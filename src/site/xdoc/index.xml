@@ -29,9 +29,11 @@
 
   <section name="What Is James Mailbox?">
 
-    <p>A library providing a flexible Mailbox storage accessible by mail (imap, pop3, smtp,...) and other protocols.</p>
+    <p>A library providing a flexible Mailbox storage accessible by mail 
+       (imap, pop3, smtp,...) and other protocols.</p>
 
-    <p>The mailbox library support different persistence mecanisms: MailDir, Database (via JPA) and JCR.</p>
+    <p>The mailbox library supports different persistence 
+       mecanisms: MailDir, Database (via JPA) and JCR.</p>
 
   </section>
 
