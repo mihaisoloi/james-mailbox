@@ -53,9 +53,9 @@
 
   <section name='Develop with James Mailbox'>
  
-    <p>Just read the <a href="source_code.html">source code</a> page to get more information on how to develop on James Mailbox.</p>
+    <p>Just read the <a href="source-code.html">source code</a> page to get more information on how to develop on James Mailbox.</p>
 
-    <img src="images/uml/org.apache.james.mailbox_package.png"/>
+    <img src="images/uml/org.apache.james.mailbox-package.png"/>
     
   </section>
 
