@@ -30,7 +30,7 @@
   <section name="What Is James Mailbox?">
 
     <p>A library providing a flexible Mailbox storage accessible by mail 
-       (imap, pop3, smtp,...) and other protocols.</p>
+       (IMAP4, POP3, SMTP,...) and other protocols.</p>
 
     <p>The mailbox library supports different persistence 
        mecanisms: MailDir, Database (via JPA) and JCR.</p>
@@ -39,14 +39,14 @@
 
   <section name='Status'>
 
-    <p>The API has been tested, but is susceptible to evolve.</p>
+    <p>The <a href="apidocs/">API</a> has been tested, but is susceptible to evolve.</p>
  
   </section>
 
   <section name='Mailbox In James Server'>
 
-    <p><a href='http://james.apache.org/server/3'>JAMES Server 3</a> uses the Maibox(using this library).
-       A backport to <a href='http://james.apache.org/server/2.3.2'>JAMES Server 2.3.2</a> would require
+    <p><a href='http://james.apache.org/server/3'>James Server 3</a> uses this library to implement its user mailboxes.
+       A backport to <a href='http://james.apache.org/server/2.3.2'>James Server 2.3.2</a> would require
        a volunteer.</p>
   
   </section>
