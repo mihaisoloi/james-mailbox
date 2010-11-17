@@ -46,7 +46,7 @@
   <section name='Mailbox In James Server'>
 
     <p><a href='http://james.apache.org/server/3'>James Server 3</a> uses this library to implement its user mailboxes.
-       A backport to <a href='http://james.apache.org/server/2.3.2'>James Server 2.3.2</a> would require
+       A backport to <a href='http://james.apache.org/server/2'>James Server 2.3.2</a> would require
        a volunteer.</p>
   
   </section>
