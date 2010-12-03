@@ -50,8 +50,8 @@ import org.apache.james.mailbox.jcr.NodeLocker;
 import org.apache.james.mailbox.jcr.NodeLocker.NodeLockedExecution;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
-import org.apache.james.mailbox.store.UidProvider;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 

@@ -34,6 +34,7 @@ import org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jcr.JCRUtils;
 import org.apache.james.mailbox.jcr.JCRVmNodeLocker;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
+import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.xml.sax.InputSource;

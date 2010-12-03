@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.jcr;
+package org.apache.james.mailbox.jcr.mail;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -28,8 +28,9 @@ import javax.jcr.query.QueryResult;
 import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
-import org.apache.james.mailbox.store.CachingUidProvider;
+import org.apache.james.mailbox.store.mail.CachingUidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**

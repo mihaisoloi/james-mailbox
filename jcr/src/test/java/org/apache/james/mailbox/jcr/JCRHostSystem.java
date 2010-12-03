@@ -37,6 +37,7 @@ import org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jcr.JCRSubscriptionManager;
 import org.apache.james.mailbox.jcr.JCRUtils;
 import org.apache.james.mailbox.jcr.JCRVmNodeLocker;
+import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.apache.james.test.functional.HostSystem;
 import org.xml.sax.InputSource;
 

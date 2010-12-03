@@ -26,7 +26,7 @@ import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
-import org.apache.james.mailbox.store.UidProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 public class MaildirStore implements UidProvider<Integer>{

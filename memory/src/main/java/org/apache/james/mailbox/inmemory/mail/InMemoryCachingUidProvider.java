@@ -16,39 +16,22 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store;
+
+package org.apache.james.mailbox.inmemory.mail;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.store.mail.CachingUidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
-/**
- * Take care of provide uids for a given {@link Mailbox}. Be aware that implementations
- * need to be thread-safe!
- * 
- *
- * @param <Id>
- */
-public interface UidProvider<Id> {
+public class InMemoryCachingUidProvider extends CachingUidProvider<Long>{
 
-    /**
-     * Return the next uid which can be used while append a Message to the {@link Mailbox}.
-     * Its important that the returned uid is higher then the last used and that the next call of this method does not return the same uid. 
-     * 
-     * @param session
-     * @param mailbox
-     * @return nextUid
-     * @throws MailboxException
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.CachingUidProvider#getLastUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public long nextUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
-    
-    /**
-     * Return the last uid which were used for storing a Message in the {@link Mailbox}
-     * 
-     * @param session
-     * @param mailbox
-     * @return lastUid
-     * @throws MailboxException
-     */
-    public long lastUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
+    protected long getLastUid(MailboxSession session, Mailbox<Long> mailbox) throws MailboxException {
+        return 0;
+    }
+
 }
