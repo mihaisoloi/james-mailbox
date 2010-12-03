@@ -27,7 +27,7 @@ import org.apache.james.mailbox.jpa.JPAMailboxManager;
 import org.apache.james.mailbox.jpa.JPAMailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.Authenticator;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
-import org.apache.james.mailbox.store.MapperStoreMessageManager;
+import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
@@ -50,8 +50,8 @@ public class OpenJPAMailboxManager extends JPAMailboxManager {
     }
 
     @Override
-    protected MapperStoreMessageManager<Long> createMessageManager(UidProvider<Long> uidProvider, MailboxEventDispatcher dispatcher, Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
-        MapperStoreMessageManager<Long> result =  new OpenJPAMessageManager((JPAMailboxSessionMapperFactory) mailboxSessionMapperFactory, uidProvider, dispatcher, mailboxRow, useStreaming);
+    protected StoreMessageManager<Long> createMessageManager(UidProvider<Long> uidProvider, MailboxEventDispatcher dispatcher, Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
+        StoreMessageManager<Long> result =  new OpenJPAMessageManager((JPAMailboxSessionMapperFactory) mailboxSessionMapperFactory, uidProvider, dispatcher, mailboxRow, useStreaming);
         return result;
     }
 }

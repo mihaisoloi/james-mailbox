@@ -28,7 +28,7 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
-import org.apache.james.mailbox.store.MapperStoreMessageManager;
+import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -39,7 +39,7 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
 /**
  * Abstract base class which should be used from JPA 2.0 implementations
  */
-public class JPAMessageManager extends MapperStoreMessageManager<Long> {
+public class JPAMessageManager extends StoreMessageManager<Long> {
     
     public JPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, UidProvider<Long> uidProvider,
             final MailboxEventDispatcher dispatcher,final Mailbox<Long> mailbox) throws MailboxException {

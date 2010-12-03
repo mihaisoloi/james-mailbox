@@ -27,8 +27,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.store.Authenticator;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
-import org.apache.james.mailbox.store.MapperStoreMessageManager;
 import org.apache.james.mailbox.store.StoreMailboxManager;
+import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
@@ -53,7 +53,7 @@ public class JCRMailboxManager extends StoreMailboxManager<String> implements JC
 
     
     @Override
-    protected MapperStoreMessageManager<String> createMessageManager(UidProvider<String> uidProvider, MailboxEventDispatcher dispatcher, Mailbox<String> mailboxEntity, MailboxSession session) throws MailboxException{
+    protected StoreMessageManager<String> createMessageManager(UidProvider<String> uidProvider, MailboxEventDispatcher dispatcher, Mailbox<String> mailboxEntity, MailboxSession session) throws MailboxException{
         return new JCRMessageManager(mapperFactory, uidProvider, dispatcher, (JCRMailbox) mailboxEntity, logger, getDelimiter());
     }
 
