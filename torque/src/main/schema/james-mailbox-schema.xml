@@ -1,0 +1,103 @@
+<!DOCTYPE database SYSTEM
+ "http://db.apache.org/torque/dtd/database_3_3.dtd">
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one   
+  or more contributor license agreements.  See the NOTICE file 
+  distributed with this work for additional information        
+  regarding copyright ownership.  The ASF licenses this file   
+  to you under the Apache License, Version 2.0 (the            
+  "License"); you may not use this file except in compliance   
+  with the License.  You may obtain a copy of the License at   
+                                                               
+    http://www.apache.org/licenses/LICENSE-2.0                 
+                                                               
+  Unless required by applicable law or agreed to in writing,   
+  software distributed under the License is distributed on an  
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY       
+  KIND, either express or implied.  See the License for the    
+  specific language governing permissions and limitations      
+  under the License.                                           
+ -->
+<database
+  name="mailboxmanager"
+  package="org.apache.james.mailboxmanager.torque.om">
+
+	<table name="mailbox" javaName="MailboxRow" description="Mailbox Table" idMethod="native">
+		<column name="mailbox_id" required="true" primaryKey="true" type="BIGINT" autoIncrement="true"
+			description="Mailbox Id"/>
+		<column name="name" required="true" type="VARCHAR" size="255"
+			description="full-namespace-name"/>
+		<column name="uid_validity" required="true" type="BIGINT"
+			description="the last used uid (default 0)"/>
+		<column name="last_uid" required="true" type="BIGINT"
+			description="the last used uid (default 0)"/>
+		<column name="message_count" type="INTEGER" default="0"
+			description="total message number"/>
+		<column name="size" type="BIGINT" default="0"
+			description="size of this mailbox in byte"/>
+		<unique>
+			<unique-column name="name" />
+		</unique>
+	</table>
+	<table name="message" javaName="MessageRow" idMethod="none" description="">
+		<column name="mailbox_id" required="true" primaryKey="true" type="BIGINT"
+			description="Mailbox Id"/>
+		<column name="uid" required="true" primaryKey="true" type="BIGINT"
+			description="the last used uid (default 0)"/>
+		<column name="internal_date" type="DATE" description="internal date" />
+		<column name="size" type="INTEGER" description="message size" />
+		<foreign-key foreignTable="mailbox" onDelete="cascade">
+			<reference local="mailbox_id" foreign="mailbox_id"/>
+		</foreign-key>
+	</table>
+	<table name="message_flags" idMethod="none">
+		<column name="mailbox_id" required="true" primaryKey="true" type="BIGINT"
+			description="Mailbox Id"/>
+		<column name="uid" required="true" primaryKey="true" type="BIGINT"
+			description=""/>		
+		<column name="answered" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<column name="deleted" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<column name="draft" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<column name="flagged" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<column name="recent" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<column name="seen" required="true" default="0" type="BOOLEANINT"
+    		description=""/>		
+		<foreign-key foreignTable="message" onDelete="cascade">
+			<reference local="mailbox_id" foreign="mailbox_id"/>
+			<reference local="uid" foreign="uid"/>
+		</foreign-key>
+	</table>
+	<table name="message_header" idMethod="none">
+		<column name="mailbox_id" required="true" primaryKey="true" type="BIGINT"
+			description="Mailbox Id"/>
+		<column name="uid" required="true" primaryKey="true" type="BIGINT"
+			description=""/>
+		<column name="line_number" required="true" primaryKey="true" type="INTEGER"
+			description=""/>
+		<column name="field" required="true" type="VARCHAR" size="256"
+			description="field"/>
+		<column name="value" required="true" type="VARCHAR" size="1024"
+			description="value"/>
+		<foreign-key foreignTable="message" onDelete="cascade">
+			<reference local="mailbox_id" foreign="mailbox_id"/>
+			<reference local="uid" foreign="uid"/>
+		</foreign-key>
+	</table>
+	<table name="message_body" idMethod="none">
+		<column name="mailbox_id" required="true" primaryKey="true" type="BIGINT"
+			description="Mailbox Id"/>
+		<column name="uid" required="true" primaryKey="true" type="BIGINT"
+			description=""/>
+		<column name="body" required="true" type="BLOB" 
+			description="value"/>
+		<foreign-key foreignTable="message" onDelete="cascade">
+			<reference local="mailbox_id" foreign="mailbox_id"/>
+			<reference local="uid" foreign="uid"/>
+		</foreign-key>
+	</table>
+</database>
