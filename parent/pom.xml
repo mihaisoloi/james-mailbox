@@ -104,7 +104,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.apache.james.imap.*,org.apache.james.mailbox.*</Export-Package>
+            <Export-Package>org.apache.james.mailbox.*</Export-Package>
             <Embed-Dependency>*;scope=runtime</Embed-Dependency>
           </instructions>
         </configuration>
@@ -212,21 +212,13 @@
         <artifactId>apache-james-mailbox-store</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-message</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.james</groupId>
         <artifactId>apache-james-mailbox-torque</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-processor</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.james</groupId>
         <artifactId>apache-james-mailbox-jpa</artifactId>
@@ -241,24 +233,6 @@
         <groupId>org.apache.james</groupId>
         <artifactId>apache-james-mailbox-memory</artifactId>
         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-api</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-api</artifactId>
-        <version>${project.version}</version>
-        <type>test-jar</type>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-protocol-tester</artifactId>
-        <version>${project.version}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.james</groupId>
@@ -404,7 +378,7 @@
       </dependency>
       <dependency>
         <groupId>commons-beanutils</groupId>
-        <artifactId>commons-beanutils</artifactId>
+        <artifactId>commons-beanutils-core</artifactId>
         <version>1.7.0</version>     
       </dependency>
       <!-- 
@@ -459,7 +433,38 @@
         <artifactId>commons-io</artifactId>
         <version>1.4</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-imap-message</artifactId>
+        <version>${version.james-imap}</version>
+        <scope>test</scope>
+      </dependency>
       
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-imap-processor</artifactId>
+        <version>${version.james-imap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-imap-api</artifactId>
+        <version>${version.james-imap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-imap-api</artifactId>
+        <version>${version.james-imap}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-imap-protocol-tester</artifactId>
+        <version>${version.james-imap}</version>
+        <scope>test</scope>
+      </dependency>
 
       <!--
         END Testing
@@ -505,6 +510,12 @@
         <artifactId>openjpa</artifactId>
         <version>${version.openjpa}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jpa_2.0_spec</artifactId>
+        <version>1.1</version>
+      </dependency>
+      
       <!-- 
         END OpenJPA
       -->
@@ -541,6 +552,13 @@
         <version>2.9.1</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>1.3.04</version>
+        <scope>test</scope>
+      </dependency>
+      
       <!-- 
         END JCR
       -->
@@ -568,6 +586,7 @@
     <javax.mail.artifactId>mail</javax.mail.artifactId>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.james-server>3.0-SNAPSHOT</version.james-server>
+    <version.james-imap>0.2-M1</version.james-imap>
     <version.openjpa>2.0.1</version.openjpa>
     <version.javax.persistence>1.0.2</version.javax.persistence>
     <version.commons-lang>2.4</version.commons-lang>
