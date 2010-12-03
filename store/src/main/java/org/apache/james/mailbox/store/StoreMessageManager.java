@@ -483,7 +483,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return messageMapper.execute(new Mapper.Transaction<List<Long>>() {
 
             public List<Long> run() throws MailboxException {
-                final List<MailboxMembership<Id>> members = messageMapper.findRecentMessagesInMailbox(getMailboxEntity(), -1);
+                final List<MailboxMembership<Id>> members = messageMapper.findRecentMessagesInMailbox(getMailboxEntity());
                 final List<Long> results = new ArrayList<Long>();
 
                 for (MailboxMembership<Id> member:members) {

@@ -286,12 +286,9 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
      */
     @SuppressWarnings("unchecked")
-    public List<MailboxMembership<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox, int limit) throws MailboxException {
+    public List<MailboxMembership<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         try {
             Query query = getEntityManager().createNamedQuery("findRecentMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId());
-            if (limit > 0) {
-                query = query.setMaxResults(limit);
-            }
             return query.getResultList();
         } catch (PersistenceException e) {
             throw new MailboxException("Search of recent messages failed in mailbox " + mailbox, e);

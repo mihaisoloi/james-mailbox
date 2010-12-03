@@ -148,7 +148,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
      */
-    public List<MailboxMembership<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox,int limit) throws MailboxException {
+    public List<MailboxMembership<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         final List<MailboxMembership<Long>> results = new ArrayList<MailboxMembership<Long>>();
         for(MailboxMembership<Long> member:getMembershipByUidForMailbox(mailbox).values()) {
             if (member.isRecent()) {
@@ -156,9 +156,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
             }
         }
         Collections.sort(results, MailboxMembershipComparator.INSTANCE);
-        if (limit > 0 && limit > results.size()) {
-            return results.subList(0, limit -1);
-        } 
+        
         return results;
     }
 

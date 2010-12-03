@@ -414,7 +414,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox
      * ()
      */
-    public List<MailboxMembership<String>> findRecentMessagesInMailbox(Mailbox<String> mailbox, int limit) throws MailboxException {
+    public List<MailboxMembership<String>> findRecentMessagesInMailbox(Mailbox<String> mailbox) throws MailboxException {
         
         try {
  
@@ -423,9 +423,6 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             
             QueryManager manager = getSession().getWorkspace().getQueryManager();
             Query query = manager.createQuery(queryString, Query.XPATH);
-            if (limit > 0) {
-                query.setLimit(limit);
-            }
             QueryResult result = query.execute();
             
             NodeIterator iterator = result.getNodes();

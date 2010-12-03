@@ -111,15 +111,12 @@ public interface MessageMapper<Id> extends Mapper {
     /**
      * Return a List of {@link MailboxMembership} which are recent.
      * The list must be ordered by the {@link Message} uid. 
-     * If a limit was given the list will maximal be the size of the limit. Id a 
-     * limit smaller then 1 is given the List must contain all messages
      * 
      * @param mailbox
-     * @param limit
      * @return recentList
      * @throws StorageException
      */
-    public abstract List<MailboxMembership<Id>> findRecentMessagesInMailbox(Mailbox<Id> mailbox, int limit) throws MailboxException;
+    public abstract List<MailboxMembership<Id>> findRecentMessagesInMailbox(Mailbox<Id> mailbox) throws MailboxException;
 
 
     /**

@@ -241,14 +241,14 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
 
     /* 
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, int)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public List<MailboxMembership<Integer>> findRecentMessagesInMailbox(Mailbox<Integer> mailbox, int limit)
+    public List<MailboxMembership<Integer>> findRecentMessagesInMailbox(Mailbox<Integer> mailbox)
     throws MailboxException {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
         SortedMap<Long, MaildirMessageName> recentMessageNames;
         try {
-            recentMessageNames = folder.getRecentMessages(limit);
+            recentMessageNames = folder.getRecentMessages();
         } catch (IOException e) {
             throw new MailboxException("Failure while search recent messages in Mailbox " + mailbox, e );
         }

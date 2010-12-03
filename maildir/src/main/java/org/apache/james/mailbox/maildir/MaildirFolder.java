@@ -361,16 +361,13 @@ public class MaildirFolder {
     
     /**
      * Creates a map of recent messages.
-     * @param limit The number of items; a limit smaller then 1 disables the limit
      * @return A {@link Map} with all uids and associated {@link MaildirMessageName}s of recent messages
      * @throws IOException If there is a problem with the uid list file
      */
-    public SortedMap<Long, MaildirMessageName> getRecentMessages(int limit) throws IOException {
+    public SortedMap<Long, MaildirMessageName> getRecentMessages() throws IOException {
         String[] recentFiles = getNewFolder().list();
         LinkedList<String> lines = new LinkedList<String>();
-        int theLimit = limit;
-        if (limit < 1 || limit > recentFiles.length)
-            theLimit = recentFiles.length;
+        int theLimit = recentFiles.length;
         SortedMap<Long, MaildirMessageName> recentMessages = new TreeMap<Long, MaildirMessageName>();
         File uidList = lockUidList();
         try {
