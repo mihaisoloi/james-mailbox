@@ -20,6 +20,7 @@ package org.apache.james.mailbox.store;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 
 

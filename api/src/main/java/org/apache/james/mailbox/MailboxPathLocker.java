@@ -17,11 +17,8 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.MailboxSession;
 
 /**
  * The {@link MailboxPathLocker} is responsible to help to synchronize the access to a {@link MailboxPath}

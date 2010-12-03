@@ -20,11 +20,11 @@ package org.apache.james.mailbox.jpa;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPAMailboxMapper;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.Authenticator;
-import org.apache.james.mailbox.store.MailboxPathLocker;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;

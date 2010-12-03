@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 
 /**
