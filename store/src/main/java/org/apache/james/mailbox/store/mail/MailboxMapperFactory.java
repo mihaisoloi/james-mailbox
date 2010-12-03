@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox.store.mail;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.store.mail.MailboxMapper;
 
 public interface MailboxMapperFactory<Id> {
 
