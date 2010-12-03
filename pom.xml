@@ -33,6 +33,14 @@
   <inceptionYear>2010</inceptionYear>
   <packaging>pom</packaging>
   <modules>
+    <module>parent</module>
+    <module>api</module>
+    <module>store</module>
+    <module>memory</module>
+    <module>jpa</module>
+    <module>jcr</module>
+    <module>maildir</module>
+    <module>torque</module>
   </modules>
   <ciManagement>
     <system>hudson</system>
@@ -48,9 +56,7 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/mailbox/trunk</developerConnection>
     <url>http://svn.apache.org/viewcvs.cgi/james/mailbox/trunk?root=Apache-SVN</url>
   </scm>
-  
   <repositories>
-   
     <!-- needed for javamail -->
     <repository>
       <id>maven2-repository.dev.java.net</id>
@@ -58,8 +64,6 @@
       <url>http://download.java.net/maven/2/</url>
       <layout>default</layout>
     </repository>
-   
-
     <!-- netty -->
     <repository>
       <id>repository.jboss.org</id>
@@ -69,7 +73,6 @@
       </snapshots>
     </repository>
   </repositories>
-  
   <build>
     <plugins>
       <plugin>
@@ -82,7 +85,6 @@
       </plugin>
     </plugins>
   </build>
-  
   <reporting>
     <plugins>
       <plugin>
