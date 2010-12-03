@@ -23,7 +23,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
- * Take care of provide uids for a given {@link Mailbox}
+ * Take care of provide uids for a given {@link Mailbox}. Be aware that implementations
+ * need to be thread-safe!
  * 
  *
  * @param <Id>
