@@ -17,11 +17,10 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox.store.mail.model;
 
 import java.util.Comparator;
 
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 
 /**
  * UID comparator for mailbox membership.
