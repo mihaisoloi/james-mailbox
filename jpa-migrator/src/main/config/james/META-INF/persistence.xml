@@ -1,0 +1,23 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0">
+
+    <persistence-unit name="JamesMigrator" transaction-type="RESOURCE_LOCAL">
+
+        <properties>
+            <property name="openjpa.ConnectionURL" value="jdbc:derby:../var/derbydb;create=true"/>
+            <property name="openjpa.ConnectionDriverName" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+            <property name="openjpa.ConnectionUserName" value="app"/>
+            <property name="openjpa.ConnectionPassword" value="app"/>
+            <!--  Uncomment this if you want to see the generated SQL in the console.
+            <property name="openjpa.Log" value="SQL=TRACE"/>
+            -->
+            <!--  Uncomment this if you want to get verbose OpenJPA log the console.
+            <property name="openjpa.Log" value="DefaultLevel=TRACE"/>
+            -->
+        </properties>
+
+    </persistence-unit>
+
+</persistence>
