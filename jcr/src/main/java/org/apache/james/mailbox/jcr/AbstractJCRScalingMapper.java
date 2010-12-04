@@ -34,8 +34,8 @@ public abstract class AbstractJCRScalingMapper extends AbstractJCRMapper{
     private final int scaling;
     private final static char PAD ='_';
     
-    public AbstractJCRScalingMapper(MailboxSessionJCRRepository repository, MailboxSession mSession, NodeLocker locker, int scaling, Log logger) {
-        super(repository, mSession, locker, logger);
+    public AbstractJCRScalingMapper(MailboxSessionJCRRepository repository, MailboxSession mSession, int scaling, Log logger) {
+        super(repository, mSession, logger);
         this.scaling = scaling;
     }
 

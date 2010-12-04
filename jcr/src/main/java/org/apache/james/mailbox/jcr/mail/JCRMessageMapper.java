@@ -20,8 +20,6 @@ package org.apache.james.mailbox.jcr.mail;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,20 +32,16 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 
 import org.apache.commons.logging.Log;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.MessageRange.Type;
+import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.jcr.AbstractJCRMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
-import org.apache.james.mailbox.jcr.NodeLocker;
-import org.apache.james.mailbox.jcr.NodeLocker.NodeLockedExecution;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
@@ -56,76 +50,24 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 
 /**
- * JCR implementation of a {@link MessageMapper}
+ * JCR implementation of a {@link MessageMapper}. The implementation store each message as 
+ * a seperate child node under the mailbox
  *
  */
 public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper<String> {
 
-    /**
-     * Store the messages directly in the mailbox:
-     * .../mailbox/
-     */
-    public final static int MESSAGE_SCALE_NONE = 0;
-    
-    /**
-     * Store the messages under a year directory in the mailbox:
-     * .../mailbox/2010/
-     */
-    public final static int MESSAGE_SCALE_YEAR = 1;
-    
-    /**
-     * Store the messages under a year/month directory in the mailbox:
-     * .../mailbox/2010/05/
-     */
-    public final static int MESSAGE_SCALE_MONTH = 2;
-    
-    /**
-     * Store the messages under a year/month/day directory in the mailbox:
-     * .../mailbox/2010/05/01/
-     */
-    public final static int MESSAGE_SCALE_DAY = 3;
-    
-    /**
-     * Store the messages under a year/month/day/hour directory in the mailbox:
-     * .../mailbox/2010/05/02/11
-     */
-    public final static int MESSAGE_SCALE_HOUR = 4;
-    
-    
-    /**
-     * Store the messages under a year/month/day/hour/min directory in the mailbox:
-     * .../mailbox/2010/05/02/11/59
-     */
-    public final static int MESSAGE_SCALE_MINUTE = 5;
-
-    private final int scaleType;
-
     private UidProvider<String> uidGenerator;
     
-
-    /**
-     * 
-     * @see #JCRMessageMapper(MailboxSessionJCRRepository, MailboxSession, NodeLocker, Log, int)
-     * 
-     * In this case {@link #MESSAGE_SCALE_DAY} is used
-     */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, NodeLocker locker, final UidProvider<String> uidGenerator, final Log logger) {
-        this(repos, session, locker, uidGenerator, logger, MESSAGE_SCALE_DAY);
-    }
 
     /**
      * Construct a new {@link JCRMessageMapper} instance
      * 
      * @param repos {@link MailboxSessionJCRRepository} to use
      * @param session {@link MailboxSession} to which the mapper is bound
-     * @param locker {@link NodeLocker} for locking Nodes
-     * @param logger Lo
-     * @param scaleType the scale type to use when storing messages. See {@link #MESSAGE_SCALE_NONE}, {@link #MESSAGE_SCALE_YEAR}, {@link #MESSAGE_SCALE_MONTH}, {@link #MESSAGE_SCALE_DAY},
-     *                  {@link #MESSAGE_SCALE_HOUR}, {@link #MESSAGE_SCALE_MINUTE}  
+     * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, NodeLocker locker, final UidProvider<String> uidGenerator, final Log logger, int scaleType) {
-        super(repos, session, locker, logger);
-        this.scaleType = scaleType;
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger) {
+        super(repos, session, logger);
         this.uidGenerator = uidGenerator;
     }
     
@@ -477,102 +419,23 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             }
 
             if (messageNode == null) {
-                Date date = message.getInternalDate();
-                if (date == null) {
-                    date = new Date();
-                }
-
-                // extracte the date from the message to create node structure
-                // later
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(date);
-                final String year = convertIntToString(cal.get(Calendar.YEAR));
-                final String month = convertIntToString(cal.get(Calendar.MONTH) + 1);
-                final String day = convertIntToString(cal.get(Calendar.DAY_OF_MONTH));
-                final String hour = convertIntToString(cal.get(Calendar.HOUR_OF_DAY));
-                final String min = convertIntToString(cal.get(Calendar.MINUTE));
-
-                Node node = null;
+               
                 Node mailboxNode = getSession().getNodeByIdentifier(mailbox.getMailboxId());
 
                 final long nextUid = uidGenerator.nextUid(mSession, mailbox);
 
                 
-                NodeLocker locker = getNodeLocker();
+                messageNode = mailboxNode.addNode(String.valueOf(nextUid), "nt:file");
+                messageNode.addMixin("jamesMailbox:message");
+                try {
+                    membership.merge(messageNode);
+                    messageNode.setProperty(JCRMessage.UID_PROPERTY, nextUid);
 
-                if (scaleType > MESSAGE_SCALE_NONE) {
-                    // we lock the whole mailbox with all its childs while
-                    // adding the folder structure for the date
-                    
-                    // TODO: Maybe we should just lock the last child folder to
-                    // improve performance
-                    node = locker.execute(new NodeLocker.NodeLockedExecution<Node>() {
-
-                        public Node execute(Node node) throws RepositoryException {
-
-                            if (scaleType >= MESSAGE_SCALE_YEAR) {
-                                node = JcrUtils.getOrAddFolder(node, year);
-                                node.addMixin(JcrConstants.MIX_LOCKABLE);
-
-                                if (scaleType >= MESSAGE_SCALE_MONTH) {
-                                    node = JcrUtils.getOrAddFolder(node, month);
-                                    node.addMixin(JcrConstants.MIX_LOCKABLE);
-
-                                    if (scaleType >= MESSAGE_SCALE_DAY) {
-                                        node = JcrUtils.getOrAddFolder(node, day);
-                                        node.addMixin(JcrConstants.MIX_LOCKABLE);
-
-                                        if (scaleType >= MESSAGE_SCALE_HOUR) {
-                                            node = JcrUtils.getOrAddFolder(node, hour);
-                                            node.addMixin(JcrConstants.MIX_LOCKABLE);
-
-                                            if (scaleType >= MESSAGE_SCALE_MINUTE) {
-                                                node = JcrUtils.getOrAddFolder(node, min);
-                                                node.addMixin(JcrConstants.MIX_LOCKABLE);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // save the folders for now
-                            getSession().save();
-                            return node;
-                        }
-
-                        public boolean isDeepLocked() {
-                            return true;
-                        }
-                    }, mailboxNode, Node.class);
-                } else {
-                    node = mailboxNode;
+                } catch (IOException e) {
+                    throw new RepositoryException("Unable to merge message in to tree", e);
                 }
-
-                // lock the day node and add the message
-                locker.execute(new NodeLockedExecution<Void>() {
-
-                    public Void execute(Node node) throws RepositoryException {
-                        Node messageNode = node.addNode(String.valueOf(nextUid), "nt:file");
-                        messageNode.addMixin("jamesMailbox:message");
-                        try {
-                            membership.merge(messageNode);
-                            messageNode.setProperty(JCRMessage.UID_PROPERTY, nextUid);
-
-                        } catch (IOException e) {
-                            throw new RepositoryException("Unable to merge message in to tree", e);
-                        }
-                        // save the message
-                        getSession().save();
-
-                        return null;
-                    }
-
-                    public boolean isDeepLocked() {
-                        return true;
-                    }
-                }, node, Void.class);
                 return nextUid;
-
+                
             } else {
                 membership.merge(messageNode);
                 return membership.getUid();
@@ -581,24 +444,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         } catch (IOException e) {
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
-        } catch (InterruptedException e) {
-            throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         }
 
-    }
-
-    /**
-     * Convert the given int value to a String. If the int value is smaller then 9 it will prefix the String with 0.
-     * 
-     * @param value
-     * @return stringValue
-     */
-    private String convertIntToString(int value) {
-        if (value <= 9) {
-            return "0" +String.valueOf(value);
-        } else {
-            return String.valueOf(value);
-        }
     }
 
     /*

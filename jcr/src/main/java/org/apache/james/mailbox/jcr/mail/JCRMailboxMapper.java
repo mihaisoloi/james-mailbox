@@ -54,8 +54,11 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
  */
 public class JCRMailboxMapper extends AbstractJCRScalingMapper implements MailboxMapper<String> {
 
-    public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final NodeLocker locker, final int scaling, final Log logger) {
-        super(repos, session, locker, scaling, logger);
+    private NodeLocker locker;
+
+	public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final NodeLocker locker, final int scaling, final Log logger) {
+        super(repos, session, scaling, logger);
+        this.locker = locker;
     }
 
     /*
@@ -165,7 +168,6 @@ public class JCRMailboxMapper extends AbstractJCRScalingMapper implements Mailbo
                 } else {
                     mailboxNode = rootNode.getNode(MAILBOXES_PATH);
                 }
-                NodeLocker locker = getNodeLocker();
                 locker.execute(new NodeLockedExecution<Void>() {
 
                     public Void execute(Node node) throws RepositoryException {

@@ -39,7 +39,6 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.SubscriptionException;
 import org.apache.james.mailbox.jcr.AbstractJCRScalingMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
-import org.apache.james.mailbox.jcr.NodeLocker;
 import org.apache.james.mailbox.jcr.user.model.JCRSubscription;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.model.Subscription;
@@ -50,8 +49,8 @@ import org.apache.james.mailbox.store.user.model.Subscription;
  */
 public class JCRSubscriptionMapper extends AbstractJCRScalingMapper implements SubscriptionMapper {
 
-    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final NodeLocker locker, final int scaling, final Log log) {
-        super(repos,session, locker, scaling, log);
+    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Log log) {
+        super(repos,session, scaling, log);
     }
 
     /*

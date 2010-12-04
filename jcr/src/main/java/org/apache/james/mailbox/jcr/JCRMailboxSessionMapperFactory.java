@@ -44,20 +44,18 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
     private final Log logger;
     private final NodeLocker locker;
     private final static int DEFAULT_SCALING = 2;
-    private int scaling;
-    private int messageScaling;
-    private UidProvider<String> provider;
+    private final int scaling;
+    private final UidProvider<String> provider;
 
     public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final NodeLocker locker, final UidProvider<String> uidProvider) {
-        this(repository, locker, uidProvider, DEFAULT_SCALING, JCRMessageMapper.MESSAGE_SCALE_DAY);
+        this(repository, locker, uidProvider, DEFAULT_SCALING);
     }
 
-    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final NodeLocker locker, final UidProvider<String> provider, final int scaling, final int messageScaling) {
+    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final NodeLocker locker, final UidProvider<String> provider, final int scaling) {
         this.repository = repository;
         this.logger = LogFactory.getLog(JCRMailboxSessionMapperFactory.class);
         this.locker = locker;
         this.scaling = scaling;
-        this.messageScaling = messageScaling;
         this.provider = provider;
     }
     
@@ -69,13 +67,13 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     @Override
     public MessageMapper<String> createMessageMapper(MailboxSession session) throws MailboxException {
-        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, locker, provider, logger, messageScaling);
+        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, provider, logger);
         return messageMapper;
     }
 
     @Override
     public SubscriptionMapper createSubscriptionMapper(MailboxSession session) throws SubscriptionException {
-        JCRSubscriptionMapper mapper = new JCRSubscriptionMapper(repository, session, locker, DEFAULT_SCALING, logger);
+        JCRSubscriptionMapper mapper = new JCRSubscriptionMapper(repository, session, DEFAULT_SCALING, logger);
         return mapper;
     }
     
