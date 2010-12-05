@@ -20,6 +20,8 @@ package org.apache.james.mailbox.jcr.mail;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,6 +34,7 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 
 import org.apache.commons.logging.Log;
+import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
@@ -58,6 +61,42 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
 
     private UidProvider<String> uidGenerator;
     
+    /**
+     * Store the messages directly in the mailbox: .../mailbox/
+     */
+    public final static int MESSAGE_SCALE_NONE = 0;
+
+    /**
+     * Store the messages under a year directory in the mailbox:
+     * .../mailbox/2010/
+     */
+    public final static int MESSAGE_SCALE_YEAR = 1;
+
+    /**
+     * Store the messages under a year/month directory in the mailbox:
+     * .../mailbox/2010/05/
+     */
+    public final static int MESSAGE_SCALE_MONTH = 2;
+
+    /**
+     * Store the messages under a year/month/day directory in the mailbox:
+     * .../mailbox/2010/05/01/
+     */
+    public final static int MESSAGE_SCALE_DAY = 3;
+
+    /**
+     * Store the messages under a year/month/day/hour directory in the mailbox:
+     * .../mailbox/2010/05/02/11
+     */
+    public final static int MESSAGE_SCALE_HOUR = 4;
+
+    /**
+     * Store the messages under a year/month/day/hour/min directory in the
+     * mailbox: .../mailbox/2010/05/02/11/59
+     */
+    public final static int MESSAGE_SCALE_MINUTE = 5;
+
+    private final int scaleType;
 
     /**
      * Construct a new {@link JCRMessageMapper} instance
@@ -66,9 +105,14 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger) {
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger, int scaleType) {
         super(repos, session, logger);
         this.uidGenerator = uidGenerator;
+        this.scaleType = scaleType;
+    }
+    
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger) {
+        this(repos, session, uidGenerator, logger, MESSAGE_SCALE_DAY);
     }
     
     /**
@@ -420,11 +464,52 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
 
             if (messageNode == null) {
                
+                Date date = message.getInternalDate();
+                if (date == null) {
+                    date = new Date();
+                }
+
+                // extracte the date from the message to create node structure
+                // later
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                final String year = convertIntToString(cal.get(Calendar.YEAR));
+                final String month = convertIntToString(cal.get(Calendar.MONTH) + 1);
+                final String day = convertIntToString(cal.get(Calendar.DAY_OF_MONTH));
+                final String hour = convertIntToString(cal.get(Calendar.HOUR_OF_DAY));
+                final String min = convertIntToString(cal.get(Calendar.MINUTE));
+
                 Node mailboxNode = getSession().getNodeByIdentifier(mailbox.getMailboxId());
+                Node node = mailboxNode;
+
+                if (scaleType > MESSAGE_SCALE_NONE) {
+                    // we lock the whole mailbox with all its childs while
+                    // adding the folder structure for the date
+
+                    if (scaleType >= MESSAGE_SCALE_YEAR) {
+                        node = JcrUtils.getOrAddFolder(node, year);
+
+                        if (scaleType >= MESSAGE_SCALE_MONTH) {
+                            node = JcrUtils.getOrAddFolder(node, month);
+
+                            if (scaleType >= MESSAGE_SCALE_DAY) {
+                                node = JcrUtils.getOrAddFolder(node, day);
+
+                                if (scaleType >= MESSAGE_SCALE_HOUR) {
+                                    node = JcrUtils.getOrAddFolder(node, hour);
+
+                                    if (scaleType >= MESSAGE_SCALE_MINUTE) {
+                                        node = JcrUtils.getOrAddFolder(node, min);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
 
                 final long nextUid = uidGenerator.nextUid(mSession, mailbox);
 
-                
                 messageNode = mailboxNode.addNode(String.valueOf(nextUid), "nt:file");
                 messageNode.addMixin("jamesMailbox:message");
                 try {
@@ -446,6 +531,21 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         }
 
+    }
+
+    /**
+     * Convert the given int value to a String. If the int value is smaller then
+     * 9 it will prefix the String with 0.
+     * 
+     * @param value
+     * @return stringValue
+     */
+    private String convertIntToString(int value) {
+        if (value <= 9) {
+            return "0" + String.valueOf(value);
+        } else {
+            return String.valueOf(value);
+        }
     }
 
     /*
@@ -483,6 +583,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
 
+    
     /**
      * Generate the XPath query for the SearchQuery
      * 
