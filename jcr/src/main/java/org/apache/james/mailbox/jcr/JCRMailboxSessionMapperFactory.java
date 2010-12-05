@@ -42,32 +42,32 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     private final MailboxSessionJCRRepository repository;
     private final Log logger;
-    private final NodeLocker locker;
     private final static int DEFAULT_SCALING = 2;
     private final int scaling;
     private final UidProvider<String> provider;
+    private int messageScaling;
 
-    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final NodeLocker locker, final UidProvider<String> uidProvider) {
-        this(repository, locker, uidProvider, DEFAULT_SCALING);
+    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final UidProvider<String> uidProvider) {
+        this(repository, uidProvider, DEFAULT_SCALING, JCRMessageMapper.MESSAGE_SCALE_DAY);
     }
 
-    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final NodeLocker locker, final UidProvider<String> provider, final int scaling) {
+    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final UidProvider<String> provider, final int scaling, final int messageScaling) {
         this.repository = repository;
         this.logger = LogFactory.getLog(JCRMailboxSessionMapperFactory.class);
-        this.locker = locker;
         this.scaling = scaling;
+        this.messageScaling = messageScaling;
         this.provider = provider;
     }
     
     @Override
     public MailboxMapper<String> createMailboxMapper(MailboxSession session) throws MailboxException {
-        JCRMailboxMapper mapper = new JCRMailboxMapper(repository, session, locker, scaling, logger);
+        JCRMailboxMapper mapper = new JCRMailboxMapper(repository, session, scaling, logger);
         return mapper;
     }
 
     @Override
     public MessageMapper<String> createMessageMapper(MailboxSession session) throws MailboxException {
-        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, provider, logger);
+        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, provider, logger, messageScaling);
         return messageMapper;
     }
 

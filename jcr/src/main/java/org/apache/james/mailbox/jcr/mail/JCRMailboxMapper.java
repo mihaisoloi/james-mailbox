@@ -41,8 +41,6 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.AbstractJCRScalingMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
-import org.apache.james.mailbox.jcr.NodeLocker;
-import org.apache.james.mailbox.jcr.NodeLocker.NodeLockedExecution;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -54,11 +52,9 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
  */
 public class JCRMailboxMapper extends AbstractJCRScalingMapper implements MailboxMapper<String> {
 
-    private NodeLocker locker;
 
-	public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final NodeLocker locker, final int scaling, final Log logger) {
+	public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Log logger) {
         super(repos, session, scaling, logger);
-        this.locker = locker;
     }
 
     /*
@@ -168,37 +164,21 @@ public class JCRMailboxMapper extends AbstractJCRScalingMapper implements Mailbo
                 } else {
                     mailboxNode = rootNode.getNode(MAILBOXES_PATH);
                 }
-                locker.execute(new NodeLockedExecution<Void>() {
 
-                    public Void execute(Node node) throws RepositoryException {
-                        
-                        node = JcrUtils.getOrAddNode(node, Text.escapeIllegalJcrChars(jcrMailbox.getNamespace()), "nt:unstructured");
-                        if (jcrMailbox.getUser() != null) {
-                            node = createUserPathStructure(node, Text.escapeIllegalJcrChars(jcrMailbox.getUser()));
-                        }
-                        node = JcrUtils.getOrAddNode(node, Text.escapeIllegalJcrChars(jcrMailbox.getName()), "nt:unstructured");
-                        node.addMixin("jamesMailbox:mailbox");
-                        
-                        
-                        jcrMailbox.merge(node);
+                node = JcrUtils.getOrAddNode(mailboxNode, Text.escapeIllegalJcrChars(jcrMailbox.getNamespace()), "nt:unstructured");
+                if (jcrMailbox.getUser() != null) {
+                    node = createUserPathStructure(node, Text.escapeIllegalJcrChars(jcrMailbox.getUser()));
+                }
+                node = JcrUtils.getOrAddNode(node, Text.escapeIllegalJcrChars(jcrMailbox.getName()), "nt:unstructured");
+                node.addMixin("jamesMailbox:mailbox");
 
-                        getSession().save();
-                        return null;
-                    }
-
-                    public boolean isDeepLocked() {
-                        return true;
-                    }
-                    
-                }, mailboxNode, Void.class);
+                jcrMailbox.merge(node);
                 
            } else {
                jcrMailbox.merge(node);
            }
             
         } catch (RepositoryException e) {
-            throw new MailboxException("Unable to save mailbox " + mailbox, e);
-        } catch (InterruptedException e) {
             throw new MailboxException("Unable to save mailbox " + mailbox, e);
         }
     }
