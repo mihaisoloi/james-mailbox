@@ -21,9 +21,12 @@ package org.apache.james.mailbox.store.mail;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.mail.Flags;
+
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -120,7 +123,7 @@ public interface MessageMapper<Id> extends Mapper {
 
 
     /**
-     * Save the given {@link MailboxMembership} to the underlying storage and return the uid of it. the uid needs to be unique and sequential. Howto
+     * Add the given {@link MailboxMembership} to the underlying storage and return the uid of it. the uid needs to be unique and sequential. Howto
      * archive that is up to the implementation
      * 
      * 
@@ -128,8 +131,21 @@ public interface MessageMapper<Id> extends Mapper {
      * @param message
      * @throws StorageException
      */
-    public abstract long save(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
+    public abstract long add(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
     
+    /**
+     * Update flags for the given {@link MessageRange}
+     * 
+     * @param mailbox
+     * @param flags
+     * @param value
+     * @param replace
+     * @param set
+     * @return updatedFlags
+     * @throws MailboxException
+     */
+    public abstract Iterator<UpdatedFlag> updateFlags(Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace,
+            final MessageRange set) throws MailboxException;
     
     /**
      * Copy the given {@link MailboxMembership} to a new mailbox and return the uid of the copy

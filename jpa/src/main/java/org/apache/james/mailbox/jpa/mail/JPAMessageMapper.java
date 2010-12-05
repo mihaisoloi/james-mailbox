@@ -18,9 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox.jpa.mail;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.mail.Flags;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -37,6 +39,7 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembers
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
+import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -295,15 +298,16 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         }
     }
 
-    /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#save(MailboxMembership)
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long save(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
+    public long add(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
         try {
             
-            if (message.getUid() == 0) {
-                ((AbstractJPAMailboxMembership) message).setUid(uidGenerator.nextUid(session,mailbox));
-            }
+            ((AbstractJPAMailboxMembership) message).setUid(uidGenerator.nextUid(session,mailbox));
+            
             getEntityManager().persist(message);
             return message.getUid();
         } catch (PersistenceException e) {
@@ -323,7 +327,38 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         } else {
             copy = new JPAMailboxMembership(mailbox.getMailboxId(), (AbstractJPAMailboxMembership) original);
         }
-        return save(mailbox, copy);
+        return add(mailbox, copy);
+    }
+
+
+   
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
+     */
+    public Iterator<UpdatedFlag> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+
+        final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
+        for (final MailboxMembership<Long> member:members) {
+            Flags originalFlags = member.createFlags();
+            if (replace) {
+                member.setFlags(flags);
+            } else {
+                Flags current = member.createFlags();
+                if (value) {
+                    current.add(flags);
+                } else {
+                    current.remove(flags);
+                }
+                member.setFlags(current);
+            }
+            Flags newFlags = member.createFlags();
+            getEntityManager().persist(member);
+            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+        }
+        
+        return updatedFlags.iterator();       
     }
     
 }

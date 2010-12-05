@@ -35,6 +35,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.MessagingException;
 import javax.mail.util.SharedFileInputStream;
 
@@ -401,7 +402,15 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
        
         final SortedMap<Long, Flags> newFlagsByUid = new TreeMap<Long, Flags>();
 
-        Iterator<UpdatedFlag> it = updateFlags(flags, value, replace, set, mailboxSession);
+        final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
+        Iterator<UpdatedFlag> it = messageMapper.execute(new Mapper.Transaction<Iterator<UpdatedFlag>>() {
+
+            public Iterator<UpdatedFlag> run() throws MailboxException {
+                return messageMapper.updateFlags(getMailboxEntity(),flags, value, replace, set);
+            }
+        });
+        
+        
         while (it.hasNext()) {
             UpdatedFlag flag = it.next();
             dispatcher.flagsUpdated(flag.getUid(), mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()), flag.getOldFlags(), flag.getNewFlags());
@@ -441,7 +450,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return mapperFactory.getMessageMapper(session).execute(new Mapper.Transaction<Long>() {
 
             public Long run() throws MailboxException {
-                return mapper.save(getMailboxEntity(), message);
+                return mapper.add(getMailboxEntity(), message);
             }
             
         });
@@ -489,10 +498,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 for (MailboxMembership<Id> member:members) {
                     results.add(member.getUid());
                     if (reset) {
-                        member.unsetRecent();
                         
                         // only call save if we need to
-                        messageMapper.save(getMailboxEntity(), member);
+                        messageMapper.updateFlags(getMailboxEntity(), new Flags(Flag.RECENT), false, false, MessageRange.one(member.getUid()));
                     }
                 }
                 return results;
@@ -521,54 +529,6 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             }
             
         });       
-    }
-
-
-    
-    /**
-     * Update the Flags for the given {@link MessageRange} 
-     * 
-     * @param flags
-     * @param value
-     * @param replace
-     * @param set
-     * @param mailboxSession
-     * @return
-     * @throws MailboxException
-     */
-    public Iterator<UpdatedFlag> updateFlags(final Flags flags, final boolean value, final boolean replace,
-            final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
-        final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
-
-        return messageMapper.execute(new Mapper.Transaction<Iterator<UpdatedFlag>>(){
-
-            public Iterator<UpdatedFlag> run() throws MailboxException {
-                final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
-
-                final List<MailboxMembership<Id>> members = messageMapper.findInMailbox(getMailboxEntity(), set);
-                for (final MailboxMembership<Id> member:members) {
-                    Flags originalFlags = member.createFlags();
-                    if (replace) {
-                        member.setFlags(flags);
-                    } else {
-                        Flags current = member.createFlags();
-                        if (value) {
-                            current.add(flags);
-                        } else {
-                            current.remove(flags);
-                        }
-                        member.setFlags(current);
-                    }
-                    Flags newFlags = member.createFlags();
-                    messageMapper.save(getMailboxEntity(), member);
-                    updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
-                }
-                
-                return updatedFlags.iterator();
-            }
-            
-        });
-       
     }
 
 

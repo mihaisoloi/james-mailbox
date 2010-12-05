@@ -26,12 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.mail.Flags;
+
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
+import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -180,7 +183,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long save(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
+    public long add(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
         getMembershipByUidForMailbox(mailbox).put(message.getUid(), message);
         return message.getUid();
     }
@@ -218,7 +221,34 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         iMailbox.consumeUid();
         
         SimpleMailboxMembership membership = new SimpleMailboxMembership(mailbox.getMailboxId(), iMailbox.getLastUid(), (SimpleMailboxMembership) original);
-        return save(mailbox, membership);
+        return add(mailbox, membership);
+    }
+
+    public Iterator<UpdatedFlag> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+
+        final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
+        for (final MailboxMembership<Long> member:members) {
+            Flags originalFlags = member.createFlags();
+            if (replace) {
+                member.setFlags(flags);
+            } else {
+                Flags current = member.createFlags();
+                if (value) {
+                    current.add(flags);
+                } else {
+                    current.remove(flags);
+                }
+                member.setFlags(current);
+            }
+            Flags newFlags = member.createFlags();
+            
+            add(mailbox, member);
+            
+            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+        }
+        
+        return updatedFlags.iterator();       
     }
     
 }

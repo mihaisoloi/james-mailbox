@@ -235,13 +235,7 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         return seen;
     }
     
-  
-    /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#unsetRecent()
-     */
-    public void unsetRecent() {
-        recent = false;
-    }
+
     
     /**
      * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(javax.mail.Flags)

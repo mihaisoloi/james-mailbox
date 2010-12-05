@@ -32,6 +32,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+import javax.mail.Flags;
 
 import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.commons.JcrUtils;
@@ -47,6 +48,7 @@ import org.apache.james.mailbox.jcr.AbstractJCRMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
+import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -452,7 +454,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long save(Mailbox<String> mailbox, MailboxMembership<String> message) throws MailboxException {
+    public long add(Mailbox<String> mailbox, MailboxMembership<String> message) throws MailboxException {
         final JCRMessage membership = (JCRMessage) message;
         try {
 
@@ -660,6 +662,50 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
     
+   
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
+     */
+    public Iterator<UpdatedFlag> updateFlags(Mailbox<String> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+
+        final List<MailboxMembership<String>> members = findInMailbox(mailbox, set);
+        for (final MailboxMembership<String> member:members) {
+            Flags originalFlags = member.createFlags();
+            if (replace) {
+                member.setFlags(flags);
+            } else {
+                Flags current = member.createFlags();
+                if (value) {
+                    current.add(flags);
+                } else {
+                    current.remove(flags);
+                }
+                member.setFlags(current);
+            }
+            Flags newFlags = member.createFlags();
+            
+            JCRMessage membership = (JCRMessage) member;
+            if (membership.isPersistent()) {
+                try {
+                    Node messageNode = getSession().getNodeByIdentifier(membership.getId());
+                    membership.merge(messageNode);
+                } catch (RepositoryException e) {
+                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
+
+                } catch (IOException e) {
+                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
+
+                }
+            }
+
+            
+            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+        }
+        
+        return updatedFlags.iterator();       
+    }
     
 
 }

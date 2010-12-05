@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
+import javax.mail.Flags;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
@@ -45,6 +47,7 @@ import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
+import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -68,7 +71,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
     throws MailboxException {
         MaildirMessage theCopy = new MaildirMessage(mailbox, (AbstractMaildirMessage) original);
 
-        return save(mailbox, theCopy);
+        return add(mailbox, theCopy);
     }
 
     /* 
@@ -272,12 +275,12 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
         }
     }
 
-    /* 
+
+    /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox,
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long save(Mailbox<Integer> mailbox, MailboxMembership<Integer> message)
+    public long add(Mailbox<Integer> mailbox, MailboxMembership<Integer> message)
     throws MailboxException {
         AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) message;
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
@@ -341,23 +344,10 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
             } catch (IOException e) {
                 throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e );
             }
+        } else {
+            throw new MailboxException("Message already exists!");
         }
-        // the message already exists and its flags need to be updated (everything else is immutable)
-        else {
-            try {
-                MaildirMessageName messageName = folder.getMessageNameByUid(message.getUid());
-                File messageFile = messageName.getFile();
-                //System.out.println("save existing " + message + " as " + messageFile.getName());
-                messageName.setFlags(message.createFlags());
-                // this automatically moves messages from new to cur if needed
-                String newMessageName = messageName.getFullName();
-                messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
-                uid = message.getUid();
-                folder.update(uid, newMessageName);
-            } catch (IOException e) {
-                throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e );
-            }
-        }
+        
         return uid;
     }
 
@@ -423,6 +413,49 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
      */
     public void endRequest() {
         // not used
+        
+    }
+
+
+    public Iterator<UpdatedFlag> updateFlags(Mailbox<Integer> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+        MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
+
+        final List<MailboxMembership<Integer>> members = findInMailbox(mailbox, set);
+        for (final MailboxMembership<Integer> member:members) {
+            Flags originalFlags = member.createFlags();
+            if (replace) {
+                member.setFlags(flags);
+            } else {
+                Flags current = member.createFlags();
+                if (value) {
+                    current.add(flags);
+                } else {
+                    current.remove(flags);
+                }
+                member.setFlags(current);
+            }
+            Flags newFlags = member.createFlags();
+            
+            try {
+                AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
+                MaildirMessageName messageName = folder.getMessageNameByUid(maildirMessage.getUid());
+                File messageFile = messageName.getFile();
+                //System.out.println("save existing " + message + " as " + messageFile.getName());
+                messageName.setFlags(maildirMessage.createFlags());
+                // this automatically moves messages from new to cur if needed
+                String newMessageName = messageName.getFullName();
+                messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
+                long uid = maildirMessage.getUid();
+                folder.update(uid, newMessageName);
+            } catch (IOException e) {
+                throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e );
+            }
+            
+            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+        }
+        
+        return updatedFlags.iterator();       
         
     }
     

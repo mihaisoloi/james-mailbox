@@ -92,11 +92,6 @@ public interface MailboxMembership<Id> {
      */
     public abstract boolean isSeen();
 
-    /**
-     * Sets {@link #isRecent()} to false.
-     * A message can only be recent once.
-     */
-    public abstract void unsetRecent();
 
     /**
      * Set the Flags 
