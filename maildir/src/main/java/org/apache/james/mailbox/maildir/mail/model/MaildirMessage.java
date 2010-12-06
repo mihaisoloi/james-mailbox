@@ -89,36 +89,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.newMessage = true;
     }
     
-    /**
-     * This constructor is used when parsing a already stored message.
-     * @param mailbox
-     * @param size
-     * @param documentIn
-     * @param bodyStartOctet
-     * @param maildirHeaders
-     * @param propertyBuilder
-     */
-    public MaildirMessage(Mailbox<Integer> mailbox, int size, InputStream documentIn, int bodyStartOctet,
-            List<MaildirHeader> maildirHeaders, PropertyBuilder propertyBuilder) {
-        super(mailbox);
-        // Document
-        this.rawFullContent = documentIn;
-        this.bodyStartOctet = bodyStartOctet;
-        this.headers = new ArrayList<MaildirHeader>(maildirHeaders);
-        this.textualLineCount = propertyBuilder.getTextualLineCount();
-        this.mediaType = propertyBuilder.getMediaType();
-        this.subType = propertyBuilder.getSubType();
-        final List<Property> properties = propertyBuilder.toProperties();
-        this.properties = new ArrayList<MaildirProperty>(properties.size());
-        int order = 0;
-        for (final Property property:properties) {
-            this.properties.add(new MaildirProperty(property, order++));
-        }
-        // MailboxMembership
-        this.size = size;
-        // this message is not new (this constructor is only used for such)
-        this.newMessage = false;
-    }
+
     
     /**
      * Create a copy of the given message
