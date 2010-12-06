@@ -20,7 +20,6 @@ package org.apache.james.mailbox.jpa.mail;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 
@@ -28,7 +27,6 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.mail.CachingUidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 
 /**
  * Lazy-lookup last used uid via JPA 
@@ -48,14 +46,13 @@ public class JPACachingUidProvider extends CachingUidProvider<Long>{
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.CachingUidProvider#getLastUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    @SuppressWarnings("unchecked")
     protected long getLastUid(MailboxSession session, Mailbox<Long> mailbox) throws MailboxException{
         EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
-            MailboxMembership<Long> m = (MailboxMembership<Long>) em.createNamedQuery("findLastUidInMailbox").setParameter("idParam", mailbox.getMailboxId()).setLockMode(LockModeType.PESSIMISTIC_WRITE).getSingleResult();
+            final long uid = (Long) em.createNamedQuery("findLastUidInMailbox").setParameter("idParam", mailbox.getMailboxId()).getSingleResult();
             em.getTransaction().commit();
-            return m.getUid();
+            return uid;
         } catch (NoResultException e) {
             em.getTransaction().rollback();
             return 0;
