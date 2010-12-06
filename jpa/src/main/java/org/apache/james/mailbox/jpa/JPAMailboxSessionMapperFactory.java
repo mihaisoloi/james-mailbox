@@ -50,6 +50,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
         this.entityManagerFactory = entityManagerFactory;
         this.delimiter = delimiter;
         this.uidGenerator = uidGenerator;
+        createEntityManager();
     }
     
     @Override
