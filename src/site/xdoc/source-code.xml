@@ -33,8 +33,6 @@
 
       <p><code>$ svn checkout http://svn.apache.org/repos/asf/james/mailbox/trunk james-mailbox</code></p>
     
-      <p>(*) Source code is not yet moved, so replace 'mailbox' with 'imap' in the above URL.</p>
-
     </subsection>
 
     <subsection name="Developer Access">
@@ -43,8 +41,6 @@
 
       <p><code>$ svn checkout https://svn.apache.org/repos/asf/james/mailbox/trunk james-mailbox</code></p>
       
-      <p>(*) Source code is not yet moved, so replace 'mailbox' with 'imap' in the above URL.</p>
-
     </subsection>
 
   </section>

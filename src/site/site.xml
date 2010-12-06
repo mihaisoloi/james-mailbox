@@ -48,7 +48,7 @@
 <!--      <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/MAILBOX" />-->
     </menu>
 
-    ${reports}
+    <menu ref="reports"/>
 
   </body>  
 
