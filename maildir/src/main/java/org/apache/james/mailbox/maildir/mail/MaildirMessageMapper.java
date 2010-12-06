@@ -47,10 +47,10 @@ import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
-import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
 public class MaildirMessageMapper extends NonTransactionalMapper implements MessageMapper<Integer> {
@@ -417,8 +417,8 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
     }
 
 
-    public Iterator<UpdatedFlag> updateFlags(Mailbox<Integer> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+    public Iterator<UpdatedFlags> updateFlags(Mailbox<Integer> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
         final List<MailboxMembership<Integer>> members = findInMailbox(mailbox, set);
@@ -452,7 +452,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                 throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e );
             }
             
-            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
         }
         
         return updatedFlags.iterator();       

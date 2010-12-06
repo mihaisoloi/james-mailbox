@@ -39,11 +39,11 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembers
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
-import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 
 
 /**
@@ -336,8 +336,8 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<UpdatedFlag> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+    public Iterator<UpdatedFlags> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
 
         final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
         for (final MailboxMembership<Long> member:members) {
@@ -355,7 +355,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
             }
             Flags newFlags = member.createFlags();
             getEntityManager().persist(member);
-            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
         }
         
         return updatedFlags.iterator();       

@@ -48,11 +48,11 @@ import org.apache.james.mailbox.jcr.AbstractJCRMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
-import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 
 /**
  * JCR implementation of a {@link MessageMapper}. The implementation store each message as 
@@ -667,8 +667,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<UpdatedFlag> updateFlags(Mailbox<String> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+    public Iterator<UpdatedFlags> updateFlags(Mailbox<String> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
 
         final List<MailboxMembership<String>> members = findInMailbox(mailbox, set);
         for (final MailboxMembership<String> member:members) {
@@ -701,7 +701,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             }
 
             
-            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
         }
         
         return updatedFlags.iterator();       

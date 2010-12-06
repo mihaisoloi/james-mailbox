@@ -20,8 +20,7 @@
 package org.apache.james.mailbox;
 
 /**
- * Used to define a range of messages by uid or msn, or a individual message by
- * key or message object.<br />
+ * Used to define a range of messages by uid.<br />
  * The type of the set should be defined by using an appropriate constructor.
  */
 public class MessageRange {

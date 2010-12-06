@@ -26,10 +26,10 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.transaction.Mapper;
 
 /**
@@ -123,8 +123,7 @@ public interface MessageMapper<Id> extends Mapper {
 
 
     /**
-     * Add the given {@link MailboxMembership} to the underlying storage and return the uid of it. the uid needs to be unique and sequential. Howto
-     * archive that is up to the implementation
+     * Add the given {@link MailboxMembership} to the underlying storage, assign a new uid and return  it. The uid generation should be delegated to the {@link UidProvider} 
      * 
      * 
      * @param mailbox
@@ -134,7 +133,7 @@ public interface MessageMapper<Id> extends Mapper {
     public abstract long add(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
     
     /**
-     * Update flags for the given {@link MessageRange}
+     * Update flags for the given {@link MessageRange}. Only the flags may be modified after a message was saved to a mailbox.
      * 
      * @param mailbox
      * @param flags
@@ -144,7 +143,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return updatedFlags
      * @throws MailboxException
      */
-    public abstract Iterator<UpdatedFlag> updateFlags(Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace,
+    public abstract Iterator<UpdatedFlags> updateFlags(Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace,
             final MessageRange set) throws MailboxException;
     
     /**

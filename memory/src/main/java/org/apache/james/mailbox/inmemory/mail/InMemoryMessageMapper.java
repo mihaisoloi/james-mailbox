@@ -34,11 +34,11 @@ import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
-import org.apache.james.mailbox.store.UpdatedFlag;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.MailboxMembershipComparator;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
 public class InMemoryMessageMapper extends NonTransactionalMapper implements MessageMapper<Long> {
@@ -224,8 +224,8 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         return add(mailbox, membership);
     }
 
-    public Iterator<UpdatedFlag> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlag> updatedFlags = new ArrayList<UpdatedFlag>();
+    public Iterator<UpdatedFlags> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
 
         final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
         for (final MailboxMembership<Long> member:members) {
@@ -245,7 +245,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
             
             add(mailbox, member);
             
-            updatedFlags.add(new UpdatedFlag(member.getUid(),originalFlags, newFlags));
+            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
         }
         
         return updatedFlags.iterator();       

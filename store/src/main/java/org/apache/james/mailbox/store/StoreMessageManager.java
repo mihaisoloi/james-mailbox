@@ -53,6 +53,7 @@ import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
+import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
@@ -403,16 +404,16 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         final SortedMap<Long, Flags> newFlagsByUid = new TreeMap<Long, Flags>();
 
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
-        Iterator<UpdatedFlag> it = messageMapper.execute(new Mapper.Transaction<Iterator<UpdatedFlag>>() {
+        Iterator<UpdatedFlags> it = messageMapper.execute(new Mapper.Transaction<Iterator<UpdatedFlags>>() {
 
-            public Iterator<UpdatedFlag> run() throws MailboxException {
+            public Iterator<UpdatedFlags> run() throws MailboxException {
                 return messageMapper.updateFlags(getMailboxEntity(),flags, value, replace, set);
             }
         });
         
         
         while (it.hasNext()) {
-            UpdatedFlag flag = it.next();
+            UpdatedFlags flag = it.next();
             dispatcher.flagsUpdated(flag.getUid(), mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()), flag.getOldFlags(), flag.getNewFlags());
             newFlagsByUid.put(flag.getUid(), flag.getNewFlags());
         }
