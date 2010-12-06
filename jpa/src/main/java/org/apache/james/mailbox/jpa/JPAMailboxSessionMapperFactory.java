@@ -50,7 +50,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
         this.entityManagerFactory = entityManagerFactory;
         this.delimiter = delimiter;
         this.uidGenerator = uidGenerator;
-        createEntityManager();
+        createEntityManager().close();
     }
     
     @Override
@@ -73,7 +73,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
      * 
      * @return manager
      */
-    public EntityManager createEntityManager() {
+    private EntityManager createEntityManager() {
         return entityManagerFactory.createEntityManager();
     }
 
