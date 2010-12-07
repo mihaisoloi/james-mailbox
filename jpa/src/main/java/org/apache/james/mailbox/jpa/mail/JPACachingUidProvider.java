@@ -50,7 +50,7 @@ public class JPACachingUidProvider extends CachingUidProvider<Long>{
         EntityManager em = factory.createEntityManager();
         try {
             em.getTransaction().begin();
-            final long uid = (Long) em.createNamedQuery("findLastUidInMailbox").setParameter("idParam", mailbox.getMailboxId()).getSingleResult();
+            final long uid = (Long) em.createNamedQuery("findLastUidInMailbox").setParameter("idParam", mailbox.getMailboxId()).setMaxResults(1).getSingleResult();
             em.getTransaction().commit();
             return uid;
         } catch (NoResultException e) {
