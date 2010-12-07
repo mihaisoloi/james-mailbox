@@ -49,16 +49,16 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership{
     @Deprecated
     public JPAStreamingMailboxMembership() {}
 
-    public JPAStreamingMailboxMembership(long mailboxId, Date internalDate, int size, Flags flags, 
+    public JPAStreamingMailboxMembership(long mailboxId, long uid, Date internalDate, int size, Flags flags, 
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailboxId, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
+        super(mailboxId, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
         this.message = new JPAStreamingMessage(content, size, bodyStartOctet, headers, propertyBuilder);
         
        
     }
 
-    public JPAStreamingMailboxMembership(long mailboxId, MailboxMembership<?> original) throws MailboxException {
-        super(mailboxId, original);
+    public JPAStreamingMailboxMembership(long mailboxId, long uid,  MailboxMembership<?> original) throws MailboxException {
+        super(mailboxId, uid, original);
         try {
             this.message = new JPAStreamingMessage(original.getMessage());
         } catch (IOException e) {

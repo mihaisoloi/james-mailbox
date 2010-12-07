@@ -47,13 +47,13 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
     }
     
     @Override
-    protected MailboxMembership<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
+    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
             final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
         for (Header header: headers) {
             jpaHeaders.add((JPAHeader) header);
         }
-        final MailboxMembership<Long> message = new JPAMailboxMembership(getMailboxEntity().getMailboxId(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+        final MailboxMembership<Long> message = new JPAMailboxMembership(getMailboxEntity().getMailboxId(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         return message;
     }
 

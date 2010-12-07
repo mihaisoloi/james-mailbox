@@ -58,15 +58,15 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     }
 
     @Override
-    protected MailboxMembership<Long> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
+    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         if (useStreaming) {
             final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
             for (Header header: headers) {
                 jpaHeaders.add((JPAHeader) header);
             }
-            return new JPAStreamingMailboxMembership(getMailboxEntity().getMailboxId(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+            return new JPAStreamingMailboxMembership(getMailboxEntity().getMailboxId(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         } else {
-            return super.createMessage(internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
+            return super.createMessage(uid, internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
         }
     }
 

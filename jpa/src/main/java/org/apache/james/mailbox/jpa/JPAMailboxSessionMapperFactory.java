@@ -29,7 +29,6 @@ import org.apache.james.mailbox.jpa.user.JPASubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 
 /**
@@ -40,16 +39,14 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     private final EntityManagerFactory entityManagerFactory;
     private final char delimiter;
-    private UidProvider<Long> uidGenerator;
 
-    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory, UidProvider<Long> uidProvider) {
-        this(entityManagerFactory, uidProvider, MailboxConstants.DEFAULT_DELIMITER);
+    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory) {
+        this(entityManagerFactory, MailboxConstants.DEFAULT_DELIMITER);
     }
 
-    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory, UidProvider<Long> uidGenerator, char delimiter) {
+    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory, char delimiter) {
         this.entityManagerFactory = entityManagerFactory;
         this.delimiter = delimiter;
-        this.uidGenerator = uidGenerator;
         createEntityManager().close();
     }
     
@@ -60,7 +57,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     @Override
     public MessageMapper<Long> createMessageMapper(MailboxSession session) {
-        return new JPAMessageMapper(session, entityManagerFactory, uidGenerator);
+        return new JPAMessageMapper(entityManagerFactory);
     }
 
     @Override

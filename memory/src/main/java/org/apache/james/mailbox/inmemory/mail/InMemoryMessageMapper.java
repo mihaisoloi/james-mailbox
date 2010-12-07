@@ -31,7 +31,6 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
@@ -216,11 +215,8 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<Long> mailbox, MailboxMembership<Long> original) throws MailboxException {
-        InMemoryMailbox iMailbox = (InMemoryMailbox) mailbox;
-        iMailbox.consumeUid();
-        
-        SimpleMailboxMembership membership = new SimpleMailboxMembership(mailbox.getMailboxId(), iMailbox.getLastUid(), (SimpleMailboxMembership) original);
+    public long copy(Mailbox<Long> mailbox, long uid, MailboxMembership<Long> original) throws MailboxException {        
+        SimpleMailboxMembership membership = new SimpleMailboxMembership(mailbox.getMailboxId(), uid, (SimpleMailboxMembership) original);
         return add(mailbox, membership);
     }
 

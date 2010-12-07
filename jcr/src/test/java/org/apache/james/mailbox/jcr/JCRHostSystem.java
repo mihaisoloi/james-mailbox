@@ -71,7 +71,7 @@ public class JCRHostSystem extends ImapHostSystem{
             
             userManager = new InMemoryUserManager();
             JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
-            JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider);
+            JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
 
             mailboxManager = new JCRMailboxManager(mf, userManager, uidProvider);
             final ImapProcessor defaultImapProcessorFactory = DefaultImapProcessorFactory.createDefaultProcessor(mailboxManager, new JCRSubscriptionManager(mf));

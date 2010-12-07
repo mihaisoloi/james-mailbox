@@ -67,7 +67,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<Integer> mailbox, MailboxMembership<Integer> original)
+    public long copy(Mailbox<Integer> mailbox, long uid, MailboxMembership<Integer> original)
     throws MailboxException {
         MaildirMessage theCopy = new MaildirMessage(mailbox, (AbstractMaildirMessage) original);
 

@@ -99,7 +99,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
         this.node = node;
     }
     
-    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, InputStream content,
+    public JCRMessage(String mailboxUUID, long uid, Date internalDate, int size, Flags flags, InputStream content,
             int bodyStartOctet, final List<JCRHeader> headers,
             final PropertyBuilder propertyBuilder, Log logger) {
         super();
@@ -108,7 +108,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
         this.size = size;
         this.logger = logger;
         setFlags(flags);
-    
+        this.uid = uid;
         this.content = content;
        
         this.bodyStartOctet = bodyStartOctet;
@@ -132,7 +132,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
      * @param message
      * @throws IOException 
      */
-    public JCRMessage(String mailboxUUID, JCRMessage message, Log logger) throws MailboxException {
+    public JCRMessage(String mailboxUUID, long uid,  JCRMessage message, Log logger) throws MailboxException {
         this.mailboxUUID = mailboxUUID;
         this.internalDate = message.getInternalDate();
         this.size = message.getFullContentOctets();
@@ -142,6 +142,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
         this.flagged = message.isFlagged();
         this.recent = message.isRecent();
         this.seen = message.isSeen();
+        this.uid = uid;
         
         this.logger = logger;
         try {

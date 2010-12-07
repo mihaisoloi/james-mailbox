@@ -123,11 +123,13 @@ public interface MessageMapper<Id> extends Mapper {
 
 
     /**
-     * Add the given {@link MailboxMembership} to the underlying storage, assign a new uid and return  it. The uid generation should be delegated to the {@link UidProvider} 
+     * Add the given {@link MailboxMembership} to the underlying storage. Be aware that implementation may choose to replace the uid of the given message while storing.
+     * So you should only depend on the returned uid.
      * 
      * 
      * @param mailbox
      * @param message
+     * @return uid
      * @throws StorageException
      */
     public abstract long add(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
@@ -147,14 +149,15 @@ public interface MessageMapper<Id> extends Mapper {
             final MessageRange set) throws MailboxException;
     
     /**
-     * Copy the given {@link MailboxMembership} to a new mailbox and return the uid of the copy
+     * Copy the given {@link MailboxMembership} to a new mailbox and return the uid of the copy. Be aware that the given uid is just a suggestion for the uid of the copied
+     * message. Implementation may choose to use a different one, so only depend on the returned uid!
      * 
      * @param mailbox the Mailbox to copy to
-     * @param uid the uid to use for the new MailboxMembership
+     * @param uid the uid to use for the new MailboxMembership.
      * @param original the original to copy
      * @return The uid of the copied instance
      * @throws StorageException
      */
-    public abstract long copy(Mailbox<Id> mailbox, MailboxMembership<Id> original) throws MailboxException;
+    public abstract long copy(Mailbox<Id> mailbox, long uid, MailboxMembership<Id> original) throws MailboxException;
 
 }

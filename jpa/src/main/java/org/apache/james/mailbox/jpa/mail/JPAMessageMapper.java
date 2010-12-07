@@ -28,7 +28,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.SearchQuery;
@@ -40,7 +39,6 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
 import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
@@ -52,13 +50,8 @@ import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
  */
 public class JPAMessageMapper extends JPATransactionalMapper implements MessageMapper<Long> {
     
-    private final UidProvider<Long> uidGenerator;
-    private MailboxSession session;
-
-    public JPAMessageMapper(final MailboxSession session, final EntityManagerFactory entityManagerFactory, UidProvider<Long> uidGenerator) {
+    public JPAMessageMapper(final EntityManagerFactory entityManagerFactory) {
         super(entityManagerFactory);
-        this.session = session;
-        this.uidGenerator = uidGenerator;
     }
 
     /**
@@ -305,9 +298,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      */
     public long add(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
         try {
-            
-            ((AbstractJPAMailboxMembership) message).setUid(uidGenerator.nextUid(session,mailbox));
-            
+                        
             getEntityManager().persist(message);
             return message.getUid();
         } catch (PersistenceException e) {
@@ -317,15 +308,15 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<Long> mailbox, MailboxMembership<Long> original) throws MailboxException {
+    public long copy(Mailbox<Long> mailbox, long uid, MailboxMembership<Long> original) throws MailboxException {
 
         MailboxMembership<Long> copy;
         if (original instanceof JPAStreamingMailboxMembership) {
-            copy = new JPAStreamingMailboxMembership(mailbox.getMailboxId(), (AbstractJPAMailboxMembership) original);
+            copy = new JPAStreamingMailboxMembership(mailbox.getMailboxId(), uid, (AbstractJPAMailboxMembership) original);
         } else {
-            copy = new JPAMailboxMembership(mailbox.getMailboxId(), (AbstractJPAMailboxMembership) original);
+            copy = new JPAMailboxMembership(mailbox.getMailboxId(), uid,  (AbstractJPAMailboxMembership) original);
         }
         return add(mailbox, copy);
     }

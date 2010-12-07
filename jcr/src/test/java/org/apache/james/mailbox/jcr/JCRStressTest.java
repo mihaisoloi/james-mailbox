@@ -64,7 +64,7 @@ public class JCRStressTest extends AbstractStressTest{
 
         JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
 
-        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider);
+        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
         mailboxManager = new JCRMailboxManager(mf, null, uidProvider);
 
     }

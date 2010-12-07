@@ -51,7 +51,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
     }
 
     @Override
-    protected MailboxMembership<Long> createMessage(Date internalDate, int size, int bodyStartOctet, 
+    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, 
             InputStream  document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] byteContent;
@@ -70,7 +70,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
             byteContent = new byte[0];
         }
         InMemoryMailbox mailbox = (InMemoryMailbox) getMailboxEntity();
-        return new SimpleMailboxMembership(internalDate, uidProvider.nextUid(null, mailbox), size, bodyStartOctet, byteContent, flags, headers, propertyBuilder, mailbox.getMailboxId());
+        return new SimpleMailboxMembership(internalDate, uid, size, bodyStartOctet, byteContent, flags, headers, propertyBuilder, mailbox.getMailboxId());
     }
     
 }

@@ -257,7 +257,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             if (isRecent) {
                 flags.add(Flags.Flag.RECENT);
             }
-            final MailboxMembership<Id> message = createMessage(internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
+            long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
+            final MailboxMembership<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                         
             dispatcher.added(uid, mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()));
@@ -327,6 +328,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     /**
      * Create a new {@link MailboxMembership} for the given data
      * 
+     * @param uid
      * @param internalDate
      * @param size
      * @param bodyStartOctet
@@ -337,7 +339,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @return membership
      * @throws MailboxException 
      */
-    protected abstract MailboxMembership<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
+    protected abstract MailboxMembership<Id> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, 
             final InputStream documentIn, final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException;
     
     /**
@@ -553,8 +555,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                copiedRows.add(messageMapper.execute(new Mapper.Transaction<Long>() {
 
                     public Long run() throws MailboxException {
-
-                        return messageMapper.copy(getMailboxEntity(), originalMessage);
+                        long uid = uidProvider.nextUid(session, getMailboxEntity());
+                        return messageMapper.copy(getMailboxEntity(), uid, originalMessage);
                         
                     }
                     

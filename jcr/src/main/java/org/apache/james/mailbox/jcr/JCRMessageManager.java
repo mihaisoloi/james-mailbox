@@ -57,12 +57,12 @@ public class JCRMessageManager extends StoreMessageManager<String> {
     }
 
     @Override
-    protected MailboxMembership<String> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
+    protected MailboxMembership<String> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JCRHeader> jcrHeaders = new ArrayList<JCRHeader>(headers.size());
         for (Header header: headers) {
             jcrHeaders.add((JCRHeader) header);
         }
-        final MailboxMembership<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), internalDate, 
+        final MailboxMembership<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), uid, internalDate, 
                 size, flags, document, bodyStartOctet, jcrHeaders, propertyBuilder, log);
         return message;
     }

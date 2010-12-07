@@ -51,7 +51,7 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
     }
 
     @Override
-    protected MailboxMembership<Integer> createMessage(Date internalDate,
+    protected MailboxMembership<Integer> createMessage(long uid, Date internalDate,
             int size, int bodyStartOctet, InputStream documentIn, Flags flags,
             List<Header> headers, PropertyBuilder propertyBuilder)
             throws MailboxException {

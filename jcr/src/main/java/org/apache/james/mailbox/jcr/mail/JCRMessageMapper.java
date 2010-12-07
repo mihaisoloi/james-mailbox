@@ -49,7 +49,6 @@ import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
@@ -60,8 +59,6 @@ import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
  *
  */
 public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper<String> {
-
-    private UidProvider<String> uidGenerator;
     
     /**
      * Store the messages directly in the mailbox: .../mailbox/
@@ -107,14 +104,13 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger, int scaleType) {
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Log logger, int scaleType) {
         super(repos, session, logger);
-        this.uidGenerator = uidGenerator;
         this.scaleType = scaleType;
     }
     
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final UidProvider<String> uidGenerator, final Log logger) {
-        this(repos, session, uidGenerator, logger, MESSAGE_SCALE_DAY);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Log logger) {
+        this(repos, session, logger, MESSAGE_SCALE_DAY);
     }
     
     /**
@@ -510,18 +506,17 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
 
                 }
 
-                final long nextUid = uidGenerator.nextUid(mSession, mailbox);
-
-                messageNode = mailboxNode.addNode(String.valueOf(nextUid), "nt:file");
+                long uid = membership.getUid();
+                messageNode = mailboxNode.addNode(String.valueOf(uid), "nt:file");
                 messageNode.addMixin("jamesMailbox:message");
                 try {
                     membership.merge(messageNode);
-                    messageNode.setProperty(JCRMessage.UID_PROPERTY, nextUid);
+                    messageNode.setProperty(JCRMessage.UID_PROPERTY, uid);
 
                 } catch (IOException e) {
                     throw new RepositoryException("Unable to merge message in to tree", e);
                 }
-                return nextUid;
+                return uid;
                 
             } else {
                 membership.merge(messageNode);
@@ -644,13 +639,13 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return xQuery;
     }
     
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(java.lang.Object, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<String> mailbox, MailboxMembership<String> oldmessage) throws MailboxException{
+    public long copy(Mailbox<String> mailbox, long uid, MailboxMembership<String> oldmessage) throws MailboxException{
         try {
-            long uid = uidGenerator.nextUid(mSession, mailbox);
             String newMessagePath = getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid);
             getSession().getWorkspace().copy(((JCRMessage)oldmessage).getNode().getPath(), getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid));
             Node node = getSession().getNode(newMessagePath);
