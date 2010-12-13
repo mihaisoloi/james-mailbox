@@ -208,5 +208,14 @@ public interface MailboxManager extends RequestAware {
      * @throws MailboxException
      */
     void addListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException;
-    
+ 
+    /**
+     * Return a unmodifiable {@link List} of {@link MailboxPath} objects
+     * 
+     * @param session
+     * @return pathList
+     * @throws MailboxException 
+     */
+    public List<MailboxPath> list(MailboxSession session) throws MailboxException;
+
 }

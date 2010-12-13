@@ -222,4 +222,9 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         }
     }
 
+    public List<Mailbox<Integer>> list() throws MailboxException {
+        // TODO FIX ME!!!
+        throw new UnsupportedOperationException("Implement me!");
+    }
+
 }

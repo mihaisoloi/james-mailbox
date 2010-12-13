@@ -152,4 +152,17 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         }
         return numberOfChildMailboxes != null && numberOfChildMailboxes > 0;
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
+     */
+    @SuppressWarnings("unchecked")
+    public List<Mailbox<Long>> list() throws MailboxException{
+        try {
+            return getEntityManager().createNamedQuery("listMailboxes").getResultList();
+        } catch (PersistenceException e) {
+            throw new MailboxException("Delete of mailboxes failed", e);
+        } 
+    }
 }

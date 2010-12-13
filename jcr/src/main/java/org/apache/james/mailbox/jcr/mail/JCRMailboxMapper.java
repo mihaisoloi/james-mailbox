@@ -213,5 +213,26 @@ public class JCRMailboxMapper extends AbstractJCRScalingMapper implements Mailbo
             throw new MailboxException("Unable to retrieve children for mailbox " + mailbox, e);
         }
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
+     */
+    public List<Mailbox<String>> list() throws MailboxException {
+        try {
+            List<Mailbox<String>> mList = new ArrayList<Mailbox<String>>();
+            QueryManager manager = getSession().getWorkspace().getQueryManager();
+
+            String queryString = "/jcr:root/" + MAILBOXES_PATH + "//element(*,jamesMailbox:mailbox)";
+            QueryResult result = manager.createQuery(queryString, Query.XPATH).execute();
+            NodeIterator it = result.getNodes();
+            if (it.hasNext()) {
+                mList.add(new JCRMailbox(it.nextNode(), getLogger()));
+            }
+            return mList;
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to retrieve the list of mailboxes", e);
+        }
+    }
  
 }

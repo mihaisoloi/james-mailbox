@@ -118,5 +118,13 @@ public class InMemoryMailboxMapper extends NonTransactionalMapper implements Mai
         }
         return false;
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
+     */
+    public List<Mailbox<Long>> list() throws MailboxException {
+        return new ArrayList<Mailbox<Long>>(mailboxesById.values());
+    }
     
 }
