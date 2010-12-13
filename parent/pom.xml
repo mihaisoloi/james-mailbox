@@ -425,7 +425,7 @@
       <dependency>
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
-        <version>10.2.2.0</version>
+        <version>10.6.2.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -563,7 +563,22 @@
         END JCR
       -->
       
+      <!--
+        START JSR250
+      -->
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>jsr250-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <!-- 
+      END JSR250
+     -->
+
     </dependencies>
+    
   </dependencyManagement>
 
   <profiles>
