@@ -81,4 +81,12 @@ public interface MailboxMapper<Id> extends Mapper {
      */
     public abstract boolean hasChildren(Mailbox<Id> mailbox)
             throws MailboxException, MailboxNotFoundException;
+    
+    /**
+     * Return a unmodifable {@link List} of all {@link Mailbox} 
+     * 
+     * @return mailboxList
+     * @throws MailboxException 
+     */
+    public abstract List<Mailbox<Id>> list() throws MailboxException;
 }

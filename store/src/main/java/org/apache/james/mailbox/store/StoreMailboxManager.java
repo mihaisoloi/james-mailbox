@@ -73,7 +73,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     private final Authenticator authenticator;
     private final static Random RANDOM = new Random();
     
-    private Log log = LogFactory.getLog("org.apache.james.imap");
+    private Log log = LogFactory.getLog("org.apache.james.mailbox");
 
     private MailboxPathLocker locker;
 
@@ -428,6 +428,21 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      */
     public void startProcessingRequest(MailboxSession session) {
         // do nothing
+        
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManager#list(org.apache.james.mailbox.MailboxSession)
+     */
+    public List<MailboxPath> list(MailboxSession session) throws MailboxException {
+        List<MailboxPath> mList = new ArrayList<MailboxPath>();
+        List<Mailbox<Id>> mailboxes = mailboxSessionMapperFactory.getMailboxMapper(session).list();
+        for (int i = 0; i < mailboxes.size(); i++) {
+            Mailbox<Id> m = mailboxes.get(i);
+            mList.add(new MailboxPath(m.getNamespace(), m.getUser(), m.getName()));
+        }
+        return Collections.unmodifiableList(mList);
         
     }
     

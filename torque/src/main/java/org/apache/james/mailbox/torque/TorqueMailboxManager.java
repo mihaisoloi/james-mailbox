@@ -471,5 +471,27 @@ public class TorqueMailboxManager implements MailboxManager {
         
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManager#list(org.apache.james.mailbox.MailboxSession)
+     */
+    public List<MailboxPath> list(MailboxSession session) throws MailboxException {
+        Criteria c = new Criteria();
+        c.setAll();
+        try {
+            List<MailboxPath> pList = new ArrayList<MailboxPath>();
+            List mailboxes = MailboxRowPeer.doSelect(c);
+            for (int i = 0; i < mailboxes.size(); i++) {
+                final MailboxRow mailboxRow = (MailboxRow) mailboxes.get(i);
+                final MailboxPath sPath = getMailboxPath(mailboxRow.getName());
+                pList.add(sPath);
+            }
+            return pList;
+        } catch (TorqueException e) {
+            throw new MailboxException("select of all mailboxes failed", e);
+
+        }
+    }
+
 
 }
