@@ -48,7 +48,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
     @NamedQuery(name="countMailboxesWithNameLike",
                 query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="listMailboxes",
-                query="SELECT mailbox FROM Mailbox mailbox"),
+                query="SELECT mailbox FROM Mailbox mailbox")
 })
 public class JPAMailbox implements Mailbox<Long> {
     
