@@ -56,7 +56,7 @@ public class JCRCachingUidProvider extends CachingUidProvider<String>{
         try {
             Session s = repos.login(session);
             // we use order by because without it count will always be 0 in jackrabbit
-            String queryString = "/jcr:root" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " asc";
+            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " desc";
             QueryManager manager = s.getWorkspace().getQueryManager();
             Query q = manager.createQuery(queryString, Query.XPATH);
             q.setLimit(1);
