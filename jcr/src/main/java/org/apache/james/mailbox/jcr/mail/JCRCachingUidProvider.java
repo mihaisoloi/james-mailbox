@@ -53,10 +53,11 @@ public class JCRCachingUidProvider extends CachingUidProvider<String>{
      * @see org.apache.james.mailbox.store.CachingUidProvider#getLastUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     protected long getLastUid(MailboxSession session, Mailbox<String> mailbox) throws MailboxException {
+        Session s = null;
         try {
-            Session s = repos.login(session);
+            s = repos.login(session);
             // we use order by because without it count will always be 0 in jackrabbit
-            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " desc";
+            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " descending";
             QueryManager manager = s.getWorkspace().getQueryManager();
             Query q = manager.createQuery(queryString, Query.XPATH);
             q.setLimit(1);
@@ -64,11 +65,14 @@ public class JCRCachingUidProvider extends CachingUidProvider<String>{
             NodeIterator nodes = result.getNodes();
             if (nodes.hasNext()) {
                 return nodes.nextNode().getProperty(JCRMessage.UID_PROPERTY).getLong();
-            } else {
-                return 0;
             }
+            return 0;
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
+        } finally {
+            if (s != null) {
+                repos.logout(session);
+            }
         }
     }
 
