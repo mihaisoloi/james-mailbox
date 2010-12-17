@@ -69,10 +69,6 @@ public class JCRCachingUidProvider extends CachingUidProvider<String>{
             return 0;
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
-        } finally {
-            if (s != null) {
-                repos.logout(session);
-            }
         }
     }
 
