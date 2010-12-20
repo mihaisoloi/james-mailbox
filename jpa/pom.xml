@@ -57,6 +57,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
+      <artifactId>apache-james-mailbox-store</artifactId>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.james</groupId>
       <artifactId>apache-james-imap-protocol-tester</artifactId>
       <scope>test</scope>
     </dependency>
