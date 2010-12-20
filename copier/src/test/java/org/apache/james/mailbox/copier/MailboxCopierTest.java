@@ -38,22 +38,52 @@ import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
 import org.apache.james.mailbox.store.Authenticator;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test class for the {@link MailboxCopierImpl} implementation.
+ * 
+ * The InMemoryMailboxManager will be used as source and destination
+ * Mailbox Manager.
+ *
+ */
 public class MailboxCopierTest {
     
+    /**
+     * Number of Mailboxes to be created in the source Mailbox Manager.
+     */
     private static final int MAILBOX_COUNT = 100;
     
+    /**
+     * Number of Messages per Mailbox to be created in the source Mailbox Manager.
+     */
     private static final int MESSAGE_PER_MAILBOX_COUNT = 10;
     
+    /**
+     * The instance for the test mailboxCopier.
+     */
     private MailboxCopierImpl mailboxCopier;
     
+    /**
+     * The instance for the source Mailbox Manager.
+     */
     private MailboxManager srcMemMailboxManager;
     
+    /**
+     * The instance for the destination Mailbox Manager.
+     */
     private MailboxManager dstMemMailboxManager;
     
+    /**
+     * Setup the mailboxCopier and the source and destination
+     * Mailbox Manager.
+     * 
+     * We use a InMemoryMailboxManager implementation.
+     * 
+     * @throws BadCredentialsException
+     * @throws MailboxException
+     */
     @Before
     public void setup() throws BadCredentialsException, MailboxException {
         
@@ -67,12 +97,14 @@ public class MailboxCopierTest {
         
     }
     
-    @After
-    public void tearDown() {
-    }
-
     /**
-     * @param args
+     * Feed the source MailboxManager with the number of mailboxes and
+     * messages per mailbox.
+     * 
+     * Copy the mailboxes to the destination Mailbox Manager, and assert the number 
+     * of mailboxes and messages per mailbox is the same as in the source
+     * Mailbox Manager.
+     * 
      * @throws MailboxException 
      * @throws UnsupportedEncodingException 
      */
@@ -90,9 +122,11 @@ public class MailboxCopierTest {
     }
     
     /**
+     * Utility method to assert the number of mailboxes and messages per mailbox
+     * are the ones expected.
+     * 
      * @throws MailboxException 
      * @throws BadCredentialsException 
-     * 
      */
     private void assertMailboxManagerSize(MailboxManager mailboxManager) throws BadCredentialsException, MailboxException {
         
@@ -110,6 +144,9 @@ public class MailboxCopierTest {
     }
     
     /**
+     * Utility method to feed a Mailbox Manager with a number of 
+     * mailboxes and messages per mailbox.
+     * 
      * @throws MailboxException
      * @throws UnsupportedEncodingException
      */
@@ -142,7 +179,10 @@ public class MailboxCopierTest {
     }
     
     /**
-     * @return
+     * Utility method to instanciate a new InMemoryMailboxManger with 
+     * the needed MailboxSessionMapperFactory, Authenticator and UidProvider.
+     * 
+     * @return a new InMemoryMailboxManager
      */
     private MailboxManager newInMemoryMailboxManager() {
     

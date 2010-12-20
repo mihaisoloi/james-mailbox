@@ -37,14 +37,32 @@ import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.util.FetchGroupImpl;
 
+/**
+ * Implementation of the {@link MailboxCopier} interface.
+ *
+ */
 public class MailboxCopierImpl implements MailboxCopier {
 	
+    /**
+     * The logger.
+     */
     private Log log = LogFactory.getLog("org.apache.james.mailbox.copier");
 
+    /**
+     * The source MailboxManager from which all mailboxes will be read
+     * and copied to the destination MailboxManager.
+     */
     private MailboxManager srcMailboxManager;
 	
+	/**
+     * The destination MailboxManager to which all mailboxes read from
+     * the source MailboxManager and copied to the destination MailboxManager.
+	 */
 	private MailboxManager dstMailboxManager;
 		
+	/* (non-Javadoc)
+	 * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
+	 */
 	public Boolean copyMailboxes() {
 	    
         MailboxSession srcMailboxSession;
@@ -54,11 +72,9 @@ public class MailboxCopierImpl implements MailboxCopier {
             srcMailboxSession = srcMailboxManager.createSystemSession("manager", log);
 	    } catch (BadCredentialsException e) {
 	        log.error(e.getMessage());
-	        e.printStackTrace();
 	        return false;
 	    } catch (MailboxException e) {
 	        log.error(e.getMessage());
-	        e.printStackTrace();
 	        return false;
 	    }
 	    
@@ -74,11 +90,9 @@ public class MailboxCopierImpl implements MailboxCopier {
 	                dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
 	            } catch (BadCredentialsException e) {
 	                log.error(e.getMessage());
-	                e.printStackTrace();
 	                return false;
 	            } catch (MailboxException e) {
 	                log.error(e.getMessage());
-	                e.printStackTrace();
 	                return false;
 	            }
 	            
@@ -99,11 +113,9 @@ public class MailboxCopierImpl implements MailboxCopier {
 	                    dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
 	                } catch (BadCredentialsException e) {
 	                    log.error(e.getMessage());
-	                    e.printStackTrace();
 	                    return false;
 	                } catch (MailboxException e) {
 	                    log.error(e.getMessage());
-	                    e.printStackTrace();
 	                    return false;
 	                }
 	                
@@ -122,7 +134,6 @@ public class MailboxCopierImpl implements MailboxCopier {
         
         } catch (MailboxException e) {
             log.error(e.getMessage());
-	        e.printStackTrace();
             return false;
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -135,7 +146,7 @@ public class MailboxCopierImpl implements MailboxCopier {
         try {
 	        srcMailboxManager.logout(srcMailboxSession, true);
         } catch (MailboxException e) {
-	        e.printStackTrace();
+            log.error(e.getMessage());
 	        return false;
         }
         
@@ -143,10 +154,26 @@ public class MailboxCopierImpl implements MailboxCopier {
 
 	}
 	
+    /**
+     * Setter to inject the srcMailboxManager.
+     * 
+     * All mailboxes from the srcMailboxManager will be copied
+     * to the dstMailboxManager upon copyMaillboxes method call.
+     * 
+     * @param srcMailboxManager
+     */
     public void setSrcMailboxManager(MailboxManager srcMailboxManager) {
         this.srcMailboxManager = srcMailboxManager;
     }
 
+    /**
+     * Setter to inject the dstMailboxManager.
+     * 
+     * All mailboxes from the srcMailboxManager will be copied
+     * to the dstMailboxManager upon copyMaillboxes method call.
+     * 
+     * @param dstMailboxManager
+     */
     public void setDstMailboxManager(MailboxManager dstMailboxManager) {
         this.dstMailboxManager = dstMailboxManager;
     }

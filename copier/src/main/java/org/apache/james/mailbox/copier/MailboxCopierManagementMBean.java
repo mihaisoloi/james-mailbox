@@ -18,6 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox.copier;
 
+/**
+ * JMX Management interface for the {@link MailboxCopier} interface.
+ */
 public interface MailboxCopierManagementMBean extends MailboxCopier {
 
 }

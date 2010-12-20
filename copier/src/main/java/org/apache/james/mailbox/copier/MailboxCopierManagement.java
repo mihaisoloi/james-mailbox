@@ -22,15 +22,30 @@ import javax.annotation.Resource;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
+/**
+ * Implementation of the {@link MailboxCopierManagementMBean} JMX Management interface.
+ *
+ */
 public class MailboxCopierManagement extends StandardMBean implements MailboxCopierManagementMBean {
     
+    /**
+     * Inject the mailboxCopier bean.
+     */
     @Resource(name="mailboxCopier")
     private MailboxCopier mailboxCopier;
     
+    /**
+     * Default Constructor.
+     * 
+     * @throws NotCompliantMBeanException
+     */
     public MailboxCopierManagement() throws NotCompliantMBeanException {
         super(MailboxCopierManagementMBean.class);
     }
     
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
+     */
     public Boolean copyMailboxes() {
         return mailboxCopier.copyMailboxes();
     }
