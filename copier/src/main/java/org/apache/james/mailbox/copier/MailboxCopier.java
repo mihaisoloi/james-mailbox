@@ -35,6 +35,6 @@ public interface MailboxCopier {
 	 * @return true if copy is completely successful, false if copy fails
 	 * at any step.
 	 */
-	Boolean copyMailboxes();
+	boolean copyMailboxes();
 	
 }

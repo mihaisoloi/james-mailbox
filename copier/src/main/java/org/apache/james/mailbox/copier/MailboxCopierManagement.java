@@ -46,7 +46,7 @@ public class MailboxCopierManagement extends StandardMBean implements MailboxCop
     /* (non-Javadoc)
      * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
      */
-    public Boolean copyMailboxes() {
+    public boolean copyMailboxes() {
         return mailboxCopier.copyMailboxes();
     }
 

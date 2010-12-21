@@ -63,7 +63,7 @@ public class MailboxCopierImpl implements MailboxCopier {
 	/* (non-Javadoc)
 	 * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
 	 */
-	public Boolean copyMailboxes() {
+	public boolean copyMailboxes() {
 	    
         MailboxSession srcMailboxSession;
         MailboxSession dstMailboxSession;
