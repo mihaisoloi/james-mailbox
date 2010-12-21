@@ -32,6 +32,7 @@ import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
+import org.apache.james.mailbox.mock.MockMail;
 import org.junit.Test;
 
 /**
@@ -97,7 +98,7 @@ public abstract class MailboxManagerTest {
             getMailboxManager().createMailbox(mailboxPath, mailboxSession);
             messageManager = getMailboxManager().getMailbox(mailboxPath, mailboxSession);
             for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
-                messageManager.appendMessage(new ByteArrayInputStream(new String("fake message" + i).getBytes("UTF-8")), 
+                messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
                         Calendar.getInstance().getTime(), 
                         mailboxSession, 
                         true, 
