@@ -53,16 +53,23 @@ public abstract class MailboxManagerTest {
     private static MailboxManager mailboxManager;
     
     /**
-     * Number of Mailboxes to be created in the Mailbox Manager.
+     * Number of Users (with INBOX) to be created in the Mailbox Manager.
      */
-    private static final int MAILBOX_COUNT = 10;
+    private static final int USER_COUNT = 5;
+    
+    /**
+     * Number of Sub Mailboxes (mailbox in another mailbox) to be created in the Mailbox Manager.
+     */
+    private static final int SUB_MAILBOXES_COUNT = 5;
     
     /**
      * Number of Messages per Mailbox to be created in the Mailbox Manager.
      */
-    private static final int MESSAGE_PER_MAILBOX_COUNT = 10;
+    private static final int MESSAGE_PER_MAILBOX_COUNT = 5;
     
     /**
+     * Create some INBOXes and their sub mailboxes and assert list() method.
+     * 
      * @throws UnsupportedEncodingException 
      * @throws MailboxException 
      */
@@ -73,7 +80,10 @@ public abstract class MailboxManagerTest {
 
         MailboxSession mailboxSession = getMailboxManager().createSystemSession("manager", new SimpleLog("testList"));
         getMailboxManager().startProcessingRequest(mailboxSession);
-        Assert.assertEquals(getMailboxManager().list(mailboxSession).size(), MAILBOX_COUNT);
+        Assert.assertEquals(USER_COUNT + // INBOX
+                USER_COUNT * MESSAGE_PER_MAILBOX_COUNT + // INBOX.SUB_FOLDER
+                USER_COUNT * MESSAGE_PER_MAILBOX_COUNT * MESSAGE_PER_MAILBOX_COUNT,  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
+                getMailboxManager().list(mailboxSession).size());
 
     }
     
@@ -86,30 +96,49 @@ public abstract class MailboxManagerTest {
      */
     private void feedMailboxManager() throws MailboxException, UnsupportedEncodingException {
 
-        MessageManager messageManager = null;
         MailboxPath mailboxPath = null;
         
-        for (int i=0; i < MAILBOX_COUNT; i++) {
+        for (int i=0; i < USER_COUNT; i++) {
 
-            MailboxSession mailboxSession = getMailboxManager().createSystemSession("user" + i, new SimpleLog("testList-feeder"));        
-
-            getMailboxManager().startProcessingRequest(mailboxSession);
+            MailboxSession mailboxSession = getMailboxManager().createSystemSession("user" + i, new SimpleLog("mailboxmanager-test"));        
             mailboxPath = new MailboxPath("#private", "user" + i, "INBOX");
-            getMailboxManager().createMailbox(mailboxPath, mailboxSession);
-            messageManager = getMailboxManager().getMailbox(mailboxPath, mailboxSession);
-            for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
-                messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
-                        Calendar.getInstance().getTime(), 
-                        mailboxSession, 
-                        true, 
-                        new Flags(Flags.Flag.RECENT));
+            createMailbox(mailboxSession, mailboxPath);
+            
+            for (int j=0; j < SUB_MAILBOXES_COUNT; j++) {
+                mailboxPath = new MailboxPath("#private", "user" + i, "INBOX.SUB_FOLDER_" + j);
+                createMailbox(mailboxSession, mailboxPath);
+                
+                for (int k=0; k < SUB_MAILBOXES_COUNT; k++) {
+                    mailboxPath = new MailboxPath("#private", "user" + i, "INBOX.SUB_FOLDER_" + j + ".SUBSUB_FOLDER_" + k);
+                    createMailbox(mailboxSession, mailboxPath);
+                }
+                    
             }
             
-            getMailboxManager().endProcessingRequest(mailboxSession);
             getMailboxManager().logout(mailboxSession, true);
         
         }
         
+    }
+    
+    /**
+     * 
+     * @param mailboxPath
+     * @throws MailboxException
+     * @throws UnsupportedEncodingException 
+     */
+    private void createMailbox(MailboxSession mailboxSession, MailboxPath mailboxPath) throws MailboxException, UnsupportedEncodingException {
+        getMailboxManager().startProcessingRequest(mailboxSession);
+        getMailboxManager().createMailbox(mailboxPath, mailboxSession);
+        MessageManager messageManager = getMailboxManager().getMailbox(mailboxPath, mailboxSession);
+        for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
+            messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
+                    Calendar.getInstance().getTime(), 
+                    mailboxSession, 
+                    true, 
+                    new Flags(Flags.Flag.RECENT));
+        }
+        getMailboxManager().endProcessingRequest(mailboxSession);
     }
     
     /**
