@@ -22,7 +22,11 @@ import java.util.HashMap;
 
 import javax.persistence.EntityManagerFactory;
 
+import org.apache.commons.logging.impl.SimpleLog;
+import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
@@ -79,8 +83,16 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
 
     }
     
+    /**
+     * Close the system session and entityManagerFactory
+     * 
+     * @throws MailboxException 
+     * @throws BadCredentialsException 
+     */
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws BadCredentialsException, MailboxException {
+        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        session.close();
         entityManagerFactory.close();
     }
 
