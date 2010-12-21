@@ -52,8 +52,8 @@
       <type>test-jar</type>
     </dependency>
     <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>jsr250-api</artifactId>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-annotation_1.0_spec</artifactId>
     </dependency> 
     <dependency>
       <groupId>junit</groupId>
