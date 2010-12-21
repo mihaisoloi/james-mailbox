@@ -20,6 +20,7 @@ package org.apache.james.mailbox;
 
 import java.util.Collection;
 
+import org.apache.james.mailbox.mock.MockMailboxSession;
 import org.junit.Assert;
 import org.junit.Test;
 
