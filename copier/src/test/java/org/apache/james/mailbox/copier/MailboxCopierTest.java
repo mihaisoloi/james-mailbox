@@ -37,6 +37,7 @@ import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
+import org.apache.james.mailbox.mock.MockMail;
 import org.apache.james.mailbox.store.Authenticator;
 import org.junit.Before;
 import org.junit.Test;
@@ -164,7 +165,7 @@ public class MailboxCopierTest {
             srcMemMailboxManager.createMailbox(mailboxPath, srcMailboxSession);
             messageManager = srcMemMailboxManager.getMailbox(mailboxPath, srcMailboxSession);
             for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
-                messageManager.appendMessage(new ByteArrayInputStream(new String("fake message" + i).getBytes("UTF-8")), 
+                messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
                         Calendar.getInstance().getTime(), 
                         srcMailboxSession, 
                         true, 
