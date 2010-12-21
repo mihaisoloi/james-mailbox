@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -43,7 +43,7 @@ import org.junit.Test;
  * implement the test methods.
  * 
  */
-public abstract class StoreMailboxManagerTest {
+public abstract class MailboxManagerTest {
     
     /**
      * The mailboxManager that needs to get instanciated
@@ -112,18 +112,22 @@ public abstract class StoreMailboxManagerTest {
     }
     
     /**
-     * Setter to inject the MailboxManager.
+     * Setter to inject the mailboxManager.
      */
     protected static void setMailboxManager(MailboxManager mailboxManager) {
-        StoreMailboxManagerTest.mailboxManager = mailboxManager;
+        MailboxManagerTest.mailboxManager = mailboxManager;
     }
 
     /**
-     * Accessor to the MailboxManager.
+     * Accessor to the mailboxManager.
      * 
      * @return the mailboxManager instance.
+     * @throws IllegalStateException in case of null mailboxManager
      */
     protected static MailboxManager getMailboxManager() {
+        if (mailboxManager == null) {
+            throw new IllegalStateException("Please setMailboxManager with a non null value before requesting getMailboxManager()");
+        }
         return mailboxManager;
     }
 

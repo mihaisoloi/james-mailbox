@@ -57,7 +57,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-mailbox-store</artifactId>
+      <artifactId>apache-james-mailbox-api</artifactId>
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>

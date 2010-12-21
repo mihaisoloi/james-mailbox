@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import javax.persistence.EntityManagerFactory;
 
+import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
@@ -32,14 +33,13 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
-import org.apache.james.mailbox.store.StoreMailboxManagerTest;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.junit.BeforeClass;
 
 /**
  * JPAMailboxManagerTest that extends the StoreMailboxManagerTest.
  */
-public class JPAMailboxManagerTest extends StoreMailboxManagerTest {
+public class JPAMailboxManagerTest extends MailboxManagerTest {
     
     /**
      * The entity manager factory.
