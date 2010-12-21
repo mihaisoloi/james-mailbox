@@ -34,6 +34,7 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 /**
@@ -76,6 +77,11 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
 
         setMailboxManager(new OpenJPAMailboxManager(mf, null, uidProvider));
 
+    }
+    
+    @AfterClass
+    public static void tearDown() {
+        entityManagerFactory.close();
     }
 
 }
