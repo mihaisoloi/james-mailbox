@@ -71,15 +71,7 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
         setMailboxManager(new JCRMailboxManager(mf, null, uidProvider));
 
     }
-    
-    /* TODO list() does not seem to work for JCR atm
-     * 
-     * @see org.apache.james.mailbox.MailboxManagerTest#testList()
-     */
-    @Test
-    public void testList() throws MailboxException, UnsupportedEncodingException {
-        
-    }
+
     
     /**
      * @throws BadCredentialsException

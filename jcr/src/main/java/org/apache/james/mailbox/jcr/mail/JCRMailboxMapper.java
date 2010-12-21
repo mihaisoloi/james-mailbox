@@ -226,7 +226,7 @@ public class JCRMailboxMapper extends AbstractJCRScalingMapper implements Mailbo
             String queryString = "/jcr:root/" + MAILBOXES_PATH + "//element(*,jamesMailbox:mailbox)";
             QueryResult result = manager.createQuery(queryString, Query.XPATH).execute();
             NodeIterator it = result.getNodes();
-            if (it.hasNext()) {
+            while (it.hasNext()) {
                 mList.add(new JCRMailbox(it.nextNode(), getLogger()));
             }
             return mList;
