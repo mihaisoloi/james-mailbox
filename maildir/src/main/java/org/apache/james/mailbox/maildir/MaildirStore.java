@@ -41,6 +41,8 @@ public class MaildirStore implements UidProvider<Integer>{
     
     private String maildirLocation;
     
+    private File maildirRootFile;
+    
     /**
      * Construct a MaildirStore with a location. The location String
      * currently may contain the
@@ -147,6 +149,22 @@ public class MaildirStore implements UidProvider<Integer>{
         return root;
     }
     
+    /**
+     * Return a File which is the root of all Maidirs.
+     * The returned maidirRootFile is lazilly constructured.
+     * 
+     * @return maidirRootFile
+     */
+    public File getMaildirRoot() {
+        if (maildirRootFile == null) {
+            String maildirRootLocation = maildirLocation.replaceAll(PATH_FULLUSER, "");
+            maildirRootLocation = maildirRootLocation.replaceAll(PATH_DOMAIN, "");
+            maildirRootLocation = maildirRootLocation.replaceAll(PATH_USER, "");
+            maildirRootFile = new File(maildirRootLocation);
+        }        
+        return maildirRootFile;
+    }
+
     /**
      * Transforms a folder name into a mailbox name
      * @param folderName The name of the mailbox folder

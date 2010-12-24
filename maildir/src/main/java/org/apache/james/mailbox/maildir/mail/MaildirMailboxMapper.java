@@ -19,6 +19,7 @@
 package org.apache.james.mailbox.maildir.mail;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -185,6 +186,59 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
+     */
+    public List<Mailbox<Integer>> list() throws MailboxException {
+        
+       // TODO The current implementation only support Maildir Location ending with /%domain/%user
+       if (! maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_DOMAIN + "/" + MaildirStore.PATH_USER)) {
+           throw new UnsupportedOperationException("The MaildirLocation must end with /%domain/%user pattern.");
+       }
+        
+       File dir = maildirStore.getMaildirRoot();
+       List<Mailbox<Integer>> mailboxList = new ArrayList<Mailbox<Integer>>();
+       
+       File[] domains = dir.listFiles();
+       
+       for (File domain: domains) {
+           
+           File[] users = domain.listFiles();
+           
+           for (File user: users) {
+               
+               // Special case for INBOX: Let's use the user's folder.
+
+               MailboxPath inboxMailboxPath = new MailboxPath("#private", 
+                       user.getName() + "@" + domain.getName(), 
+                       "INBOX");
+               mailboxList.add(maildirStore.loadMailbox(user, inboxMailboxPath));
+               
+               // List all INBOX sub folders.
+               
+               File[] mailboxes = user.listFiles(new FileFilter() {
+                   public boolean accept(File pathname) {
+                       return pathname.getName().startsWith(".");
+                   }
+               });
+               
+               for (File mailbox: mailboxes) {
+                   
+                   MailboxPath mailboxPath = new MailboxPath("#private", 
+                           user.getName() + "@" + domain.getName(), 
+                           mailbox.getName().substring(1));
+                   mailboxList.add(maildirStore.loadMailbox(mailbox, mailboxPath));
+
+               }
+
+           }
+           
+       }
+           
+       return mailboxList;
+
+    }
+
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#endRequest()
@@ -220,11 +274,6 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         } catch (IndexOutOfBoundsException e) {
             throw new MailboxNotFoundException(String.valueOf(mailboxId));
         }
-    }
-
-    public List<Mailbox<Integer>> list() throws MailboxException {
-        // TODO FIX ME!!!
-        throw new UnsupportedOperationException("Implement me!");
     }
 
 }
