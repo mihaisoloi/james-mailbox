@@ -53,6 +53,11 @@ public abstract class MailboxManagerTest {
     private static MailboxManager mailboxManager;
     
     /**
+     * Number of Domains to be created in the Mailbox Manager.
+     */
+    private static final int DOMAIN_COUNT = 5;
+    
+    /**
      * Number of Users (with INBOX) to be created in the Mailbox Manager.
      */
     private static final int USER_COUNT = 5;
@@ -80,9 +85,10 @@ public abstract class MailboxManagerTest {
 
         MailboxSession mailboxSession = getMailboxManager().createSystemSession("manager", new SimpleLog("testList"));
         getMailboxManager().startProcessingRequest(mailboxSession);
-        Assert.assertEquals(USER_COUNT + // INBOX
-                USER_COUNT * MESSAGE_PER_MAILBOX_COUNT + // INBOX.SUB_FOLDER
-                USER_COUNT * MESSAGE_PER_MAILBOX_COUNT * MESSAGE_PER_MAILBOX_COUNT,  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
+        Assert.assertEquals(DOMAIN_COUNT * 
+                  (USER_COUNT + // INBOX
+                  USER_COUNT * MESSAGE_PER_MAILBOX_COUNT + // INBOX.SUB_FOLDER
+                  USER_COUNT * MESSAGE_PER_MAILBOX_COUNT * MESSAGE_PER_MAILBOX_COUNT),  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
                 getMailboxManager().list(mailboxSession).size());
 
     }
@@ -98,25 +104,38 @@ public abstract class MailboxManagerTest {
 
         MailboxPath mailboxPath = null;
         
-        for (int i=0; i < USER_COUNT; i++) {
+        for (int i=0; i < DOMAIN_COUNT; i++) {
 
-            MailboxSession mailboxSession = getMailboxManager().createSystemSession("user" + i, new SimpleLog("mailboxmanager-test"));        
-            mailboxPath = new MailboxPath("#private", "user" + i, "INBOX");
-            createMailbox(mailboxSession, mailboxPath);
-            
-            for (int j=0; j < SUB_MAILBOXES_COUNT; j++) {
-                mailboxPath = new MailboxPath("#private", "user" + i, "INBOX.SUB_FOLDER_" + j);
+            for (int j=0; j < USER_COUNT; j++) {
+                
+                String user = "user" + j + "@localhost" + i;
+                
+                String folderName = "INBOX";
+
+                MailboxSession mailboxSession = getMailboxManager().createSystemSession(user, new SimpleLog("mailboxmanager-test"));
+                mailboxPath = new MailboxPath("#private", user, folderName);
                 createMailbox(mailboxSession, mailboxPath);
                 
                 for (int k=0; k < SUB_MAILBOXES_COUNT; k++) {
-                    mailboxPath = new MailboxPath("#private", "user" + i, "INBOX.SUB_FOLDER_" + j + ".SUBSUB_FOLDER_" + k);
-                    createMailbox(mailboxSession, mailboxPath);
-                }
                     
+                    folderName = folderName + ".SUB_FOLDER_" + k;
+                    mailboxPath = new MailboxPath("#private", user, folderName);
+                    createMailbox(mailboxSession, mailboxPath);
+                    
+                    for (int l=0; l < SUB_MAILBOXES_COUNT; l++) {
+
+                        folderName = folderName + ".SUBSUB_FOLDER_" + l;
+                        mailboxPath = new MailboxPath("#private", user, folderName);
+                        createMailbox(mailboxSession, mailboxPath);
+
+                    }
+                        
+                }
+
+                getMailboxManager().logout(mailboxSession, true);
+        
             }
             
-            getMailboxManager().logout(mailboxSession, true);
-        
         }
         
     }
