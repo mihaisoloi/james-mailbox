@@ -84,7 +84,9 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     private void doTestListWithMaildirStoreConfiguration(String maildirStoreConfiguration) throws MailboxException, UnsupportedEncodingException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + maildirStoreConfiguration);
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        setMailboxManager(new MaildirMailboxManager(mf, null, store));
+        MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
+        manager.init();
+        setMailboxManager(manager);
         super.testList();
         try {
             tearDown();

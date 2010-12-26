@@ -37,11 +37,13 @@ public class MaildirStressTest extends AbstractStressTest {
     private MaildirMailboxManager mailboxManager;
     
     @Before
-    public void setUp() {
+    public void setUp() throws MailboxException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%user");
 
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
         mailboxManager = new MaildirMailboxManager(mf, null, store);
+        mailboxManager.init();
+
     }
     
     @After

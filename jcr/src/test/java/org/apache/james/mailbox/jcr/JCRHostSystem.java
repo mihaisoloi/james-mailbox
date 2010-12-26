@@ -74,6 +74,8 @@ public class JCRHostSystem extends ImapHostSystem{
             JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
 
             mailboxManager = new JCRMailboxManager(mf, userManager, uidProvider);
+            mailboxManager.init();
+
             final ImapProcessor defaultImapProcessorFactory = DefaultImapProcessorFactory.createDefaultProcessor(mailboxManager, new JCRSubscriptionManager(mf));
             resetUserMetaData();
             MailboxSession session = mailboxManager.createSystemSession("test", new SimpleLog("TestLog"));

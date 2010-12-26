@@ -17,26 +17,23 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public interface MailboxListenerSupport {
 
-import org.apache.james.mailbox.MailboxListener;
-import org.apache.james.mailbox.MailboxPath;
 
-/**
- * Receive a {@link Event} and delegate it to an other {@link MailboxListener} depending on the registered name
- *
- */
-public class DelegatingMailboxListener extends AbstractDelegatingMailboxListener{
-
-    private Map<MailboxPath, List<MailboxListener>> listeners = new HashMap<MailboxPath, List<MailboxListener>>();
-
-    @Override
-    protected Map<MailboxPath, List<MailboxListener>> getListeners() {
-        return listeners;
-    }
-    
+    /**
+     * <p>Implementations of Mailbox may interpret the fact that someone is
+     * listening and do some caching and even postpone persistence until
+     * everyone has removed itself.
+     * </p><p>
+     * Listeners should return true from {@link MailboxListener#isClosed()}
+     * when they are ready to be removed.
+     * </p>
+     * @param mailboxPath not null
+     * @param listener not null
+     * @param session not null
+     * @throws MailboxException
+     */
+    void addListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException;
 }

@@ -67,7 +67,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     public static final char SQL_WILDCARD_CHAR = '%';
     
     private final MailboxEventDispatcher dispatcher = new MailboxEventDispatcher();
-    private final DelegatingMailboxListener delegatingListener = new DelegatingMailboxListener();   
+    private AbstractDelegatingMailboxListener delegatingListener = null;  
     protected final MailboxMapperFactory<Id> mailboxSessionMapperFactory;    
     
     private final Authenticator authenticator;
@@ -84,10 +84,37 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         this.locker = locker;
         this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;
         this.uidProvider = uidProvider;
-        // The dispatcher need to have the delegating listener added
-        dispatcher.addMailboxListener(delegatingListener);
+       
     }
    
+    /**
+     * Init the {@link MailboxManager}
+     * 
+     * @throws MailboxException
+     */
+    public void init() throws MailboxException{
+        // The dispatcher need to have the delegating listener added
+        dispatcher.addMailboxListener(getDelegationListener());
+    }
+    
+    protected AbstractDelegatingMailboxListener getDelegationListener() {
+        if (delegatingListener == null) {
+            delegatingListener = new DelegatingMailboxListener();
+        }
+        return delegatingListener;
+    }
+    
+    /**
+     * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link DelegatingMailboxListener} instance will
+     * be created lazy
+     * 
+     * @param delegatingListener
+     */
+    public void setDelegatingMailboxListener(AbstractDelegatingMailboxListener delegatingListener) {
+        this.delegatingListener = delegatingListener;
+    }
+    
+    
     protected Log getLog() {
         return log;
     }
@@ -411,7 +438,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @see org.apache.james.mailbox.MailboxManager#addListener(org.apache.james.imap.api.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void addListener(MailboxPath path, MailboxListener listener, MailboxSession session) throws MailboxException {
-        delegatingListener.addListener(path, listener);
+        delegatingListener.addListener(path, listener, session);
     }
 
      /**

@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
  * </p>
  */
 
-public interface MailboxManager extends RequestAware {
+public interface MailboxManager extends RequestAware, MailboxListenerSupport {
 
     /**
      * Return the delimter to use for folders
@@ -194,20 +194,6 @@ public interface MailboxManager extends RequestAware {
     void logout(MailboxSession session, boolean force) throws MailboxException;
 
 
-    /**
-     * <p>Implementations of Mailbox may interpret the fact that someone is
-     * listening and do some caching and even postpone persistence until
-     * everyone has removed itself.
-     * </p><p>
-     * Listeners should return true from {@link MailboxListener#isClosed()}
-     * when they are ready to be removed.
-     * </p>
-     * @param mailboxPath not null
-     * @param listener not null
-     * @param session not null
-     * @throws MailboxException
-     */
-    void addListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException;
  
     /**
      * Return a unmodifiable {@link List} of {@link MailboxPath} objects

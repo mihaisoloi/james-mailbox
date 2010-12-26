@@ -73,7 +73,7 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
     /* (non-Javadoc)
      * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
      */
-    protected void createMailboxManager() {
+    protected void createMailboxManager() throws MailboxException {
 
         new File(JACKRABBIT_HOME).delete();
 
@@ -99,8 +99,9 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
         JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
 
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        setMailboxManager(new JCRMailboxManager(mf, null, uidProvider));
-
+        JCRMailboxManager manager = new JCRMailboxManager(mf, null, uidProvider);
+        manager.init();
+        setMailboxManager(manager);
     }
 
 }

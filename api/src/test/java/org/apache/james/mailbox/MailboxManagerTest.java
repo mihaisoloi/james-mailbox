@@ -169,8 +169,9 @@ public abstract class MailboxManagerTest {
      * Implement this method to create the mailboxManager.
      * 
      * @return
+     * @throws MailboxException 
      */
-    protected abstract void createMailboxManager();
+    protected abstract void createMailboxManager() throws MailboxException;
     
     /**
      * Setter to inject the mailboxManager.

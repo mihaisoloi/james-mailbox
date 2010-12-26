@@ -54,7 +54,7 @@ public class JPAStressTest extends AbstractStressTest{
     private EntityManagerFactory entityManagerFactory;
     
     @Before
-    public void setUp() {
+    public void setUp() throws MailboxException {
         
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("openjpa.ConnectionDriverName", "org.h2.Driver");
@@ -77,7 +77,8 @@ public class JPAStressTest extends AbstractStressTest{
         JPACachingUidProvider uidProvider = new JPACachingUidProvider(entityManagerFactory);
         JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory);
         mailboxManager = new OpenJPAMailboxManager(mf, null, uidProvider);
-        
+        mailboxManager.init();
+
         // Set the lock timeout via SQL because of a bug in openJPA
         // https://issues.apache.org/jira/browse/OPENJPA-1656
         setH2LockTimeout();

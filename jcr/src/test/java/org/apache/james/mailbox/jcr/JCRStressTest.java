@@ -26,6 +26,7 @@ import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.imap.functional.AbstractStressTest;
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.GlobalMailboxSessionJCRRepository;
@@ -48,7 +49,7 @@ public class JCRStressTest extends AbstractStressTest{
    
     
     @Before
-    public void setUp() throws RepositoryException {
+    public void setUp() throws RepositoryException, MailboxException {
 
         new File(JACKRABBIT_HOME).delete();
 
@@ -66,6 +67,7 @@ public class JCRStressTest extends AbstractStressTest{
 
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
         mailboxManager = new JCRMailboxManager(mf, null, uidProvider);
+        mailboxManager.init();
 
     }
     

@@ -78,7 +78,7 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
      * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
      */
     @Override
-    protected void createMailboxManager() {
+    protected void createMailboxManager() throws MailboxException {
         
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("openjpa.ConnectionDriverName", "org.h2.Driver");
@@ -100,8 +100,10 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
         JPACachingUidProvider uidProvider = new JPACachingUidProvider(entityManagerFactory);
         JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory);
 
-        setMailboxManager(new OpenJPAMailboxManager(mf, null, uidProvider));
-
+        JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null, uidProvider);
+        mailboxManager.init();
+        
+        setMailboxManager(mailboxManager);
     }
 
 }
