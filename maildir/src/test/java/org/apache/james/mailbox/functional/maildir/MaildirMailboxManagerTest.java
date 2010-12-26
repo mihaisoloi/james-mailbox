@@ -48,7 +48,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      */
     @Before
     public void setup() throws Exception {
-        FileUtils.deleteDirectory(new File(MAILDIR_HOME));
+        deleteMaildirTestDirectory();
     }
     
     /**
@@ -58,7 +58,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      */
     @After
     public void tearDown() throws IOException {
-        FileUtils.deleteDirectory(new File(MAILDIR_HOME));
+        deleteMaildirTestDirectory();
     }
 
     /* (non-Javadoc)
@@ -73,14 +73,24 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
 
             doTestListWithMaildirStoreConfiguration("/%domain/%user");
             
-            // TODO Tests fail with /%user and /%fulluser configuration
-//            doTestListWithMaildirStoreConfiguration("/%user");
-//            doTestListWithMaildirStoreConfiguration("/%fulluser");
+            // TODO Tests fail with /%user configuration
+            // doTestListWithMaildirStoreConfiguration("/%user");
+
+            // TODO Tests fail with /%fulluser configuration
+            // doTestListWithMaildirStoreConfiguration("/%fulluser");
 
         }
             
     }
     
+    /**
+     * Create the maildirStore with the provided configuration and executes the list() tests.
+     * Cleans the generated artifacts.
+     * 
+     * @param maildirStoreConfiguration
+     * @throws MailboxException
+     * @throws UnsupportedEncodingException
+     */
     private void doTestListWithMaildirStoreConfiguration(String maildirStoreConfiguration) throws MailboxException, UnsupportedEncodingException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + maildirStoreConfiguration);
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
@@ -89,16 +99,28 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
         setMailboxManager(manager);
         super.testList();
         try {
-            tearDown();
+            deleteMaildirTestDirectory();
         } catch (IOException e) {
             Assert.fail();
             e.printStackTrace();
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
+     */
     @Override
     protected void createMailboxManager() {
         // Do nothing, the maildir mailboxManager is created in the test method.
+    }
+   
+    /**
+     * Utility method to delete the test Maildir Directory.
+     * 
+     * @throws IOException
+     */
+    private void deleteMaildirTestDirectory() throws IOException {
+        FileUtils.deleteDirectory(new File(MAILDIR_HOME));
     }
 
 }
