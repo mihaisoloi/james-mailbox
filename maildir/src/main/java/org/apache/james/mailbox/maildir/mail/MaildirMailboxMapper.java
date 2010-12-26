@@ -191,52 +191,25 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      */
     public List<Mailbox<Integer>> list() throws MailboxException {
         
-       // TODO The current implementation only support Maildir Location ending with /%domain/%user
-       if (! maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_DOMAIN + "/" + MaildirStore.PATH_USER)) {
-           throw new UnsupportedOperationException("The MaildirLocation must end with /%domain/%user pattern.");
-       }
+        File maildirRoot = maildirStore.getMaildirRoot();
+        List<Mailbox<Integer>> mailboxList = new ArrayList<Mailbox<Integer>>();
         
-       File dir = maildirStore.getMaildirRoot();
-       List<Mailbox<Integer>> mailboxList = new ArrayList<Mailbox<Integer>>();
-       
-       File[] domains = dir.listFiles();
-       
-       for (File domain: domains) {
-           
-           File[] users = domain.listFiles();
-           
-           for (File user: users) {
-               
-               // Special case for INBOX: Let's use the user's folder.
-
-               MailboxPath inboxMailboxPath = new MailboxPath("#private", 
-                       user.getName() + "@" + domain.getName(), 
-                       "INBOX");
-               mailboxList.add(maildirStore.loadMailbox(user, inboxMailboxPath));
-               
-               // List all INBOX sub folders.
-               
-               File[] mailboxes = user.listFiles(new FileFilter() {
-                   public boolean accept(File pathname) {
-                       return pathname.getName().startsWith(".");
-                   }
-               });
-               
-               for (File mailbox: mailboxes) {
-                   
-                   MailboxPath mailboxPath = new MailboxPath("#private", 
-                           user.getName() + "@" + domain.getName(), 
-                           mailbox.getName().substring(1));
-                   mailboxList.add(maildirStore.loadMailbox(mailbox, mailboxPath));
-
-               }
-
+       if (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_DOMAIN + "/" + MaildirStore.PATH_USER)) {
+           File[] domains = maildirRoot.listFiles();
+           for (File domain: domains) {
+               File[] users = domain.listFiles();
+               visitUsersForMailboxList(domain, users, mailboxList);
            }
-           
+           return mailboxList;
        }
-           
-       return mailboxList;
 
+       if ((maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_USER)) && (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_FULLUSER))) {
+           File[] users = maildirRoot.listFiles();
+           visitUsersForMailboxList(null, users, mailboxList);
+       }
+       
+       throw new UnsupportedOperationException("The MaildirLocation must end with /%domain/%user, /%user or /%fulluser.");
+        
     }
 
     /*
@@ -274,6 +247,47 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         } catch (IndexOutOfBoundsException e) {
             throw new MailboxNotFoundException(String.valueOf(mailboxId));
         }
+    }
+    
+    private void visitUsersForMailboxList(File domain, File[] users, List<Mailbox<Integer>> mailboxList) throws MailboxException {
+        
+        String userName = null;
+        
+        for (File user: users) {
+            
+            // Special case for INBOX: Let's use the user's folder.
+
+            MailboxPath inboxMailboxPath = new MailboxPath("#private", 
+                    user.getName() + "@" + domain.getName(), 
+                    "INBOX");
+            mailboxList.add(maildirStore.loadMailbox(user, inboxMailboxPath));
+            
+            // List all INBOX sub folders.
+            
+            File[] mailboxes = user.listFiles(new FileFilter() {
+                public boolean accept(File pathname) {
+                    return pathname.getName().startsWith(".");
+                }
+            });
+            
+            for (File mailbox: mailboxes) {
+                
+                if (domain == null) {
+                    userName = user.getName();
+                }
+                else {
+                    userName = user.getName() + "@" + domain.getName();
+                }
+                
+                MailboxPath mailboxPath = new MailboxPath("#private", 
+                        userName, 
+                        mailbox.getName().substring(1));
+                mailboxList.add(maildirStore.loadMailbox(mailbox, mailboxPath));
+
+            }
+
+        }
+        
     }
 
 }

@@ -22,8 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import junit.framework.Assert;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
@@ -49,9 +50,6 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     @Before
     public void setup() throws Exception {
         FileUtils.deleteDirectory(new File(MAILDIR_HOME));
-        MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user");
-        MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        setMailboxManager(new MaildirMailboxManager(mf, null, store));
     }
     
     /**
@@ -69,10 +67,31 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      */
     @Test
     public void testList() throws MailboxException, UnsupportedEncodingException {
+        
         if (OsDetector.isWindows()) {
             System.out.println("Maildir tests work only on non-windows systems. So skip the test");
         } else {
-            super.testList();
+
+            doTestListWithMaildirStoreConfiguration("/%domain/%user");
+            
+            // TODO Tests fail with /%user and /%fulluser configuration
+//            doTestListWithMaildirStoreConfiguration("/%user");
+//            doTestListWithMaildirStoreConfiguration("/%fulluser");
+
+        }
+            
+    }
+    
+    private void doTestListWithMaildirStoreConfiguration(String maildirStoreConfiguration) throws MailboxException, UnsupportedEncodingException {
+        MaildirStore store = new MaildirStore(MAILDIR_HOME + maildirStoreConfiguration);
+        MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
+        setMailboxManager(new MaildirMailboxManager(mf, null, store));
+        super.testList();
+        try {
+            tearDown();
+        } catch (IOException e) {
+            Assert.fail();
+            e.printStackTrace();
         }
     }
     
