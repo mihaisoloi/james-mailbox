@@ -99,13 +99,13 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     
     protected AbstractDelegatingMailboxListener getDelegationListener() {
         if (delegatingListener == null) {
-            delegatingListener = new DelegatingMailboxListener();
+            delegatingListener = new HashMapDelegatingMailboxListener();
         }
         return delegatingListener;
     }
     
     /**
-     * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link DelegatingMailboxListener} instance will
+     * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link HashMapDelegatingMailboxListener} instance will
      * be created lazy
      * 
      * @param delegatingListener
