@@ -69,6 +69,7 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
      */
     @After
     public void tearDown() throws BadCredentialsException, MailboxException {
+        deleteAllMailboxes();
         MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
         session.close();
         entityManagerFactory.close();
@@ -102,8 +103,21 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
 
         JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null, uidProvider);
         mailboxManager.init();
-        
+
         setMailboxManager(mailboxManager);
+        
+        deleteAllMailboxes();
+        
+    }
+    
+    private void deleteAllMailboxes() throws BadCredentialsException, MailboxException {
+        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        try {
+            ((OpenJPAMailboxManager) mailboxManager).deleteEverything(session);
+        } catch (MailboxException e) {
+            e.printStackTrace();
+        }
+        session.close();
     }
 
 }
