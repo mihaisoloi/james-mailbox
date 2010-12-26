@@ -25,7 +25,6 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
@@ -59,7 +58,28 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
      */
     @Before
     public void setup() throws Exception {
+        createMailboxManager();
+    }
     
+    /**
+     * Close the system session and entityManagerFactory
+     * 
+     * @throws MailboxException 
+     * @throws BadCredentialsException 
+     */
+    @After
+    public void tearDown() throws BadCredentialsException, MailboxException {
+        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        session.close();
+        entityManagerFactory.close();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
+     */
+    @Override
+    protected void createMailboxManager() {
+        
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("openjpa.ConnectionDriverName", "org.h2.Driver");
         properties.put("openjpa.ConnectionURL", "jdbc:h2:mem:imap;DB_CLOSE_DELAY=-1");
@@ -82,26 +102,6 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
 
         setMailboxManager(new OpenJPAMailboxManager(mf, null, uidProvider));
 
-    }
-    
-    /**
-     * Close the system session and entityManagerFactory
-     * 
-     * @throws MailboxException 
-     * @throws BadCredentialsException 
-     */
-    @After
-    public void tearDown() throws BadCredentialsException, MailboxException {
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
-        session.close();
-        entityManagerFactory.close();
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
-     */
-    protected void setMailboxManager(MailboxManager mailboxManager) {
-        this.mailboxManager = mailboxManager;
     }
 
 }

@@ -166,9 +166,18 @@ public abstract class MailboxManagerTest {
     }
     
     /**
+     * Implement this method to create the mailboxManager.
+     * 
+     * @return
+     */
+    protected abstract void createMailboxManager();
+    
+    /**
      * Setter to inject the mailboxManager.
      */
-    protected abstract void setMailboxManager(MailboxManager mailboxManager);
+    protected void setMailboxManager(MailboxManager mailboxManager) {
+        this.mailboxManager = mailboxManager;
+    }
 
     /**
      * Accessor to the mailboxManager.

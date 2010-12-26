@@ -20,12 +20,16 @@ package org.apache.james.mailbox.jcr;
 
 import java.io.File;
 
+import javax.jcr.RepositoryException;
+
+import junit.framework.Assert;
+
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
+import org.apache.jackrabbit.core.config.ConfigurationException;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
@@ -51,24 +55,7 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
      */
     @Before
     public void setup() throws Exception {
-    
-        new File(JACKRABBIT_HOME).delete();
-
-        String user = "user";
-        String pass = "pass";
-        String workspace = null;
-        RepositoryConfig config = RepositoryConfig.create(new InputSource(JCRMailboxManagerTest.class.getClassLoader().getResourceAsStream("test-repository.xml")), JACKRABBIT_HOME);
-        repository = RepositoryImpl.create(config);
-
-        // Register imap cnd file
-        JCRUtils.registerCnd(repository, workspace, user, pass);
-        MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
-
-        JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
-
-        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        setMailboxManager(new JCRMailboxManager(mf, null, uidProvider));
-
+        createMailboxManager();
     }
 
     
@@ -84,10 +71,36 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
     }
     
     /* (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
+     * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
      */
-    protected void setMailboxManager(MailboxManager mailboxManager) {
-        this.mailboxManager = mailboxManager;
+    protected void createMailboxManager() {
+
+        new File(JACKRABBIT_HOME).delete();
+
+        String user = "user";
+        String pass = "pass";
+        String workspace = null;
+        RepositoryConfig config;
+        try {
+            config = RepositoryConfig.create(new InputSource(JCRMailboxManagerTest.class.getClassLoader().getResourceAsStream("test-repository.xml")), JACKRABBIT_HOME);
+            repository = RepositoryImpl.create(config);
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+            Assert.fail();
+        } catch (RepositoryException e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+        // Register imap cnd file
+        JCRUtils.registerCnd(repository, workspace, user, pass);
+        MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
+
+        JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
+
+        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
+        setMailboxManager(new JCRMailboxManager(mf, null, uidProvider));
+
     }
 
 }

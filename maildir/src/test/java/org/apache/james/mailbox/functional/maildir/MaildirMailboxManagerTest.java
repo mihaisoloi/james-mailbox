@@ -26,7 +26,6 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.maildir.MaildirMailboxManager;
 import org.apache.james.mailbox.maildir.MaildirMailboxSessionMapperFactory;
@@ -94,12 +93,10 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
             e.printStackTrace();
         }
     }
-    
-    /* (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
-     */
-    protected void setMailboxManager(MailboxManager mailboxManager) {
-        this.mailboxManager = mailboxManager;
+
+    @Override
+    protected void createMailboxManager() {
+        // Do nothing, the maildir mailboxManager is created in the test method.
     }
 
 }
