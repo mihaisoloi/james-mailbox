@@ -25,6 +25,7 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
@@ -38,8 +39,8 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * JPAMailboxManagerTest that extends the StoreMailboxManagerTest.
@@ -56,8 +57,8 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
      * 
      * @throws Exception
      */
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
     
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("openjpa.ConnectionDriverName", "org.h2.Driver");
@@ -89,11 +90,18 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
      * @throws MailboxException 
      * @throws BadCredentialsException 
      */
-    @AfterClass
-    public static void tearDown() throws BadCredentialsException, MailboxException {
+    @After
+    public void tearDown() throws BadCredentialsException, MailboxException {
         MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
         session.close();
         entityManagerFactory.close();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
+     */
+    protected void setMailboxManager(MailboxManager mailboxManager) {
+        this.mailboxManager = mailboxManager;
     }
 
 }

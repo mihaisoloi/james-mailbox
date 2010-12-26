@@ -19,17 +19,19 @@
 package org.apache.james.mailbox.functional.maildir;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.maildir.MaildirMailboxManager;
 import org.apache.james.mailbox.maildir.MaildirMailboxSessionMapperFactory;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -44,8 +46,8 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      * 
      * @throws Exception
      */
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         FileUtils.deleteDirectory(new File(MAILDIR_HOME));
         MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user");
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
@@ -53,14 +55,13 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     }
     
     /**
-     * Close the system session and entityManagerFactory
+     * Delete Maildir directory after test.
      * 
-     * @throws MailboxException 
-     * @throws BadCredentialsException 
+     * @throws IOException 
      */
-    @AfterClass
-    public static void tearDown() throws BadCredentialsException, MailboxException {
-//        FileUtils.deleteDirectory(new File(MAILDIR_HOME));
+    @After
+    public void tearDown() throws IOException {
+        FileUtils.deleteDirectory(new File(MAILDIR_HOME));
     }
 
     /* (non-Javadoc)
@@ -75,4 +76,11 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
+     */
+    protected void setMailboxManager(MailboxManager mailboxManager) {
+        this.mailboxManager = mailboxManager;
+    }
+
 }

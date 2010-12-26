@@ -19,19 +19,18 @@
 package org.apache.james.mailbox.jcr;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.InputSource;
 
 /**
@@ -50,8 +49,8 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
      * 
      * @throws Exception
      */
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
     
         new File(JACKRABBIT_HOME).delete();
 
@@ -74,15 +73,21 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
 
     
     /**
-     * @throws BadCredentialsException
-     * @throws MailboxException
+     * Close system session and shutdown system repository.
      */
-    @AfterClass
-    public static void tearDown() throws BadCredentialsException, MailboxException {
+    @After
+    public void tearDown() throws BadCredentialsException, MailboxException {
         MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
         session.close();
         repository.shutdown();
         new File(JACKRABBIT_HOME).delete();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxManagerTest#setMailboxManager(org.apache.james.mailbox.MailboxManager)
+     */
+    protected void setMailboxManager(MailboxManager mailboxManager) {
+        this.mailboxManager = mailboxManager;
     }
 
 }

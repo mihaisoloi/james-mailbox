@@ -50,27 +50,32 @@ public abstract class MailboxManagerTest {
      * The mailboxManager that needs to get instanciated
      * by the mailbox implementations.
      */
-    private static MailboxManager mailboxManager;
+    protected MailboxManager mailboxManager;
     
     /**
      * Number of Domains to be created in the Mailbox Manager.
      */
-    private static final int DOMAIN_COUNT = 5;
+    private static final int DOMAIN_COUNT = 3;
     
     /**
      * Number of Users (with INBOX) to be created in the Mailbox Manager.
      */
-    private static final int USER_COUNT = 5;
+    private static final int USER_COUNT = 3;
     
     /**
-     * Number of Sub Mailboxes (mailbox in another mailbox) to be created in the Mailbox Manager.
+     * Number of Sub Mailboxes (mailbox in INBOX) to be created in the Mailbox Manager.
      */
-    private static final int SUB_MAILBOXES_COUNT = 5;
+    private static final int SUB_MAILBOXES_COUNT = 3;
+    
+    /**
+     * Number of Sub Sub Mailboxes (mailbox in a mailbox under INBOX) to be created in the Mailbox Manager.
+     */
+    private static final int SUB_SUB_MAILBOXES_COUNT = 3;
     
     /**
      * Number of Messages per Mailbox to be created in the Mailbox Manager.
      */
-    private static final int MESSAGE_PER_MAILBOX_COUNT = 5;
+    private static final int MESSAGE_PER_MAILBOX_COUNT = 3;
     
     /**
      * Create some INBOXes and their sub mailboxes and assert list() method.
@@ -87,8 +92,8 @@ public abstract class MailboxManagerTest {
         getMailboxManager().startProcessingRequest(mailboxSession);
         Assert.assertEquals(DOMAIN_COUNT * 
                   (USER_COUNT + // INBOX
-                  USER_COUNT * MESSAGE_PER_MAILBOX_COUNT + // INBOX.SUB_FOLDER
-                  USER_COUNT * MESSAGE_PER_MAILBOX_COUNT * MESSAGE_PER_MAILBOX_COUNT),  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
+                  USER_COUNT * SUB_MAILBOXES_COUNT + // INBOX.SUB_FOLDER
+                  USER_COUNT * SUB_MAILBOXES_COUNT * SUB_SUB_MAILBOXES_COUNT),  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
                 getMailboxManager().list(mailboxSession).size());
 
     }
@@ -118,14 +123,14 @@ public abstract class MailboxManagerTest {
                 
                 for (int k=0; k < SUB_MAILBOXES_COUNT; k++) {
                     
-                    folderName = folderName + ".SUB_FOLDER_" + k;
-                    mailboxPath = new MailboxPath("#private", user, folderName);
+                    String subFolderName = folderName + ".SUB_FOLDER_" + k;
+                    mailboxPath = new MailboxPath("#private", user, subFolderName);
                     createMailbox(mailboxSession, mailboxPath);
                     
-                    for (int l=0; l < SUB_MAILBOXES_COUNT; l++) {
+                    for (int l=0; l < SUB_SUB_MAILBOXES_COUNT; l++) {
 
-                        folderName = folderName + ".SUBSUB_FOLDER_" + l;
-                        mailboxPath = new MailboxPath("#private", user, folderName);
+                        String subSubfolderName = subFolderName + ".SUBSUB_FOLDER_" + l;
+                        mailboxPath = new MailboxPath("#private", user, subSubfolderName);
                         createMailbox(mailboxSession, mailboxPath);
 
                     }
@@ -163,9 +168,7 @@ public abstract class MailboxManagerTest {
     /**
      * Setter to inject the mailboxManager.
      */
-    protected static void setMailboxManager(MailboxManager mailboxManager) {
-        MailboxManagerTest.mailboxManager = mailboxManager;
-    }
+    protected abstract void setMailboxManager(MailboxManager mailboxManager);
 
     /**
      * Accessor to the mailboxManager.
@@ -173,7 +176,7 @@ public abstract class MailboxManagerTest {
      * @return the mailboxManager instance.
      * @throws IllegalStateException in case of null mailboxManager
      */
-    protected static MailboxManager getMailboxManager() {
+    protected MailboxManager getMailboxManager() {
         if (mailboxManager == null) {
             throw new IllegalStateException("Please setMailboxManager with a non null value before requesting getMailboxManager()");
         }
