@@ -39,99 +39,97 @@ import org.apache.james.mailbox.util.FetchGroupImpl;
 
 /**
  * Implementation of the {@link MailboxCopier} interface.
- *
+ * 
  */
 public class MailboxCopierImpl implements MailboxCopier {
-	
+
     /**
      * The logger.
      */
     private Log log = LogFactory.getLog("org.apache.james.mailbox.copier");
 
     /**
-     * The source MailboxManager from which all mailboxes will be read
-     * and copied to the destination MailboxManager.
+     * The source MailboxManager from which all mailboxes will be read and
+     * copied to the destination MailboxManager.
      */
     private MailboxManager srcMailboxManager;
-	
-	/**
-     * The destination MailboxManager to which all mailboxes read from
-     * the source MailboxManager and copied to the destination MailboxManager.
-	 */
-	private MailboxManager dstMailboxManager;
-		
-	/* (non-Javadoc)
-	 * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
-	 */
-	public boolean copyMailboxes() {
-	    
+
+    /**
+     * The destination MailboxManager to which all mailboxes read from the
+     * source MailboxManager and copied to the destination MailboxManager.
+     */
+    private MailboxManager dstMailboxManager;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
+     */
+    public boolean copyMailboxes() {
+
         MailboxSession srcMailboxSession;
         MailboxSession dstMailboxSession;
-	    
-	    try {
-            srcMailboxSession = srcMailboxManager.createSystemSession("manager", log);
-	    } catch (BadCredentialsException e) {
-	        log.error(e.getMessage());
-	        return false;
-	    } catch (MailboxException e) {
-	        log.error(e.getMessage());
-	        return false;
-	    }
-	    
-        srcMailboxManager.startProcessingRequest(srcMailboxSession);
-		
+
         try {
-        	
-	        List<MailboxPath> mailboxPathList = srcMailboxManager.list(srcMailboxSession);
-	        
-	        for (MailboxPath mailboxPath: mailboxPathList) {
-	            
-	            try {
-	                dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
-	            } catch (BadCredentialsException e) {
-	                log.error(e.getMessage());
-	                return false;
-	            } catch (MailboxException e) {
-	                log.error(e.getMessage());
-	                return false;
-	            }
-	            
-	            dstMailboxManager.startProcessingRequest(dstMailboxSession);
-	            dstMailboxManager.createMailbox(mailboxPath, dstMailboxSession);
-	            dstMailboxManager.endProcessingRequest(dstMailboxSession);
-	            
-	            MessageManager srcMessageManager = srcMailboxManager.getMailbox(mailboxPath, srcMailboxSession);
-	            
-	        	Iterator<MessageResult> messageResultIterator = srcMessageManager.getMessages(MessageRange.all(), FetchGroupImpl.FULL_CONTENT, srcMailboxSession);
-	        
-	        	while (messageResultIterator.hasNext()) {
-	        	    
-	        	    MessageResult messageResult = messageResultIterator.next();
-	        	    InputStreamContent content = (InputStreamContent) messageResult.getFullContent();
-	        	    
-	                try {
-	                    dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
-	                } catch (BadCredentialsException e) {
-	                    log.error(e.getMessage());
-	                    return false;
-	                } catch (MailboxException e) {
-	                    log.error(e.getMessage());
-	                    return false;
-	                }
-	                
+            srcMailboxSession = srcMailboxManager.createSystemSession("manager", log);
+        } catch (BadCredentialsException e) {
+            log.error(e.getMessage());
+            return false;
+        } catch (MailboxException e) {
+            log.error(e.getMessage());
+            return false;
+        }
+
+        srcMailboxManager.startProcessingRequest(srcMailboxSession);
+
+        try {
+
+            List<MailboxPath> mailboxPathList = srcMailboxManager.list(srcMailboxSession);
+
+            for (MailboxPath mailboxPath : mailboxPathList) {
+
+                try {
+                    dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
+                } catch (BadCredentialsException e) {
+                    log.error(e.getMessage());
+                    return false;
+                } catch (MailboxException e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+
+                dstMailboxManager.startProcessingRequest(dstMailboxSession);
+                dstMailboxManager.createMailbox(mailboxPath, dstMailboxSession);
+                dstMailboxManager.endProcessingRequest(dstMailboxSession);
+
+                MessageManager srcMessageManager = srcMailboxManager.getMailbox(mailboxPath, srcMailboxSession);
+
+                Iterator<MessageResult> messageResultIterator = srcMessageManager.getMessages(MessageRange.all(), FetchGroupImpl.FULL_CONTENT, srcMailboxSession);
+
+                while (messageResultIterator.hasNext()) {
+
+                    MessageResult messageResult = messageResultIterator.next();
+                    InputStreamContent content = (InputStreamContent) messageResult.getFullContent();
+
+                    try {
+                        dstMailboxSession = dstMailboxManager.createSystemSession(mailboxPath.getUser(), log);
+                    } catch (BadCredentialsException e) {
+                        log.error(e.getMessage());
+                        return false;
+                    } catch (MailboxException e) {
+                        log.error(e.getMessage());
+                        return false;
+                    }
+
                     dstMailboxManager.startProcessingRequest(dstMailboxSession);
                     MessageManager dstMessageManager = dstMailboxManager.getMailbox(mailboxPath, dstMailboxSession);
-	                dstMessageManager.appendMessage(content.getInputStream(), 
-                            messageResult.getInternalDate(),
-	                        dstMailboxSession, 
-	                        messageResult.getFlags().contains(Flag.RECENT),
-	                        messageResult.getFlags());
-	                dstMailboxManager.endProcessingRequest(dstMailboxSession);
-	                
-	            }
-	        	    
-	        }
-        
+                    dstMessageManager.appendMessage(content.getInputStream(), messageResult.getInternalDate(), dstMailboxSession, messageResult.getFlags().contains(Flag.RECENT), messageResult.getFlags());
+                    dstMailboxManager.endProcessingRequest(dstMailboxSession);
+
+                }
+
+            }
+
         } catch (MailboxException e) {
             log.error(e.getMessage());
             return false;
@@ -140,25 +138,25 @@ public class MailboxCopierImpl implements MailboxCopier {
             e.printStackTrace();
             return false;
         }
-		
+
         srcMailboxManager.endProcessingRequest(srcMailboxSession);
-		
+
         try {
-	        srcMailboxManager.logout(srcMailboxSession, true);
+            srcMailboxManager.logout(srcMailboxSession, true);
         } catch (MailboxException e) {
             log.error(e.getMessage());
-	        return false;
+            return false;
         }
-        
+
         return true;
 
-	}
-	
+    }
+
     /**
      * Setter to inject the srcMailboxManager.
      * 
-     * All mailboxes from the srcMailboxManager will be copied
-     * to the dstMailboxManager upon copyMaillboxes method call.
+     * All mailboxes from the srcMailboxManager will be copied to the
+     * dstMailboxManager upon copyMaillboxes method call.
      * 
      * @param srcMailboxManager
      */
@@ -169,13 +167,13 @@ public class MailboxCopierImpl implements MailboxCopier {
     /**
      * Setter to inject the dstMailboxManager.
      * 
-     * All mailboxes from the srcMailboxManager will be copied
-     * to the dstMailboxManager upon copyMaillboxes method call.
+     * All mailboxes from the srcMailboxManager will be copied to the
+     * dstMailboxManager upon copyMaillboxes method call.
      * 
      * @param dstMailboxManager
      */
     public void setDstMailboxManager(MailboxManager dstMailboxManager) {
         this.dstMailboxManager = dstMailboxManager;
     }
-    
+
 }
