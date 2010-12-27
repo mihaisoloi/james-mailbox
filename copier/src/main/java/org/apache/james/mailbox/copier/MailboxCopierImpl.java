@@ -48,24 +48,12 @@ public class MailboxCopierImpl implements MailboxCopier {
      */
     private Log log = LogFactory.getLog("org.apache.james.mailbox.copier");
 
-    /**
-     * The source MailboxManager from which all mailboxes will be read and
-     * copied to the destination MailboxManager.
-     */
-    private MailboxManager srcMailboxManager;
-
-    /**
-     * The destination MailboxManager to which all mailboxes read from the
-     * source MailboxManager and copied to the destination MailboxManager.
-     */
-    private MailboxManager dstMailboxManager;
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes()
+     * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes(org.apache.james.mailbox.MailboxManager, org.apache.james.mailbox.MailboxManager)
      */
-    public boolean copyMailboxes() {
+    public boolean copyMailboxes(MailboxManager srcMailboxManager, MailboxManager dstMailboxManager) {
 
         MailboxSession srcMailboxSession;
         MailboxSession dstMailboxSession;
@@ -150,30 +138,6 @@ public class MailboxCopierImpl implements MailboxCopier {
 
         return true;
 
-    }
-
-    /**
-     * Setter to inject the srcMailboxManager.
-     * 
-     * All mailboxes from the srcMailboxManager will be copied to the
-     * dstMailboxManager upon copyMaillboxes method call.
-     * 
-     * @param srcMailboxManager
-     */
-    public void setSrcMailboxManager(MailboxManager srcMailboxManager) {
-        this.srcMailboxManager = srcMailboxManager;
-    }
-
-    /**
-     * Setter to inject the dstMailboxManager.
-     * 
-     * All mailboxes from the srcMailboxManager will be copied to the
-     * dstMailboxManager upon copyMaillboxes method call.
-     * 
-     * @param dstMailboxManager
-     */
-    public void setDstMailboxManager(MailboxManager dstMailboxManager) {
-        this.dstMailboxManager = dstMailboxManager;
     }
 
 }

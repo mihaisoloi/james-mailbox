@@ -93,9 +93,6 @@ public class MailboxCopierTest {
         srcMemMailboxManager = newInMemoryMailboxManager();
         dstMemMailboxManager = newInMemoryMailboxManager();
         
-        mailboxCopier.setSrcMailboxManager(srcMemMailboxManager);
-        mailboxCopier.setDstMailboxManager(dstMemMailboxManager);
-        
     }
     
     /**
@@ -116,7 +113,7 @@ public class MailboxCopierTest {
 
         assertMailboxManagerSize(srcMemMailboxManager);
         
-        mailboxCopier.copyMailboxes();
+        mailboxCopier.copyMailboxes(srcMemMailboxManager, dstMemMailboxManager);
 
         assertMailboxManagerSize(dstMemMailboxManager);
         

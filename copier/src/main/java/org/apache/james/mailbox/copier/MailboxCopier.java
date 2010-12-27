@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.copier;
 
+import org.apache.james.mailbox.MailboxManager;
+
 /**
  * Interface that exposes a method aimed to copy all mailboxes from a source
  * mailbox manager to a destination mailbox manager.
@@ -30,9 +32,11 @@ public interface MailboxCopier {
      * implementation is responsible to read all mailboxes form the injected
      * srcMailboxManager and to copy all its contents to the dstMailboxManager.
      * 
+     * @param src
+     * @param dest
      * @return true if copy is completely successful, false if copy fails at any
      *         step.
      */
-    boolean copyMailboxes();
+    boolean copyMailboxes(MailboxManager src, MailboxManager dest);
 
 }
