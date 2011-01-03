@@ -29,7 +29,7 @@ public class MailboxExistsException extends MailboxException {
     private final String mailboxName;
 
     public MailboxExistsException(String mailboxName) {
-        super();
+        super("Mailbox Already Exists", new Exception("Mailbox Already Exists"));
         this.mailboxName = mailboxName;
     }
 
