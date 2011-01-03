@@ -19,6 +19,7 @@
 package org.apache.james.mailbox.copier;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
 import org.apache.james.mailbox.mock.MockMail;
+import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.apache.james.mailbox.store.Authenticator;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,16 +52,6 @@ import org.junit.Test;
  *
  */
 public class MailboxCopierTest {
-    
-    /**
-     * Number of Mailboxes to be created in the source Mailbox Manager.
-     */
-    private static final int MAILBOX_COUNT = 100;
-    
-    /**
-     * Number of Messages per Mailbox to be created in the source Mailbox Manager.
-     */
-    private static final int MESSAGE_PER_MAILBOX_COUNT = 10;
     
     /**
      * The instance for the test mailboxCopier.
@@ -89,6 +81,7 @@ public class MailboxCopierTest {
     public void setup() throws BadCredentialsException, MailboxException {
         
         mailboxCopier = new MailboxCopierImpl();
+        mailboxCopier.setLog(new SimpleLog(MailboxCopierTest.class.getName()));
         
         srcMemMailboxManager = newInMemoryMailboxManager();
         dstMemMailboxManager = newInMemoryMailboxManager();
@@ -104,18 +97,20 @@ public class MailboxCopierTest {
      * Mailbox Manager.
      * 
      * @throws MailboxException 
-     * @throws UnsupportedEncodingException 
+     * @throws IOException 
      */
     @Test
-    public void testMailboxCopy() throws MailboxException, UnsupportedEncodingException {
+    public void testMailboxCopy() throws MailboxException, IOException {
         
-        feedSrcMailboxManager();
-
-        assertMailboxManagerSize(srcMemMailboxManager);
+        srcMemMailboxManager = new MockMailboxManager(srcMemMailboxManager).getMockMailboxManager();
+        assertMailboxManagerSize(srcMemMailboxManager, 1);
         
         mailboxCopier.copyMailboxes(srcMemMailboxManager, dstMemMailboxManager);
-
-        assertMailboxManagerSize(dstMemMailboxManager);
+        assertMailboxManagerSize(dstMemMailboxManager, 1);
+        
+        // We copy a second time to assert existing mailboxes does not give issue.
+        mailboxCopier.copyMailboxes(srcMemMailboxManager, dstMemMailboxManager);
+        assertMailboxManagerSize(dstMemMailboxManager, 2);
         
     }
     
@@ -126,53 +121,22 @@ public class MailboxCopierTest {
      * @throws MailboxException 
      * @throws BadCredentialsException 
      */
-    private void assertMailboxManagerSize(MailboxManager mailboxManager) throws BadCredentialsException, MailboxException {
+    private void assertMailboxManagerSize(MailboxManager mailboxManager, int multiplicationFactor) throws BadCredentialsException, MailboxException {
         
         MailboxSession mailboxSession = mailboxManager.createSystemSession("manager", new SimpleLog("src-mailbox-copier"));        
         mailboxManager.startProcessingRequest(mailboxSession);
+
         List<MailboxPath> mailboxPathList = mailboxManager.list(mailboxSession);
-        Assert.assertEquals(MAILBOX_COUNT, mailboxPathList.size());
+        
+        Assert.assertEquals(MockMailboxManager.EXPECTED_MAILBOXES_COUNT, mailboxPathList.size());
+        
         for (MailboxPath mailboxPath: mailboxPathList) {
             MessageManager messageManager = mailboxManager.getMailbox(mailboxPath, mailboxSession);
-            Assert.assertEquals(MESSAGE_PER_MAILBOX_COUNT, messageManager.getMessageCount(mailboxSession));
+            Assert.assertEquals(MockMailboxManager.MESSAGE_PER_MAILBOX_COUNT * multiplicationFactor, messageManager.getMessageCount(mailboxSession));
         }
+        
         mailboxManager.endProcessingRequest(mailboxSession);
         mailboxManager.logout(mailboxSession, true);
-        
-    }
-    
-    /**
-     * Utility method to feed a Mailbox Manager with a number of 
-     * mailboxes and messages per mailbox.
-     * 
-     * @throws MailboxException
-     * @throws UnsupportedEncodingException
-     */
-    private void feedSrcMailboxManager() throws MailboxException, UnsupportedEncodingException {
-
-        MessageManager messageManager = null;
-        MailboxPath mailboxPath = null;
-        
-        for (int i=0; i < MAILBOX_COUNT; i++) {
-
-            MailboxSession srcMailboxSession = srcMemMailboxManager.createSystemSession("user" + i, new SimpleLog("src-mailbox-copier"));        
-
-            srcMemMailboxManager.startProcessingRequest(srcMailboxSession);
-            mailboxPath = new MailboxPath("#private", "user" + i, "INBOX");
-            srcMemMailboxManager.createMailbox(mailboxPath, srcMailboxSession);
-            messageManager = srcMemMailboxManager.getMailbox(mailboxPath, srcMailboxSession);
-            for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
-                messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
-                        Calendar.getInstance().getTime(), 
-                        srcMailboxSession, 
-                        true, 
-                        new Flags(Flags.Flag.RECENT));
-            }
-            
-            srcMemMailboxManager.endProcessingRequest(srcMailboxSession);
-            srcMemMailboxManager.logout(srcMailboxSession, true);
-        
-        }
         
     }
     
