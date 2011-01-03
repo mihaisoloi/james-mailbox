@@ -18,21 +18,12 @@
  ****************************************************************/
 package org.apache.james.mailbox;
 
-import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Calendar;
-
-import javax.mail.Flags;
 
 import junit.framework.Assert;
 
 import org.apache.commons.logging.impl.SimpleLog;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManager;
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageManager;
-import org.apache.james.mailbox.mock.MockMail;
+import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.junit.Test;
 
 /**
@@ -53,31 +44,6 @@ public abstract class MailboxManagerTest {
     protected MailboxManager mailboxManager;
     
     /**
-     * Number of Domains to be created in the Mailbox Manager.
-     */
-    private static final int DOMAIN_COUNT = 3;
-    
-    /**
-     * Number of Users (with INBOX) to be created in the Mailbox Manager.
-     */
-    private static final int USER_COUNT = 3;
-    
-    /**
-     * Number of Sub Mailboxes (mailbox in INBOX) to be created in the Mailbox Manager.
-     */
-    private static final int SUB_MAILBOXES_COUNT = 3;
-    
-    /**
-     * Number of Sub Sub Mailboxes (mailbox in a mailbox under INBOX) to be created in the Mailbox Manager.
-     */
-    private static final int SUB_SUB_MAILBOXES_COUNT = 3;
-    
-    /**
-     * Number of Messages per Mailbox to be created in the Mailbox Manager.
-     */
-    private static final int MESSAGE_PER_MAILBOX_COUNT = 3;
-    
-    /**
      * Create some INBOXes and their sub mailboxes and assert list() method.
      * 
      * @throws UnsupportedEncodingException 
@@ -86,83 +52,12 @@ public abstract class MailboxManagerTest {
     @Test
     public void testList() throws MailboxException, UnsupportedEncodingException {
 
-        feedMailboxManager();
+        setMailboxManager(new MockMailboxManager(getMailboxManager()).getMockMailboxManager());
 
         MailboxSession mailboxSession = getMailboxManager().createSystemSession("manager", new SimpleLog("testList"));
         getMailboxManager().startProcessingRequest(mailboxSession);
-        Assert.assertEquals(DOMAIN_COUNT * 
-                  (USER_COUNT + // INBOX
-                  USER_COUNT * SUB_MAILBOXES_COUNT + // INBOX.SUB_FOLDER
-                  USER_COUNT * SUB_MAILBOXES_COUNT * SUB_SUB_MAILBOXES_COUNT),  // INBOX.SUB_FOLDER.SUBSUB_FOLDER
-                getMailboxManager().list(mailboxSession).size());
+        Assert.assertEquals(MockMailboxManager.EXPECTED_MAILBOXES_COUNT, getMailboxManager().list(mailboxSession).size());
 
-    }
-    
-    /**
-     * Utility method to feed the Mailbox Manager with a number of 
-     * mailboxes and messages per mailbox.
-     * 
-     * @throws MailboxException
-     * @throws UnsupportedEncodingException
-     */
-    private void feedMailboxManager() throws MailboxException, UnsupportedEncodingException {
-
-        MailboxPath mailboxPath = null;
-        
-        for (int i=0; i < DOMAIN_COUNT; i++) {
-
-            for (int j=0; j < USER_COUNT; j++) {
-                
-                String user = "user" + j + "@localhost" + i;
-                
-                String folderName = "INBOX";
-
-                MailboxSession mailboxSession = getMailboxManager().createSystemSession(user, new SimpleLog("mailboxmanager-test"));
-                mailboxPath = new MailboxPath("#private", user, folderName);
-                createMailbox(mailboxSession, mailboxPath);
-                
-                for (int k=0; k < SUB_MAILBOXES_COUNT; k++) {
-                    
-                    String subFolderName = folderName + ".SUB_FOLDER_" + k;
-                    mailboxPath = new MailboxPath("#private", user, subFolderName);
-                    createMailbox(mailboxSession, mailboxPath);
-                    
-                    for (int l=0; l < SUB_SUB_MAILBOXES_COUNT; l++) {
-
-                        String subSubfolderName = subFolderName + ".SUBSUB_FOLDER_" + l;
-                        mailboxPath = new MailboxPath("#private", user, subSubfolderName);
-                        createMailbox(mailboxSession, mailboxPath);
-
-                    }
-                        
-                }
-
-                getMailboxManager().logout(mailboxSession, true);
-        
-            }
-            
-        }
-        
-    }
-    
-    /**
-     * 
-     * @param mailboxPath
-     * @throws MailboxException
-     * @throws UnsupportedEncodingException 
-     */
-    private void createMailbox(MailboxSession mailboxSession, MailboxPath mailboxPath) throws MailboxException, UnsupportedEncodingException {
-        getMailboxManager().startProcessingRequest(mailboxSession);
-        getMailboxManager().createMailbox(mailboxPath, mailboxSession);
-        MessageManager messageManager = getMailboxManager().getMailbox(mailboxPath, mailboxSession);
-        for (int j=0; j < MESSAGE_PER_MAILBOX_COUNT; j++) {
-            messageManager.appendMessage(new ByteArrayInputStream(MockMail.MAIL_TEXT_PLAIN.getBytes("UTF-8")), 
-                    Calendar.getInstance().getTime(), 
-                    mailboxSession, 
-                    true, 
-                    new Flags(Flags.Flag.RECENT));
-        }
-        getMailboxManager().endProcessingRequest(mailboxSession);
     }
     
     /**
