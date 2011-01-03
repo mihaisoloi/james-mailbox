@@ -18,6 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox.copier;
 
+import java.io.IOException;
+
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 
 /**
@@ -37,6 +40,6 @@ public interface MailboxCopier {
      * @return true if copy is completely successful, false if copy fails at any
      *         step.
      */
-    boolean copyMailboxes(MailboxManager src, MailboxManager dest);
+    void copyMailboxes(MailboxManager src, MailboxManager dest) throws MailboxException, IOException;
 
 }
