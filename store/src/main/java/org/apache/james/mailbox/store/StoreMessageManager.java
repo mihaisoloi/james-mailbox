@@ -36,7 +36,6 @@ import java.util.TreeSet;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
-import javax.mail.MessagingException;
 import javax.mail.util.SharedFileInputStream;
 
 import org.apache.james.mailbox.MailboxException;
@@ -44,8 +43,8 @@ import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
+import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.UidProvider;
@@ -62,6 +61,8 @@ import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeTokenStream;
+
+import com.sun.mail.imap.protocol.MessageSet;
 
 /**
  * Abstract base class for {@link org.apache.james.mailbox.MessageManager} implementations. This abstract
@@ -265,9 +266,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             return uid;
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
-        } catch (MessagingException e) {
-            throw new MailboxException("Unable to parse message", e);
         } catch (MimeException e) {
+            throw new MailboxException("Unable to parse message", e);
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         } finally {
             if (tmpMsgIn != null) {
@@ -443,7 +444,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 }
                 dispatcher.added(uid, session.getSessionId(), new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
             }
-        } catch (MessagingException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }
     }
@@ -563,7 +564,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 }));
             }
             return copiedRows.iterator();
-        } catch (MessagingException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }
     }
@@ -578,7 +579,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final List<MailboxMembership<Id>> originalRows = messageMapper.findInMailbox(getMailboxEntity(), set);
             return to.copy(originalRows, session);
 
-        } catch (MessagingException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }
     }

@@ -54,8 +54,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
+import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.MailboxMetaData;
@@ -724,7 +724,7 @@ public class TorqueMailbox implements MessageManager {
                 
             } catch (TorqueException e) {
                 throw new MailboxException("save failed");
-            } catch (MessagingException e) {
+            } catch (MailboxException e) {
                 throw new MailboxException("parsing of message failed");
             }
         } finally {

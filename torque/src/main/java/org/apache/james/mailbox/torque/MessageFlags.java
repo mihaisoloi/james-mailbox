@@ -25,6 +25,7 @@ import java.util.Iterator;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 
 /**
@@ -44,7 +45,7 @@ public class MessageFlags {
      * @throws MessagingException
      */
     public static final MessageFlags[] toMessageFlags(Collection messageResults)
-            throws MessagingException {
+            throws MailboxException {
         final int size = messageResults.size();
         final MessageFlags[] results = new MessageFlags[size];
         int i = 0;
@@ -59,7 +60,7 @@ public class MessageFlags {
 
     private Flags flags;
 
-    public MessageFlags(final MessageResult result) throws MessagingException {
+    public MessageFlags(final MessageResult result) throws MailboxException {
         this(result.getUid(), result.getFlags());
     }
 

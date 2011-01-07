@@ -19,19 +19,20 @@
 
 package org.apache.james.mailbox;
 
-import javax.mail.MessagingException;
-
-
-public class MailboxException extends MessagingException {
+/**
+ * Mailbox services should throw this exception in case of unsuccessfull operation.
+ *
+ */
+public class MailboxException extends Exception {
 
     private static final long serialVersionUID = 4612761817238115904L;
     
-    public MailboxException(final String message) {
-        super(message);
+    public MailboxException() {
+        super();
     }
 
-    
-    public MailboxException() {
+    public MailboxException(final String message) {
+        super(message);
     }
 
     public MailboxException(String msg, Exception cause) {

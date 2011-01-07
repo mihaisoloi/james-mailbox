@@ -22,6 +22,9 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+/**
+ * Ensure that {@link MailboxException} construction is correct.
+ */
 public class MailboxExceptionTest {
     
     private static final String EXCEPTION_MESSAGE = "this is an exception message";
@@ -30,9 +33,8 @@ public class MailboxExceptionTest {
     
     @Test
     public void testMailboxExceptionMessage() {
-        MailboxException mbe = new MailboxException();
-        // This one fails...
-//        Assert.assertEquals(EXCEPTION_MESSAGE, mbe.getMessage());
+        MailboxException mbe = new MailboxException(EXCEPTION_MESSAGE);
+        Assert.assertEquals(EXCEPTION_MESSAGE, mbe.getMessage());
     }
 
     @Test

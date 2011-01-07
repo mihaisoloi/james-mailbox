@@ -29,12 +29,12 @@ public class MailboxExistsException extends MailboxException {
     private final String mailboxName;
 
     public MailboxExistsException(String mailboxName) {
-        super("Mailbox Already Exists", new Exception("Mailbox Already Exists"));
+        super("Mailbox with name=" + mailboxName + " already exists.");
         this.mailboxName = mailboxName;
     }
 
     /**
-     * Gets the name of the mailbox which alredy exists.
+     * Gets the name of the mailbox which already exists.
      * 
      * @return the mailboxName, not null
      */
@@ -45,4 +45,5 @@ public class MailboxExistsException extends MailboxException {
     public String toString() {
         return getMessage();
     }
+
 }
