@@ -32,6 +32,7 @@ import org.apache.james.mailbox.maildir.MaildirMailboxManager;
 import org.apache.james.mailbox.maildir.MaildirMailboxSessionMapperFactory;
 import org.apache.james.mailbox.maildir.MaildirStore;
 import org.apache.james.mailbox.maildir.MaildirSubscriptionManager;
+import org.apache.james.mailbox.store.MockAuthenticator;
 import org.apache.james.test.functional.HostSystem;
 
 public class MaildirHostSystem extends ImapHostSystem {
@@ -40,7 +41,7 @@ public class MaildirHostSystem extends ImapHostSystem {
     private static final String MAILDIR_HOME = "target/Maildir";
     
     private final MaildirMailboxManager mailboxManager;
-    private final InMemoryUserManager userManager;
+    private final MockAuthenticator userManager;
     private final MaildirMailboxSessionMapperFactory mailboxSessionMapperFactory;
     
     public static HostSystem build() throws Exception { 
@@ -48,7 +49,7 @@ public class MaildirHostSystem extends ImapHostSystem {
     }
     
     public MaildirHostSystem() throws MailboxException {
-        userManager = new InMemoryUserManager();
+        userManager = new MockAuthenticator();
         MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%user");
         mailboxSessionMapperFactory = new MaildirMailboxSessionMapperFactory(store);
         MaildirSubscriptionManager sm = new MaildirSubscriptionManager(mailboxSessionMapperFactory);

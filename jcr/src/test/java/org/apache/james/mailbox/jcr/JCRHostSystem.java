@@ -27,7 +27,6 @@ import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.imap.api.process.ImapProcessor;
 import org.apache.james.imap.encode.main.DefaultImapEncoderFactory;
 import org.apache.james.imap.functional.ImapHostSystem;
-import org.apache.james.imap.functional.InMemoryUserManager;
 import org.apache.james.imap.main.DefaultImapDecoderFactory;
 import org.apache.james.imap.processor.main.DefaultImapProcessorFactory;
 import org.apache.james.mailbox.MailboxSession;
@@ -37,6 +36,7 @@ import org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jcr.JCRSubscriptionManager;
 import org.apache.james.mailbox.jcr.JCRUtils;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
+import org.apache.james.mailbox.store.MockAuthenticator;
 import org.apache.james.test.functional.HostSystem;
 import org.xml.sax.InputSource;
 
@@ -47,7 +47,7 @@ public class JCRHostSystem extends ImapHostSystem{
     }
     
     private final JCRMailboxManager mailboxManager;
-    private final InMemoryUserManager userManager; 
+    private final MockAuthenticator userManager; 
 
     private static final String JACKRABBIT_HOME = "target/jackrabbit";
     public static final String META_DATA_DIRECTORY = "target/user-meta-data";
@@ -69,7 +69,7 @@ public class JCRHostSystem extends ImapHostSystem{
             // Register imap cnd file
             JCRUtils.registerCnd(repository, workspace, user, pass);
             
-            userManager = new InMemoryUserManager();
+            userManager = new MockAuthenticator();
             JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
             JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
 

@@ -22,7 +22,6 @@ package org.apache.james.mailbox.inmemory;
 import org.apache.james.imap.api.process.ImapProcessor;
 import org.apache.james.imap.encode.main.DefaultImapEncoderFactory;
 import org.apache.james.imap.functional.ImapHostSystem;
-import org.apache.james.imap.functional.InMemoryUserManager;
 import org.apache.james.imap.main.DefaultImapDecoderFactory;
 import org.apache.james.imap.processor.main.DefaultImapProcessorFactory;
 import org.apache.james.mailbox.MailboxException;
@@ -30,12 +29,13 @@ import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.inmemory.InMemorySubscriptionManager;
 import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
+import org.apache.james.mailbox.store.MockAuthenticator;
 import org.apache.james.test.functional.HostSystem;
 
 public class InMemoryHostSystem extends ImapHostSystem {
 
     private InMemoryMailboxManager mailboxManager;
-    private InMemoryUserManager userManager; 
+    private MockAuthenticator userManager; 
     private InMemoryMailboxSessionMapperFactory factory;
     
     static HostSystem build() throws Exception {
@@ -58,7 +58,7 @@ public class InMemoryHostSystem extends ImapHostSystem {
     }
     
     private void initFields() throws MailboxException {
-        userManager = new InMemoryUserManager();
+        userManager = new MockAuthenticator();
         factory = new InMemoryMailboxSessionMapperFactory();
         InMemoryCachingUidProvider uidProvider = new InMemoryCachingUidProvider();
         mailboxManager = new InMemoryMailboxManager(factory, userManager, uidProvider);

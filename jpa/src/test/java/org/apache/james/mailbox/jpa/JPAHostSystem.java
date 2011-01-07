@@ -29,7 +29,6 @@ import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.imap.api.process.ImapProcessor;
 import org.apache.james.imap.encode.main.DefaultImapEncoderFactory;
 import org.apache.james.imap.functional.ImapHostSystem;
-import org.apache.james.imap.functional.InMemoryUserManager;
 import org.apache.james.imap.main.DefaultImapDecoderFactory;
 import org.apache.james.imap.processor.main.DefaultImapProcessorFactory;
 import org.apache.james.mailbox.MailboxSession;
@@ -45,6 +44,7 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
+import org.apache.james.mailbox.store.MockAuthenticator;
 import org.apache.james.test.functional.HostSystem;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 
@@ -58,7 +58,7 @@ public class JPAHostSystem extends ImapHostSystem {
     }
     
     private final OpenJPAMailboxManager mailboxManager;
-    private final InMemoryUserManager userManager; 
+    private final MockAuthenticator userManager; 
     private final EntityManagerFactory entityManagerFactory;
 
     public JPAHostSystem() throws Exception {
@@ -76,7 +76,7 @@ public class JPAHostSystem extends ImapHostSystem {
                 JPAMessage.class.getName() + ";" +
                 JPAProperty.class.getName() + ";" +
                 JPASubscription.class.getName() + ")");
-        userManager = new InMemoryUserManager();
+        userManager = new MockAuthenticator();
         entityManagerFactory = OpenJPAPersistence.getEntityManagerFactory(properties);
         JPACachingUidProvider uidProvider = new JPACachingUidProvider(entityManagerFactory);
 
