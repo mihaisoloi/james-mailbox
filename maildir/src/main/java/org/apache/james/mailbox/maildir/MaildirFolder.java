@@ -32,14 +32,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class MaildirFolder {
+
+    /**
+     * The logger.
+     */
+    private Log log = LogFactory.getLog(MaildirFolder.class.getName());
 
     public static final String VALIDITY_FILE = "james-uidvalidity";
     public static final String UIDLIST_FILE = "james-uidlist";
@@ -63,6 +70,7 @@ public class MaildirFolder {
      * @param absPath The absolute path of the mailbox folder
      */
     public MaildirFolder(String absPath) {
+        log.info("=====> absPath=" + absPath + " - " + this.hashCode());
         this.rootFolder = new File(absPath);
         this.curFolder = new File(rootFolder, CUR);
         this.newFolder = new File(rootFolder, NEW);

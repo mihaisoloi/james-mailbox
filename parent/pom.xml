@@ -461,8 +461,8 @@
       </dependency>
       <dependency>
         <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-protocol-tester</artifactId>
-        <version>${version.james-imap}</version>
+        <artifactId>apache-james-mailbox-integration-tester</artifactId>
+        <version>${version.james-mailbox-integration-tester}</version>
         <scope>test</scope>
       </dependency>
 
@@ -602,6 +602,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.james-server>3.0-SNAPSHOT</version.james-server>
     <version.james-imap>0.2-M2-SNAPSHOT</version.james-imap>
+    <version.james-mailbox-integration-tester>0.2-M2-SNAPSHOT</version.james-mailbox-integration-tester>
     <version.openjpa>2.0.1</version.openjpa>
     <version.javax.persistence>1.0.2</version.javax.persistence>
     <version.commons-lang>2.4</version.commons-lang>

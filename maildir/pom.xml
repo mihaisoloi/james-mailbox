@@ -69,7 +69,7 @@
         
     <dependency>
       <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-protocol-tester</artifactId>
+      <artifactId>apache-james-mailbox-integration-tester</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
