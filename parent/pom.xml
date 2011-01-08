@@ -459,12 +459,6 @@
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-mailbox-integration-tester</artifactId>
-        <version>${version.james-mailbox-integration-tester}</version>
-        <scope>test</scope>
-      </dependency>
 
       <!--
         END Testing

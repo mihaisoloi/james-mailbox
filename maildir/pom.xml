@@ -66,12 +66,6 @@
       <groupId>${javax.mail.groupId}</groupId>
       <artifactId>${javax.mail.artifactId}</artifactId>
     </dependency>
-        
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-mailbox-integration-tester</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>apache-james-imap-processor</artifactId>

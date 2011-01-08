@@ -63,11 +63,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-mailbox-integration-tester</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
       <artifactId>apache-james-imap-api</artifactId>
       <scope>test</scope>
     </dependency>
