@@ -62,6 +62,12 @@
       <type>test-jar</type>
     </dependency>
     <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-james-mailbox-store</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
