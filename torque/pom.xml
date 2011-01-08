@@ -97,20 +97,5 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-processor</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-message</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>

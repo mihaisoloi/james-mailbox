@@ -21,7 +21,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <artifactId>apache-james-imap-parent</artifactId>
+        <artifactId>apache-james-mailbox-parent</artifactId>
         <groupId>org.apache.james</groupId>
         <version>0.2-M2-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
@@ -81,7 +81,7 @@
                     </platforms>
                     <programs>
                         <program>
-                            <mainClass>org.apache.james.imap.jpa.migrator.JpaMigrator</mainClass>
+                            <mainClass>org.apache.james.mailbox.jpa.migrator.JpaMigrator</mainClass>
                             <!--
                                 call it only run because appassemble will add .bat by default on
                                 windows
@@ -93,7 +93,7 @@
                             </platforms>
                         </program>
                         <program>
-                            <mainClass>org.apache.james.imap.jpa.migrator.JpaMigrator</mainClass>
+                            <mainClass>org.apache.james.mailbox.jpa.migrator.JpaMigrator</mainClass>
                             <name>run.sh</name>
                             <!-- Only generate unix shell script for this application -->
                             <platforms>

@@ -433,32 +433,6 @@
         <artifactId>commons-io</artifactId>
         <version>1.4</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-message</artifactId>
-        <version>${version.james-imap}</version>
-        <scope>test</scope>
-      </dependency>
-      
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-processor</artifactId>
-        <version>${version.james-imap}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-api</artifactId>
-        <version>${version.james-imap}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>apache-james-imap-api</artifactId>
-        <version>${version.james-imap}</version>
-        <type>test-jar</type>
-        <scope>test</scope>
-      </dependency>
 
       <!--
         END Testing
@@ -594,9 +568,6 @@
     <javax.mail.groupId>javax.mail</javax.mail.groupId>
     <javax.mail.artifactId>mail</javax.mail.artifactId>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.james-server>3.0-SNAPSHOT</version.james-server>
-    <version.james-imap>0.2-M2-SNAPSHOT</version.james-imap>
-    <version.james-mailbox-integration-tester>0.2-M2-SNAPSHOT</version.james-mailbox-integration-tester>
     <version.openjpa>2.0.1</version.openjpa>
     <version.javax.persistence>1.0.2</version.javax.persistence>
     <version.commons-lang>2.4</version.commons-lang>
@@ -608,8 +579,6 @@
     <version.torque>3.3</version.torque>
     <version.jmock>2.5.1</version.jmock>
     <version.jackrabbit>2.2.0</version.jackrabbit>
-
     <target.jdk>1.5</target.jdk>
   </properties>
-
 </project>

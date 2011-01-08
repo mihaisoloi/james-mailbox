@@ -66,16 +66,6 @@
       <artifactId>junit-dep</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-message</artifactId>
-      <scope>test</scope>
-    </dependency>
     <!-- xercesImpl needed for some java versions -->
     <dependency>
       <groupId>xerces</groupId>
@@ -85,11 +75,6 @@
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-imap-processor</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
