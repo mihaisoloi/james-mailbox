@@ -21,6 +21,7 @@ package org.apache.james.mailbox.maildir;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
@@ -35,7 +36,6 @@ public class MaildirStore implements UidProvider<Integer>{
     public static final String PATH_DOMAIN = "%domain";
     public static final String PATH_FULLUSER = "%fulluser";
     public static final String WILDCARD = "%";
-    public static final String INBOX = "INBOX";
     
     public static final String maildirDelimiter = ".";
     
@@ -172,7 +172,7 @@ public class MaildirStore implements UidProvider<Integer>{
      */
     public String getMailboxNameFromFolderName(String folderName) {
         String mName;
-        if (folderName.equals("")) mName = INBOX;
+        if (folderName.equals("")) mName = MailboxConstants.INBOX;
         else
         // remove leading dot
             mName = folderName.substring(1);
@@ -192,7 +192,7 @@ public class MaildirStore implements UidProvider<Integer>{
     public String getFolderName(String namespace, String user, String name) {
         String root = userRoot(user);
         // if INBOX => location == maildirLocation
-        if (name.equals(INBOX))
+        if (name.equals(MailboxConstants.INBOX))
             return root;
         StringBuffer folder = new StringBuffer(root);
         if (!root.endsWith(File.pathSeparator))

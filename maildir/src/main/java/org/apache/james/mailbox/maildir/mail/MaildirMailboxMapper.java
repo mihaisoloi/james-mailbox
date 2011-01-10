@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxNotFoundException;
@@ -106,7 +107,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                 mailboxList.add(cacheMailbox(mailbox));
             }
         // INBOX is in the root of the folder
-        if (Pattern.matches(mailboxPath.getName().replace(MaildirStore.WILDCARD, ".*"), MaildirStore.INBOX)) {
+        if (Pattern.matches(mailboxPath.getName().replace(MaildirStore.WILDCARD, ".*"), MailboxConstants.INBOX)) {
             Mailbox<Integer> mailbox = maildirStore.loadMailbox(root, mailboxPath.getNamespace(), mailboxPath.getUser(), "");
             mailboxList.add(0, cacheMailbox(mailbox));
         }
@@ -138,7 +139,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                 
                 MaildirFolder originalFolder = maildirStore.createMaildirFolder(originalMailbox);
                 // renaming the INBOX means to move its contents to the new folder 
-                if (originalMailbox.getName().equals(MaildirStore.INBOX)) {
+                if (originalMailbox.getName().equals(MailboxConstants.INBOX)) {
                     File inboxFolder = originalFolder.getRootFile();
                     File newFolder = folder.getRootFile();
                     if (!newFolder.mkdirs())
@@ -257,9 +258,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
             
             // Special case for INBOX: Let's use the user's folder.
 
-            MailboxPath inboxMailboxPath = new MailboxPath("#private", 
-                    user.getName() + "@" + domain.getName(), 
-                    "INBOX");
+            MailboxPath inboxMailboxPath = MailboxPath.inbox(user.getName() + "@" + domain.getName());
             mailboxList.add(maildirStore.loadMailbox(user, inboxMailboxPath));
             
             // List all INBOX sub folders.
@@ -279,7 +278,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                     userName = user.getName() + "@" + domain.getName();
                 }
                 
-                MailboxPath mailboxPath = new MailboxPath("#private", 
+                MailboxPath mailboxPath = new MailboxPath(MailboxConstants.USER_NAMESPACE, 
                         userName, 
                         mailbox.getName().substring(1));
                 mailboxList.add(maildirStore.loadMailbox(mailbox, mailboxPath));
