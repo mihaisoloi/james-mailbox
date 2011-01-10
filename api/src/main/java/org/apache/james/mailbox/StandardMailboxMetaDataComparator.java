@@ -36,9 +36,9 @@ public class StandardMailboxMetaDataComparator implements
         final String nameTwo = two.getPath().getName();
         final int result;
         final String nameOne = one.getPath().getName();
-        if (INBOX.equals(nameOne)) {
-            result = INBOX.equals(nameTwo) ? 0 : -1;
-        } else if (INBOX.equals(nameTwo)) {
+        if (MailboxConstants.INBOX.equals(nameOne)) {
+            result = MailboxConstants.INBOX.equals(nameTwo) ? 0 : -1;
+        } else if (MailboxConstants.INBOX.equals(nameTwo)) {
             result = 1;
         } else if (nameOne == null) {
             result = nameTwo == null ? 0 : 1;
@@ -50,7 +50,6 @@ public class StandardMailboxMetaDataComparator implements
         return result;
     }
     
-    private static final String INBOX = "INBOX";
 
     /**
      * @see Comparator#compare(Object, Object)
