@@ -91,11 +91,11 @@ public class MaildirStore implements UidProvider<Integer>{
      */
     public Mailbox<Integer> loadMailbox(MailboxPath mailboxPath)
     throws MailboxNotFoundException, MailboxException {
-        String folder = getFolderName(mailboxPath);
-        File f = new File(folder);
-        if (!f.isDirectory())
+        MaildirFolder folder = new MaildirFolder(getFolderName(mailboxPath));
+
+        if (!folder.exists())
             throw new MailboxNotFoundException(mailboxPath);
-        return loadMailbox(f, mailboxPath);
+        return loadMailbox(folder.getRootFile(), mailboxPath);
     }
 
     /**
@@ -105,7 +105,7 @@ public class MaildirStore implements UidProvider<Integer>{
      * @return The Mailbox object populated with data from the file system
      * @throws MailboxException If the mailbox folder doesn't exist or can't be read
      */
-    public Mailbox<Integer> loadMailbox(File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
+    private Mailbox<Integer> loadMailbox(File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
         long uidValidity;
         long lastUid;
         MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath());

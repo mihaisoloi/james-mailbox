@@ -108,7 +108,7 @@ public class MaildirFolder {
      * @return true if the directory belonging to this {@link MaildirFolder} exists ; false otherwise 
      */
     public boolean exists() {
-        return rootFolder.isDirectory();
+        return rootFolder.isDirectory() && curFolder.isDirectory() && newFolder.isDirectory() && tmpFolder.isDirectory();
     }
     
     /**

@@ -80,12 +80,8 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.imap.api.MailboxPath)
      */
     public Mailbox<Integer> findMailboxByPath(MailboxPath mailboxPath)
-            throws MailboxException, MailboxNotFoundException {
-        String folder = maildirStore.getFolderName(mailboxPath);
-        File f = new File(folder);
-        if (!f.isDirectory())
-            throw new MailboxNotFoundException(mailboxPath);
-        Mailbox<Integer> mailbox = maildirStore.loadMailbox(f, mailboxPath);
+            throws MailboxException, MailboxNotFoundException {      
+        Mailbox<Integer> mailbox = maildirStore.loadMailbox(mailboxPath);
         return cacheMailbox(mailbox);
     }
     
@@ -167,7 +163,8 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
             // it cannot be found and is thus new
             MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
             if (!folder.exists()) {
-                boolean success = folder.getRootFile().mkdirs();
+                boolean success = folder.getRootFile().exists();
+                if (!success) success = folder.getRootFile().mkdirs();
                 if (!success)
                     throw new MailboxException("Failed to save Mailbox " + mailbox);
                 success = folder.getCurFolder().mkdir();
@@ -259,7 +256,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
             // Special case for INBOX: Let's use the user's folder.
 
             MailboxPath inboxMailboxPath = MailboxPath.inbox(user.getName() + "@" + domain.getName());
-            mailboxList.add(maildirStore.loadMailbox(user, inboxMailboxPath));
+            mailboxList.add(maildirStore.loadMailbox(inboxMailboxPath));
             
             // List all INBOX sub folders.
             
@@ -281,7 +278,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                 MailboxPath mailboxPath = new MailboxPath(MailboxConstants.USER_NAMESPACE, 
                         userName, 
                         mailbox.getName().substring(1));
-                mailboxList.add(maildirStore.loadMailbox(mailbox, mailboxPath));
+                mailboxList.add(maildirStore.loadMailbox(mailboxPath));
 
             }
 

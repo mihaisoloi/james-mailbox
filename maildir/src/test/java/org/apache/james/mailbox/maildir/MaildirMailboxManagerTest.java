@@ -18,15 +18,23 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+
+import javax.mail.Flags;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.impl.SimpleLog;
+import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
+import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,5 +127,22 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     private void deleteMaildirTestDirectory() throws IOException {
         FileUtils.deleteDirectory(new File(MAILDIR_HOME));
     }
+    
+    // See MAILBOX-31
+    @Test
+    public void testCreateSubFolder() throws MailboxException {
+        MaildirStore store = new MaildirStore("target/maildir" + "/%domain/%user");
+        MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
+        MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
 
+        manager.init();
+
+        String user = "test@localhost";
+        MailboxSession session = manager.createSystemSession(user, new SimpleLog("Test"));
+        manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "Trash"), session);
+        manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
+        
+        // this threw NPE
+        manager.getMailbox(MailboxPath.inbox(user), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
+    }
 }
