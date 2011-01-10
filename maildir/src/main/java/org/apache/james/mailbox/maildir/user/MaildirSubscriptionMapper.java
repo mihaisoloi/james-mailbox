@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.james.mailbox.SubscriptionException;
+import org.apache.james.mailbox.maildir.MaildirStore;
 import org.apache.james.mailbox.maildir.user.model.MaildirSubscription;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
@@ -38,12 +39,11 @@ import org.apache.james.mailbox.store.user.model.Subscription;
 
 public class MaildirSubscriptionMapper extends NonTransactionalMapper implements SubscriptionMapper {
 
-    private static final String PATH_USER = "%user";
     private static final String FILE_SUBSCRIPTION = "subscriptions";
-    private final String maildirLocation;
+    private MaildirStore store;
     
-    public MaildirSubscriptionMapper(String maildirLocation) {
-        this.maildirLocation = maildirLocation;
+    public MaildirSubscriptionMapper(MaildirStore store) {
+        this.store = store;
     }
     
     /* 
@@ -56,7 +56,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         boolean changed = subscriptionNames.remove(subscription.getMailbox());
         if (changed) {
             try {
-                writeSubscriptions(new File(createFolderNameFromUser(subscription.getUser())), subscriptionNames);
+                writeSubscriptions(new File(store.userRoot(subscription.getUser())), subscriptionNames);
             } catch (IOException e) {
                 throw new SubscriptionException(e);
             }
@@ -81,7 +81,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findMailboxSubscriptionForUser(java.lang.String, java.lang.String)
      */
     public Subscription findMailboxSubscriptionForUser(String user, String mailbox) throws SubscriptionException {
-        File userRoot = new File(createFolderNameFromUser(user));
+        File userRoot = new File(store.userRoot(user));
         Set<String> subscriptionNames;
         try {
             subscriptionNames = readSubscriptions(userRoot);
@@ -103,7 +103,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         boolean changed = subscriptionNames.add(subscription.getMailbox());
         if (changed) {
             try {
-                writeSubscriptions(new File(createFolderNameFromUser(subscription.getUser())), subscriptionNames);
+                writeSubscriptions(new File(store.userRoot(subscription.getUser())), subscriptionNames);
             } catch (IOException e) {
                 throw new SubscriptionException(e);
             }
@@ -118,14 +118,6 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         // nothing to do
     }
     
-    /**
-     * Get the folder name of the folder containing the user's mailboxes 
-     * @param user The user to get the folder for
-     * @return The name of the folder
-     */
-    private String createFolderNameFromUser(String user) {
-        return maildirLocation.replace(PATH_USER, user);
-    }
     
     /**
      * Read the subscriptions for a particular user
@@ -134,7 +126,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
      * @throws SubscriptionException
      */
     private Set<String> readSubscriptionsForUser(String user) throws SubscriptionException { 
-        File userRoot = new File(createFolderNameFromUser(user));
+        File userRoot = new File(store.userRoot(user));
         Set<String> subscriptionNames;
         try {
             subscriptionNames = readSubscriptions(userRoot);
@@ -176,6 +168,8 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     private void writeSubscriptions(File mailboxFolder, final Set<String> subscriptions) throws IOException {
         List<String> sortedSubscriptions = new ArrayList<String>(subscriptions);
         Collections.sort(sortedSubscriptions);
+        if (!mailboxFolder.exists()) mailboxFolder.mkdirs();
+        
         File subscriptionFile = new File(mailboxFolder, FILE_SUBSCRIPTION);
         if (!subscriptionFile.exists())
             subscriptionFile.createNewFile();

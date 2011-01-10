@@ -53,7 +53,7 @@ public class MaildirMailboxSessionMapperFactory extends
     @Override
     protected SubscriptionMapper createSubscriptionMapper(MailboxSession session)
             throws SubscriptionException {
-        return new MaildirSubscriptionMapper(store.getMaildirLocation());
+        return new MaildirSubscriptionMapper(store);
     }
 
 }
