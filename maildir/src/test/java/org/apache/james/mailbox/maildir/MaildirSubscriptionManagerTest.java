@@ -25,7 +25,7 @@ public class MaildirSubscriptionManagerTest extends AbstractSubscriptionManagerT
 
     @Override
     public SubscriptionManager createSubscriptionManager() {
-        MaildirStore store = new MaildirStore("target/%u/");
+        MaildirStore store = new MaildirStore("target/Maildir/%domain/%user");
         MaildirMailboxSessionMapperFactory factory = new MaildirMailboxSessionMapperFactory(store);
         MaildirSubscriptionManager sm = new MaildirSubscriptionManager(factory);
         return sm;
