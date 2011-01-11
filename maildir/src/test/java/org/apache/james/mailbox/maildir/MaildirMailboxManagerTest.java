@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -26,12 +28,11 @@ import java.util.Date;
 
 import javax.mail.Flags;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
@@ -77,12 +78,16 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
         } else {
 
             doTestListWithMaildirStoreConfiguration("/%domain/%user");
-            
-            // TODO Tests fail with /%user configuration
-            // doTestListWithMaildirStoreConfiguration("/%user");
 
+            // TODO Tests fail with /%user configuration
+            try {
+                doTestListWithMaildirStoreConfiguration("/%user");
+                fail();
+            } catch (MailboxExistsException e) {
+                // This is expected as the there are many users which have the same localpart
+            }
             // TODO Tests fail with /%fulluser configuration
-            // doTestListWithMaildirStoreConfiguration("/%fulluser");
+            doTestListWithMaildirStoreConfiguration("/%fulluser");
 
         }
             
@@ -102,12 +107,15 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
         MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
         manager.init();
         setMailboxManager(manager);
-        super.testList();
         try {
-            deleteMaildirTestDirectory();
-        } catch (IOException e) {
-            Assert.fail();
-            e.printStackTrace();
+            super.testList();
+        } finally {
+            try {
+                deleteMaildirTestDirectory();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
@@ -131,7 +139,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     // See MAILBOX-31
     @Test
     public void testCreateSubFolder() throws MailboxException {
-        MaildirStore store = new MaildirStore("target/maildir" + "/%domain/%user");
+        MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user");
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
         MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
 

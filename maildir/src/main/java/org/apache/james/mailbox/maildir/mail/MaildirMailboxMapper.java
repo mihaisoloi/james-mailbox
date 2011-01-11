@@ -201,9 +201,10 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
            return mailboxList;
        }
 
-       if ((maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_USER)) && (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_FULLUSER))) {
+       if ((maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_USER)) || (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_FULLUSER))) {
            File[] users = maildirRoot.listFiles();
            visitUsersForMailboxList(null, users, mailboxList);
+           return mailboxList;
        }
        
        throw new UnsupportedOperationException("The MaildirLocation must end with /%domain/%user, /%user or /%fulluser.");
@@ -253,9 +254,16 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         
         for (File user: users) {
             
+            
+            if (domain == null) {
+                userName = user.getName();
+            }
+            else {
+                userName = user.getName() + "@" + domain.getName();
+            }
+            
             // Special case for INBOX: Let's use the user's folder.
-
-            MailboxPath inboxMailboxPath = MailboxPath.inbox(user.getName() + "@" + domain.getName());
+            MailboxPath inboxMailboxPath = MailboxPath.inbox(userName);
             mailboxList.add(maildirStore.loadMailbox(inboxMailboxPath));
             
             // List all INBOX sub folders.
@@ -267,13 +275,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
             });
             
             for (File mailbox: mailboxes) {
-                
-                if (domain == null) {
-                    userName = user.getName();
-                }
-                else {
-                    userName = user.getName() + "@" + domain.getName();
-                }
+               
                 
                 MailboxPath mailboxPath = new MailboxPath(MailboxConstants.USER_NAMESPACE, 
                         userName, 
