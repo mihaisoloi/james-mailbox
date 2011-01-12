@@ -42,12 +42,10 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxMapper<Long> {
 
     private static final char SQL_WILDCARD_CHAR = '%';
-    private final char delimiter;
     private String lastMailboxName;
     
-    public JPAMailboxMapper(EntityManagerFactory entityManagerFactory, char delimiter) {
+    public JPAMailboxMapper(EntityManagerFactory entityManagerFactory) {
         super(entityManagerFactory);
-        this.delimiter = delimiter;
     }
 
     /**
@@ -141,7 +139,7 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
     /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(java.lang.String)
      */
-    public boolean hasChildren(Mailbox<Long> mailbox) throws MailboxException,
+    public boolean hasChildren(Mailbox<Long> mailbox, char delimiter) throws MailboxException,
             MailboxNotFoundException {
         final String name = mailbox.getName() + delimiter + SQL_WILDCARD_CHAR; 
         final Long numberOfChildMailboxes;
@@ -153,7 +151,7 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         return numberOfChildMailboxes != null && numberOfChildMailboxes > 0;
     }
 
-    /*
+	/*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
      */

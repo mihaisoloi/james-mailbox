@@ -35,11 +35,9 @@ public class InMemoryMailboxMapper extends NonTransactionalMapper implements Mai
     
     private static final int INITIAL_SIZE = 128;
     private final Map<Long, InMemoryMailbox> mailboxesById;
-    private final char delimiter;
 
-    public InMemoryMailboxMapper(char delimiter) {
+    public InMemoryMailboxMapper() {
         mailboxesById = new ConcurrentHashMap<Long, InMemoryMailbox>(INITIAL_SIZE);
-        this.delimiter = delimiter;
     }
 
     /*
@@ -108,7 +106,7 @@ public class InMemoryMailboxMapper extends NonTransactionalMapper implements Mai
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public boolean hasChildren(Mailbox<Long> mailbox) throws MailboxException,
+    public boolean hasChildren(Mailbox<Long> mailbox, char delimiter) throws MailboxException,
             MailboxNotFoundException {
         String mailboxName = mailbox.getName() + delimiter;
         for (final InMemoryMailbox box:mailboxesById.values()) {

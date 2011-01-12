@@ -73,7 +73,7 @@ public interface MailboxMetaData {
      * 
      * @return delimiter
      */
-    String getHierarchyDelimiter();
+    char getHierarchyDelimiter();
 
     /**
      * Return the MailboxPath 

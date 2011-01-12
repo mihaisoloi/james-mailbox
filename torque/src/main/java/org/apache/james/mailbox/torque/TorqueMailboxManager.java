@@ -115,7 +115,7 @@ public class TorqueMailboxManager implements MailboxManager {
      * @return session
      */
     private SimpleMailboxSession createSession(String userName, String password, Log log) {
-        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>());
+        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter());
     }
 
     /**
@@ -166,22 +166,22 @@ public class TorqueMailboxManager implements MailboxManager {
     }
     public MessageManager getMailbox(MailboxPath path, MailboxSession session)
             throws MailboxException {
-        return doGetMailbox(getName(path));
+        return doGetMailbox(getName(path), session);
     }
 
     private String getName(MailboxPath path) {
         StringBuffer sb = new StringBuffer();
         sb.append(path.getNamespace());
-        sb.append(MailboxConstants.DEFAULT_DELIMITER);
+        sb.append(getDelimiter());
 
         if (path.getUser() != null) {
             sb.append(path.getUser());
-            sb.append(MailboxConstants.DEFAULT_DELIMITER);
+            sb.append(getDelimiter());
         }
         sb.append(path.getName());
         return sb.toString();
     }
-    private TorqueMailbox doGetMailbox(String mailboxName)
+    private TorqueMailbox doGetMailbox(String mailboxName, MailboxSession session)
             throws MailboxException {
         try {
             synchronized (mailboxes) {
@@ -194,7 +194,7 @@ public class TorqueMailboxManager implements MailboxManager {
                     TorqueMailbox torqueMailbox = (TorqueMailbox) mailboxes
                             .get(mailboxName);
                     if (torqueMailbox == null) {
-                        torqueMailbox = new TorqueMailbox(mailboxRow, lock);
+                        torqueMailbox = new TorqueMailbox(mailboxRow, session, lock);
                         mailboxes.put(mailboxName, torqueMailbox);
                     }
 
@@ -221,14 +221,14 @@ public class TorqueMailboxManager implements MailboxManager {
         final int length = namespaceName.length();
         if (length == 0) {
             getLog().warn("Ignoring mailbox with empty name");
-        } else if (namespaceName.charAt(length - 1) == MailboxConstants.DEFAULT_DELIMITER) {
+        } else if (namespaceName.charAt(length - 1) == getDelimiter()) {
             createMailbox(namespaceName.substring(0, length - 1), mailboxSession);
         } else {
             synchronized (mailboxes) {
                 // Create root first
                 // If any creation fails then mailbox will not be created
                 // TODO: transaction
-                int index = namespaceName.indexOf(MailboxConstants.DEFAULT_DELIMITER);
+                int index = namespaceName.indexOf(getDelimiter());
                 int count = 0;
                 while (index >= 0) {
                     // Until explicit namespace support is added,
@@ -242,7 +242,7 @@ public class TorqueMailboxManager implements MailboxManager {
                             doCreate(mailbox);
                         }
                     }
-                    index = namespaceName.indexOf(MailboxConstants.DEFAULT_DELIMITER, ++index);
+                    index = namespaceName.indexOf(getDelimiter(), ++index);
                 }
                 if (mailboxExists(getMailboxPath(namespaceName), mailboxSession)) {
                     throw new MailboxExistsException(namespaceName); 
@@ -347,8 +347,8 @@ public class TorqueMailboxManager implements MailboxManager {
 
     public void copyMessages(MessageRange set, MailboxPath from, MailboxPath to,
             MailboxSession session) throws MailboxException {
-        TorqueMailbox toMailbox = doGetMailbox(getName(to));
-        TorqueMailbox fromMailbox = doGetMailbox(getName(from));
+        TorqueMailbox toMailbox = doGetMailbox(getName(to), session);
+        TorqueMailbox fromMailbox = doGetMailbox(getName(from), session);
         fromMailbox.copyTo(set, toMailbox, session);
     }
 
@@ -387,7 +387,7 @@ public class TorqueMailboxManager implements MailboxManager {
                         } else {
                             inferiors = MailboxMetaData.Children.HAS_NO_CHILDREN;
                         }
-                        results.add(new SimpleMailboxMetaData(sPath, MailboxConstants.DEFAULT_DELIMITER_STRING, inferiors, Selectability.NONE));
+                        results.add(new SimpleMailboxMetaData(sPath, getDelimiter(), inferiors, Selectability.NONE));
                     }
                 }
             }
@@ -440,7 +440,7 @@ public class TorqueMailboxManager implements MailboxManager {
     }
 
     public MailboxPath getMailboxPath(String name) {
-        String nameParts[] = name.split("\\" +MailboxConstants.DEFAULT_DELIMITER_STRING,3);
+        String nameParts[] = name.split("\\" +getDelimiter(),3);
         if (nameParts.length < 3) {
             return new MailboxPath(nameParts[0], null, nameParts[1]);
         }
@@ -459,7 +459,7 @@ public class TorqueMailboxManager implements MailboxManager {
     }
 
     public void addListener(MailboxPath path, MailboxListener listener, MailboxSession session) throws MailboxException {
-        final TorqueMailbox mailbox = doGetMailbox(getName(path));
+        final TorqueMailbox mailbox = doGetMailbox(getName(path), session);
         mailbox.addListener(listener);
     }
 

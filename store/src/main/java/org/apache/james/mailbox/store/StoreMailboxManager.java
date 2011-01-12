@@ -147,8 +147,8 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param log
      * @return session
      */
-    private SimpleMailboxSession createSession(String userName, String password, Log log) {
-        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>());
+    private MailboxSession createSession(String userName, String password, Log log) {
+        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter());
     }
 
     /**
@@ -164,7 +164,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MailboxManager#getDelimiter()
      */
-    public final char getDelimiter() {
+    public char getDelimiter() {
         return MailboxConstants.DEFAULT_DELIMITER;
     }
 
@@ -250,14 +250,14 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         if (length == 0) {
             getLog().warn("Ignoring mailbox with empty name");
         } else {
-            if (mailboxPath.getName().charAt(length - 1) == MailboxConstants.DEFAULT_DELIMITER)
+            if (mailboxPath.getName().charAt(length - 1) == getDelimiter())
                 mailboxPath.setName(mailboxPath.getName().substring(0, length - 1));
             if (mailboxExists(mailboxPath, mailboxSession))
                 throw new MailboxExistsException(mailboxPath.toString());
             // Create parents first
             // If any creation fails then the mailbox will not be created
             // TODO: transaction
-            for (final MailboxPath mailbox : mailboxPath.getHierarchyLevels(MailboxConstants.DEFAULT_DELIMITER))
+            for (final MailboxPath mailbox : mailboxPath.getHierarchyLevels(getDelimiter()))
 
                 locker.executeWithLock(mailboxSession, mailbox, new LockAwareExecution() {
 
@@ -332,7 +332,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                 dispatcher.mailboxRenamed(from, to, session.getSessionId());
 
                 // rename submailboxes
-                final MailboxPath children = new MailboxPath(MailboxConstants.USER_NAMESPACE, from.getUser(), from.getName() + MailboxConstants.DEFAULT_DELIMITER + "%");
+                final MailboxPath children = new MailboxPath(MailboxConstants.USER_NAMESPACE, from.getUser(), from.getName() + getDelimiter() + "%");
                 locker.executeWithLock(session, children, new LockAwareExecution() {
                     
                     public void execute(MailboxSession session, MailboxPath children) throws MailboxException {
@@ -403,13 +403,13 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                 final String match = name.substring(baseLength);
                 if (mailboxExpression.isExpressionMatch(match)) {
                     final MailboxMetaData.Children inferiors; 
-                    if (mapper.hasChildren(mailbox)) {
+                    if (mapper.hasChildren(mailbox, session.getPathDelimiter())) {
                         inferiors = MailboxMetaData.Children.HAS_CHILDREN;
                     } else {
                         inferiors = MailboxMetaData.Children.HAS_NO_CHILDREN;
                     }
                     MailboxPath mailboxPath = new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), name);
-                    results.add(new SimpleMailboxMetaData(mailboxPath, MailboxConstants.DEFAULT_DELIMITER_STRING, inferiors, Selectability.NONE));
+                    results.add(new SimpleMailboxMetaData(mailboxPath, getDelimiter(), inferiors, Selectability.NONE));
                 }
             }
         }

@@ -75,11 +75,12 @@ public interface MailboxMapper<Id> extends Mapper {
      * Return if the given {@link Mailbox} has children
      * 
      * @param mailbox not null
+     * @param delimiter path delimiter
      * @return true when the mailbox has children, false otherwise
      * @throws MailboxException
      * @throws MailboxNotFoundException
      */
-    public abstract boolean hasChildren(Mailbox<Id> mailbox)
+    public abstract boolean hasChildren(Mailbox<Id> mailbox, char delimiter)
             throws MailboxException, MailboxNotFoundException;
     
     /**

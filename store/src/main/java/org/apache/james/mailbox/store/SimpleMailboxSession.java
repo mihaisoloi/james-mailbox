@@ -54,14 +54,16 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     private final List<Locale> localePreferences;
 
     private final Map<Object, Object> attributes;
+    
+    private final char pathSeparator;
 
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Log log, final List<Locale> localePreferences) {
-        this(sessionId, userName, password, log, localePreferences, new ArrayList<String>(), null);
+            final Log log, final List<Locale> localePreferences, char pathSeparator) {
+        this(sessionId, userName, password, log, localePreferences, new ArrayList<String>(), null, pathSeparator);
     }
 
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Log log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace) {
+            final Log log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace, char pathSeparator) {
         this.sessionId = sessionId;
         this.log = log;
         this.userName = userName;
@@ -77,6 +79,7 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
 
         this.localePreferences = localePreferences;
         this.attributes = new HashMap<Object, Object>();
+        this.pathSeparator = pathSeparator;
     }
     
     /*
@@ -185,5 +188,12 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     public String getPassword() {
         return password;
     }
+
+    /**
+     * @see org.apache.james.mailbox.MailboxSession#getPathDelimiter()
+     */
+	public char getPathDelimiter() {
+		return pathSeparator;
+	}
 
 }

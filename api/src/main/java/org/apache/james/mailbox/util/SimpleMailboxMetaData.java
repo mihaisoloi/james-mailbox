@@ -25,23 +25,24 @@ import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
 
 public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<MailboxMetaData> {
 
-    public static MailboxMetaData createNoSelect(MailboxPath path, String delimiter) {
+    public static MailboxMetaData createNoSelect(MailboxPath path, char delimiter) {
         return new SimpleMailboxMetaData(path, delimiter, Children.CHILDREN_ALLOWED_BUT_UNKNOWN, Selectability.NOSELECT);
     }
 
     private final MailboxPath path;
 
-    private final String delimiter;
+    private final char delimiter;
 
     private final Children inferiors;
 
     private final Selectability selectability;
 
-    public SimpleMailboxMetaData(MailboxPath path, String delimiter) {
+    public SimpleMailboxMetaData(MailboxPath path, char delimiter) {
         this(path, delimiter, Children.CHILDREN_ALLOWED_BUT_UNKNOWN, Selectability.NONE);
     }
 
-    public SimpleMailboxMetaData(final MailboxPath path, final String delimiter,
+    
+    public SimpleMailboxMetaData(final MailboxPath path, final char delimiter,
             final Children inferiors, final Selectability selectability) {
         super();
         this.path = path;
@@ -50,7 +51,7 @@ public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<Mailbo
         this.selectability = selectability;
     }
 
-    /**
+	/**
      * Is this mailbox <code>\Noinferiors</code> as per RFC3501.
      * 
      * @return true if marked, false otherwise
@@ -70,7 +71,7 @@ public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<Mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MailboxMetaData#getHierarchyDelimiter()
      */
-    public String getHierarchyDelimiter() {
+    public char getHierarchyDelimiter() {
         return delimiter;
     }
 

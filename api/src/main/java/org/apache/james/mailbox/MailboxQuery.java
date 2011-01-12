@@ -35,6 +35,7 @@ public class MailboxQuery {
 
     private final int expressionLength;
 
+    private final char pathDelimiter;
     /**
      * Constructs an expression determining a set of mailbox names.
      * 
@@ -49,7 +50,7 @@ public class MailboxQuery {
      *            delimiter
      */
     public MailboxQuery(final MailboxPath base, final String expression,
-            final char freeWildcard, final char localWildcard) {
+            final char freeWildcard, final char localWildcard, final char pathDelimiter) {
         super();
         this.base = base;
         if (base.getName() == null)
@@ -62,6 +63,7 @@ public class MailboxQuery {
         expressionLength = this.expression.length();
         this.freeWildcard = freeWildcard;
         this.localWildcard = localWildcard;
+        this.pathDelimiter = pathDelimiter;
     }
 
     /**
@@ -173,7 +175,7 @@ public class MailboxQuery {
                     if (expressionNext == tasteNextName) {
                         matchRest = isLocalWildcardMatch(name, i + 1, expressionIndex + 1);
                         break;
-                    } else if (tasteNextName == MailboxConstants.DEFAULT_DELIMITER) {
+                    } else if (tasteNextName == pathDelimiter) {
                         matchRest = false;
                         break;
                     }
@@ -184,7 +186,7 @@ public class MailboxQuery {
             boolean containsDelimiter = false;
             for (int i = nameIndex; i < name.length(); i++) {
                 final char nextRemaining = name.charAt(i);
-                if (nextRemaining == MailboxConstants.DEFAULT_DELIMITER) {
+                if (nextRemaining == pathDelimiter) {
                     containsDelimiter = true;
                     break;
                 }
@@ -237,9 +239,9 @@ public class MailboxQuery {
         final String result;
         if (base != null && base.getName() != null && base.getName().length() > 0) {
             final int baseLength = base.getName().length();
-            if (base.getName().charAt(baseLength - 1) == MailboxConstants.DEFAULT_DELIMITER) {
+            if (base.getName().charAt(baseLength - 1) == pathDelimiter) {
                 if (expression != null && expression.length() > 0) {
-                    if (expression.charAt(0) == MailboxConstants.DEFAULT_DELIMITER) {
+                    if (expression.charAt(0) == pathDelimiter) {
                         result = base.getName() + expression.substring(1);
                     } else {
                         result = base.getName() + expression;
@@ -249,10 +251,10 @@ public class MailboxQuery {
                 }
             } else {
                 if (expression != null && expression.length() > 0) {
-                    if (expression.charAt(0) == MailboxConstants.DEFAULT_DELIMITER) {
+                    if (expression.charAt(0) == pathDelimiter) {
                         result = base.getName() + expression;
                     } else {
-                        result = base.getName() + MailboxConstants.DEFAULT_DELIMITER + expression;
+                        result = base.getName() + pathDelimiter + expression;
                     }
                 } else {
                     result = base.getName();

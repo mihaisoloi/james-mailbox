@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.inmemory;
 
-import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.SubscriptionException;
@@ -36,16 +35,12 @@ public class InMemoryMailboxSessionMapperFactory extends MailboxSessionMapperFac
     private MessageMapper<Long> messageMapper;
     private SubscriptionMapper subscriptionMapper;
     
-    public InMemoryMailboxSessionMapperFactory(char delimiter) {
-        mailboxMapper = new InMemoryMailboxMapper(delimiter);
+    public InMemoryMailboxSessionMapperFactory() {
+        mailboxMapper = new InMemoryMailboxMapper();
         messageMapper = new InMemoryMessageMapper();
         subscriptionMapper = new InMemorySubscriptionMapper();
     }
     
-    public InMemoryMailboxSessionMapperFactory() {
-        this(MailboxConstants.DEFAULT_DELIMITER);
-    }
-
     @Override
     public MailboxMapper<Long> createMailboxMapper(MailboxSession session) throws MailboxException {
         return mailboxMapper;

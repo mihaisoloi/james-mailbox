@@ -114,7 +114,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public boolean hasChildren(Mailbox<Integer> mailbox) throws MailboxException, MailboxNotFoundException {
+    public boolean hasChildren(Mailbox<Integer> mailbox, char delimiter) throws MailboxException, MailboxNotFoundException {
         String searchString = mailbox.getName() + MaildirStore.maildirDelimiter + MaildirStore.WILDCARD;
         List<Mailbox<Integer>> mailboxes = findMailboxWithPathLike(
                 new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), searchString));

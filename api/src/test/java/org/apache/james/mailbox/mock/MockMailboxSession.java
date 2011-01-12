@@ -28,6 +28,7 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.SimpleLog;
+import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MailboxSession.User;
 
@@ -93,5 +94,9 @@ public class MockMailboxSession implements MailboxSession{
     public boolean isOpen() {
         return close == false;
     }
+
+	public char getPathDelimiter() {
+		return '.';
+	}
 
 }

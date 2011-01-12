@@ -90,16 +90,19 @@ public class TorqueMailbox implements MessageManager {
 
     private MailboxRow mailboxRow;
 
+    private MailboxSession session;
+    
     private final UidChangeTracker tracker;
 
     private final ReentrantReadWriteLock lock;
 
     private final MessageSearches searches;
 
-    TorqueMailbox(final MailboxRow mailboxRow, final ReentrantReadWriteLock lock) {
+    TorqueMailbox(final MailboxRow mailboxRow, final MailboxSession session, final ReentrantReadWriteLock lock) {
         this.searches = new MessageSearches();
         this.mailboxRow = mailboxRow;
-        this.tracker = new UidChangeTracker(mailboxRow.getLastUid(), getMailboxPath(mailboxRow.getName()));
+        this.session = session;
+        this.tracker = new UidChangeTracker(mailboxRow.getLastUid(), getMailboxPath(mailboxRow.getName(), session.getPathDelimiter()));
         this.lock = lock;
     }
 
@@ -806,12 +809,12 @@ public class TorqueMailbox implements MessageManager {
     }
 
     public void reportRenamed(String from, MailboxRow mailboxRow, MailboxSession session) {
-        tracker.reportRenamed(getMailboxPath(mailboxRow.getName()), session.getSessionId());
+        tracker.reportRenamed(getMailboxPath(mailboxRow.getName(), session.getPathDelimiter()), session.getSessionId());
         this.mailboxRow = mailboxRow;
     }
 
-    public MailboxPath getMailboxPath(String name) {
-        String nameParts[] = name.split("\\" +MailboxConstants.DEFAULT_DELIMITER_STRING,3);
+    public MailboxPath getMailboxPath(String name, char delimiter) {
+        String nameParts[] = name.split("\\" +delimiter,3);
         if (nameParts.length < 3) {
             return new MailboxPath(nameParts[0], null, nameParts[1]);
         }

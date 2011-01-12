@@ -21,7 +21,6 @@ package org.apache.james.mailbox.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPAMailboxMapper;
 import org.apache.james.mailbox.jpa.mail.JPAMessageMapper;
@@ -38,21 +37,15 @@ import org.apache.james.mailbox.store.user.SubscriptionMapper;
 public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<Long> {
 
     private final EntityManagerFactory entityManagerFactory;
-    private final char delimiter;
 
     public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory) {
-        this(entityManagerFactory, MailboxConstants.DEFAULT_DELIMITER);
-    }
-
-    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory, char delimiter) {
         this.entityManagerFactory = entityManagerFactory;
-        this.delimiter = delimiter;
         createEntityManager().close();
     }
     
     @Override
     public MailboxMapper<Long> createMailboxMapper(MailboxSession session) {
-        return new JPAMailboxMapper(entityManagerFactory, delimiter);
+        return new JPAMailboxMapper(entityManagerFactory);
     }
 
     @Override
