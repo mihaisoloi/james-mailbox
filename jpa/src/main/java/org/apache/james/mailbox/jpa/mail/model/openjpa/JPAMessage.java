@@ -42,7 +42,7 @@ public class JPAMessage extends AbstractJPAMessage {
     /** The value for the body field. Lazy loaded */
     /** We use a max length to represent 1gb data. Thats prolly overkill, but who knows */
     @Basic(optional = false, fetch = FetchType.LAZY)
-    @Column(name = "MAIL_BYTES", length = 1048576000)
+    @Column(name = "MAIL_BYTES", length = 1048576000, nullable = true)
     @Lob private byte[] content;
 
     @Deprecated
@@ -61,7 +61,6 @@ public class JPAMessage extends AbstractJPAMessage {
     public JPAMessage(Message message) throws IOException{
         super(message);
         this.content = StreamUtils.out(message.getFullContent()).toByteArray();
-        
     }
 
     /*
@@ -79,7 +78,5 @@ public class JPAMessage extends AbstractJPAMessage {
     public InputStream getBodyContent() throws IOException {
         return new ByteArrayInputStream(content, getBodyStartOctet(), (int)getFullContentOctets());
     }
-
-
 
 }

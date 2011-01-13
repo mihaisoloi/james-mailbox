@@ -92,7 +92,6 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
             }
         } catch (NoResultException e) {
             throw new MailboxNotFoundException(mailboxPath);
-            
         } catch (PersistenceException e) {
             throw new MailboxException("Search of mailbox " + mailboxPath + " failed", e);
         } 
@@ -103,8 +102,8 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
      */
     public void delete(Mailbox<Long> mailbox) throws MailboxException {
         try {  
-            getEntityManager().remove(mailbox);
             getEntityManager().createNamedQuery("deleteMessages").setParameter("idParam", mailbox.getMailboxId()).executeUpdate();
+            getEntityManager().remove(mailbox);
         } catch (PersistenceException e) {
             throw new MailboxException("Delete of mailbox " + mailbox + " failed", e);
         } 
@@ -127,14 +126,21 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         }
     }
 
-    public void deleteAll() throws MailboxException {
+    public void deleteAllMemberships() throws MailboxException {
         try {
-            getEntityManager().createNamedQuery("deleteAll").executeUpdate();
+            getEntityManager().createNamedQuery("deleteAllMemberships").executeUpdate();
         } catch (PersistenceException e) {
             throw new MailboxException("Delete of mailboxes failed", e);
         } 
     }
-
+    
+    public void deleteAllMailboxes() throws MailboxException {
+        try {
+            getEntityManager().createNamedQuery("deleteAllMailboxes").executeUpdate();
+        } catch (PersistenceException e) {
+            throw new MailboxException("Delete of mailboxes failed", e);
+        } 
+    }
     
     /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(java.lang.String)

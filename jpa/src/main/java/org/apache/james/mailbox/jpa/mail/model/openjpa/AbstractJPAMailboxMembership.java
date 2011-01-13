@@ -25,15 +25,19 @@ import java.util.List;
 
 import javax.mail.Flags;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.AbstractMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -43,33 +47,35 @@ import org.apache.openjpa.persistence.jdbc.Index;
 @IdClass(AbstractJPAMailboxMembership.MailboxIdUidKey.class)
 @NamedQueries({
     @NamedQuery(name="findRecentMessagesInMailbox",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.recent = TRUE"),
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.recent = TRUE"),
     @NamedQuery(name="findUnseenMessagesInMailboxOrderByUid",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.seen = FALSE ORDER BY membership.uid ASC"),
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.seen = FALSE ORDER BY membership.uid ASC"),
     @NamedQuery(name="findMessagesInMailbox",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam"),
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam"),
     @NamedQuery(name="findMessagesInMailboxBetweenUIDs",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid BETWEEN :fromParam AND :toParam"),        
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid BETWEEN :fromParam AND :toParam"),        
     @NamedQuery(name="findMessagesInMailboxWithUID",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid=:uidParam"),                    
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid=:uidParam"),                    
     @NamedQuery(name="findMessagesInMailboxAfterUID",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid>=:uidParam"),                    
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid>=:uidParam"),                    
     @NamedQuery(name="findDeletedMessagesInMailbox",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.deleted=TRUE"),                   
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.deleted=TRUE"),                   
     @NamedQuery(name="findDeletedMessagesInMailboxBetweenUIDs",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid BETWEEN :fromParam AND :toParam AND membership.deleted=TRUE"),        
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid BETWEEN :fromParam AND :toParam AND membership.deleted=TRUE"),        
     @NamedQuery(name="findDeletedMessagesInMailboxWithUID",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid=:uidParam AND membership.deleted=TRUE"),                    
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid=:uidParam AND membership.deleted=TRUE"),                    
     @NamedQuery(name="findDeletedMessagesInMailboxAfterUID",
-            query="SELECT membership FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.uid>=:uidParam AND membership.deleted=TRUE"),                    
+            query="SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.uid>=:uidParam AND membership.deleted=TRUE"),                    
     @NamedQuery(name="countUnseenMessagesInMailbox",
-            query="SELECT COUNT(membership) FROM Membership membership WHERE membership.mailboxId = :idParam AND membership.seen=FALSE"),                     
+            query="SELECT COUNT(membership) FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam AND membership.seen=FALSE"),                     
     @NamedQuery(name="countMessagesInMailbox",
-            query="SELECT COUNT(membership) FROM Membership membership WHERE membership.mailboxId = :idParam"),                    
+            query="SELECT COUNT(membership) FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam"),                    
     @NamedQuery(name="deleteMessages",
-            query="DELETE FROM Membership membership WHERE membership.mailboxId = :idParam"),
+            query="DELETE FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam"),
     @NamedQuery(name="findLastUidInMailbox",
-            query="SELECT membership.uid FROM Membership membership WHERE membership.mailboxId = :idParam ORDER BY membership.uid DESC")
+            query="SELECT membership.uid FROM Membership membership WHERE membership.mailbox.mailboxId = :idParam ORDER BY membership.uid DESC"),
+    @NamedQuery(name="deleteAllMemberships",
+            query="DELETE FROM Membership membership")
 })
 public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMembership<Long> {
 
@@ -79,11 +85,11 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
     public static class MailboxIdUidKey implements Serializable {
 
         private static final long serialVersionUID = 7847632032426660997L;
-        
+
         public MailboxIdUidKey() {}
 
-        /** The value for the mailboxId field */
-        public long mailboxId;
+        /** The value for the mailbox field */
+        public long mailbox;
         
         /** The value for the uid field */
         public long uid;
@@ -92,7 +98,7 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result + (int) (mailboxId ^ (mailboxId >>> 32));
+            result = PRIME * result + (int) (mailbox ^ (mailbox >>> 32));
             result = PRIME * result + (int) (uid ^ (uid >>> 32));
             return result;
         }
@@ -106,22 +112,28 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
             if (getClass() != obj.getClass())
                 return false;
             final MailboxIdUidKey other = (MailboxIdUidKey) obj;
-            if (mailboxId != other.mailboxId)
+            if (mailbox != other.mailbox)
                 return false;
             if (uid != other.uid)
                 return false;
             return true;
         }
-    }
 
+    }
     /** The value for the mailboxId field */
     @Id
-    @Column(name = "MAILBOX_ID", nullable = false)
-    private long mailboxId;
+    @ManyToOne(
+            cascade = {
+                    CascadeType.PERSIST, 
+                    CascadeType.REFRESH, 
+                    CascadeType.MERGE}, 
+            fetch=FetchType.LAZY)
+    @Column(name = "MAILBOX_ID", nullable = true)
+    private JPAMailbox mailbox;
 
     /** The value for the uid field */
     @Id
-    @Column(name = "MAIL_UID", nullable = false)
+    @Column(name = "MAIL_UID", nullable = true)
     private long uid;
 
     /** The value for the internalDate field */
@@ -168,9 +180,9 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
     @Deprecated
     public AbstractJPAMailboxMembership() {}
 
-    public AbstractJPAMailboxMembership(long mailboxId, long uid, Date internalDate, Flags flags, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
+    public AbstractJPAMailboxMembership(JPAMailbox mailbox, long uid, Date internalDate, Flags flags, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
         super();
-        this.mailboxId = mailboxId;
+        this.mailbox = mailbox;
         this.internalDate = internalDate;
         this.uid = uid;
         setFlags(flags);
@@ -184,9 +196,9 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
      * @param original message to be copied, not null
      * @throws IOException 
      */
-    public AbstractJPAMailboxMembership(long mailboxId, long uid, MailboxMembership<?> original) throws MailboxException {
+    public AbstractJPAMailboxMembership(JPAMailbox mailbox, long uid, MailboxMembership<?> original) throws MailboxException {
         super();
-        this.mailboxId = mailboxId;
+        this.mailbox = mailbox;
         this.uid = uid;
         this.internalDate = original.getInternalDate();
         this.answered = original.isAnswered();
@@ -208,7 +220,7 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
      * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getMailboxId()
      */
     public Long getMailboxId() {
-        return mailboxId;
+        return getMailbox().getMailboxId();
     }
 
     /**
@@ -276,11 +288,25 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         seen = flags.contains(Flags.Flag.SEEN);
     }
 
+    /**
+     * Utility getter on Mailbox.
+     */
+    public JPAMailbox getMailbox() {
+        return mailbox;
+    }
+
+    /**
+     * Utility setter on Mailbox.
+     */
+    public void setMailbox(JPAMailbox mailbox) {
+        this.mailbox = mailbox;
+    }
+
     @Override
     public int hashCode() {
         final int PRIME = 31;
         int result = 1;
-        result = PRIME * result + (int) (mailboxId ^ (mailboxId >>> 32));
+        result = PRIME * result + (int) (getMailboxId() ^ (getMailboxId() >>> 32));
         result = PRIME * result + (int) (uid ^ (uid >>> 32));
         return result;
     }
@@ -294,7 +320,7 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         if (getClass() != obj.getClass())
             return false;
         final AbstractJPAMailboxMembership other = (AbstractJPAMailboxMembership) obj;
-        if (mailboxId != other.mailboxId)
+        if (getMailboxId() != other.getMailboxId())
             return false;
         if (uid != other.uid)
             return false;

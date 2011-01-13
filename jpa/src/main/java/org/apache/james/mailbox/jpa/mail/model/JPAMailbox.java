@@ -34,23 +34,23 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 @Table(name="JAMES_MAILBOX")
 @NamedQueries({
     @NamedQuery(name="findMailboxById",
-        query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.mailboxId = :idParam"),
+        query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.mailbox.mailboxId = :idParam"),
     @NamedQuery(name="findMailboxByName",
         query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name = :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="findMailboxByNameWithUser",
         query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name = :nameParam and mailbox.user= :userParam and mailbox.namespace= :namespaceParam"),
-    @NamedQuery(name="deleteAll",
-                query="DELETE FROM Mailbox mailbox"),
+    @NamedQuery(name="deleteAllMailboxes",
+        query="DELETE FROM Mailbox mailbox"),
     @NamedQuery(name="findMailboxWithNameLikeWithUser",
-                query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user= :userParam and mailbox.namespace= :namespaceParam"),
+        query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user= :userParam and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="findMailboxWithNameLike",
-                query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
+        query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="countMailboxesWithNameLikeWithUser",
-                query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user= :userParam and mailbox.namespace= :namespaceParam"),
+        query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user= :userParam and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="countMailboxesWithNameLike",
-                query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
+        query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="listMailboxes",
-                query="SELECT mailbox FROM Mailbox mailbox")
+        query="SELECT mailbox FROM Mailbox mailbox")
 })
 public class JPAMailbox implements Mailbox<Long> {
     
@@ -59,17 +59,17 @@ public class JPAMailbox implements Mailbox<Long> {
     /** The value for the mailboxId field */
     @Id
     @GeneratedValue
-    @Column(name = "MAILBOX_ID", nullable = false)
+    @Column(name = "MAILBOX_ID", nullable = true)
     private long mailboxId;
     
     /** The value for the name field */
     @Basic(optional=false)
-    @Column(name = "MAILBOX_NAME", nullable = false, length = 200)
+    @Column(name = "MAILBOX_NAME", nullable = true, length = 200)
     private String name;
 
     /** The value for the uidValidity field */
     @Basic(optional=false)
-    @Column(name = "MAILBOX_UID_VALIDITY", nullable = false)
+    @Column(name = "MAILBOX_UID_VALIDITY", nullable = true)
     private long uidValidity;
 
     @Basic(optional=false)
@@ -77,7 +77,7 @@ public class JPAMailbox implements Mailbox<Long> {
     private String user;
     
     @Basic(optional=false)
-    @Column(name = "MAILBOX_NAMESPACE", nullable = false, length = 200)
+    @Column(name = "MAILBOX_NAMESPACE", nullable = true, length = 200)
     private String namespace;
 
     /**

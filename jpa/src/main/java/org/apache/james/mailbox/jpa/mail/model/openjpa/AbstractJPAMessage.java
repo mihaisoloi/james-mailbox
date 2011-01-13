@@ -42,24 +42,23 @@ import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
 /**
  * Abstract base class for JPA based implementations of {@link AbstractMessage}
- *
  */
 @MappedSuperclass
 public abstract class AbstractJPAMessage extends AbstractMessage {
 
     @Id
     @GeneratedValue
-    @Column(name = "MAIL_ID", nullable = false)
+    @Column(name = "MAIL_ID", nullable = true)
     private long id;
     
     /** The first body octet */
     @Basic(optional=false)
-    @Column(name = "MAIL_BODY_START_OCTET", nullable = false)
+    @Column(name = "MAIL_BODY_START_OCTET", nullable = true)
     private int bodyStartOctet;
     
     /** Number of octets in the full document content */
     @Basic(optional=false)
-    @Column(name = "MAIL_CONTENT_OCTETS_COUNT", nullable = false)
+    @Column(name = "MAIL_CONTENT_OCTETS_COUNT", nullable = true)
     private long contentOctets;
     
     /** MIME media type */

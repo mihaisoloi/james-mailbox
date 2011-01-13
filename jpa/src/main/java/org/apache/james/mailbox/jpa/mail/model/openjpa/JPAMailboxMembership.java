@@ -34,7 +34,6 @@ import javax.persistence.Table;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
@@ -44,7 +43,7 @@ public class JPAMailboxMembership extends AbstractJPAMailboxMembership {
 
     /** The value for the body field. Lazy loaded */
     @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
-    @Column(name = "MAIL_ID", nullable = false)
+    @Column(name = "MAIL_ID", nullable = true)
     private JPAMessage message;
   
     /**
@@ -53,9 +52,9 @@ public class JPAMailboxMembership extends AbstractJPAMailboxMembership {
     @Deprecated
     public JPAMailboxMembership() {}
 
-    public JPAMailboxMembership(long mailboxId, long uid, Date internalDate, int size, Flags flags, 
+    public JPAMailboxMembership(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailboxId, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
+        super(mailbox, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
         try {
             this.message = new JPAMessage(content, size, bodyStartOctet, headers, propertyBuilder);
         } catch (IOException e) {
@@ -63,8 +62,8 @@ public class JPAMailboxMembership extends AbstractJPAMailboxMembership {
         }
     }
 
-    public JPAMailboxMembership(long mailboxId, long uid, AbstractJPAMailboxMembership original) throws MailboxException {
-        super(mailboxId, uid, original);
+    public JPAMailboxMembership(JPAMailbox mailbox, long uid, AbstractJPAMailboxMembership original) throws MailboxException {
+        super(mailbox, uid, original);
         try {
             this.message = new JPAMessage((JPAMessage) original.getMessage());
         } catch (IOException e) {

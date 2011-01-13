@@ -27,6 +27,7 @@ import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.UidProvider;
@@ -37,7 +38,7 @@ import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 /**
- * Abstract base class which should be used from JPA 2.0 implementations
+ * Abstract base class which should be used from JPA implementations.
  */
 public class JPAMessageManager extends StoreMessageManager<Long> {
     
@@ -53,10 +54,9 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
         for (Header header: headers) {
             jpaHeaders.add((JPAHeader) header);
         }
-        final MailboxMembership<Long> message = new JPAMailboxMembership(getMailboxEntity().getMailboxId(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+        final MailboxMembership<Long> message = new JPAMailboxMembership((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         return message;
     }
-
     
     @Override
     protected Header createHeader(int lineNumber, String name, String value) {

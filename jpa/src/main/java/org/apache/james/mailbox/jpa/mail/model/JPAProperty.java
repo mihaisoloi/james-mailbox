@@ -35,27 +35,27 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
     /** The system unique key */
     @Id
     @GeneratedValue
-    @Column(name = "PROPERTY_ID", nullable = false)
+    @Column(name = "PROPERTY_ID", nullable = true)
     private long id;
     
     /** Order within the list of properties */
     @Basic(optional=false)
-    @Column(name = "PROPERTY_LINE_NUMBER", nullable = false)
+    @Column(name = "PROPERTY_LINE_NUMBER", nullable = true)
     private int line;
     
     /** Local part of the name of this property */
     @Basic(optional=false)
-    @Column(name = "PROPERTY_LOCAL_NAME", nullable = false, length = 200)
+    @Column(name = "PROPERTY_LOCAL_NAME", nullable = true, length = 200)
     private String localName;
     
     /** Namespace part of the name of this property */
     @Basic(optional=false)
-    @Column(name = "PROPERTY_NAME_SPACE", nullable = false, length = 200)
+    @Column(name = "PROPERTY_NAME_SPACE", nullable = true, length = 200)
     private String namespace;
 
     /** Value of this property */
     @Basic(optional=false)
-    @Column(name = "PROPERTY_VALUE", nullable = false, length = 200)
+    @Column(name = "PROPERTY_VALUE", nullable = true, length = 200)
     private String value;
     
     /**
@@ -156,8 +156,7 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
      * @return a <code>String</code> representation 
      * of this object.
      */
-    public String toString()
-    {
+    public String toString() {
         final String result = "JPAProperty ( "
             + "id = " + this.id + " "
             + "localName = " + this.localName + " "
@@ -167,4 +166,5 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
     
         return result;
     }
+    
 }

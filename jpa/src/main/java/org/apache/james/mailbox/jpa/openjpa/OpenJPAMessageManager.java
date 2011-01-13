@@ -30,6 +30,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.JPAMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
@@ -40,7 +41,6 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 /**
  * OpenJPA implementation of Mailbox
- *
  */
 public class OpenJPAMessageManager extends JPAMessageManager {
 
@@ -64,7 +64,7 @@ public class OpenJPAMessageManager extends JPAMessageManager {
             for (Header header: headers) {
                 jpaHeaders.add((JPAHeader) header);
             }
-            return new JPAStreamingMailboxMembership(getMailboxEntity().getMailboxId(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+            return new JPAStreamingMailboxMembership((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         } else {
             return super.createMessage(uid, internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
         }

@@ -34,7 +34,6 @@ import javax.persistence.Table;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -45,7 +44,7 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership 
 
     /** The value for the body field. Lazy loaded */
     @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
-    @Column(name = "MAIL_ID", nullable = false)
+    @Column(name = "MAIL_ID", nullable = true)
     private JPAStreamingMessage message;
     
     /**
@@ -54,14 +53,14 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership 
     @Deprecated
     public JPAStreamingMailboxMembership() {}
 
-    public JPAStreamingMailboxMembership(long mailboxId, long uid, Date internalDate, int size, Flags flags, 
+    public JPAStreamingMailboxMembership(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailboxId, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
+        super(mailbox, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
         this.message = new JPAStreamingMessage(content, size, bodyStartOctet, headers, propertyBuilder);
     }
 
-    public JPAStreamingMailboxMembership(long mailboxId, long uid,  MailboxMembership<?> original) throws MailboxException {
-        super(mailboxId, uid, original);
+    public JPAStreamingMailboxMembership(JPAMailbox mailbox, long uid,  MailboxMembership<?> original) throws MailboxException {
+        super(mailbox, uid, original);
         try {
             this.message = new JPAStreamingMessage(original.getMessage());
         } catch (IOException e) {

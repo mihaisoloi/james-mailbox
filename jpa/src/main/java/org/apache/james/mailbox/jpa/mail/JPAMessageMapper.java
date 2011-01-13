@@ -34,6 +34,7 @@ import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.jpa.JPATransactionalMapper;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
@@ -42,11 +43,10 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
-
+import org.apache.openjpa.persistence.ArgumentException;
 
 /**
  * JPA implementation of a {@link MessageMapper}. This class is not thread-safe!
- *
  */
 public class JPAMessageMapper extends JPATransactionalMapper implements MessageMapper<Long> {
     
@@ -189,10 +189,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         }
     }
 
-
-
     /*
-     * 
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#searchMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
      */
@@ -200,7 +197,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
     public Iterator<Long> searchMailbox(Mailbox<Long> mailbox, SearchQuery query) throws MailboxException {
         try {
             final StringBuilder queryBuilder = new StringBuilder(50);
-            queryBuilder.append("SELECT membership FROM Membership membership WHERE membership.mailboxId = ").append(mailbox.getMailboxId());
+            queryBuilder.append("SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = ").append(mailbox.getMailboxId());
             final List<Criterion> criteria = query.getCriterias();
             boolean range = false;
             int rangeLength = -1;
@@ -291,19 +288,28 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         }
     }
 
-
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
     public long add(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
+
         try {
-                        
+            
+            // We need to reload a "JPA attached" mailbox, because the provide mailbox is already "JPA detached"
+            // If we don't this, we will get an org.apache.openjpa.persistence.ArgumentException.
+            ((AbstractJPAMailboxMembership) message).setMailbox(getEntityManager().find(JPAMailbox.class, mailbox.getMailboxId()));
+            
             getEntityManager().persist(message);
+            
             return message.getUid();
+        
         } catch (PersistenceException e) {
             throw new MailboxException("Save of message " + message + " failed in mailbox " + mailbox, e);
+        } catch (ArgumentException e) {
+            throw new MailboxException("Save of message " + message + " failed in mailbox " + mailbox, e);
         }
+
     }
 
     /*
@@ -311,26 +317,24 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
     public long copy(Mailbox<Long> mailbox, long uid, MailboxMembership<Long> original) throws MailboxException {
-
         MailboxMembership<Long> copy;
         if (original instanceof JPAStreamingMailboxMembership) {
-            copy = new JPAStreamingMailboxMembership(mailbox.getMailboxId(), uid, (AbstractJPAMailboxMembership) original);
+            copy = new JPAStreamingMailboxMembership((JPAMailbox) mailbox, uid, (AbstractJPAMailboxMembership) original);
         } else {
-            copy = new JPAMailboxMembership(mailbox.getMailboxId(), uid,  (AbstractJPAMailboxMembership) original);
+            copy = new JPAMailboxMembership((JPAMailbox) mailbox, uid,  (AbstractJPAMailboxMembership) original);
         }
         return add(mailbox, copy);
     }
-
-
    
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
     public Iterator<UpdatedFlags> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+        
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
-
         final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
+
         for (final MailboxMembership<Long> member:members) {
             Flags originalFlags = member.createFlags();
             if (replace) {
@@ -349,7 +353,8 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
             updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
         }
         
-        return updatedFlags.iterator();       
+        return updatedFlags.iterator();
+
     }
     
 }
