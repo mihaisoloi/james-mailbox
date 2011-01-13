@@ -25,23 +25,28 @@ import java.util.List;
 
 import javax.mail.Flags;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
 @Entity(name="Membership")
-public class JPAMailboxMembership extends AbstractJPAMailboxMembership{
-
+@Table(name="JAMES_MAILBOX_MEMBERSHIP")
+public class JPAMailboxMembership extends AbstractJPAMailboxMembership {
 
     /** The value for the body field. Lazy loaded */
-    @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY) private JPAMessage message;
+    @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @Column(name = "MAIL_ID", nullable = false)
+    private JPAMessage message;
   
-    
     /**
      * For enhancement only.
      */
@@ -75,5 +80,4 @@ public class JPAMailboxMembership extends AbstractJPAMailboxMembership{
         return message;
     }
     
-
 }

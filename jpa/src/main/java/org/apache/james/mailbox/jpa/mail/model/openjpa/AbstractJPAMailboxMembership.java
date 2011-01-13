@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.mail.Flags;
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.MappedSuperclass;
@@ -76,13 +77,16 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
 
     /** Identifies composite key */
     public static class MailboxIdUidKey implements Serializable {
+
         private static final long serialVersionUID = 7847632032426660997L;
+        
+        public MailboxIdUidKey() {}
+
         /** The value for the mailboxId field */
         public long mailboxId;
+        
         /** The value for the uid field */
         public long uid;
-
-        public MailboxIdUidKey() {}
 
         @Override
         public int hashCode() {
@@ -111,32 +115,52 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
     }
 
     /** The value for the mailboxId field */
-    @Id private long mailboxId;
+    @Id
+    @Column(name = "MAILBOX_ID", nullable = false)
+    private long mailboxId;
 
     /** The value for the uid field */
-    @Id private long uid;
+    @Id
+    @Column(name = "MAIL_UID", nullable = false)
+    private long uid;
 
     /** The value for the internalDate field */
-    @Basic(optional=false) private Date internalDate;
+    @Basic(optional = false)
+    @Column(name = "MAIL_DATE", nullable = true)
+    private Date internalDate;
 
     /** The value for the answered field */
-    @Basic(optional=false) private boolean answered = false;
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_ANSWERED", nullable = true)
+    private boolean answered = false;
 
     /** The value for the deleted field */
-    @Basic(optional=false) @Index private boolean deleted = false;
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_DELETED", nullable = true)
+    @Index
+    private boolean deleted = false;
 
     /** The value for the draft field */
-    @Basic(optional=false) private boolean draft = false;
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_DRAFT", nullable = true)
+    private boolean draft = false;
 
     /** The value for the flagged field */
-    @Basic(optional=false) private boolean flagged = false;
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_FLAGGED", nullable = true)
+    private boolean flagged = false;
 
     /** The value for the recent field */
-    @Basic(optional=false) @Index private boolean recent = false;
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_RECENT", nullable = true)
+    @Index
+    private boolean recent = false;
 
     /** The value for the seen field */
-    @Basic(optional=false) @Index private boolean seen = false;
-
+    @Basic(optional = false)
+    @Column(name = "MAIL_IS_SEEN", nullable = true)
+    @Index
+    private boolean seen = false;
     
     /**
      * For enhancement only.
@@ -236,7 +260,9 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         return seen;
     }
     
-
+    public void setUid(long uid) {
+        this.uid = uid;
+    }
     
     /**
      * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(javax.mail.Flags)
@@ -249,8 +275,6 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         recent = flags.contains(Flags.Flag.RECENT);
         seen = flags.contains(Flags.Flag.SEEN);
     }
-
-  
 
     @Override
     public int hashCode() {
@@ -277,11 +301,10 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         final String retValue = 
             "mailbox("
-            + "mailboxId = " + this.mailboxId + TOSTRING_SEPARATOR
+            + "mailboxId = " + this.getMailboxId() + TOSTRING_SEPARATOR
             + "uid = " + this.uid + TOSTRING_SEPARATOR
             + "internalDate = " + this.internalDate + TOSTRING_SEPARATOR
             + "answered = " + this.answered + TOSTRING_SEPARATOR
@@ -291,11 +314,7 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
             + "recent = " + this.recent + TOSTRING_SEPARATOR
             + "seen = " + this.seen + TOSTRING_SEPARATOR
             + " )";
-
         return retValue;
     }
     
-    public void setUid(long uid) {
-        this.uid = uid;
-    }
 }

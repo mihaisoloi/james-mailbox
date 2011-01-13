@@ -28,20 +28,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 import org.apache.james.mailbox.store.streaming.StreamUtils;
 
 @Entity(name="Message")
-public class JPAMessage extends AbstractJPAMessage{
-
+@Table(name="JAMES_MAIL")
+public class JPAMessage extends AbstractJPAMessage {
 
     /** The value for the body field. Lazy loaded */
     /** We use a max length to represent 1gb data. Thats prolly overkill, but who knows */
-    @Basic(optional=false, fetch=FetchType.LAZY) @Column(length=1048576000)  @Lob private byte[] content;
+    @Basic(optional = false, fetch = FetchType.LAZY)
+    @Column(name = "MAIL_BYTES", length = 1048576000)
+    @Lob private byte[] content;
 
     @Deprecated
     public JPAMessage() {}

@@ -19,6 +19,7 @@
 package org.apache.james.mailbox.jpa.user.model;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -32,24 +33,36 @@ import org.apache.james.mailbox.store.user.model.Subscription;
 /**
  * A subscription to a mailbox by a user.
  */
-@Entity(name="Subscription")
-@Table(uniqueConstraints=@UniqueConstraint(columnNames={"USERNAME", "MAILBOX"}))
+@Entity(name = "Subscription")
+@Table(
+    name = "JAMES_SUBSCRIPTION",
+    uniqueConstraints = @UniqueConstraint(columnNames={"USER_NAME", "MAILBOX_NAME"})
+)
 @NamedQueries({
-    @NamedQuery(name="findFindMailboxSubscriptionForUser",
-        query="SELECT subscription FROM Subscription subscription WHERE subscription.username = :userParam AND subscription.mailbox = :mailboxParam"),          
-    @NamedQuery(name="findSubscriptionsForUser",
-        query="SELECT subscription FROM Subscription subscription WHERE subscription.username = :userParam")                  
+    @NamedQuery(name = "findFindMailboxSubscriptionForUser",
+        query = "SELECT subscription FROM Subscription subscription WHERE subscription.username = :userParam AND subscription.mailbox = :mailboxParam"),          
+    @NamedQuery(name = "findSubscriptionsForUser",
+        query = "SELECT subscription FROM Subscription subscription WHERE subscription.username = :userParam")                  
 })
 public class JPASubscription implements Subscription {
 
     private static final String TO_STRING_SEPARATOR = "  ";
+    
     /** Primary key */
     @GeneratedValue
-    @Id private long id;
+    @Id 
+    @Column(name = "SUBSCRIPTION_ID", nullable = false)
+    private long id;
+    
     /** Name of the subscribed user */
-    @Basic(optional=false) private String username;
+    @Basic(optional=false)
+    @Column(name = "USER_NAME", nullable = false, length = 100)
+    private String username;
+    
     /** Subscribed mailbox */
-    @Basic(optional=false) private String mailbox;
+    @Basic(optional=false) 
+    @Column(name = "MAILBOX_NAME", nullable = false, length = 100)
+    private String mailbox;
     
     /**
      * Used by JPA
@@ -109,16 +122,13 @@ public class JPASubscription implements Subscription {
      *
      * @return output suitable for debugging
      */
-    public String toString()
-    {
+    public String toString() {
         final String result = "Subscription ( "
             + "id = " + this.id + TO_STRING_SEPARATOR
             + "user = " + this.username + TO_STRING_SEPARATOR
             + "mailbox = " + this.mailbox + TO_STRING_SEPARATOR
             + " )";
-    
         return result;
     }
-    
     
 }

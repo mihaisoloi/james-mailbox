@@ -25,11 +25,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 @Entity(name="Mailbox")
+@Table(name="JAMES_MAILBOX")
 @NamedQueries({
     @NamedQuery(name="findMailboxById",
         query="SELECT mailbox FROM Mailbox mailbox WHERE mailbox.mailboxId = :idParam"),
@@ -55,16 +57,28 @@ public class JPAMailbox implements Mailbox<Long> {
     private static final String TAB = " ";
 
     /** The value for the mailboxId field */
-    @Id @GeneratedValue private long mailboxId;
+    @Id
+    @GeneratedValue
+    @Column(name = "MAILBOX_ID", nullable = false)
+    private long mailboxId;
     
     /** The value for the name field */
-    @Basic(optional=false) @Column(nullable = false) private String name;
+    @Basic(optional=false)
+    @Column(name = "MAILBOX_NAME", nullable = false, length = 200)
+    private String name;
 
     /** The value for the uidValidity field */
-    @Basic(optional=false) private long uidValidity;
+    @Basic(optional=false)
+    @Column(name = "MAILBOX_UID_VALIDITY", nullable = false)
+    private long uidValidity;
 
-    @Basic(optional=false) @Column(nullable = true)  private String user;
-    @Basic(optional=false) @Column(nullable = false) private String namespace;
+    @Basic(optional=false)
+    @Column(name = "USER_NAME", nullable = true, length = 200)
+    private String user;
+    
+    @Basic(optional=false)
+    @Column(name = "MAILBOX_NAMESPACE", nullable = false, length = 200)
+    private String namespace;
 
     /**
      * JPA only
@@ -96,14 +110,12 @@ public class JPAMailbox implements Mailbox<Long> {
         return name;
     }
 
-
     /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getUidValidity()
      */
     public long getUidValidity() {
         return uidValidity;
     }
-
     
     /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setName(java.lang.String)
@@ -113,8 +125,7 @@ public class JPAMailbox implements Mailbox<Long> {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         final String retValue = "Mailbox ( "
             + "mailboxId = " + this.mailboxId + TAB
             + "name = " + this.name + TAB
@@ -169,7 +180,6 @@ public class JPAMailbox implements Mailbox<Long> {
         this.namespace = namespace;
     }
 
-
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setUser(java.lang.String)
@@ -177,4 +187,5 @@ public class JPAMailbox implements Mailbox<Long> {
     public void setUser(String user) {
         this.user = user;
     }
+    
 }

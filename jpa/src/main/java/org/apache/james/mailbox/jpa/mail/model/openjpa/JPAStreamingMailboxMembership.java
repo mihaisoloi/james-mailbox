@@ -25,23 +25,28 @@ import java.util.List;
 
 import javax.mail.Flags;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
 @Entity(name="Membership")
-public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership{
-
+@Table(name="JAMES_MAILBOX_MEMBERSHIP")
+public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership {
 
     /** The value for the body field. Lazy loaded */
-    @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY) private JPAStreamingMessage message;
-  
+    @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @Column(name = "MAIL_ID", nullable = false)
+    private JPAStreamingMessage message;
     
     /**
      * For enhancement only.
@@ -53,8 +58,6 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership{
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
         super(mailboxId, uid, internalDate, flags, bodyStartOctet, headers, propertyBuilder);  
         this.message = new JPAStreamingMessage(content, size, bodyStartOctet, headers, propertyBuilder);
-        
-       
     }
 
     public JPAStreamingMailboxMembership(long mailboxId, long uid,  MailboxMembership<?> original) throws MailboxException {
@@ -73,6 +76,5 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership{
     public Message getMessage() {
         return message;
     }
-    
 
 }

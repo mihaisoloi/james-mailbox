@@ -27,6 +27,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -46,12 +47,13 @@ import org.apache.openjpa.persistence.Persistent;
  * TODO: Fix me!
  */
 @Entity(name="Message")
-public class JPAStreamingMessage extends AbstractJPAMessage{
+@Table(name="JAMES_MAIL")
+public class JPAStreamingMessage extends AbstractJPAMessage {
 
-
-	@Persistent(optional=false, fetch=FetchType.LAZY) @Column(length=1048576000)  private InputStream content;
+	@Persistent(optional=false, fetch=FetchType.LAZY)
+	@Column(name = "MAIL_BYTES", length=1048576000)
+	private InputStream content;
 	 
-
     @Deprecated
     public JPAStreamingMessage() {}
 
@@ -74,7 +76,6 @@ public class JPAStreamingMessage extends AbstractJPAMessage{
     public InputStream getFullContent() throws IOException {
         return content;
     }
-
     
     public InputStream getBodyContent() throws IOException {
         return new LazySkippingInputStream(content, getBodyStartOctet());

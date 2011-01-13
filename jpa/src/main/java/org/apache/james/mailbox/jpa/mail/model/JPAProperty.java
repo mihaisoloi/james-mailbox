@@ -19,26 +19,44 @@
 package org.apache.james.mailbox.jpa.mail.model;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.apache.james.mailbox.store.mail.model.AbstractComparableProperty;
 import org.apache.james.mailbox.store.mail.model.Property;
 
 @Entity(name="Property")
+@Table(name="JAMES_MAIL_PROPERTY")
 public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
 
-    @Id @GeneratedValue private long id;
+    /** The system unique key */
+    @Id
+    @GeneratedValue
+    @Column(name = "PROPERTY_ID", nullable = false)
+    private long id;
     
     /** Order within the list of properties */
-    @Basic(optional=false) private int line;
+    @Basic(optional=false)
+    @Column(name = "PROPERTY_LINE_NUMBER", nullable = false)
+    private int line;
+    
     /** Local part of the name of this property */
-    @Basic(optional=false) private String localName;
+    @Basic(optional=false)
+    @Column(name = "PROPERTY_LOCAL_NAME", nullable = false, length = 200)
+    private String localName;
+    
     /** Namespace part of the name of this property */
-    @Basic(optional=false) private String namespace;
+    @Basic(optional=false)
+    @Column(name = "PROPERTY_NAME_SPACE", nullable = false, length = 200)
+    private String namespace;
+
     /** Value of this property */
-    @Basic(optional=false) private String value;
+    @Basic(optional=false)
+    @Column(name = "PROPERTY_VALUE", nullable = false, length = 200)
+    private String value;
     
     /**
      * @deprecated enhancement only

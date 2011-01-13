@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -44,25 +45,48 @@ import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
  *
  */
 @MappedSuperclass
-public abstract class AbstractJPAMessage extends AbstractMessage{
+public abstract class AbstractJPAMessage extends AbstractMessage {
 
-    @Id@GeneratedValue private long id;
-
-    /** Headers for this message */
-    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY) @ElementJoinColumn(name="MESSAGE_ID") private List<JPAHeader> headers;
-    /** The first body octet */
-    @Basic(optional=false) private int bodyStartOctet;
-    /** Number of octets in the full document content */
-    @Basic(optional=false) private long contentOctets;
-    /** MIME media type */
-    @Basic(optional=true) private String mediaType;
-    /** MIME sub type */
-    @Basic(optional=true) private String subType;
-    /** Meta data for this message */
-    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY) @OrderBy("line") @ElementJoinColumn(name="MESSAGE_ID") private List<JPAProperty> properties;
-    /** THE CRFL count when this document is textual, null otherwise */
-    @Basic(optional=true) private Long textualLineCount;
+    @Id
+    @GeneratedValue
+    @Column(name = "MAIL_ID", nullable = false)
+    private long id;
     
+    /** The first body octet */
+    @Basic(optional=false)
+    @Column(name = "MAIL_BODY_START_OCTET", nullable = false)
+    private int bodyStartOctet;
+    
+    /** Number of octets in the full document content */
+    @Basic(optional=false)
+    @Column(name = "MAIL_CONTENT_OCTETS_COUNT", nullable = false)
+    private long contentOctets;
+    
+    /** MIME media type */
+    @Basic(optional=true)
+    @Column(name = "MAIL_MIME_TYPE", nullable = true, length = 200)
+    private String mediaType;
+    
+    /** MIME sub type */
+    @Basic(optional=true)
+    @Column(name = "MAIL_MIME_SUBTYPE", nullable = true, length = 200)
+    private String subType;
+    
+    /** THE CRFL count when this document is textual, null otherwise */
+    @Basic(optional=true)
+    @Column(name = "MAIL_TEXTUAL_LINE_COUNT", nullable = true)
+    private Long textualLineCount;
+    
+    /** Headers for this message */
+    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @ElementJoinColumn(name="MAIL_ID")
+    private List<JPAHeader> headers;
+
+    /** Meta data for this message */
+    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @OrderBy("line")
+    @ElementJoinColumn(name="MAIL_ID")
+    private List<JPAProperty> properties;
 
     @Deprecated
     public AbstractJPAMessage() {}
@@ -81,7 +105,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage{
         for (final Property property:properties) {
             this.properties.add(new JPAProperty(property, order++));
         }
-
     }
 
     /**
@@ -120,7 +143,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage{
         return new ArrayList<Header>(headers);
     }
 
-
     @Override
     public int hashCode() {
         final int PRIME = 31;
@@ -143,8 +165,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage{
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         final String retValue = 
             "message("
             + "id = " + id
@@ -188,7 +209,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage{
     public Long getTextualLineCount() {
         return textualLineCount;
     }
-
 
     /*
      * (non-Javadoc)
