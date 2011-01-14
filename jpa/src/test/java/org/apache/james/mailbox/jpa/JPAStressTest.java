@@ -24,7 +24,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.impl.SimpleLog;
-import org.apache.james.imap.functional.AbstractStressTest;
+import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
@@ -45,7 +45,7 @@ import org.junit.Before;
 /**
  * Proof of bug https://issues.apache.org/jira/browse/IMAP-137
  */
-public class JPAStressTest extends AbstractStressTest{
+public class JPAStressTest extends AbstractStressTest {
     
     private OpenJPAMailboxManager mailboxManager;
     

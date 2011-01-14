@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.imap.functional;
+package org.apache.james.mailbox;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;

@@ -16,24 +16,22 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.functional.maildir;
+package org.apache.james.mailbox.maildir;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.james.imap.functional.AbstractStressTest;
+import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
-import org.apache.james.mailbox.maildir.MaildirMailboxManager;
-import org.apache.james.mailbox.maildir.MaildirMailboxSessionMapperFactory;
-import org.apache.james.mailbox.maildir.MaildirStore;
 import org.junit.After;
 import org.junit.Before;
 
 public class MaildirStressTest extends AbstractStressTest {
 
     private static final String MAILDIR_HOME = "target/Maildir";
+
     private MaildirMailboxManager mailboxManager;
     
     @Before

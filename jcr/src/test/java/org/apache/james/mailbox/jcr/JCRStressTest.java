@@ -25,29 +25,21 @@ import javax.jcr.RepositoryException;
 import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
-import org.apache.james.imap.functional.AbstractStressTest;
+import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jcr.GlobalMailboxSessionJCRRepository;
-import org.apache.james.mailbox.jcr.JCRMailboxManager;
-import org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory;
-import org.apache.james.mailbox.jcr.JCRUtils;
-import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.xml.sax.InputSource;
 
-public class JCRStressTest extends AbstractStressTest{
+public class JCRStressTest extends AbstractStressTest {
     
     private JCRMailboxManager mailboxManager;
-
-    private static final String JACKRABBIT_HOME = "target/jackrabbit";
-    public static final String META_DATA_DIRECTORY = "target/user-meta-data";
     private RepositoryImpl repository;
+    private static final String JACKRABBIT_HOME = "target/jackrabbit";
    
-    
     @Before
     public void setUp() throws RepositoryException, MailboxException {
 
@@ -71,22 +63,17 @@ public class JCRStressTest extends AbstractStressTest{
 
     }
     
-    
     @After
-    
     public void tearDown() {
         MailboxSession session = mailboxManager.createSystemSession("test", new SimpleLog("Test"));
         session.close();
         repository.shutdown();
         new File(JACKRABBIT_HOME).delete();
-
     }
 
-    
     @Override
     protected MailboxManager getMailboxManager() {
         return mailboxManager;
     }
-
  
 }
