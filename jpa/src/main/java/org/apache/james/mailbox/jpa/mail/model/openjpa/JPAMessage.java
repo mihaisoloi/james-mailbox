@@ -42,7 +42,7 @@ public class JPAMessage extends AbstractJPAMessage {
     /** The value for the body field. Lazy loaded */
     /** We use a max length to represent 1gb data. Thats prolly overkill, but who knows */
     @Basic(optional = false, fetch = FetchType.LAZY)
-    @Column(name = "MAIL_BYTES", length = 1048576000, nullable = true)
+    @Column(name = "MAIL_BYTES", length = 1048576000, nullable = false)
     @Lob private byte[] content;
 
     @Deprecated

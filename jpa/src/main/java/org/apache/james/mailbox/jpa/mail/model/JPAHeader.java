@@ -36,25 +36,25 @@ public class JPAHeader extends AbstractComparableHeader {
 
     @Id
     @GeneratedValue
-    @Column(name = "HEADER_ID", nullable = true)
+    @Column(name = "HEADER_ID")
     private long id;
 
     /** The value for the lineNumber field */
-    @Basic(optional=false)
-    @Column(name = "HEADER_LINE_NUMBER", nullable = true)
+    @Basic(optional = false)
+    @Column(name = "HEADER_LINE_NUMBER", nullable = false)
     private int lineNumber;
 
     /** The value for the field field */
     /** Use a max of 1024 which could happen on very freaky header field names*/
-    @Basic(optional=false)
-    @Column(name = "HEADER_FIELD", nullable = true, length = 1024)
+    @Basic(optional = false)
+    @Column(name = "HEADER_FIELD", nullable = false, length = 1024)
     private String field;
 
     /** The value for the value field */
     /** We use 4000 as max which is mostly overkill for most emails but better waste a bit of space then loose headers**/
     /** 4000 is the maximum value accepted by Oracle for VARCHAR2 **/
-    @Basic(optional=false)
-    @Column(name = "HEADER_VALUE", nullable = true, length = 4000)
+    @Basic(optional = false)
+    @Column(name = "HEADER_VALUE", nullable = false, length = 4000)
     private String value;
     
     /**

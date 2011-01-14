@@ -59,25 +59,25 @@ public class JPAMailbox implements Mailbox<Long> {
     /** The value for the mailboxId field */
     @Id
     @GeneratedValue
-    @Column(name = "MAILBOX_ID", nullable = true)
+    @Column(name = "MAILBOX_ID")
     private long mailboxId;
     
     /** The value for the name field */
-    @Basic(optional=false)
-    @Column(name = "MAILBOX_NAME", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "MAILBOX_NAME", nullable = false, length = 200)
     private String name;
 
     /** The value for the uidValidity field */
-    @Basic(optional=false)
-    @Column(name = "MAILBOX_UID_VALIDITY", nullable = true)
+    @Basic(optional = false)
+    @Column(name = "MAILBOX_UID_VALIDITY", nullable = false)
     private long uidValidity;
 
-    @Basic(optional=false)
-    @Column(name = "USER_NAME", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "USER_NAME", nullable = false, length = 200)
     private String user;
     
-    @Basic(optional=false)
-    @Column(name = "MAILBOX_NAMESPACE", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "MAILBOX_NAMESPACE", nullable = false, length = 200)
     private String namespace;
 
     /**

@@ -36,7 +36,11 @@ import org.apache.james.mailbox.store.user.model.Subscription;
 @Entity(name = "Subscription")
 @Table(
     name = "JAMES_SUBSCRIPTION",
-    uniqueConstraints = @UniqueConstraint(columnNames={"USER_NAME", "MAILBOX_NAME"})
+    uniqueConstraints = 
+        @UniqueConstraint(
+                columnNames={
+                        "USER_NAME", 
+                        "MAILBOX_NAME"})
 )
 @NamedQueries({
     @NamedQuery(name = "findFindMailboxSubscriptionForUser",
@@ -51,16 +55,16 @@ public class JPASubscription implements Subscription {
     /** Primary key */
     @GeneratedValue
     @Id 
-    @Column(name = "SUBSCRIPTION_ID", nullable = false)
+    @Column(name = "SUBSCRIPTION_ID")
     private long id;
     
     /** Name of the subscribed user */
-    @Basic(optional=false)
+    @Basic(optional = false)
     @Column(name = "USER_NAME", nullable = false, length = 100)
     private String username;
     
     /** Subscribed mailbox */
-    @Basic(optional=false) 
+    @Basic(optional = false) 
     @Column(name = "MAILBOX_NAME", nullable = false, length = 100)
     private String mailbox;
     

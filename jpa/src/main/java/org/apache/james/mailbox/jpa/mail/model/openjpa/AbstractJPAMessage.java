@@ -48,31 +48,31 @@ public abstract class AbstractJPAMessage extends AbstractMessage {
 
     @Id
     @GeneratedValue
-    @Column(name = "MAIL_ID", nullable = true)
+    @Column(name = "MAIL_ID")
     private long id;
     
     /** The first body octet */
-    @Basic(optional=false)
-    @Column(name = "MAIL_BODY_START_OCTET", nullable = true)
+    @Basic(optional = false)
+    @Column(name = "MAIL_BODY_START_OCTET", nullable = false)
     private int bodyStartOctet;
     
     /** Number of octets in the full document content */
-    @Basic(optional=false)
-    @Column(name = "MAIL_CONTENT_OCTETS_COUNT", nullable = true)
+    @Basic(optional = false)
+    @Column(name = "MAIL_CONTENT_OCTETS_COUNT", nullable = false)
     private long contentOctets;
     
     /** MIME media type */
-    @Basic(optional=true)
+    @Basic(optional = true)
     @Column(name = "MAIL_MIME_TYPE", nullable = true, length = 200)
     private String mediaType;
     
     /** MIME sub type */
-    @Basic(optional=true)
+    @Basic(optional = true)
     @Column(name = "MAIL_MIME_SUBTYPE", nullable = true, length = 200)
     private String subType;
     
     /** THE CRFL count when this document is textual, null otherwise */
-    @Basic(optional=true)
+    @Basic(optional = true)
     @Column(name = "MAIL_TEXTUAL_LINE_COUNT", nullable = true)
     private Long textualLineCount;
     

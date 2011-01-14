@@ -51,7 +51,7 @@ import org.apache.openjpa.persistence.Persistent;
 public class JPAStreamingMessage extends AbstractJPAMessage {
 
 	@Persistent(optional=false, fetch=FetchType.LAZY)
-	@Column(name = "MAIL_BYTES", length=1048576000, nullable = true)
+	@Column(name = "MAIL_BYTES", length=1048576000, nullable = false)
 	private InputStream content;
 	 
     @Deprecated

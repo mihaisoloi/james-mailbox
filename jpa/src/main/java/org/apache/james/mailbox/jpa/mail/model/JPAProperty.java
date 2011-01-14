@@ -39,23 +39,23 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
     private long id;
     
     /** Order within the list of properties */
-    @Basic(optional=false)
-    @Column(name = "PROPERTY_LINE_NUMBER", nullable = true)
+    @Basic(optional = false)
+    @Column(name = "PROPERTY_LINE_NUMBER", nullable = false)
     private int line;
     
     /** Local part of the name of this property */
-    @Basic(optional=false)
-    @Column(name = "PROPERTY_LOCAL_NAME", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "PROPERTY_LOCAL_NAME", nullable = false, length = 500)
     private String localName;
     
     /** Namespace part of the name of this property */
-    @Basic(optional=false)
-    @Column(name = "PROPERTY_NAME_SPACE", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "PROPERTY_NAME_SPACE", nullable = false, length = 500)
     private String namespace;
 
     /** Value of this property */
-    @Basic(optional=false)
-    @Column(name = "PROPERTY_VALUE", nullable = true, length = 200)
+    @Basic(optional = false)
+    @Column(name = "PROPERTY_VALUE", nullable = false, length = 1024)
     private String value;
     
     /**

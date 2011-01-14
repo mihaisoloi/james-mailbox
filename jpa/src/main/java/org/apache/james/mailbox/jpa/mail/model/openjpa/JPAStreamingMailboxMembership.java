@@ -44,7 +44,7 @@ public class JPAStreamingMailboxMembership extends AbstractJPAMailboxMembership 
 
     /** The value for the body field. Lazy loaded */
     @ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
-    @Column(name = "MAIL_ID", nullable = true)
+    @Column(name = "MAIL_ID", nullable = false)
     private JPAStreamingMessage message;
     
     /**

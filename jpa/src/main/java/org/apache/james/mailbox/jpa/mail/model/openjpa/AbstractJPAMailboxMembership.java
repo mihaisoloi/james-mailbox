@@ -133,44 +133,44 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
 
     /** The value for the uid field */
     @Id
-    @Column(name = "MAIL_UID", nullable = true)
+    @Column(name = "MAIL_UID")
     private long uid;
 
     /** The value for the internalDate field */
     @Basic(optional = false)
-    @Column(name = "MAIL_DATE", nullable = true)
+    @Column(name = "MAIL_DATE")
     private Date internalDate;
 
     /** The value for the answered field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_ANSWERED", nullable = true)
+    @Column(name = "MAIL_IS_ANSWERED", nullable = false)
     private boolean answered = false;
 
     /** The value for the deleted field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_DELETED", nullable = true)
+    @Column(name = "MAIL_IS_DELETED", nullable = false)
     @Index
     private boolean deleted = false;
 
     /** The value for the draft field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_DRAFT", nullable = true)
+    @Column(name = "MAIL_IS_DRAFT", nullable = false)
     private boolean draft = false;
 
     /** The value for the flagged field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_FLAGGED", nullable = true)
+    @Column(name = "MAIL_IS_FLAGGED", nullable = false)
     private boolean flagged = false;
 
     /** The value for the recent field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_RECENT", nullable = true)
+    @Column(name = "MAIL_IS_RECENT", nullable = false)
     @Index
     private boolean recent = false;
 
     /** The value for the seen field */
     @Basic(optional = false)
-    @Column(name = "MAIL_IS_SEEN", nullable = true)
+    @Column(name = "MAIL_IS_SEEN", nullable = false)
     @Index
     private boolean seen = false;
     
