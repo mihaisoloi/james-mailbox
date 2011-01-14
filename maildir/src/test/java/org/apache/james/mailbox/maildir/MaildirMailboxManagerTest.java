@@ -101,6 +101,32 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
             
     }
     
+    // See MAILBOX-31
+    @Test
+    public void testCreateSubFolder() throws MailboxException {
+
+        if (OsDetector.isWindows()) {
+            System.out.println("Maildir tests work only on non-windows systems. So skip the test");
+        } else {
+
+            MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user");
+            MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
+            MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
+    
+            manager.init();
+    
+            String user = "test@localhost";
+            MailboxSession session = manager.createSystemSession(user, new SimpleLog("Test"));
+            manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "Trash"), session);
+            manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
+            
+            // this threw NPE
+            manager.getMailbox(MailboxPath.inbox(user), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
+
+        }
+
+    }
+
     /**
      * Create the maildirStore with the provided configuration and executes the list() tests.
      * Cleans the generated artifacts.
@@ -144,21 +170,4 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
         FileUtils.deleteDirectory(new File(MAILDIR_HOME));
     }
     
-    // See MAILBOX-31
-    @Test
-    public void testCreateSubFolder() throws MailboxException {
-        MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user");
-        MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        MaildirMailboxManager manager = new MaildirMailboxManager(mf, null, store);
-
-        manager.init();
-
-        String user = "test@localhost";
-        MailboxSession session = manager.createSystemSession(user, new SimpleLog("Test"));
-        manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "Trash"), session);
-        manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
-        
-        // this threw NPE
-        manager.getMailbox(MailboxPath.inbox(user), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
-    }
 }
