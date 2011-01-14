@@ -54,7 +54,11 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      */
     @Before
     public void setup() throws Exception {
-        deleteMaildirTestDirectory();
+        if (OsDetector.isWindows()) {
+            System.out.println("Maildir tests work only on non-windows systems. So skip the test");
+        } else {
+          deleteMaildirTestDirectory();
+        }
     }
     
     /**
@@ -64,7 +68,11 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
      */
     @After
     public void tearDown() throws IOException {
-        deleteMaildirTestDirectory();
+        if (OsDetector.isWindows()) {
+            System.out.println("Maildir tests work only on non-windows systems. So skip the test");
+        } else {
+          deleteMaildirTestDirectory();
+        }
     }
 
     /* (non-Javadoc)
