@@ -56,6 +56,10 @@
       <artifactId>geronimo-annotation_1.0_spec</artifactId>
     </dependency> 
     <dependency>
+      <groupId>org.apache.openjpa</groupId>
+      <artifactId>openjpa</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
