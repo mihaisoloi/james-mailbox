@@ -49,8 +49,7 @@ public class MailboxQuery {
      *            matches any sequence of characters up to the next hierarchy
      *            delimiter
      */
-    public MailboxQuery(final MailboxPath base, final String expression,
-            final char freeWildcard, final char localWildcard, final char pathDelimiter) {
+    public MailboxQuery(final MailboxPath base, final String expression, final char pathDelimiter) {
         super();
         this.base = base;
         if (base.getName() == null)
@@ -61,8 +60,8 @@ public class MailboxQuery {
             this.expression = expression;
         }
         expressionLength = this.expression.length();
-        this.freeWildcard = freeWildcard;
-        this.localWildcard = localWildcard;
+        this.freeWildcard = '*';
+        this.localWildcard = '%';
         this.pathDelimiter = pathDelimiter;
     }
 

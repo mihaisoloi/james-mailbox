@@ -36,7 +36,7 @@ public class MailboxExpressionTest {
 
 
     private MailboxQuery create(String expression) {
-        return new MailboxQuery(BASE_PATH, expression, '*', '%', '.');
+        return new MailboxQuery(BASE_PATH, expression, '.');
     }
 
     @Test
@@ -56,13 +56,13 @@ public class MailboxExpressionTest {
 
     @Test
     public void testCombinedNameEmptyPart() throws Exception {
-        MailboxQuery expression = new MailboxQuery(BASE_PATH, "", '*', '%', '.');
+        MailboxQuery expression = new MailboxQuery(BASE_PATH, "", '.');
         assertEquals(BASE, expression.getCombinedName());
     }
 
     @Test
     public void testNullCombinedName() throws Exception {
-        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, null), null, '*', '%', '.');
+        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, null), null, '.');
         assertNotNull(expression.getCombinedName());
     }
 
@@ -80,14 +80,14 @@ public class MailboxExpressionTest {
 
     @Test
     public void testCombinedNameBaseEndsWithDelimiter() throws Exception {
-        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, BASE + '.'), PART, '*', '%', '.');
+        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, BASE + '.'), PART, '.');
         assertEquals(BASE + "." + PART, expression.getCombinedName());
     }
 
     @Test
     public void testCombinedNameBaseEndsWithDelimiterPartStarts()
             throws Exception {
-        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, BASE + '.'), '.' + PART, '*', '%', '.');
+        MailboxQuery expression = new MailboxQuery(new MailboxPath(null, null, BASE + '.'), '.' + PART, '.');
         assertEquals(BASE + "." + PART, expression.getCombinedName());
     }
 
