@@ -189,25 +189,21 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      */
     public List<Mailbox<Integer>> list() throws MailboxException {
         
-        File maildirRoot = maildirStore.getMaildirRoot();
-        List<Mailbox<Integer>> mailboxList = new ArrayList<Mailbox<Integer>>();
+       File maildirRoot = maildirStore.getMaildirRoot();
+       List<Mailbox<Integer>> mailboxList = new ArrayList<Mailbox<Integer>>();
         
-       if (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_DOMAIN + "/" + MaildirStore.PATH_USER)) {
-           File[] domains = maildirRoot.listFiles();
-           for (File domain: domains) {
-               File[] users = domain.listFiles();
-               visitUsersForMailboxList(domain, users, mailboxList);
-           }
-           return mailboxList;
-       }
-
-       if ((maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_USER)) || (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_FULLUSER))) {
+       if (maildirStore.getMaildirLocation().endsWith("/" + MaildirStore.PATH_FULLUSER)) {
            File[] users = maildirRoot.listFiles();
            visitUsersForMailboxList(null, users, mailboxList);
            return mailboxList;
        }
        
-       throw new UnsupportedOperationException("The MaildirLocation must end with /%domain/%user, /%user or /%fulluser.");
+       File[] domains = maildirRoot.listFiles();
+       for (File domain: domains) {
+           File[] users = domain.listFiles();
+           visitUsersForMailboxList(domain, users, mailboxList);
+       }
+       return mailboxList;
         
     }
 
