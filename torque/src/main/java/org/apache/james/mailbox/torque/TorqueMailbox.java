@@ -713,7 +713,7 @@ public class TorqueMailbox implements MessageManager {
         return true;
     }
 
-    public void copyTo(MessageRange set, TorqueMailbox toMailbox,
+    public List<MessageRange> copyTo(MessageRange set, TorqueMailbox toMailbox,
             MailboxSession session) throws MailboxException {
         final List rows;
         lockForReading();
@@ -734,7 +734,13 @@ public class TorqueMailbox implements MessageManager {
             unlockAfterReading();
         }
         // Release read lock before copying
-        toMailbox.copy(rows, session);
+        Iterator<Long> iterator=toMailbox.copy(rows, session);
+        List<MessageRange> result=new ArrayList<MessageRange>();
+         while (iterator.hasNext())
+        {
+            result.add(MessageRange.one(iterator.next()));
+        }
+        return result;
     }
 
     private void unlockAfterReading() {
@@ -745,9 +751,10 @@ public class TorqueMailbox implements MessageManager {
         }
     }
 
-    private void copy(List rows, MailboxSession session)
+    private Iterator<Long> copy(List rows, MailboxSession session)
     throws MailboxException {
         try {
+            List<Long> copiedEmailsUids = new ArrayList<Long>();
             for (Iterator iter = rows.iterator(); iter.hasNext();) {
                 MessageRow fromRow = (MessageRow) iter.next();
                 final MailboxRow mailbox = reserveNextUid();
@@ -762,6 +769,7 @@ public class TorqueMailbox implements MessageManager {
                     // inserted long before 4, when
                     // mail 4 is big and comes over a slow connection.
                     long uid = mailbox.getLastUid();
+                    copiedEmailsUids.add(uid);
                     this.mailboxRow = mailbox;
 
                     MessageRow newRow = new MessageRow();
@@ -792,6 +800,7 @@ public class TorqueMailbox implements MessageManager {
                     getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), session.getSessionId());
                 }
             }
+            return copiedEmailsUids.iterator();
         } catch (TorqueException e) {
             throw new MailboxException("save failed");
         } catch (InterruptedException e) {

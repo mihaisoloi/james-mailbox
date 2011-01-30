@@ -345,11 +345,12 @@ public class TorqueMailboxManager implements MailboxManager {
         }
     }
 
-    public void copyMessages(MessageRange set, MailboxPath from, MailboxPath to,
+    public List<MessageRange> copyMessages(MessageRange set, MailboxPath from, MailboxPath to,
             MailboxSession session) throws MailboxException {
         TorqueMailbox toMailbox = doGetMailbox(getName(to), session);
         TorqueMailbox fromMailbox = doGetMailbox(getName(from), session);
-        fromMailbox.copyTo(set, toMailbox, session);
+        List<MessageRange> result=new ArrayList<MessageRange>();
+        return fromMailbox.copyTo(set, toMailbox, session);       
     }
 
     @SuppressWarnings("unchecked")

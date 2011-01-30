@@ -433,17 +433,16 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @param session
      * @throws MailboxException
      */
-    public void copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
+    public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
         try {
+            List<MessageRange> result=new ArrayList<MessageRange>();
             Iterator<Long> copiedUids = copy(set, toMailbox, session);
-            long highest = 0;
             while(copiedUids.hasNext()) {
                 long uid = copiedUids.next();
-                if (highest < uid) {
-                    highest = uid;
-                }
+                result.add(MessageRange.one(uid));
                 dispatcher.added(uid, session.getSessionId(), new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
             }
+            return result;
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }

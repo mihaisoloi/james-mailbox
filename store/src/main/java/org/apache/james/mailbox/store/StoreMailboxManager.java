@@ -21,6 +21,7 @@ package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -367,11 +368,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @see org.apache.james.mailbox.MailboxManager#copyMessages(org.apache.james.mailbox.MessageRange, org.apache.james.imap.api.MailboxPath, org.apache.james.imap.api.MailboxPath, org.apache.james.mailbox.MailboxSession)
      */
     @SuppressWarnings("unchecked")
-	public void copyMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException {
+	public List<MessageRange> copyMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException {
         StoreMessageManager<Id> toMailbox = (StoreMessageManager<Id>) getMailbox(to, session);
         StoreMessageManager<Id> fromMailbox = (StoreMessageManager<Id>) getMailbox(from, session);
-        fromMailbox.copyTo(set, toMailbox, session);
-
+        return fromMailbox.copyTo(set, toMailbox, session);
     }
 
     /*

@@ -126,8 +126,9 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      *            name of the destination mailbox
      * @param session
      *            <code>MailboxSession</code>, not null
+     * @return a list of MessageRange - uids assigned to copied messages
      */
-    void copyMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException;
+    List<MessageRange> copyMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException;
 
     /**
      * Searches for mailboxes matching the given query.
