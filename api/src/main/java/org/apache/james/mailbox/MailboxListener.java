@@ -54,20 +54,20 @@ public interface MailboxListener {
      * A mailbox event.
      */
     public class Event {
-        private final long sessionId;
+        private final MailboxSession session;
         private final MailboxPath path;
-        public Event(final long sessionId, final MailboxPath path) {
-            this.sessionId = sessionId;
+        public Event(final MailboxSession session, final MailboxPath path) {
+            this.session = session;
             this.path = path;
         }
         
         /**
-         * Gets the id of the session which the event.
+         * Gets the {@link MailboxSession} in whichs context the {@link Event} happened
          * 
-         * @return session id
+         * @return session 
          */
-        public long getSessionId() {
-            return sessionId;
+        public MailboxSession getSession() {
+            return session;
         }
         
         /**
@@ -85,8 +85,8 @@ public interface MailboxListener {
      */
     public class MailboxDeletion extends Event {
 
-        public MailboxDeletion(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public MailboxDeletion(final MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
     }
     
@@ -95,8 +95,8 @@ public interface MailboxListener {
      * Indicates that a mailbox has been renamed.
      */
     public abstract class MailboxRenamed extends Event {
-        public MailboxRenamed(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public MailboxRenamed(final MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
         /**
          * Gets the new name for this mailbox.
@@ -111,8 +111,8 @@ public interface MailboxListener {
      */
     public abstract class MessageEvent extends Event {
 
-        public MessageEvent(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public MessageEvent(MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
 
         /**
@@ -125,8 +125,8 @@ public interface MailboxListener {
 
     public abstract class Expunged extends MessageEvent {
 
-        public Expunged(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public Expunged(MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
     }
 
@@ -137,8 +137,8 @@ public interface MailboxListener {
      */
     public abstract class FlagsUpdated extends MessageEvent {
 
-        public FlagsUpdated(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public FlagsUpdated(MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
 
         /**
@@ -161,8 +161,8 @@ public interface MailboxListener {
      */
     public abstract class Added extends MessageEvent {
 
-        public Added(long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public Added(MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
     }
 

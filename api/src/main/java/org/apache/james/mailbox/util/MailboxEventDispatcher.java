@@ -32,6 +32,7 @@ import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxSession;
 
 /**
  * Helper class to dispatch {@link Event}'s to registerend MailboxListener 
@@ -74,36 +75,36 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param sessionId
      * @param path
      */
-    public void added(long uid, long sessionId, MailboxPath path) {
+    public void added(MailboxSession session, long uid, MailboxPath path) {
         pruneClosed();
-        final AddedImpl added = new AddedImpl(sessionId, path, uid);
+        final AddedImpl added = new AddedImpl(session, path, uid);
         event(added);
     }
 
     /**
      * Should get called when a message was expunged from a Mailbox. All registered MailboxListener will get triggered then
-
+     * 
+     * @param session
      * @param uid
-     * @param sessionId
      * @param path
      */
-    public void expunged(final long uid, long sessionId, MailboxPath path) {
-        final ExpungedImpl expunged = new ExpungedImpl(sessionId, path, uid);
+    public void expunged(final MailboxSession session, final long uid, MailboxPath path) {
+        final ExpungedImpl expunged = new ExpungedImpl(session, path, uid);
         event(expunged);
     }
 
     /**
      * Should get called when the message flags were update in a Mailbox. All registered MailboxListener will get triggered then
      *
+     * @param session
      * @param uid
-     * @param sessionId
      * @param path
      * @param original
      * @param updated
      */
-    public void flagsUpdated(final long uid, long sessionId, final MailboxPath path,
+    public void flagsUpdated(MailboxSession session, final long uid, final MailboxPath path,
             final Flags original, final Flags updated) {
-        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(sessionId, path, uid,
+        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uid,
                 original, updated);
         event(flags);
     }
@@ -142,16 +143,16 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param to
      * @param sessionId
      */
-    public void mailboxRenamed(MailboxPath from, MailboxPath to, long sessionId) {
-        event(new MailboxRenamedEventImpl(from, to, sessionId));
+    public void mailboxRenamed(MailboxSession session, MailboxPath from, MailboxPath to) {
+        event(new MailboxRenamedEventImpl(session, from, to));
     }
 
     private final static class AddedImpl extends MailboxListener.Added {
 
         private final long subjectUid;
 
-        public AddedImpl(final long sessionId, final MailboxPath path, final long subjectUid) {
-            super(sessionId, path);
+        public AddedImpl(final MailboxSession session, final MailboxPath path, final long subjectUid) {
+            super(session, path);
             this.subjectUid = subjectUid;
         }
 
@@ -168,8 +169,8 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         private final long subjectUid;
 
-        public ExpungedImpl(final long sessionId, final MailboxPath path, final long subjectUid) {
-            super(sessionId, path);
+        public ExpungedImpl(MailboxSession session, final MailboxPath path, final long subjectUid) {
+            super(session, path);
             this.subjectUid = subjectUid;
         }
 
@@ -199,9 +200,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         private final Flags newFlags;
 
-        public FlagsUpdatedImpl(final long sessionId, final MailboxPath path, final long subjectUid,
+        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid,
                 final Flags original, final Flags updated) {
-            this(sessionId, path, subjectUid, updated, isChanged(original, updated,
+            this(session, path, subjectUid, updated, isChanged(original, updated,
                     Flags.Flag.ANSWERED), isChanged(original, updated,
                     Flags.Flag.DELETED), isChanged(original, updated,
                     Flags.Flag.DRAFT), isChanged(original, updated,
@@ -210,12 +211,12 @@ public class MailboxEventDispatcher implements MailboxListener {
                     Flags.Flag.SEEN));
         }
 
-        public FlagsUpdatedImpl(final long sessionId, final MailboxPath path, final long subjectUid,
+        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid,
                 final Flags newFlags, boolean answeredUpdated,
                 boolean deletedUpdated, boolean draftUpdated,
                 boolean flaggedUpdated, boolean recentUpdated,
                 boolean seenUpdated) {
-            super(sessionId, path);
+            super(session, path);
             this.subjectUid = subjectUid;
             this.modifiedFlags = new boolean[NUMBER_OF_SYSTEM_FLAGS];
             this.modifiedFlags[0] = answeredUpdated;
@@ -302,29 +303,28 @@ public class MailboxEventDispatcher implements MailboxListener {
 
     /**
      * Should get called when a Mailbox was deleted. All registered MailboxListener will get triggered then
- 
      *
-     * @param sessionId
+     * @param session
      * @param path
      */
-    public void mailboxDeleted(long sessionId, MailboxPath path) {
+    public void mailboxDeleted(MailboxSession session, MailboxPath path) {
         final MailboxDeletionEventImpl event = new MailboxDeletionEventImpl(
-                sessionId, path);
+                session, path);
         event(event);
     }
 
     private static final class MailboxDeletionEventImpl extends
             MailboxListener.MailboxDeletion {
-        public MailboxDeletionEventImpl(final long sessionId, MailboxPath path) {
-            super(sessionId, path);
+        public MailboxDeletionEventImpl(MailboxSession session, MailboxPath path) {
+            super(session, path);
         }
     }
 
     private static final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
         private final MailboxPath newPath;
 
-        public MailboxRenamedEventImpl(final MailboxPath path, final MailboxPath newPath, final long sessionId) {
-            super(sessionId, path);
+        public MailboxRenamedEventImpl(final MailboxSession session, final MailboxPath path, final MailboxPath newPath) {
+            super(session, path);
             this.newPath = newPath;
         }
 

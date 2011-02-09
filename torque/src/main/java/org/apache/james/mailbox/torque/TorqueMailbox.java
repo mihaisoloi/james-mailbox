@@ -45,7 +45,6 @@ import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxNotFoundException;
@@ -198,7 +197,7 @@ public class TorqueMailbox implements MessageManager {
                     save(messageRow);
                     MessageResult messageResult = fillMessageResult(messageRow,
                             FetchGroupImpl.MINIMAL);
-                    getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), mailboxSession.getSessionId());
+                    getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), mailboxSession);
                     return messageResult.getUid();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -359,7 +358,7 @@ public class TorqueMailbox implements MessageManager {
             flagsByIndex.put(row.getUid(), row.getMessageFlags().createFlags());
         }
         final TorqueResultIterator results = getResults(result, rows);
-        getUidChangeTracker().found(range, flagsByIndex, session.getSessionId());
+        getUidChangeTracker().found(range, flagsByIndex, session);
         return results;
     }
 
@@ -445,7 +444,7 @@ public class TorqueMailbox implements MessageManager {
                     MessageResult messageResult = fillMessageResult(
                             (MessageRow) messageRows.get(0), FetchGroupImpl.MINIMAL);
                     if (messageResult != null) {
-                        getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), mailboxSession.getSessionId());
+                        getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), mailboxSession);
                     }
 
                     return messageResult.getUid();
@@ -516,7 +515,7 @@ public class TorqueMailbox implements MessageManager {
                 todelc.add(MessageRowPeer.UID, messageRow.getUid());
                 MessageRowPeer.doDelete(todelc);
             }
-            getUidChangeTracker().expunged(uids);
+            getUidChangeTracker().expunged(session, uids);
             return uids.iterator();
         } catch (TorqueException e) {
             throw new MailboxException("delete failed", e);
@@ -561,7 +560,7 @@ public class TorqueMailbox implements MessageManager {
                     messageFlags.save();
                 }
             }
-            tracker.flagsUpdated(newFlagsByUid, originalFlagsByUid, mailboxSession.getSessionId());
+            tracker.flagsUpdated(newFlagsByUid, originalFlagsByUid, mailboxSession);
             return newFlagsByUid;
         } catch (TorqueException e) {
             throw new MailboxException("save failed", e);
@@ -797,7 +796,7 @@ public class TorqueMailbox implements MessageManager {
                     save(newRow);
                     MessageResult messageResult = fillMessageResult(newRow,
                             FetchGroupImpl.MINIMAL);
-                    getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), session.getSessionId());
+                    getUidChangeTracker().found(messageResult.getUid(), messageResult.getFlags(), session);
                 }
             }
             return copiedEmailsUids.iterator();
@@ -814,11 +813,11 @@ public class TorqueMailbox implements MessageManager {
     }
 
     public void deleted(MailboxSession session) {
-        tracker.mailboxDeleted(session.getSessionId());
+        tracker.mailboxDeleted(session);
     }
 
     public void reportRenamed(String from, MailboxRow mailboxRow, MailboxSession session) {
-        tracker.reportRenamed(getMailboxPath(mailboxRow.getName(), session.getPathDelimiter()), session.getSessionId());
+        tracker.reportRenamed(getMailboxPath(mailboxRow.getName(), session.getPathDelimiter()), session);
         this.mailboxRow = mailboxRow;
     }
 

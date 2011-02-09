@@ -133,7 +133,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         Iterator<Long> uidIt = deleteMarkedInMailbox(set, mailboxSession);
         while(uidIt.hasNext()) {
             long uid = uidIt.next();
-            dispatcher.expunged(uid, mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()));
+            dispatcher.expunged(mailboxSession, uid, new StoreMailboxPath<Id>(getMailboxEntity()));
             uids.add(uid);
         }
         return uids.iterator();    
@@ -262,7 +262,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final MailboxMembership<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                         
-            dispatcher.added(uid, mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()));
+            dispatcher.added(mailboxSession, uid, new StoreMailboxPath<Id>(getMailboxEntity()));
             return uid;
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
@@ -417,7 +417,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         
         while (it.hasNext()) {
             UpdatedFlags flag = it.next();
-            dispatcher.flagsUpdated(flag.getUid(), mailboxSession.getSessionId(), new StoreMailboxPath<Id>(getMailboxEntity()), flag.getOldFlags(), flag.getNewFlags());
+            dispatcher.flagsUpdated(mailboxSession, flag.getUid(), new StoreMailboxPath<Id>(getMailboxEntity()), flag.getOldFlags(), flag.getNewFlags());
             newFlagsByUid.put(flag.getUid(), flag.getNewFlags());
         }
         return newFlagsByUid;
@@ -440,7 +440,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             while(copiedUids.hasNext()) {
                 long uid = copiedUids.next();
                 result.add(MessageRange.one(uid));
-                dispatcher.added(uid, session.getSessionId(), new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
+                dispatcher.added(session, uid, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
             }
             return result;
         } catch (MailboxException e) {

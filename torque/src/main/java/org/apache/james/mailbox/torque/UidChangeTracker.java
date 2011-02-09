@@ -33,6 +33,7 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -58,10 +59,10 @@ public class UidChangeTracker implements MailboxConstants {
         this.path = path;
     }
 
-    public synchronized void expunged(final Collection<Long> uidsExpunged) {
+    public synchronized void expunged(MailboxSession session, final Collection<Long> uidsExpunged) {
         for (Long uid:uidsExpunged) {
             cache.remove(uid);
-            eventDispatcher.expunged(uid, 0, path);
+            eventDispatcher.expunged(session, uid, path);
         }
     }
 
@@ -73,7 +74,7 @@ public class UidChangeTracker implements MailboxConstants {
      * @param sessionId
      *            id of the session upating the flags
      */
-    public synchronized void flagsUpdated(SortedMap<Long,Flags> newFlagsByUid, Map<Long,Flags> originalFlagsByUid, long sessionId) {
+    public synchronized void flagsUpdated(SortedMap<Long,Flags> newFlagsByUid, Map<Long,Flags> originalFlagsByUid, MailboxSession session) {
         if (newFlagsByUid != null) {
             for(Map.Entry<Long, Flags> entry:newFlagsByUid.entrySet()) {
                 final Long uid = entry.getKey();
@@ -86,14 +87,14 @@ public class UidChangeTracker implements MailboxConstants {
                     lastFlags = cachedFlags;
                 }
                 if (!newFlags.equals(lastFlags)) {
-                    eventDispatcher.flagsUpdated(uid, sessionId, path, lastFlags, newFlags);
+                    eventDispatcher.flagsUpdated(session, uid, path, lastFlags, newFlags);
                 }
                 cache.put(uid, newFlags);
             }
         }
     }
 
-    public synchronized void found(MessageRange range, final Map<Long, Flags> flagsByIndex, long sessionId) {
+    public synchronized void found(MessageRange range, final Map<Long, Flags> flagsByIndex, MailboxSession session) {
         final Set<Long> expectedSet = getSubSet(range);
         for (Map.Entry<Long, Flags> entry:flagsByIndex.entrySet()) {
             final Long uid = entry.getKey();
@@ -101,24 +102,24 @@ public class UidChangeTracker implements MailboxConstants {
                 expectedSet.remove(uid);
             }
             final Flags flags = entry.getValue();
-            found(uid, flags, sessionId);
+            found(uid, flags, session);
         }
 
         for (Iterator<Long> iter = expectedSet.iterator(); iter.hasNext();) {
             long uid = ((Long) iter.next()).longValue();
-            eventDispatcher.expunged(uid, sessionId, path);
+            eventDispatcher.expunged(session, uid, path);
         }
     }
 
-    public synchronized void found(final Long uid, final Flags flags, long sessionId) {
+    public synchronized void found(final Long uid, final Flags flags, MailboxSession session) {
         if (flags != null) {
             final Flags cachedFlags = cache.get(uid);
             if (cachedFlags == null || !flags.equals(cachedFlags)) {
-                eventDispatcher.flagsUpdated(uid, sessionId, path, cachedFlags, flags);
+                eventDispatcher.flagsUpdated(session, uid, path, cachedFlags, flags);
             }
         }
         if (uid > lastUid) {
-            eventDispatcher.added(uid, sessionId, path);
+            eventDispatcher.added(session, uid, path);
             lastUid = uid;
         }
         cache.put(uid, flags);
@@ -142,12 +143,12 @@ public class UidChangeTracker implements MailboxConstants {
         eventDispatcher.addMailboxListener(listener);
     }
     
-    public void mailboxDeleted(long sessionId) {
-        eventDispatcher.mailboxDeleted(sessionId, path);
+    public void mailboxDeleted(MailboxSession session) {
+        eventDispatcher.mailboxDeleted(session, path);
     }
 
-    public void reportRenamed(MailboxPath to, long sessionId) {
-        eventDispatcher.mailboxRenamed(path, to, sessionId);
+    public void reportRenamed(MailboxPath to, MailboxSession session) {
+        eventDispatcher.mailboxRenamed(session, path, to);
         path = to;
     }
 }

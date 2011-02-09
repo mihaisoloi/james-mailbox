@@ -21,7 +21,6 @@ package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -300,7 +299,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
 
         });
 
-        dispatcher.mailboxDeleted(session.getSessionId(), mailboxPath);
+        dispatcher.mailboxDeleted(session, mailboxPath);
 
     }
 
@@ -330,7 +329,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                 mailbox.setName(to.getName());
                 mapper.save(mailbox);
 
-                dispatcher.mailboxRenamed(from, to, session.getSessionId());
+                dispatcher.mailboxRenamed(session, from, to);
 
                 // rename submailboxes
                 final MailboxPath children = new MailboxPath(MailboxConstants.USER_NAMESPACE, from.getUser(), from.getName() + getDelimiter() + "%");
@@ -346,7 +345,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
 
                             sub.setName(subNewName);
                             mapper.save(sub);
-                            dispatcher.mailboxRenamed(fromPath, toPath, session.getSessionId());
+                            dispatcher.mailboxRenamed(session, fromPath, toPath);
 
                             if (log.isDebugEnabled())
                                 log.debug("Rename mailbox sub-mailbox " + subOriginalName + " to " + subNewName);
