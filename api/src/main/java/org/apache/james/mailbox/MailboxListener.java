@@ -90,6 +90,16 @@ public interface MailboxListener {
         }
     }
     
+    /**
+     * Indicates that a mailbox has been Added.
+     */
+    public class MailboxAdded extends Event {
+        public MailboxAdded(final MailboxSession session, MailboxPath path) {
+            super(session, path);
+        }
+    }
+
+    
     
     /**
      * Indicates that a mailbox has been renamed.

@@ -272,6 +272,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                                 }
 
                             });
+                            
+                            // notify listeners
+                            dispatcher.mailboxAdded(session, mailbox);
                         }
                     }
                 });

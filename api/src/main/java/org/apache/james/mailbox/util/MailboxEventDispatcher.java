@@ -308,18 +308,23 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param path
      */
     public void mailboxDeleted(MailboxSession session, MailboxPath path) {
-        final MailboxDeletionEventImpl event = new MailboxDeletionEventImpl(
+        final MailboxDeletion event = new MailboxDeletion(
                 session, path);
         event(event);
     }
 
-    private static final class MailboxDeletionEventImpl extends
-            MailboxListener.MailboxDeletion {
-        public MailboxDeletionEventImpl(MailboxSession session, MailboxPath path) {
-            super(session, path);
-        }
+    /**
+     * Should get called when a Mailbox was added. All registered MailboxListener will get triggered then
+     *
+     * @param session
+     * @param path
+     */
+    public void mailboxAdded(MailboxSession session, MailboxPath path) {
+        final MailboxAdded event = new MailboxAdded(
+                session, path);
+        event(event);
     }
-
+    
     private static final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
         private final MailboxPath newPath;
 
