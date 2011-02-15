@@ -32,7 +32,6 @@ import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.mock.MockMailboxSession;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.SimpleHeader;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
@@ -44,7 +43,7 @@ import org.junit.Test;
 public class LuceneMessageSearchIndexTest {
 
     private MessageSearchIndex<Long> index;
-    private MockMailboxSession session = new MockMailboxSession("myuser");
+
     private SimpleMailbox mailbox = new SimpleMailbox(0);
     private SimpleMailbox mailbox2 = new SimpleMailbox(1);
 
@@ -63,27 +62,27 @@ public class LuceneMessageSearchIndexTest {
         headersTestSubject.add(new SimpleHeader("Subject", 2, "test2"));
 
         SimpleMailboxMembership m = new SimpleMailboxMembership(mailbox.getMailboxId(),1, new Date(), 200, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
-        index.add(session, mailbox, m);
+        index.add(null, mailbox, m);
         
         SimpleMailboxMembership m2 = new SimpleMailboxMembership(mailbox2.getMailboxId(),1, new Date(), 20, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
-        index.add(session, mailbox2, m2);
+        index.add(null, mailbox2, m2);
 
         Calendar cal = Calendar.getInstance();
         cal.set(1980, 2, 10);
         SimpleMailboxMembership m3 = new SimpleMailboxMembership(mailbox.getMailboxId(),2, cal.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody".getBytes(), headersTest);
-        index.add(session, mailbox, m3);
+        index.add(null, mailbox, m3);
         
         Calendar cal2 = Calendar.getInstance();
         cal2.set(8000, 2, 10);
         SimpleMailboxMembership m4 = new SimpleMailboxMembership(mailbox.getMailboxId(),3, cal2.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody2".getBytes(), headersTestSubject);
-        index.add(session, mailbox, m4);
+        index.add(null, mailbox, m4);
     }
     
     @Test
     public void testSearchAll() throws Exception {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.all());
-        Iterator<Long> it2 = index.search(session, mailbox2, query);
+        Iterator<Long> it2 = index.search(null, mailbox2, query);
         assertTrue(it2.hasNext());
         assertEquals(1, it2.next().longValue(), 1);
         assertFalse(it2.hasNext());
@@ -94,7 +93,7 @@ public class LuceneMessageSearchIndexTest {
 
         SearchQuery q = new SearchQuery();
         q.andCriteria(SearchQuery.flagIsSet(Flag.DELETED));
-        Iterator<Long> it3 = index.search(session, mailbox, q);
+        Iterator<Long> it3 = index.search(null, mailbox, q);
         assertEquals(3, it3.next().longValue(), 1);
         assertEquals(4, it3.next().longValue(), 1);
         assertFalse(it3.hasNext());
@@ -104,7 +103,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchBody() throws Exception {    
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.bodyContains("body"));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());
@@ -114,7 +113,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchMail() throws Exception {    
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.mailContains("body"));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
 
@@ -125,7 +124,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchHeaderContains() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.headerContains("Subject", "test"));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
 
@@ -136,7 +135,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchHeaderExists() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.headerExists("Subject"));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(3, it4.next().longValue(), 1);
 
@@ -147,7 +146,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchFlagUnset() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.flagIsUnSet(Flag.DRAFT));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
         assertEquals(3, it4.next().longValue(), 1);
@@ -163,7 +162,7 @@ public class LuceneMessageSearchIndexTest {
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.internalDateBefore(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1 , cal.get(Calendar.YEAR)));
         
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(2, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());
     }
@@ -175,7 +174,7 @@ public class LuceneMessageSearchIndexTest {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.internalDateAfter(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1, cal.get(Calendar.YEAR)));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(3, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());
     }
@@ -188,7 +187,7 @@ public class LuceneMessageSearchIndexTest {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.internalDateOn(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1, cal.get(Calendar.YEAR)));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());
     }
@@ -199,7 +198,7 @@ public class LuceneMessageSearchIndexTest {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.uid(new SearchQuery.NumericRange[] {new SearchQuery.NumericRange(1)}));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next(), 1);
         assertFalse(it4.hasNext());
     }
@@ -211,7 +210,7 @@ public class LuceneMessageSearchIndexTest {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.uid(new SearchQuery.NumericRange[] {new SearchQuery.NumericRange(1), new SearchQuery.NumericRange(2,3)}));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
         assertEquals(3, it4.next().longValue(), 1);
@@ -225,7 +224,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchSizeEquals() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeEquals(200));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
 
         assertFalse(it4.hasNext());
@@ -235,7 +234,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchSizeLessThan() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeLessThan(200));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(2, it4.next().longValue(), 1);
         assertEquals(3, it4.next().longValue(), 1);
 
@@ -247,7 +246,7 @@ public class LuceneMessageSearchIndexTest {
     public void testSearchSizeGreaterThan() throws Exception {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeGreaterThan(6));
-        Iterator<Long> it4 = index.search(session, mailbox, q2);
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
         assertEquals(3, it4.next().longValue(), 1);

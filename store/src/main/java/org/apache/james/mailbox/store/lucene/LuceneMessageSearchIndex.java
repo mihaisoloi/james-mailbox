@@ -30,7 +30,6 @@ import java.util.Locale;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
@@ -259,8 +258,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 if (MEDIA_TYPE_TEXT.equalsIgnoreCase(mediaType) || MEDIA_TYPE_MESSAGE.equalsIgnoreCase(mediaType)) {
                     // TODO: maybe we want to limit the length here ?
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    IOUtils.copy(in, out);
+                    int b = -1;
+                    while ((b = in.read()) != -1) {
+                        out.write(b);
+                    }
+                    out.flush();
                     doc.add(new Field(BODY_FIELD,  out.toString(charset),Store.NO, Index.ANALYZED));
+                    out.close();
                     
                 }
             }
