@@ -30,6 +30,12 @@ import org.apache.james.mailbox.MailboxSession;
 
 public abstract class AbstractDelegatingMailboxListener implements MailboxListener, MailboxListenerSupport{
 
+    private boolean isClosed;
+    
+    protected AbstractDelegatingMailboxListener() {
+    	isClosed = false;
+    }
+    
     /**
      * Receive the event and dispatch it to the right {@link MailboxListener} depending on {@link Event#getMailboxPath()}
      */
@@ -72,10 +78,17 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
     }
 
     /**
-     * Is never closed
+     * Close the listener
+     */
+    public void close() {
+    	isClosed = true;
+    }
+    
+    /**
+     * Check if closed
      */
     public boolean isClosed() {
-        return false;
+        return isClosed;
     }
 
     /*

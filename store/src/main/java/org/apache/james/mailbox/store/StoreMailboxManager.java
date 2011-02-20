@@ -111,7 +111,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param delegatingListener
      */
     public void setDelegatingMailboxListener(AbstractDelegatingMailboxListener delegatingListener) {
+    	if(this.delegatingListener != null)
+    		this.delegatingListener.close();
         this.delegatingListener = delegatingListener;
+        dispatcher.addMailboxListener(this.delegatingListener);
     }
     
     
