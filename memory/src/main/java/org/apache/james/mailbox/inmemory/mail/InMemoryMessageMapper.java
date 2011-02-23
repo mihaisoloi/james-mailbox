@@ -93,8 +93,9 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(java.lang.Object, org.apache.james.mailbox.MessageRange)
      */
     @SuppressWarnings("unchecked")
-    public List<MailboxMembership<Long>> findInMailbox(Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
+    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MailboxMembershipCallback<Long> callback) throws MailboxException {
         final List<MailboxMembership<Long>> results;
+        final int batchSize = set.getBatchSize();
         final MessageRange.Type type = set.getType();
         switch (type) {
             case ALL:
@@ -129,21 +130,39 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
                 break;
         }
         Collections.sort(results, MailboxMembershipComparator.INSTANCE);
-        return results;
+        
+        if(batchSize > 0) {
+	        int i = 0;
+	        while(i*batchSize < results.size()) {
+	        	callback.onMailboxMembers(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
+	        	i++;
+	        }
+        } else {
+        	callback.onMailboxMembers(results);
+        }
     }
-
+    
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findMarkedForDeletionInMailbox(org.apache.james.mailbox.MessageRange)
      */
     public List<MailboxMembership<Long>> findMarkedForDeletionInMailbox(Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
-        final List<MailboxMembership<Long>> results = findInMailbox(mailbox, set);
-        for(final Iterator<MailboxMembership<Long>> it=results.iterator();it.hasNext();) {
-            if (!it.next().isDeleted()) {
-                it.remove();
-            }
-        }
-        return results;
+    	final List<MailboxMembership<Long>> filteredResult = new ArrayList<MailboxMembership<Long>>();
+    	
+        findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
+        	
+			public void onMailboxMembers(List<MailboxMembership<Long>> results)
+					throws MailboxException {
+				for(final Iterator<MailboxMembership<Long>> it=results.iterator();it.hasNext();) {
+					MailboxMembership<Long> member = it.next();
+		            if (member.isDeleted()) {
+		                filteredResult.add(member);
+		            }
+		        }
+			}
+		});
+        
+		return filteredResult;
     }
 
     /*
@@ -220,31 +239,36 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         return add(mailbox, membership);
     }
 
-    public Iterator<UpdatedFlags> updateFlags(Mailbox<Long> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Long> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
 
-        final List<MailboxMembership<Long>> members = findInMailbox(mailbox, set);
-        for (final MailboxMembership<Long> member:members) {
-            Flags originalFlags = member.createFlags();
-            if (replace) {
-                member.setFlags(flags);
-            } else {
-                Flags current = member.createFlags();
-                if (value) {
-                    current.add(flags);
-                } else {
-                    current.remove(flags);
-                }
-                member.setFlags(current);
-            }
-            Flags newFlags = member.createFlags();
-            
-            add(mailbox, member);
-            
-            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-        }
+        findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
+			
+			public void onMailboxMembers(List<MailboxMembership<Long>> members)
+					throws MailboxException {
+				for (final MailboxMembership<Long> member:members) {
+		            Flags originalFlags = member.createFlags();
+		            if (replace) {
+		                member.setFlags(flags);
+		            } else {
+		                Flags current = member.createFlags();
+		                if (value) {
+		                    current.add(flags);
+		                } else {
+		                    current.remove(flags);
+		                }
+		                member.setFlags(current);
+		            }
+		            Flags newFlags = member.createFlags();
+		            
+		            add(mailbox, member);
+		            
+		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
+		        }
+				
+			}
+		});
         
         return updatedFlags.iterator();       
     }
-    
 }

@@ -53,12 +53,15 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.MailboxMetaData;
+import org.apache.james.mailbox.store.ResultIterator;
+import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.streaming.CRLFOutputStream;
+import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 import org.apache.james.mailbox.torque.om.MailboxRow;
 import org.apache.james.mailbox.torque.om.MailboxRowPeer;
 import org.apache.james.mailbox.torque.om.MessageBody;
@@ -328,16 +331,39 @@ public class TorqueMailbox implements MessageManager {
         return criteria;
     }
 
-    public Iterator getMessages(final MessageRange set, FetchGroup fetchGroup,
+    public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup,
             MailboxSession mailboxSession) throws MailboxException {
-        lockForReading();
+        
+    	final List<MessageResult> rows = new ArrayList<MessageResult>();
+    	
+    	getMessages(set, fetchGroup, mailboxSession, new MessageCallback() {
+			
+			public void onMessages(Iterator<MessageResult> it) throws MailboxException {
+				while(it.hasNext()) {
+					rows.add(it.next());
+				}
+			}
+		}); 
+    	
+        return rows.iterator();
+    }
+
+	public void getMessages(MessageRange batchedSet,
+			FetchGroup fetchGroup, MailboxSession mailboxSession,
+			MessageCallback messageCallback) throws MailboxException {
+		lockForReading();
         try {
             checkAccess();
+
+            List<MessageRange> ranges = createRanges(batchedSet.getUidFrom(), batchedSet.getUidTo(), batchedSet.getBatchSize());
+            
             try {
-                Criteria c = criteriaForMessageSet(set);
-                c.add(MessageFlagsPeer.MAILBOX_ID, getMailboxRow()
-                        .getMailboxId());
-                return getMessages(fetchGroup, set, c, mailboxSession);
+            	for(MessageRange set : ranges) {
+	                Criteria c = criteriaForMessageSet(set);
+	                c.add(MessageFlagsPeer.MAILBOX_ID, getMailboxRow()
+	                        .getMailboxId());
+	                messageCallback.onMessages(getMessages(fetchGroup, set, c, mailboxSession));
+            	}
             } catch (TorqueException e) {
                 throw new MailboxException("Search failed", e);
             } catch (MessagingException e) {
@@ -346,8 +372,26 @@ public class TorqueMailbox implements MessageManager {
         } finally {
             unlockAfterReading();
         }
-    }
-
+	}
+	
+	private List<MessageRange> createRanges(long start, long end, int batchSize) {
+	  List<MessageRange> ranges = new ArrayList<MessageRange>();
+	  if (start == end) {
+	      ranges.add(MessageRange.one(start));
+	  } else {
+	      while (start < end) {
+	          long to = start + batchSize;
+	          if (to > end) {
+	              to = end;
+	          }
+	          MessageRange r = MessageRange.range(start, to);
+	          ranges.add(r);
+	          start = to;
+	      }
+	  }
+	  return ranges;
+	}
+    
     @SuppressWarnings("unchecked")
     private TorqueResultIterator getMessages(FetchGroup result, MessageRange range,
             Criteria c, MailboxSession session) throws TorqueException, MessagingException,
@@ -857,4 +901,5 @@ public class TorqueMailbox implements MessageManager {
 
         return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession));
     }
+
 }

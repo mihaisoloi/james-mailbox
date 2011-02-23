@@ -42,9 +42,10 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.MessageRangeException;
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.UidProvider;
@@ -56,6 +57,7 @@ import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
+import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
@@ -477,10 +479,33 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup,
             MailboxSession mailboxSession) throws MailboxException {
-        final List<MailboxMembership<Id>> rows = mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set);
+        
+    	final List<MailboxMembership<Id>> rows = new ArrayList<MailboxMembership<Id>>();
+    	
+    	mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
+			public void onMailboxMembers(List<MailboxMembership<Id>> batchRows) throws MailboxException {
+				rows.addAll(batchRows);
+			}
+		});
+    	
         return new ResultIterator<Id>(rows.iterator(), fetchGroup);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession, int, org.apache.james.mailbox.MessageManager.MessageCallback)
+     */
+	public void getMessages(MessageRange set,
+			final FetchGroup fetchGroup, MailboxSession mailboxSession,
+			final MessageCallback messageCallback) throws MailboxException {
+	
+		mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
+			public void onMailboxMembers(List<MailboxMembership<Id>> rows) throws MailboxException {
+				messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
+			}
+		});
+	}
+	
     /**
      * Return a List which holds all uids of recent messages and optional reset the recent flag on the messages for the uids
      * 
@@ -572,11 +597,21 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
-    protected Iterator<Long> copy(MessageRange set, StoreMessageManager<Id> to, MailboxSession session) throws MailboxException {
+    protected Iterator<Long> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         try {
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
-            final List<MailboxMembership<Id>> originalRows = messageMapper.findInMailbox(getMailboxEntity(), set);
-            return to.copy(originalRows, session);
+            
+            final List<Long> copiedMessages = new ArrayList<Long>();
+            messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
+
+				public void onMailboxMembers(List<MailboxMembership<Id>> originalRows)
+						throws MailboxException {
+					Iterator<Long> ids = to.copy(originalRows, session);
+					while(ids.hasNext())
+						copiedMessages.add(ids.next());
+				}
+			});
+            return copiedMessages.iterator(); 
 
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);

@@ -39,17 +39,17 @@ import org.apache.james.mailbox.store.transaction.Mapper;
 public interface MessageMapper<Id> extends Mapper {
 
     /**
-     * Return a List of {@link MailboxMembership} which represent the given {@link MessageRange}
+     * Return a List of {@link MailboxMembership} using {@link MailboxMembershipCallback<Id>} which represent the given {@link MessageRange}
      * The list must be ordered by the {@link Message} uid
      * 
      * @param mailbox The mailbox to search
-     * @param set
-     * @return list
+     * @param set message range for batch processing
+     * @param callback callback object 
      * @throws MailboxException
      */
-    public abstract List<MailboxMembership<Id>> findInMailbox(Mailbox<Id> mailbox, MessageRange set)
+    public abstract void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MailboxMembershipCallback<Id> callback)
             throws MailboxException;
-
+    
     /**
      * Return a List of {@link MailboxMembership} for the given {@link MessageRange} which are marked for deletion
      * The list must be ordered by the {@link Message} uid

@@ -27,16 +27,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.SortedMap;
+import java.util.Map.Entry;
 
 import javax.mail.Flags;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.maildir.MaildirFolder;
@@ -125,11 +125,12 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public List<MailboxMembership<Integer>> findInMailbox(Mailbox<Integer> mailbox, MessageRange set)
+    public void findInMailbox(Mailbox<Integer> mailbox, MessageRange set, MailboxMembershipCallback<Integer> callback)
     throws MailboxException {
         final List<MailboxMembership<Integer>> results;
         final long from = set.getUidFrom();
         final long to = set.getUidTo();
+        final int batchSize = set.getBatchSize(); 
         final Type type = set.getType();
         switch (type) {
         default:
@@ -146,7 +147,16 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
             results = findMessagesInMailboxBetweenUIDs(mailbox, null, from, to);
             break;       
         }
-        return results;
+        
+        if(batchSize > 0) {
+	        int i = 0;
+	        while(i*batchSize < results.size()) {
+	        	callback.onMailboxMembers(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
+	        	i++;
+	        }
+        } else {
+        	callback.onMailboxMembers(results);
+        }
     }
 
     private List<MailboxMembership<Integer>> findMessageInMailboxWithUID(Mailbox<Integer> mailbox, long uid)
@@ -417,47 +427,52 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
     }
 
 
-    public Iterator<UpdatedFlags> updateFlags(Mailbox<Integer> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Integer> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
-        MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
+        final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
-        final List<MailboxMembership<Integer>> members = findInMailbox(mailbox, set);
-        for (final MailboxMembership<Integer> member:members) {
-            Flags originalFlags = member.createFlags();
-            if (replace) {
-                member.setFlags(flags);
-            } else {
-                Flags current = member.createFlags();
-                if (value) {
-                    current.add(flags);
-                } else {
-                    current.remove(flags);
-                }
-                member.setFlags(current);
-            }
-            Flags newFlags = member.createFlags();
-            
-            try {
-                AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
-                MaildirMessageName messageName = folder.getMessageNameByUid(maildirMessage.getUid());
-                File messageFile = messageName.getFile();
-                //System.out.println("save existing " + message + " as " + messageFile.getName());
-                messageName.setFlags(maildirMessage.createFlags());
-                // this automatically moves messages from new to cur if needed
-                String newMessageName = messageName.getFullName();
-                messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
-                long uid = maildirMessage.getUid();
-                folder.update(uid, newMessageName);
-            } catch (IOException e) {
-                throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e );
-            }
-            
-            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-        }
+        findInMailbox(mailbox, set, new MailboxMembershipCallback<Integer>() {
+			
+			public void onMailboxMembers(List<MailboxMembership<Integer>> members)
+					throws MailboxException {
+				for (final MailboxMembership<Integer> member:members) {
+		            Flags originalFlags = member.createFlags();
+		            if (replace) {
+		                member.setFlags(flags);
+		            } else {
+		                Flags current = member.createFlags();
+		                if (value) {
+		                    current.add(flags);
+		                } else {
+		                    current.remove(flags);
+		                }
+		                member.setFlags(current);
+		            }
+		            Flags newFlags = member.createFlags();
+		            
+		            try {
+		                AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
+		                MaildirMessageName messageName = folder.getMessageNameByUid(maildirMessage.getUid());
+		                File messageFile = messageName.getFile();
+		                //System.out.println("save existing " + message + " as " + messageFile.getName());
+		                messageName.setFlags(maildirMessage.createFlags());
+		                // this automatically moves messages from new to cur if needed
+		                String newMessageName = messageName.getFullName();
+		                messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
+		                long uid = maildirMessage.getUid();
+		                folder.update(uid, newMessageName);
+		            } catch (IOException e) {
+		                throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e );
+		            }
+		            
+		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
+		        }
+			}
+		});
+        
         
         return updatedFlags.iterator();       
         
     }
-    
   
 }

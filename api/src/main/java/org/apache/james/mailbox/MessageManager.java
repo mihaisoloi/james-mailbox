@@ -112,6 +112,7 @@ public interface MessageManager {
     /**
      * Gets messages in the given range.
      * @param set
+     * @param fetchGroup data to fetch
      * @param mailboxSession not null
      * @return MessageResult with the fields defined by FetchGroup
      * @throws MailboxException
@@ -119,6 +120,19 @@ public interface MessageManager {
     Iterator<MessageResult> getMessages(MessageRange set, FetchGroup fetchGroup, 
             MailboxSession mailboxSession) throws MailboxException;
     
+    /**
+     * Gets messages in the given range.
+     * @param set
+     * @param fetchGroup data to fetch
+     * @param mailboxSession not null
+     * @param messageCallback data callback
+     * @return MessageResult with the fields defined by FetchGroup
+     * @throws MailboxException
+     */
+	void getMessages(MessageRange set, FetchGroup fetchGroup, 
+			MailboxSession mailboxSession, MessageCallback messageCallback) 
+			throws MailboxException;
+
     /**
      * Gets current meta data for the mailbox.
      * Consolidates common calls together to allow improved performance.
@@ -132,6 +146,13 @@ public interface MessageManager {
      * @throws MailboxException
      */
     MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException;
+    
+    /**
+     * Message batch read callback method 
+     */
+    public interface MessageCallback {
+    	void onMessages(final Iterator<MessageResult> it) throws MailboxException;
+    }
     
     /**
      * Meta data about the current state of the mailbox.

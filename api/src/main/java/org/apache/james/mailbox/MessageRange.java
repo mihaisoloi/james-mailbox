@@ -38,13 +38,27 @@ public class MessageRange {
 
     private static final int NOT_A_UID = -1;
     
+    // return all rows at ones 
+    private static final int UNLIMITED_BATCH = 0;
+    
     /**
      * Constructs a range consisting of a single message only.
      * @param uid UID of the message
      * @return not null
      */
     public static MessageRange one(long uid) {
-        final MessageRange result = new MessageRange(Type.ONE, uid, uid);
+        final MessageRange result = new MessageRange(Type.ONE, uid, uid, UNLIMITED_BATCH);
+        return result;
+    }
+    
+    /**
+     * Constructs a range consisting of all messages.
+     * @param batchSize return max batchSize rows in chunk
+     * @return not null
+     */
+    public static MessageRange all(int batchSize) {
+        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID,
+                NOT_A_UID, batchSize);
         return result;
     }
 
@@ -53,11 +67,32 @@ public class MessageRange {
      * @return not null
      */
     public static MessageRange all() {
-        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID,
-                NOT_A_UID);
+    	return all(UNLIMITED_BATCH);
+    }
+    
+    /**
+     * Constructs an inclusive ranges of messages.
+     * The parameters will be checked and {@link #from(long)}
+     * used where appropriate.
+     * @param from first message UID
+     * @param to last message UID
+     * @param batchSize return max batchSize rows in chunk 
+     * @return not null
+     */
+    public static MessageRange range(long from, long to, int batchSize) {
+        final MessageRange result;
+        if (to == Long.MAX_VALUE || to < from) {
+            to = NOT_A_UID;
+            result = from(from);
+        } else if (from == to){ 
+            // from and to is the same so no need to construct a real range
+            result = one(from);
+        } else {
+            result = new MessageRange(Type.RANGE, from, to, batchSize);
+        }
         return result;
     }
-
+    
     /**
      * Constructs an inclusive ranges of messages.
      * The parameters will be checked and {@link #from(long)}
@@ -67,27 +102,27 @@ public class MessageRange {
      * @return not null
      */
     public static MessageRange range(long from, long to) {
-        final MessageRange result;
-        if (to == Long.MAX_VALUE || to < from) {
-            to = NOT_A_UID;
-            result = from(from);
-        } else if (from == to){ 
-            // from and to is the same so no need to construct a real range
-            result = one(from);
-        } else {
-            result = new MessageRange(Type.RANGE, from, to);
-        }
+    	return range(from, to, UNLIMITED_BATCH);
+    }
+    
+    /**
+     * Constructs an inclusive, open ended range of messages.
+     * @param from first message UID in range
+     * @param batchSize return max batchSize rows in chunk 
+     * @return not null
+     */
+    public static MessageRange from(long from, int batchSize) {
+        final MessageRange result= new MessageRange(Type.FROM, from, NOT_A_UID, batchSize);
         return result;
     }
     
     /**
      * Constructs an inclusive, open ended range of messages.
-     * @param from first messege UID in range
+     * @param from first message UID in range
      * @return not null
      */
     public static MessageRange from(long from) {
-        final MessageRange result= new MessageRange(Type.FROM, from, NOT_A_UID);
-        return result;
+        return from(from, UNLIMITED_BATCH);
     }
 
     private final Type type;
@@ -95,13 +130,16 @@ public class MessageRange {
     private final long uidFrom;
 
     private final long uidTo;
+    
+    private final int batchSize;
 
-    private MessageRange(final Type type, final long uidFrom,
-            final long uidTo) {
+    protected MessageRange(final Type type, final long uidFrom,
+            final long uidTo, final int batchSize) {
         super();
         this.type = type;
         this.uidFrom = uidFrom;
         this.uidTo = uidTo;
+        this.batchSize = batchSize;
     }
 
     public Type getType() {
@@ -116,6 +154,9 @@ public class MessageRange {
         return uidTo;
     }
 
+    public int getBatchSize() {
+        return batchSize;
+    }
 
     /**
      * Return true if the uid is within the range
@@ -146,6 +187,6 @@ public class MessageRange {
     }
     
     public String toString() {
-        return "TYPE: " + type + " UID: " + uidFrom + ":" + uidTo;
+        return "TYPE: " + type + " UID: " + uidFrom + ":" + uidTo + (batchSize > 0 ? " BATCH: "+batchSize : "");
     }
 }

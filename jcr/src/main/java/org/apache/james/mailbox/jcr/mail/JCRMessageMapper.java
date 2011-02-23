@@ -40,8 +40,8 @@ import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.jcr.AbstractJCRMapper;
@@ -208,39 +208,54 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache
      * .james.imap.mailbox.MessageRange)
      */
-    public List<MailboxMembership<String>> findInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
+    public void findInMailbox(Mailbox<String> mailbox, MessageRange set,
+    		MailboxMembershipCallback<String> callback) throws MailboxException {
         try {
-            final List<MailboxMembership<String>> results;
-            final long from = set.getUidFrom();
+        	List<MailboxMembership<String>> results;
+            long from = set.getUidFrom();
             final long to = set.getUidTo();
+            final int batchSize = set.getBatchSize();
             final Type type = set.getType();
-            switch (type) {
-                default:
-                case ALL:
-                    results = findMessagesInMailbox(mailbox);
-                    break;
-                case FROM:
-                    results = findMessagesInMailboxAfterUID(mailbox, from);
-                    break;
-                case ONE:
-                    results = findMessageInMailboxWithUID(mailbox, from);
-                    break;
-                case RANGE:
-                    results = findMessagesInMailboxBetweenUIDs(mailbox, from, to);
-                    break;       
-            }
-            return results;
+            
+            do {
+	            switch (type) {
+	                default:
+	                case ALL:
+	                    results = findMessagesInMailbox(mailbox, batchSize);
+	                    break;
+	                case FROM:
+	                	results = findMessagesInMailboxAfterUID(mailbox, from, batchSize);
+	                    break;
+	                case ONE:
+	                	results = findMessageInMailboxWithUID(mailbox, from);
+	                    break;
+	                case RANGE:
+	                	results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, batchSize);
+	                    break;       
+	            }
+            
+	            if(results.size() > 0) {
+					callback.onMailboxMembers(results);
+										
+					// move the start UID behind the last fetched message UID					
+					from = results.get(results.size()-1).getUid()+1;
+				}
+	            
+	        } while(results.size() > 0 && batchSize > 0);
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
         }
     }
-
-    private List<MailboxMembership<String>> findMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid) throws RepositoryException {
+   
+    private List<MailboxMembership<String>> findMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid, int batchSize) throws RepositoryException {
         List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + uid + "] order by @" + JCRMessage.UID_PROPERTY;
 
         QueryManager manager = getSession().getWorkspace().getQueryManager();
-        QueryResult result = manager.createQuery(queryString, Query.XPATH).execute();
+        Query query = manager.createQuery(queryString, Query.XPATH);
+        if(batchSize > 0)
+        	query.setLimit(batchSize);
+        QueryResult result = query.execute();
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
@@ -264,12 +279,15 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
-    private List<MailboxMembership<String>> findMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to) throws RepositoryException {
+    private List<MailboxMembership<String>> findMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to, int batchSize) throws RepositoryException {
         List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + from + " and @" + JCRMessage.UID_PROPERTY + "<=" + to + "] order by @" + JCRMessage.UID_PROPERTY;
         
         QueryManager manager = getSession().getWorkspace().getQueryManager();
-        QueryResult result = manager.createQuery(queryString, Query.XPATH).execute();
+        Query query = manager.createQuery(queryString, Query.XPATH);
+        if(batchSize > 0)
+        	query.setLimit(batchSize);
+        QueryResult result = query.execute();
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
@@ -278,12 +296,15 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
     
-    private List<MailboxMembership<String>> findMessagesInMailbox(Mailbox<String> mailbox) throws RepositoryException {        
+    private List<MailboxMembership<String>> findMessagesInMailbox(Mailbox<String> mailbox, int batchSize) throws RepositoryException {        
         List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
         
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY;
         QueryManager manager = getSession().getWorkspace().getQueryManager();
-        QueryResult result = manager.createQuery(queryString, Query.XPATH).execute();
+        Query query = manager.createQuery(queryString, Query.XPATH);
+        if(batchSize > 0)
+        	query.setLimit(batchSize);
+        QueryResult result = query.execute();
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
@@ -662,45 +683,50 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<UpdatedFlags> updateFlags(Mailbox<String> mailbox, Flags flags, boolean value, boolean replace, MessageRange set) throws MailboxException {
+    public Iterator<UpdatedFlags> updateFlags(final Mailbox<String> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
 
-        final List<MailboxMembership<String>> members = findInMailbox(mailbox, set);
-        for (final MailboxMembership<String> member:members) {
-            Flags originalFlags = member.createFlags();
-            if (replace) {
-                member.setFlags(flags);
-            } else {
-                Flags current = member.createFlags();
-                if (value) {
-                    current.add(flags);
-                } else {
-                    current.remove(flags);
-                }
-                member.setFlags(current);
-            }
-            Flags newFlags = member.createFlags();
-            
-            JCRMessage membership = (JCRMessage) member;
-            if (membership.isPersistent()) {
-                try {
-                    Node messageNode = getSession().getNodeByIdentifier(membership.getId());
-                    membership.merge(messageNode);
-                } catch (RepositoryException e) {
-                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
+        findInMailbox(mailbox, set, new MailboxMembershipCallback<String>() {
+			
+			public void onMailboxMembers(List<MailboxMembership<String>> members)
+					throws MailboxException {
 
-                } catch (IOException e) {
-                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
+				for (final MailboxMembership<String> member:members) {
+		            Flags originalFlags = member.createFlags();
+		            if (replace) {
+		                member.setFlags(flags);
+		            } else {
+		                Flags current = member.createFlags();
+		                if (value) {
+		                    current.add(flags);
+		                } else {
+		                    current.remove(flags);
+		                }
+		                member.setFlags(current);
+		            }
+		            Flags newFlags = member.createFlags();
+		            
+		            JCRMessage membership = (JCRMessage) member;
+		            if (membership.isPersistent()) {
+		                try {
+		                    Node messageNode = getSession().getNodeByIdentifier(membership.getId());
+		                    membership.merge(messageNode);
+		                } catch (RepositoryException e) {
+		                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
 
-                }
-            }
+		                } catch (IOException e) {
+		                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
 
-            
-            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-        }
+		                }
+		            }
+		            
+		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
+		        }
+
+				
+			}
+		});
         
         return updatedFlags.iterator();       
     }
-    
-
 }
