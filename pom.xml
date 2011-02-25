@@ -104,7 +104,7 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <configuration>
           <aggregate>true</aggregate>
-          <targetjdk>1.5</targetjdk>
+          <targetJdk>1.5</targetJdk>
           <rulesets>
             <ruleset>/rulesets/basic.xml</ruleset>
             <ruleset>/rulesets/controversial.xml</ruleset>
