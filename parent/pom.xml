@@ -450,37 +450,6 @@
       -->
 
 
-      <!--
-        START Torque 
-      -->
-      <dependency>
-        <groupId>org.apache.torque</groupId>
-        <artifactId>village</artifactId>
-        <version>${version.torque}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.torque</groupId>
-        <artifactId>torque-runtime</artifactId>
-        <version>${version.torque}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>avalon-framework</groupId>
-            <artifactId>avalon-framework-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>avalon-logkit</groupId>
-            <artifactId>avalon-logkit</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <!--
-        END Torque 
-      -->
-
       <!-- 
         START OpenJPA
       -->
@@ -564,12 +533,12 @@
     <profile>
       <id>geronimo</id>
       <properties>
-		    <javax.mail.groupId>org.apache.geronimo.javamail</javax.mail.groupId>
-		    <javax.mail.artifactId>geronimo-javamail_1.4_mail</javax.mail.artifactId>
-		    <javax.activation.groupId>org.apache.geronimo.specs</javax.activation.groupId>
-		    <javax.activation.artifactId>geronimo-activation_1.1_spec</javax.activation.artifactId>
-            <version.javax.mail>1.6</version.javax.mail>
-            <version.activation>1.0.2</version.activation>
+        <javax.mail.groupId>org.apache.geronimo.javamail</javax.mail.groupId>
+        <javax.mail.artifactId>geronimo-javamail_1.4_mail</javax.mail.artifactId>
+        <javax.activation.groupId>org.apache.geronimo.specs</javax.activation.groupId>
+        <javax.activation.artifactId>geronimo-activation_1.1_spec</javax.activation.artifactId>
+        <version.javax.mail>1.6</version.javax.mail>
+        <version.activation>1.0.2</version.activation>
       </properties>
     </profile>
   </profiles>

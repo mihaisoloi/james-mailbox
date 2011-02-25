@@ -41,7 +41,6 @@
     <module>jcr</module>
     <module>maildir</module>
     <module>tool</module>
-    <module>torque</module>
   </modules>
   <ciManagement>
     <system>hudson</system>
