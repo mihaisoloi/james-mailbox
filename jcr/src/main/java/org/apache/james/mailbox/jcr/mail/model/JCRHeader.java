@@ -21,11 +21,11 @@ package org.apache.james.mailbox.jcr.mail.model;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.mail.model.AbstractComparableHeader;
 import org.apache.james.mailbox.store.mail.model.Header;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of a {@link Header}
@@ -42,25 +42,25 @@ public class JCRHeader extends AbstractComparableHeader implements JCRImapConsta
     private String fieldName;
     private String value;
     private int lineNumber;
-    private Log logger;
+    private Logger logger;
     private Node node;
     
     /**
      * Copies the content of an existing header.
      * @param header
      */
-    public JCRHeader(Header header, Log logger) {
+    public JCRHeader(Header header, Logger logger) {
         this(header.getLineNumber(), header.getFieldName(), header.getValue(), logger);
     }
     
-    public JCRHeader(Node node, Log logger) {
+    public JCRHeader(Node node, Logger logger) {
         this.node = node;
         this.logger = logger;
     }
     
     
     
-    public JCRHeader(final int lineNumber, final String fieldName, final String value, Log logger) {
+    public JCRHeader(final int lineNumber, final String fieldName, final String value, Logger logger) {
         this.fieldName = fieldName;
         this.value = value;
         this.lineNumber = lineNumber;

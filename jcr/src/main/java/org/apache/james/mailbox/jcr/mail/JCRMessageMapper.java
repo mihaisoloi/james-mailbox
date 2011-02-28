@@ -34,7 +34,6 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 import javax.mail.Flags;
 
-import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
@@ -52,6 +51,7 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of a {@link MessageMapper}. The implementation store each message as 
@@ -104,12 +104,12 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Log logger, int scaleType) {
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Logger logger, int scaleType) {
         super(repos, session, logger);
         this.scaleType = scaleType;
     }
     
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Log logger) {
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Logger logger) {
         this(repos, session, logger, MESSAGE_SCALE_DAY);
     }
     

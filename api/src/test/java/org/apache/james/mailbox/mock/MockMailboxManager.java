@@ -24,12 +24,12 @@ import java.util.Calendar;
 
 import javax.mail.Flags;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
+import org.slf4j.LoggerFactory;
 
 /**
  * A mock mailbox manager.
@@ -114,7 +114,7 @@ public class MockMailboxManager {
                 
                 String folderName = "INBOX";
 
-                MailboxSession mailboxSession = getMockMailboxManager().createSystemSession(user, new SimpleLog("mailboxmanager-test"));
+                MailboxSession mailboxSession = getMockMailboxManager().createSystemSession(user, LoggerFactory.getLogger("mailboxmanager-test"));
                 mailboxPath = new MailboxPath("#private", user, folderName);
                 createMailbox(mailboxSession, mailboxPath);
                 

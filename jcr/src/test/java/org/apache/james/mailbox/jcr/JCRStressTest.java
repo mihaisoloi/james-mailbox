@@ -22,7 +22,6 @@ import java.io.File;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.AbstractStressTest;
@@ -32,6 +31,7 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 public class JCRStressTest extends AbstractStressTest {
@@ -65,7 +65,7 @@ public class JCRStressTest extends AbstractStressTest {
     
     @After
     public void tearDown() {
-        MailboxSession session = mailboxManager.createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = mailboxManager.createSystemSession("test", LoggerFactory.getLogger("Test"));
         session.close();
         repository.shutdown();
         new File(JACKRABBIT_HOME).delete();

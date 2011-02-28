@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.inmemory;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
@@ -27,6 +26,7 @@ import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
 import org.apache.james.mailbox.store.MockAuthenticator;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 
 /**
  * InMemoryMailboxManagerTest that extends the MailboxManagerTest.
@@ -51,7 +51,7 @@ public class InMemoryMailboxManagerTest extends MailboxManagerTest {
      */
     @After
     public void tearDown() throws BadCredentialsException, MailboxException {
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         session.close();
     }
 

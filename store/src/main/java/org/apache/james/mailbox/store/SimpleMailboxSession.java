@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxSession;
+import org.slf4j.Logger;
 
 /**
  * Describes a mailbox session.
@@ -43,7 +43,7 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     
     private final long sessionId;
     
-    private final Log log;
+    private final Logger log;
 
     private final String userName;
     
@@ -58,12 +58,12 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     private final char pathSeparator;
 
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Log log, final List<Locale> localePreferences, char pathSeparator) {
+            final Logger log, final List<Locale> localePreferences, char pathSeparator) {
         this(sessionId, userName, password, log, localePreferences, new ArrayList<String>(), null, pathSeparator);
     }
 
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Log log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace, char pathSeparator) {
+            final Logger log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace, char pathSeparator) {
         this.sessionId = sessionId;
         this.log = log;
         this.userName = userName;
@@ -86,7 +86,7 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MailboxSession#getLog()
      */
-    public Log getLog() {
+    public Logger getLog() {
         return log;
     }
 

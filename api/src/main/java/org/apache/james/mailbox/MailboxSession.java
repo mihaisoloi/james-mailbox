@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 /**
  * Mailbox session.
@@ -54,7 +54,7 @@ public interface MailboxSession {
      * Gets the logger for this session context.
      * @return not null
      */
-    public Log getLog();
+    public Logger getLog();
     
     /**
      * Gets the user executing this session.

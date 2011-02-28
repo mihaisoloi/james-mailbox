@@ -18,19 +18,19 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.user.model.JCRSubscription;
 import org.apache.james.mailbox.store.StoreSubscriptionManager;
 import org.apache.james.mailbox.store.user.model.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JCR implementation of a SubscriptionManager
  */
 public class JCRSubscriptionManager extends StoreSubscriptionManager implements JCRImapConstants {
     
-    private final Log logger = LogFactory.getLog(JCRSubscriptionManager.class);
+    private final Logger logger = LoggerFactory.getLogger(JCRSubscriptionManager.class);
 
     public JCRSubscriptionManager(JCRMailboxSessionMapperFactory mapperFactory) {
         super(mapperFactory);

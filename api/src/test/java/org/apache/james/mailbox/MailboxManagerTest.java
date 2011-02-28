@@ -22,9 +22,9 @@ import java.io.UnsupportedEncodingException;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the {@link StoreMailboxManager} methods that 
@@ -54,7 +54,7 @@ public abstract class MailboxManagerTest {
 
         setMailboxManager(new MockMailboxManager(getMailboxManager()).getMockMailboxManager());
 
-        MailboxSession mailboxSession = getMailboxManager().createSystemSession("manager", new SimpleLog("testList"));
+        MailboxSession mailboxSession = getMailboxManager().createSystemSession("manager", LoggerFactory.getLogger("testList"));
         getMailboxManager().startProcessingRequest(mailboxSession);
         Assert.assertEquals(MockMailboxManager.EXPECTED_MAILBOXES_COUNT, getMailboxManager().list(mailboxSession).size());
 

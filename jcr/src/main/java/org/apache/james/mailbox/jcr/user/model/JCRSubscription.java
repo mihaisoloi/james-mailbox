@@ -27,10 +27,10 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.user.model.Subscription;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of a {@link Subscription}.
@@ -42,18 +42,18 @@ public class JCRSubscription implements Subscription, Persistent, JCRImapConstan
     public final static String MAILBOXES_PROPERTY =  "jamesMailbox:subscriptionMailboxes";
     
     private Node node;
-    private final Log log;
+    private final Logger log;
     private String mailbox;
     private String username;
 
     
-    public JCRSubscription(Node node, String mailbox, Log log) {
+    public JCRSubscription(Node node, String mailbox, Logger log) {
         this.node = node;
         this.log = log;
         this.mailbox = mailbox;
     }
 
-    public JCRSubscription(String username, String mailbox, Log log) {
+    public JCRSubscription(String username, String mailbox, Logger log) {
         this.username = username;
         this.mailbox = mailbox;
         this.log = log;

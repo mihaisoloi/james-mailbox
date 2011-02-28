@@ -32,8 +32,6 @@ import java.util.TimeZone;
 
 import javax.mail.Flags;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UnsupportedSearchException;
@@ -44,24 +42,26 @@ import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.field.datetime.DateTime;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
 import org.apache.james.mime4j.field.datetime.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Uility methods to help perform search operations.
  */
 public class MessageSearches {
 
-    private Log log;
+    private Logger log;
 
     private boolean isCustomLog = false;
 
-    public final Log getLog() {
+    public final Logger getLog() {
         if (log == null) {
-            log = LogFactory.getLog(MessageSearches.class);
+            log = LoggerFactory.getLogger(MessageSearches.class);
         }
         return log;
     }
 
-    public final void setLog(Log log) {
+    public final void setLog(Logger log) {
         isCustomLog = true;
         this.log = log;
     }

@@ -24,7 +24,6 @@ import javax.jcr.RepositoryException;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.ConfigurationException;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
@@ -35,6 +34,7 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 /**
@@ -64,7 +64,7 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
      */
     @After
     public void tearDown() throws BadCredentialsException, MailboxException {
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         session.close();
         repository.shutdown();
         new File(JACKRABBIT_HOME).delete();

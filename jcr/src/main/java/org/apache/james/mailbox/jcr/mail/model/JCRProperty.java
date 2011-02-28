@@ -21,12 +21,11 @@ package org.apache.james.mailbox.jcr.mail.model;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.logging.Log;
-
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.mail.model.AbstractComparableProperty;
 import org.apache.james.mailbox.store.mail.model.Property;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of {@link Property}
@@ -35,7 +34,7 @@ import org.apache.james.mailbox.store.mail.model.Property;
 public class JCRProperty extends AbstractComparableProperty<JCRProperty> implements JCRImapConstants, Persistent {
 
     private Node node;
-    private final Log logger;
+    private final Logger logger;
     private String namespace;
     private String localName;
     private String value;
@@ -46,12 +45,12 @@ public class JCRProperty extends AbstractComparableProperty<JCRProperty> impleme
     public final static String VALUE_PROPERTY =  "jamesMailbox:propertyValue";
     public final static String ORDER_PROPERTY =  "jamesMailbox:propertyOrder";
 
-    public JCRProperty(final Node node, final Log logger) {
+    public JCRProperty(final Node node, final Logger logger) {
         this.node = node;
         this.logger = logger;
     }
 
-    public JCRProperty(final String namespace, final String localName, final String value, final int order, Log logger) {
+    public JCRProperty(final String namespace, final String localName, final String value, final int order, Logger logger) {
         this.namespace = namespace;
         this.localName = localName;
         this.value = value;
@@ -59,7 +58,7 @@ public class JCRProperty extends AbstractComparableProperty<JCRProperty> impleme
         this.logger = logger;
     }
 
-    public JCRProperty(Property property, int order, Log logger) {
+    public JCRProperty(Property property, int order, Logger logger) {
         this(property.getNamespace(), property.getLocalName(), property.getValue(), order, logger);
     }
     /*

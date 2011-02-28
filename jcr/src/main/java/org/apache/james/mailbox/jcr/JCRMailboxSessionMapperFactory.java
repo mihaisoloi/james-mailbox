@@ -18,9 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.SubscriptionException;
@@ -31,6 +28,8 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JCR implementation of a {@link MailboxSessionMapperFactory}
@@ -40,7 +39,7 @@ import org.apache.james.mailbox.store.user.SubscriptionMapper;
 public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<String> {
 
     private final MailboxSessionJCRRepository repository;
-    private final Log logger;
+    private final Logger logger;
     private final static int DEFAULT_SCALING = 2;
     private final int scaling;
     private int messageScaling;
@@ -51,7 +50,7 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final int scaling, final int messageScaling) {
         this.repository = repository;
-        this.logger = LogFactory.getLog(JCRMailboxSessionMapperFactory.class);
+        this.logger = LoggerFactory.getLogger(JCRMailboxSessionMapperFactory.class);
         this.scaling = scaling;
         this.messageScaling = messageScaling;
     }

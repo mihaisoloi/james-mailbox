@@ -27,12 +27,12 @@ import java.nio.CharBuffer;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeTokenStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Searches an email for content. This class should be safe for use by
@@ -40,7 +40,7 @@ import org.apache.james.mime4j.parser.MimeTokenStream;
  */
 public class MessageSearcher {
 
-    private Log logger;
+    private Logger logger;
 
     private CharSequence searchContent = null;
 
@@ -138,7 +138,7 @@ public class MessageSearcher {
         }
         final boolean result;
         if (searchContent == null || "".equals(searchContent)) {
-            final Log logger = getLogger();
+            final Logger logger = getLogger();
             logger.debug("Nothing to search for. ");
             result = false;
         } else {
@@ -226,7 +226,7 @@ public class MessageSearcher {
     }
 
     protected void handle(Exception e) throws IOException, MimeException {
-        final Log logger = getLogger();
+        final Logger logger = getLogger();
         logger.warn("Cannot read MIME body.");
         logger.debug("Failed to read body.", e);
     }
@@ -264,14 +264,14 @@ public class MessageSearcher {
         return result;
     }
 
-    public final Log getLogger() {
+    public final Logger getLogger() {
         if (logger == null) {
-            logger = LogFactory.getLog(MessageSearcher.class);
+            logger = LoggerFactory.getLogger(MessageSearcher.class);
         }
         return logger;
     }
 
-    public final void setLogger(Log logger) {
+    public final void setLogger(Logger logger) {
         this.logger = logger;
     }
 }

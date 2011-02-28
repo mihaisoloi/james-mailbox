@@ -21,10 +21,10 @@ package org.apache.james.mailbox.jcr;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
+import org.slf4j.Logger;
 
 /**
  * Abstract Mapper base class for Level 1 Implementations of JCR. So no real transaction management is used. 
@@ -35,12 +35,12 @@ import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 public abstract class AbstractJCRMapper extends TransactionalMapper implements JCRImapConstants {
     public final static String MAILBOXES_PATH =  "mailboxes";
 
-    private final Log logger;
+    private final Logger logger;
     private final MailboxSessionJCRRepository repository;
     protected final MailboxSession mSession;
 
     
-    public AbstractJCRMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, Log logger) {
+    public AbstractJCRMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, Logger logger) {
         this.repository = repository;
         this.mSession = mSession;
         this.logger = logger;
@@ -51,7 +51,7 @@ public abstract class AbstractJCRMapper extends TransactionalMapper implements J
      * 
      * @return logger
      */
-    protected Log getLogger() {
+    protected Logger getLogger() {
         return logger;
     }
     

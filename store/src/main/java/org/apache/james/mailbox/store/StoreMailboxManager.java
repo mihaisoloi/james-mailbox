@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
@@ -52,6 +50,8 @@ import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.apache.james.mailbox.util.SimpleMailboxMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This abstract base class of an {@link MailboxManager} implementation provides a high-level api for writing your own
@@ -73,7 +73,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     private final Authenticator authenticator;
     private final static Random RANDOM = new Random();
     
-    private Log log = LogFactory.getLog("org.apache.james.mailbox");
+    private Logger log = LoggerFactory.getLogger("org.apache.james.mailbox");
 
     private MailboxPathLocker locker;
 
@@ -118,11 +118,11 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     }
     
     
-    protected Log getLog() {
+    protected Logger getLog() {
         return log;
     }
 
-    public void setLog(Log log) {
+    public void setLog(Logger log) {
         this.log = log;
     }
 
@@ -137,9 +137,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManager#createSystemSession(java.lang.String, org.apache.commons.logging.Log)
+     * @see org.apache.james.mailbox.MailboxManager#createSystemSession(java.lang.String, org.slf4j.Logger)
      */
-    public MailboxSession createSystemSession(String userName, Log log) {
+    public MailboxSession createSystemSession(String userName, Logger log) {
         return createSession(userName, null, log);
     }
 
@@ -150,7 +150,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param log
      * @return session
      */
-    private MailboxSession createSession(String userName, String password, Log log) {
+    private MailboxSession createSession(String userName, String password, Logger log) {
         return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter());
     }
 
@@ -184,9 +184,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManager#login(java.lang.String, java.lang.String, org.apache.commons.logging.Log)
+     * @see org.apache.james.mailbox.MailboxManager#login(java.lang.String, java.lang.String, org.slf4j.Logger)
      */
-    public MailboxSession login(String userid, String passwd, Log log) throws BadCredentialsException, MailboxException {
+    public MailboxSession login(String userid, String passwd, Logger log) throws BadCredentialsException, MailboxException {
         if (login(userid, passwd)) {
             return createSession(userid, passwd, log);
         } else {
@@ -314,7 +314,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @see org.apache.james.mailbox.MailboxManager#renameMailbox(org.apache.james.imap.api.MailboxPath, org.apache.james.imap.api.MailboxPath, org.apache.james.mailbox.MailboxSession)
      */
     public void renameMailbox(final MailboxPath from, final MailboxPath to, final MailboxSession session) throws MailboxException {
-        final Log log = getLog();
+        final Logger log = getLog();
         if (log.isDebugEnabled())
             log.debug("renameMailbox " + from + " to " + to);
         if (mailboxExists(to, session)) {

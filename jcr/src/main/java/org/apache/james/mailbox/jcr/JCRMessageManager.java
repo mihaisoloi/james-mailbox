@@ -25,7 +25,6 @@ import java.util.List;
 
 import javax.mail.Flags;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jcr.mail.model.JCRHeader;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
@@ -36,6 +35,7 @@ import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of a {@link MapperStoreMessageManager}
@@ -43,10 +43,10 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
  */
 public class JCRMessageManager extends StoreMessageManager<String> {
 
-    private final Log log;
+    private final Logger log;
 
     public JCRMessageManager(JCRMailboxSessionMapperFactory mapperFactory, final UidProvider<String> uidProvider,
-            final MailboxEventDispatcher dispatcher, final JCRMailbox mailbox, final Log log, final char delimiter) throws MailboxException {
+            final MailboxEventDispatcher dispatcher, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
         super(mapperFactory, uidProvider, dispatcher, mailbox);
         this.log = log;
     }

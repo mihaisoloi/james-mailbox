@@ -22,7 +22,6 @@ import java.util.HashMap;
 
 import javax.persistence.EntityManagerFactory;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
@@ -40,6 +39,7 @@ import org.apache.james.mailbox.jpa.user.model.JPASubscription;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 
 /**
  * JPAMailboxManagerTest that extends the StoreMailboxManagerTest.
@@ -70,7 +70,7 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
     @After
     public void tearDown() throws BadCredentialsException, MailboxException {
         deleteAllMailboxes();
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         session.close();
         entityManagerFactory.close();
     }
@@ -111,7 +111,7 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
     }
     
     private void deleteAllMailboxes() throws BadCredentialsException, MailboxException {
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         try {
             ((OpenJPAMailboxManager) mailboxManager).deleteEverything(session);
         } catch (MailboxException e) {

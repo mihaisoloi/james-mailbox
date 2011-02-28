@@ -21,9 +21,9 @@ package org.apache.james.mailbox.jcr;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.james.mailbox.MailboxSession;
+import org.slf4j.Logger;
 
 /**
  * Abstract base class for Mapper's which support scaling 
@@ -34,7 +34,7 @@ public abstract class AbstractJCRScalingMapper extends AbstractJCRMapper{
     private final int scaling;
     private final static char PAD ='_';
     
-    public AbstractJCRScalingMapper(MailboxSessionJCRRepository repository, MailboxSession mSession, int scaling, Log logger) {
+    public AbstractJCRScalingMapper(MailboxSessionJCRRepository repository, MailboxSession mSession, int scaling, Logger logger) {
         super(repository, mSession, logger);
         this.scaling = scaling;
     }

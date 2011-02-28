@@ -21,10 +21,10 @@ package org.apache.james.mailbox.store;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.logging.Log;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.slf4j.Logger;
 
 /**
  * {@link Iterator} implementation which use a {@link MessageSearches} instance to lazy 
@@ -44,7 +44,7 @@ public final class SearchQueryIterator implements Iterator<Long>{
         this(it, query, null);
     }
 
-    public SearchQueryIterator(Iterator<MailboxMembership<?>> it, SearchQuery query, Log log) {
+    public SearchQueryIterator(Iterator<MailboxMembership<?>> it, SearchQuery query, Logger log) {
         this.it = it;
         this.query = query;
         if (log != null) {

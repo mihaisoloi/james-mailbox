@@ -18,8 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
@@ -32,6 +30,8 @@ import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JCR implementation of a MailboxManager
@@ -40,7 +40,7 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
 public class JCRMailboxManager extends StoreMailboxManager<String> implements JCRImapConstants {
 
     private final JCRMailboxSessionMapperFactory mapperFactory;
-    private final Log logger = LogFactory.getLog(JCRMailboxManager.class);
+    private final Logger logger = LoggerFactory.getLogger(JCRMailboxManager.class);
     
     public JCRMailboxManager(JCRMailboxSessionMapperFactory mapperFactory, final Authenticator authenticator, final UidProvider<String> uidProvider) {
 	    this(mapperFactory, authenticator, uidProvider, new JVMMailboxPathLocker());

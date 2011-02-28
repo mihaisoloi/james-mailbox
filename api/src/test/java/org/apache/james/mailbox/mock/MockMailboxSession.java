@@ -26,18 +26,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MailboxSession.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockMailboxSession implements MailboxSession{
 
     private User user;
     private boolean close;
     private Map<Object, Object> attrs = new HashMap<Object, Object>();
-    private SimpleLog log = new SimpleLog("MockLog");
+    private Logger log = LoggerFactory.getLogger("MockLog");
     private final static Random RANDOM = new Random();
 
     private long sessionId = RANDOM.nextLong();
@@ -67,7 +67,7 @@ public class MockMailboxSession implements MailboxSession{
         return attrs;
     }
 
-    public Log getLog() {
+    public Logger getLog() {
         return log;
     }
 

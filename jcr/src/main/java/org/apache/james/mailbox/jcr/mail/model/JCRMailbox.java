@@ -21,13 +21,13 @@ package org.apache.james.mailbox.jcr.mail.model;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.Text;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.slf4j.Logger;
 
 
 /**
@@ -45,7 +45,7 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
 
     private String name;
     private long uidValidity;
-    private final Log logger;
+    private final Logger logger;
     private Node node;
 
 
@@ -53,7 +53,7 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
     private String user;
     
     
-    public JCRMailbox( final MailboxPath path, final long uidValidity, Log logger) {
+    public JCRMailbox( final MailboxPath path, final long uidValidity, Logger logger) {
         this.name = path.getName();
         this.namespace = path.getNamespace();
         this.user = path.getUser();
@@ -61,12 +61,12 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         this.logger = logger;
     }
     
-    public JCRMailbox( final Node node, final Log logger) {
+    public JCRMailbox( final Node node, final Logger logger) {
         this.node = node;
         this.logger = logger;
     }
     
-    public Log getLog() {
+    public Logger getLog() {
         return logger;
     }
 

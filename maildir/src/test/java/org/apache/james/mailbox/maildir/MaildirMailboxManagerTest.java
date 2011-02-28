@@ -29,7 +29,6 @@ import java.util.Date;
 import javax.mail.Flags;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
@@ -39,6 +38,7 @@ import org.apache.james.mailbox.MailboxSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  * MaildirMailboxManagerTest that extends the StoreMailboxManagerTest.
@@ -116,7 +116,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
             manager.init();
     
             String user = "test@localhost";
-            MailboxSession session = manager.createSystemSession(user, new SimpleLog("Test"));
+            MailboxSession session = manager.createSystemSession(user, LoggerFactory.getLogger("Test"));
             manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "Trash"), session);
             manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
             

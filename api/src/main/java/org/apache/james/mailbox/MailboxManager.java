@@ -21,7 +21,7 @@ package org.apache.james.mailbox;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 
 /**
@@ -158,7 +158,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      * @throws BadCredentialsException when system access is not allowed for the given user
      * @throws MailboxException when the creation fails for other reasons
      */
-    public MailboxSession createSystemSession(String userName, Log log) throws BadCredentialsException, MailboxException;
+    public MailboxSession createSystemSession(String userName, Logger log) throws BadCredentialsException, MailboxException;
 
     /**
      * Autenticates the given user against the given password.
@@ -172,7 +172,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      * @throws BadCredentialsException when system access is denighed for the given user
      * @throws MailboxException when the creation fails for other reasons
      */
-    MailboxSession login(String userid, String passwd, Log log) throws BadCredentialsException, MailboxException;
+    MailboxSession login(String userid, String passwd, Logger log) throws BadCredentialsException, MailboxException;
     
     /**
      * <p>Logs the session out, freeing any resources.

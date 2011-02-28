@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.mail.Flags;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
@@ -35,6 +34,7 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractStressTest {
 
@@ -49,7 +49,7 @@ public abstract class AbstractStressTest {
         final CountDownLatch latch = new CountDownLatch(APPEND_OPERATIONS);
         final ExecutorService pool = Executors.newFixedThreadPool(APPEND_OPERATIONS/2);
         
-        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         getMailboxManager().startProcessingRequest(session);
         final MailboxPath path = new MailboxPath(MailboxConstants.USER_NAMESPACE, "username", "INBOX");
         getMailboxManager().createMailbox(path, session);
@@ -69,7 +69,7 @@ public abstract class AbstractStressTest {
                     
 
                     try {
-                        MailboxSession session = getMailboxManager().createSystemSession("test", new SimpleLog("Test"));
+                        MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
 
                         getMailboxManager().startProcessingRequest(session);
                         MessageManager m = getMailboxManager().getMailbox(path, session);

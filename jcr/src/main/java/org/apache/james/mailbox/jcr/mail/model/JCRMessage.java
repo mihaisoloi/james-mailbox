@@ -32,7 +32,6 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.mail.Flags;
 
-import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.james.mailbox.MailboxException;
@@ -46,6 +45,7 @@ import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 import org.apache.james.mailbox.store.streaming.StreamUtils;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of {@link Message}
@@ -54,7 +54,7 @@ import org.apache.james.mailbox.store.streaming.StreamUtils;
 public class JCRMessage extends AbstractMessage implements MailboxMembership<String>, JCRImapConstants, Persistent{
 
     private Node node;
-    private final Log logger;
+    private final Logger logger;
     private InputStream content;
     private List<JCRHeader> headers;
     private String mediaType;
@@ -94,14 +94,14 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
     public final static String TEXTUAL_LINE_COUNT_PROPERTY  = "jamesMailbox:messageTextualLineCount";
     public final static String SUBTYPE_PROPERTY  = "jamesMailbox:messageSubType";
 
-    public JCRMessage(Node node, Log logger) {
+    public JCRMessage(Node node, Logger logger) {
         this.logger= logger;
         this.node = node;
     }
     
     public JCRMessage(String mailboxUUID, long uid, Date internalDate, int size, Flags flags, InputStream content,
             int bodyStartOctet, final List<JCRHeader> headers,
-            final PropertyBuilder propertyBuilder, Log logger) {
+            final PropertyBuilder propertyBuilder, Logger logger) {
         super();
         this.mailboxUUID = mailboxUUID;
         this.internalDate = internalDate;
@@ -132,7 +132,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
      * @param message
      * @throws IOException 
      */
-    public JCRMessage(String mailboxUUID, long uid,  JCRMessage message, Log logger) throws MailboxException {
+    public JCRMessage(String mailboxUUID, long uid,  JCRMessage message, Logger logger) throws MailboxException {
         this.mailboxUUID = mailboxUUID;
         this.internalDate = message.getInternalDate();
         this.size = message.getFullContentOctets();

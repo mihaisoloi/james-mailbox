@@ -18,9 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,7 +37,7 @@ public abstract class AbstractMailboxManagerTest {
     public void testBasicOperations() throws BadCredentialsException, MailboxException {
         MailboxManager manager = createMailboxManager();
         
-        MailboxSession session = manager.createSystemSession(USER1, new SimpleLog("Mock"));
+        MailboxSession session = manager.createSystemSession(USER1, LoggerFactory.getLogger("Mock"));
         Assert.assertEquals(USER1, session.getUser().getUserName());
         
         manager.startProcessingRequest(session);

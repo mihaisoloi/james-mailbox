@@ -28,7 +28,6 @@ import javax.mail.Flags;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.impl.SimpleLog;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
@@ -43,6 +42,7 @@ import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.apache.james.mailbox.store.Authenticator;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class for the {@link MailboxCopierImpl} implementation.
@@ -81,7 +81,7 @@ public class MailboxCopierTest {
     public void setup() throws BadCredentialsException, MailboxException {
         
         mailboxCopier = new MailboxCopierImpl();
-        mailboxCopier.setLog(new SimpleLog(MailboxCopierTest.class.getName()));
+        mailboxCopier.setLog(LoggerFactory.getLogger(MailboxCopierTest.class.getName()));
         
         srcMemMailboxManager = newInMemoryMailboxManager();
         dstMemMailboxManager = newInMemoryMailboxManager();
@@ -123,7 +123,7 @@ public class MailboxCopierTest {
      */
     private void assertMailboxManagerSize(MailboxManager mailboxManager, int multiplicationFactor) throws BadCredentialsException, MailboxException {
         
-        MailboxSession mailboxSession = mailboxManager.createSystemSession("manager", new SimpleLog("src-mailbox-copier"));        
+        MailboxSession mailboxSession = mailboxManager.createSystemSession("manager", LoggerFactory.getLogger("src-mailbox-copier"));        
         mailboxManager.startProcessingRequest(mailboxSession);
 
         List<MailboxPath> mailboxPathList = mailboxManager.list(mailboxSession);

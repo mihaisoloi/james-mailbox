@@ -42,7 +42,7 @@ public class JpaMigrator {
      * You can also invoke with many JIRA at once. They will be all serially executed.</p>
      * 
      * TODO Extract the SQL in JAVA classes to XML file.
-     * TODO Log with log4j.
+     * TODO Log with slf4j.
      * 
      * @param the JIRAs numbers
      * @throws JpaMigrateException 

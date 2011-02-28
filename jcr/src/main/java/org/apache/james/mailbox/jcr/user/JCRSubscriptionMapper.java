@@ -31,7 +31,6 @@ import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 
-import org.apache.commons.logging.Log;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.Text;
 import org.apache.james.mailbox.MailboxConstants;
@@ -42,6 +41,7 @@ import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.user.model.JCRSubscription;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.model.Subscription;
+import org.slf4j.Logger;
 
 /**
  * JCR implementation of a SubscriptionManager
@@ -49,7 +49,7 @@ import org.apache.james.mailbox.store.user.model.Subscription;
  */
 public class JCRSubscriptionMapper extends AbstractJCRScalingMapper implements SubscriptionMapper {
 
-    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Log log) {
+    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Logger log) {
         super(repos,session, scaling, log);
     }
 

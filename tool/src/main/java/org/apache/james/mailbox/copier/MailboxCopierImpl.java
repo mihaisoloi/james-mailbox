@@ -25,8 +25,6 @@ import java.util.List;
 
 import javax.mail.Flags.Flag;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxManager;
@@ -37,6 +35,8 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.util.FetchGroupImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link MailboxCopier} interface.
@@ -47,7 +47,7 @@ public class MailboxCopierImpl implements MailboxCopier {
     /**
      * The logger.
      */
-    private Log log = LogFactory.getLog(MailboxCopierImpl.class.getName());
+    private Logger log = LoggerFactory.getLogger(MailboxCopierImpl.class.getName());
 
     /*
      * (non-Javadoc)
@@ -141,7 +141,7 @@ public class MailboxCopierImpl implements MailboxCopier {
      * 
      * @param log
      */
-    public void setLog(Log log) {
+    public void setLog(Logger log) {
         this.log = log;
     }
 

@@ -347,6 +347,24 @@
         </exclusions>
       </dependency>
 
+      <!-- 
+        START Logging
+      -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.6.1</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- 
+        START Logging
+      -->
+       
       <!--
         Start Commons
       -->
@@ -354,29 +372,6 @@
         <groupId>commons-collections</groupId>
         <artifactId>commons-collections</artifactId>
         <version>${version.commons-collections}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>
-        <version>${version.commons-logging}</version>
-        <exclusions>
-          <exclusion>
-            <artifactId>logkit</artifactId>
-            <groupId>logkit</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>avalon-framework</artifactId>
-            <groupId>avalon-framework</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>log4j</artifactId>
-            <groupId>log4j</groupId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
@@ -531,12 +526,6 @@
         <version>${version.jackrabbit}</version>
         <scope>test</scope>
       </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.5.7</version>
-        <scope>test</scope>
-      </dependency>
 
       <dependency>
         <groupId>xerces</groupId>
@@ -596,7 +585,6 @@
     <version.javax.persistence>1.0.2</version.javax.persistence>
     <version.commons-lang>2.4</version.commons-lang>
     <version.commons-collections>3.2.1</version.commons-collections>
-    <version.commons-logging>1.1.1</version.commons-logging>
     <version.apache-mime4j>0.6.1</version.apache-mime4j>
     <version.javax.mail>1.4.3</version.javax.mail>
     <version.activation>1.1.1</version.activation>
