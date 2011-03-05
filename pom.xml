@@ -238,8 +238,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <configuration>
-          <siteDirectory>${imap.siteDirectory}</siteDirectory>
-          <generateReports>${imap.generateReports}</generateReports>
+          <siteDirectory>${mailbox.siteDirectory}</siteDirectory>
+          <generateReports>${mailbox.generateReports}</generateReports>
           <reportPlugins>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -749,8 +749,8 @@
     <profile>
       <id>site-reports</id>
       <properties>
-        <imap.siteDirectory>${basedir}/src/reporting-site</imap.siteDirectory>
-        <imap.generateReports>true</imap.generateReports>
+        <mailbox.siteDirectory>${basedir}/src/reporting-site</mailbox.siteDirectory>
+        <mailbox.generateReports>true</mailbox.generateReports>
       </properties>
     </profile>
   </profiles>
@@ -771,8 +771,8 @@
     <version.jmock>2.5.1</version.jmock>
     <version.jackrabbit>2.2.0</version.jackrabbit>
     <target.jdk>1.5</target.jdk>
-    <imap.siteDirectory>${basedir}/src/site</imap.siteDirectory>
-    <imap.generateReports>false</imap.generateReports>
+    <mailbox.siteDirectory>${basedir}/src/site</mailbox.siteDirectory>
+    <mailbox.generateReports>false</mailbox.generateReports>
   </properties>
 </project>
 
