@@ -27,13 +27,14 @@
 
   <bannerLeft>
     <name>James Server</name>
-    <src>images/james-server-logo.gif</src>
-    <href>http://james.apache.org/index.html</href>
+    <src>images/logos/james-server-logo.gif</src>
+    <href>http://james.apache.org/server/index.html</href>
+    <alt>james-server-logo.gif</alt>
   </bannerLeft>
   
   <bannerRight>
     <name>The Apache Software Foundation</name>
-    <src>images/asf-logo-reduced.gif</src>
+    <src>images/logos/asf-logo-reduced.gif</src>
     <href>http://www.apache.org/index.html</href>
   </bannerRight> 
 
@@ -42,13 +43,12 @@
     <menu name="Mailbox">
       <item name="Introduction" href="/index.html" />
       <item name="Source Code" href="/source-code.html" />
-      <item name="Javadoc" href="../imap/apidocs/index.html" />
+<!--  <item name="Javadoc" href="../imap/apidocs/index.html" />-->
+      <item name="Reports" href="https://hudson.apache.org/hudson/view/G-L/view/James/job/mailbox/site/" />
 <!--    <item name="Changes" href="/changes.html" />-->
 <!--      <item name="JIRA Report" href="/jira-report.html" />-->
 <!--      <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/MAILBOX" />-->
     </menu>
-
-    <menu ref="reports"/>
 
   </body>  
 

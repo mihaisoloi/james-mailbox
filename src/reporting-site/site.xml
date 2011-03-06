@@ -26,16 +26,17 @@
     </skin>
 
     <bannerLeft>
-        <name>James Project</name>
-        <src>http://james.apache.org/images/logos/james-imap-logo.gif</src>
-        <href>http://james.apache.org/index.html</href>
+        <name>James Server</name>
+        <src>images/logos/james-server-logo.gif</src>
+        <href>http://james.apache.org/server/index.html</href>
+        <alt>james-server-logo.gif</alt>
     </bannerLeft>
-
+    
     <bannerRight>
         <name>The Apache Software Foundation</name>
-        <src>http://james.apache.org/images/logos/asf-logo-reduced.gif</src>
+        <src>images/logos/asf-logo-reduced.gif</src>
         <href>http://www.apache.org/index.html</href>
-    </bannerRight>
+    </bannerRight> 
 
     <body>
 
