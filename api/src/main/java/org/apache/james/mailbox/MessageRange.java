@@ -189,4 +189,11 @@ public class MessageRange {
     public String toString() {
         return "TYPE: " + type + " UID: " + uidFrom + ":" + uidTo + (batchSize > 0 ? " BATCH: "+batchSize : "");
     }
+
+	public MessageRange getUnlimitedRange() {
+		if(this.batchSize == UNLIMITED_BATCH)
+			return this;
+		else
+			return new MessageRange(type, uidFrom, uidTo, UNLIMITED_BATCH);
+	}
 }

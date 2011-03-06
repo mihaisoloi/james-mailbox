@@ -479,18 +479,30 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup,
             MailboxSession mailboxSession) throws MailboxException {
-        
-    	final List<MailboxMembership<Id>> rows = new ArrayList<MailboxMembership<Id>>();
-    	
-    	mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
-			public void onMailboxMembers(List<MailboxMembership<Id>> batchRows) throws MailboxException {
-				rows.addAll(batchRows);
+
+        class InterceptingCallback implements MessageCallback {
+        	Iterator<MessageResult> iterator;
+        	
+			public void onMessages(Iterator<MessageResult> it) throws MailboxException {
+				iterator = it;				
 			}
-		});
+			
+			public Iterator<MessageResult> getIterator() {
+				return iterator;
+			}
+        } 
     	
-        return new ResultIterator<Id>(rows.iterator(), fetchGroup);
+        // if we are intercepting callback - let's make it effective
+        MessageRange nonBatchedSet = set.getUnlimitedRange();
+        
+        // intercepting callback 
+        InterceptingCallback callback = new InterceptingCallback();
+    	this.getMessages(nonBatchedSet, fetchGroup, mailboxSession, callback);
+    	
+        return callback.getIterator();
     }
 
+   
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession, int, org.apache.james.mailbox.MessageManager.MessageCallback)
