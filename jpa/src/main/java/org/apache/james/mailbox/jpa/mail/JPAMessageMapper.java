@@ -64,39 +64,40 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
             final long to = set.getUidTo();
             final int batchSize = set.getBatchSize();
             final Type type = set.getType();
-            
-    		// when batch is specified fetch data in chunks and send back in batches
-    		do {
-	            switch (type) {
-	                default:
-	                case ALL:
-	                    results = findMessagesInMailbox(mailbox, batchSize);
-	                    break;
-	                case FROM:
-	                    results = findMessagesInMailboxAfterUID(mailbox, from, batchSize);
-	                    break;
-	                case ONE:
-	                    results = findMessagesInMailboxWithUID(mailbox, from);
-	                    break;
-	                case RANGE:
-	                    results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, batchSize);
-	                    break;       
-	            }
-	            
-	            if(results.size() > 0) {
-					callback.onMailboxMembers(results);
-					
-					// move the start UID behind the last fetched message UID
-					from = results.get(results.size()-1).getUid()+1;
-				}
-					
-			} while(results.size() > 0 && batchSize > 0);
-	            
+
+            // when batch is specified fetch data in chunks and send back in
+            // batches
+            do {
+                switch (type) {
+                default:
+                case ALL:
+                    results = findMessagesInMailbox(mailbox, batchSize);
+                    break;
+                case FROM:
+                    results = findMessagesInMailboxAfterUID(mailbox, from, batchSize);
+                    break;
+                case ONE:
+                    results = findMessagesInMailboxWithUID(mailbox, from);
+                    break;
+                case RANGE:
+                    results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, batchSize);
+                    break;
+                }
+
+                if (results.size() > 0) {
+                    callback.onMailboxMembers(results);
+
+                    // move the start UID behind the last fetched message UID
+                    from = results.get(results.size() - 1).getUid() + 1;
+                }
+
+            } while (results.size() > 0 && batchSize > 0);
+
         } catch (PersistenceException e) {
             throw new MailboxException("Search of MessageRange " + set + " failed in mailbox " + mailbox, e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private List<MailboxMembership<Long>> findMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid, int batchSize) {
         Query query = getEntityManager().createNamedQuery("findMessagesInMailboxAfterUID")
@@ -118,14 +119,11 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
 
     @SuppressWarnings("unchecked")
     private List<MailboxMembership<Long>> findMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to, int batchSize) {
-        Query query = getEntityManager().createNamedQuery("findMessagesInMailboxBetweenUIDs")
-        .setParameter("idParam", mailbox.getMailboxId())
-        .setParameter("fromParam", from)
-        .setParameter("toParam", to);
-        
-        if(batchSize > 0)
-        	query.setMaxResults(batchSize);
-        
+        Query query = getEntityManager().createNamedQuery("findMessagesInMailboxBetweenUIDs").setParameter("idParam", mailbox.getMailboxId()).setParameter("fromParam", from).setParameter("toParam", to);
+
+        if (batchSize > 0)
+            query.setMaxResults(batchSize);
+
         return query.getResultList();
     }
 
@@ -357,32 +355,31 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
     public Iterator<UpdatedFlags> updateFlags(Mailbox<Long> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
-        
+
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
-			
-			public void onMailboxMembers(List<MailboxMembership<Long>> members)
-					throws MailboxException {
-		        for (final MailboxMembership<Long> member:members) {
-		            Flags originalFlags = member.createFlags();
-		            if (replace) {
-		                member.setFlags(flags);
-		            } else {
-		                Flags current = member.createFlags();
-		                if (value) {
-		                    current.add(flags);
-		                } else {
-		                    current.remove(flags);
-		                }
-		                member.setFlags(current);
-		            }
-		            Flags newFlags = member.createFlags();
-		            getEntityManager().persist(member);
-		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-		        }
-				
-			}
-		});
+
+            public void onMailboxMembers(List<MailboxMembership<Long>> members) throws MailboxException {
+                for (final MailboxMembership<Long> member : members) {
+                    Flags originalFlags = member.createFlags();
+                    if (replace) {
+                        member.setFlags(flags);
+                    } else {
+                        Flags current = member.createFlags();
+                        if (value) {
+                            current.add(flags);
+                        } else {
+                            current.remove(flags);
+                        }
+                        member.setFlags(current);
+                    }
+                    Flags newFlags = member.createFlags();
+                    getEntityManager().persist(member);
+                    updatedFlags.add(new UpdatedFlags(member.getUid(), originalFlags, newFlags));
+                }
+
+            }
+        });
 
         return updatedFlags.iterator();
 

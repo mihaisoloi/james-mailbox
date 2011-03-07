@@ -42,7 +42,6 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageRangeException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
@@ -477,49 +476,46 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.Mailbox#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
      */
-    public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup,
-            MailboxSession mailboxSession) throws MailboxException {
+    public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException {
 
         class InterceptingCallback implements MessageCallback {
-        	Iterator<MessageResult> iterator;
-        	
-			public void onMessages(Iterator<MessageResult> it) throws MailboxException {
-				iterator = it;				
-			}
-			
-			public Iterator<MessageResult> getIterator() {
-				return iterator;
-			}
-        } 
-    	
+            Iterator<MessageResult> iterator;
+
+            public void onMessages(Iterator<MessageResult> it) throws MailboxException {
+                iterator = it;
+            }
+
+            public Iterator<MessageResult> getIterator() {
+                return iterator;
+            }
+        }
+
         // if we are intercepting callback - let's make it effective
         MessageRange nonBatchedSet = set.getUnlimitedRange();
-        
-        // intercepting callback 
+
+        // intercepting callback
         InterceptingCallback callback = new InterceptingCallback();
-    	this.getMessages(nonBatchedSet, fetchGroup, mailboxSession, callback);
-    	
+        this.getMessages(nonBatchedSet, fetchGroup, mailboxSession, callback);
+
         return callback.getIterator();
     }
-
    
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession, int, org.apache.james.mailbox.MessageManager.MessageCallback)
      */
-	public void getMessages(MessageRange set,
-			final FetchGroup fetchGroup, MailboxSession mailboxSession,
-			final MessageCallback messageCallback) throws MailboxException {
-	
-		mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
-			public void onMailboxMembers(List<MailboxMembership<Id>> rows) throws MailboxException {
-				messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
-			}
-		});
-	}
-	
+    public void getMessages(MessageRange set, final FetchGroup fetchGroup, MailboxSession mailboxSession, final MessageCallback messageCallback) throws MailboxException {
+
+        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
+            public void onMailboxMembers(List<MailboxMembership<Id>> rows) throws MailboxException {
+                messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
+            }
+        });
+    }
+
     /**
-     * Return a List which holds all uids of recent messages and optional reset the recent flag on the messages for the uids
+     * Return a List which holds all uids of recent messages and optional reset
+     * the recent flag on the messages for the uids
      * 
      * @param reset
      * @param mailboxSession
@@ -612,18 +608,17 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     protected Iterator<Long> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         try {
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
-            
+
             final List<Long> copiedMessages = new ArrayList<Long>();
             messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
 
-				public void onMailboxMembers(List<MailboxMembership<Id>> originalRows)
-						throws MailboxException {
-					Iterator<Long> ids = to.copy(originalRows, session);
-					while(ids.hasNext())
-						copiedMessages.add(ids.next());
-				}
-			});
-            return copiedMessages.iterator(); 
+                public void onMailboxMembers(List<MailboxMembership<Id>> originalRows) throws MailboxException {
+                    Iterator<Long> ids = to.copy(originalRows, session);
+                    while (ids.hasNext())
+                        copiedMessages.add(ids.next());
+                }
+            });
+            return copiedMessages.iterator();
 
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
