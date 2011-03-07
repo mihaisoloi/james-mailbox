@@ -502,11 +502,11 @@ public class SearchQuery {
             this.highValue = highValue;
         }
 
-        public final long getHighValue() {
+        public long getHighValue() {
             return highValue;
         }
 
-        public final long getLowValue() {
+        public long getLowValue() {
             return lowValue;
         }
 
@@ -598,7 +598,7 @@ public class SearchQuery {
          * 
          * @return <code>List</code> of {@link Criterion}
          */
-        public final List<Criterion> getCriteria() {
+        public List<Criterion> getCriteria() {
             return criteria;
         }
 
@@ -607,7 +607,7 @@ public class SearchQuery {
          * 
          * @return not null
          */
-        public final Conjunction getType() {
+        public Conjunction getType() {
             return type;
         }
 
@@ -671,7 +671,7 @@ public class SearchQuery {
     public static final class AllCriterion extends Criterion {
         private static final AllCriterion ALL = new AllCriterion();
 
-        private static final Criterion all() {
+        private static Criterion all() {
             return ALL;
         }
 
@@ -724,7 +724,7 @@ public class SearchQuery {
          * 
          * @return not null
          */
-        public final Scope getType() {
+        public Scope getType() {
             return type;
         }
 
@@ -733,7 +733,7 @@ public class SearchQuery {
          * 
          * @return the <code>Operator</code>, not null
          */
-        public final ContainsOperator getOperator() {
+        public ContainsOperator getOperator() {
             return operator;
         }
 
@@ -810,7 +810,7 @@ public class SearchQuery {
          * 
          * @return the headerName
          */
-        public final String getHeaderName() {
+        public String getHeaderName() {
             return headerName;
         }
 
@@ -819,7 +819,7 @@ public class SearchQuery {
          * 
          * @return the <code>Operator</code>, not null
          */
-        public final HeaderOperator getOperator() {
+        public HeaderOperator getOperator() {
             return operator;
         }
 
@@ -898,7 +898,7 @@ public class SearchQuery {
          * 
          * @return the <code>Operator</code>, not null
          */
-        public final DateOperator getOperator() {
+        public DateOperator getOperator() {
             return operator;
         }
 
@@ -968,7 +968,7 @@ public class SearchQuery {
          * 
          * @return the <code>NumericOperator</code>, not null
          */
-        public final NumericOperator getOperator() {
+        public NumericOperator getOperator() {
             return operator;
         }
 
@@ -1042,7 +1042,7 @@ public class SearchQuery {
          * 
          * @return the flag name, not null
          */
-        public final String getFlag() {
+        public String getFlag() {
             return flag;
         }
 
@@ -1051,7 +1051,7 @@ public class SearchQuery {
          * 
          * @return the <code>BooleanOperator</code>, not null
          */
-        public final BooleanOperator getOperator() {
+        public BooleanOperator getOperator() {
             return operator;
         }
 
@@ -1131,7 +1131,7 @@ public class SearchQuery {
          * 
          * @return the flag, not null
          */
-        public final Flag getFlag() {
+        public Flag getFlag() {
             return flag;
         }
 
@@ -1140,7 +1140,7 @@ public class SearchQuery {
          * 
          * @return the <code>BooleanOperator</code>, not null
          */
-        public final BooleanOperator getOperator() {
+        public BooleanOperator getOperator() {
             return operator;
         }
 
@@ -1218,7 +1218,7 @@ public class SearchQuery {
          * 
          * @return the <code>InOperator</code>
          */
-        public final InOperator getOperator() {
+        public InOperator getOperator() {
             return operator;
         }
 
@@ -1301,7 +1301,7 @@ public class SearchQuery {
          * 
          * @return the value
          */
-        public final String getValue() {
+        public String getValue() {
             return value;
         }
 
@@ -1360,7 +1360,7 @@ public class SearchQuery {
     public static final class ExistsOperator implements HeaderOperator {
         private static final ExistsOperator EXISTS = new ExistsOperator();
 
-        public static final ExistsOperator exists() {
+        public static ExistsOperator exists() {
             return EXISTS;
         }
 
@@ -1399,11 +1399,11 @@ public class SearchQuery {
 
         private static final BooleanOperator UNSET = new BooleanOperator(false);
 
-        public static final BooleanOperator set() {
+        public static BooleanOperator set() {
             return SET;
         }
 
-        public static final BooleanOperator unset() {
+        public static BooleanOperator unset() {
             return UNSET;
         }
 
@@ -1420,7 +1420,7 @@ public class SearchQuery {
          * @return true indicates that set values should be selected, false
          *         indicates that unset values should be selected
          */
-        public final boolean isSet() {
+        public boolean isSet() {
             return set;
         }
 
@@ -1500,7 +1500,7 @@ public class SearchQuery {
          * 
          * @return not null
          */
-        public final NumericComparator getType() {
+        public NumericComparator getType() {
             return type;
         }
 
@@ -1509,7 +1509,7 @@ public class SearchQuery {
          * 
          * @return the value
          */
-        public final long getValue() {
+        public long getValue() {
             return value;
         }
 
@@ -1598,7 +1598,7 @@ public class SearchQuery {
          * 
          * @return the day, one based
          */
-        public final int getDay() {
+        public int getDay() {
             return day;
         }
 
@@ -1607,7 +1607,7 @@ public class SearchQuery {
          * 
          * @return the month, one based
          */
-        public final int getMonth() {
+        public int getMonth() {
             return month;
         }
 
@@ -1617,7 +1617,7 @@ public class SearchQuery {
          * @return the type, either {@link #BEFORE}, {@link #AFTER} or
          *         {@link ON}
          */
-        public final DateComparator getType() {
+        public DateComparator getType() {
             return type;
         }
 
@@ -1626,7 +1626,7 @@ public class SearchQuery {
          * 
          * @return the year
          */
-        public final int getYear() {
+        public int getYear() {
             return year;
         }
 
@@ -1705,7 +1705,7 @@ public class SearchQuery {
          * 
          * @return the <code>NumericRange</code>'s search on, not null
          */
-        public final NumericRange[] getRange() {
+        public NumericRange[] getRange() {
             return range;
         }
 

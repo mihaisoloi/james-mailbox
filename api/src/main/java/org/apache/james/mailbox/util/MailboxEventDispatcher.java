@@ -182,7 +182,7 @@ public class MailboxEventDispatcher implements MailboxListener {
     private final static class FlagsUpdatedImpl extends
             MailboxListener.FlagsUpdated {
 
-        private static final boolean isChanged(final Flags original,
+        private static boolean isChanged(final Flags original,
                 final Flags updated, Flags.Flag flag) {
             return original != null && updated != null
                     && (original.contains(flag) ^ updated.contains(flag));
@@ -261,12 +261,11 @@ public class MailboxEventDispatcher implements MailboxListener {
             }
 
             private void nextPosition() {
-                if (position < NUMBER_OF_SYSTEM_FLAGS) {
-                    if (!modifiedFlags[position]) {
-                        position++;
-                        nextPosition();
-                    }
-                }
+		if ((position < NUMBER_OF_SYSTEM_FLAGS)
+			&& (!modifiedFlags[position])) {
+		    position++;
+		    nextPosition();
+		}
             }
 
             /*

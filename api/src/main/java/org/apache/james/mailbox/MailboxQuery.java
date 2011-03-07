@@ -212,12 +212,11 @@ public class MailboxQuery {
             boolean matchRest = false;
             for (int i = nameIndex; i < name.length(); i++) {
                 final char tasteNextName = name.charAt(i);
-                if (expressionNextNormal == tasteNextName) {
-                    if (isWildcardMatch(name, i, nextNormal)) {
-                        matchRest = true;
-                        break;
-                    }
-                }
+		if ((expressionNextNormal == tasteNextName)
+			&& (isWildcardMatch(name, i, nextNormal))) {
+		    matchRest = true;
+		    break;
+		}
             }
             result = matchRest;
         } else {

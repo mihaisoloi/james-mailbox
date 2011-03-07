@@ -22,8 +22,6 @@ package org.apache.james.mailbox;
 import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 
-import javax.mail.MessagingException;
-
 /**
  * IMAP needs to know the size of the content before it starts to write it
  * out. This interface allows direct writing whilst exposing total size.

@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResult.MimePath;
 
 /**

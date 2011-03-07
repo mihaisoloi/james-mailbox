@@ -328,47 +328,47 @@ public class MessageResultImpl implements MessageResult {
 
         private int content;
 
-        public final Content getBody() {
+        public Content getBody() {
             return body;
         }
 
-        public final void setBody(Content body) {
+        public void setBody(Content body) {
             content = content | FetchGroup.BODY_CONTENT;
             this.body = body;
         }
 
-        public final Content getMimeBody() {
+        public Content getMimeBody() {
             return mimeBody;
         }
 
-        public final void setMimeBody(Content mimeBody) {
+        public void setMimeBody(Content mimeBody) {
             content = content | FetchGroup.MIME_CONTENT;
             this.mimeBody = mimeBody;
         }
 
-        public final Content getFull() {
+        public Content getFull() {
             return full;
         }
 
-        public final void setFull(Content full) {
+        public void setFull(Content full) {
             content = content | FetchGroup.FULL_CONTENT;
             this.full = full;
         }
 
-        public final Iterator<Header> getHeaders() {
+        public Iterator<Header> getHeaders() {
             return headers;
         }
 
-        public final void setHeaders(Iterator<Header> headers) {
+        public void setHeaders(Iterator<Header> headers) {
             content = content | FetchGroup.HEADERS;
             this.headers = headers;
         }
 
-        public final Iterator<Header> getMimeHeaders() {
+        public Iterator<Header> getMimeHeaders() {
             return mimeHeaders;
         }
 
-        public final void setMimeHeaders(Iterator<Header> mimeHeaders) {
+        public void setMimeHeaders(Iterator<Header> mimeHeaders) {
             content = content | FetchGroup.MIME_HEADERS;
             this.mimeHeaders = mimeHeaders;
         }
