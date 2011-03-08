@@ -38,7 +38,6 @@ import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 import javax.mail.util.SharedFileInputStream;
 
-import org.apache.commons.collections.iterators.EmptyIterator;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
@@ -486,10 +485,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 iterator = it;
             }
 
-            @SuppressWarnings("unchecked")
             public Iterator<MessageResult> getIterator() {
         	if (iterator == null) {
-        	    return (Iterator<MessageResult>)EmptyIterator.INSTANCE;
+        	    iterator = new ResultIterator<Id>(null, null);
         	}
                 return iterator;
             }
