@@ -19,9 +19,9 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>james-server-root</artifactId>
+    <artifactId>james-project</artifactId>
     <groupId>org.apache.james</groupId>
-    <version>1.5</version>
+    <version>1.6-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -237,39 +237,48 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-descriptor</id>
+            <goals>
+              <goal>attach-descriptor</goal>
+            </goals>
+            <configuration>
+              <siteDirectory>${basedir}/src/site</siteDirectory>
+              <generateReports>false</generateReports>
+            </configuration>
+          </execution>
+        </executions>
         <configuration>
-          <siteDirectory>${mailbox.siteDirectory}</siteDirectory>
-          <generateReports>${mailbox.generateReports}</generateReports>
+          <siteDirectory>${maven-site-plugin.siteDirectory}</siteDirectory>
+          <generateReports>${maven-site-plugin.generateReports}</generateReports>
           <reportPlugins>
+            <!-- Order matters. First project-info-reports, second jxr. -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <reports>
+                <report>dependencies</report>
+                <report>dependency-management</report>
+                <report>dependency-convergence</report>
+                <report>distribution-management</report>
+                <report>index</report>
+                <report>license</report>
+                <report>mailing-list</report>
+                <report>modules</report>
+                <report>plugin-management</report>
+                <report>plugins</report>
+                <report>project-team</report>
+                <report>scm</report>
+                <report>summary</report>
+              </reports>
+            </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-jxr-plugin</artifactId>
               <configuration>
                 <aggregate>true</aggregate>
               </configuration>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-project-info-reports-plugin</artifactId>
-              <reportSets>
-                <reportSet>
-                  <reports>
-                    <report>dependencies</report>
-                    <report>dependency-management</report>
-                    <report>dependency-convergence</report>
-                    <report>distribution-management</report>
-                    <report>index</report>
-                    <report>license</report>
-                    <report>mailing-list</report>
-                    <report>modules</report>
-                    <report>plugin-management</report>
-                    <report>plugins</report>
-                    <report>project-team</report>
-                    <report>scm</report>
-                    <report>summary</report>
-                  </reports>
-                </reportSet>
-              </reportSets>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -298,7 +307,6 @@
                   <!-- Eclipse -->
                   <exclude>**/.*</exclude>
                   <exclude>.*/**/*</exclude>
-      
                 </excludes>
               </configuration>
             </plugin>
@@ -741,13 +749,6 @@
         <version.activation>1.0.2</version.activation>
       </properties>
     </profile>
-    <profile>
-      <id>site-reports</id>
-      <properties>
-        <mailbox.siteDirectory>${basedir}/src/reporting-site</mailbox.siteDirectory>
-        <mailbox.generateReports>true</mailbox.generateReports>
-      </properties>
-    </profile>
   </profiles>
 
   <properties>
@@ -765,8 +766,6 @@
     <version.jmock>2.5.1</version.jmock>
     <version.jackrabbit>2.2.0</version.jackrabbit>
     <target.jdk>1.5</target.jdk>
-    <mailbox.siteDirectory>${basedir}/src/site</mailbox.siteDirectory>
-    <mailbox.generateReports>false</mailbox.generateReports>
   </properties>
 </project>
 
