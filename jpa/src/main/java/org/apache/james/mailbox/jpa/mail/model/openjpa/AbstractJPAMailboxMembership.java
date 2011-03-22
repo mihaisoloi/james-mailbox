@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.jpa.mail.model.openjpa;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

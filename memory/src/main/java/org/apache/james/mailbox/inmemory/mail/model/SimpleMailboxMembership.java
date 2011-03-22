@@ -33,7 +33,6 @@ import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 
 public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> implements Message, Comparable<MailboxMembership<Long>> {
 

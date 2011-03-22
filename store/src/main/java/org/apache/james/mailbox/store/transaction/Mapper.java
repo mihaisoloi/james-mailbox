@@ -22,7 +22,6 @@ package org.apache.james.mailbox.store.transaction;
 import java.util.List;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageRangeException;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 
 /**
