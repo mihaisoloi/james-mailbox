@@ -1746,7 +1746,7 @@ public class SearchQuery {
             StringBuffer retValue = new StringBuffer();
 
             retValue.append("InOperator ( ").append("range = ").append(
-                    this.range).append(TAB).append(" )");
+                    Arrays.toString(this.range)).append(TAB).append(" )");
 
             return retValue.toString();
         }
