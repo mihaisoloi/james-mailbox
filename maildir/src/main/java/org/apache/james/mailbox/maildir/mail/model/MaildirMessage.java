@@ -246,7 +246,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
      */
     public void setUid(long uid) {
         modified = true;
-        setUid(uid);
+        super.setUid(uid);
     }
 
   
