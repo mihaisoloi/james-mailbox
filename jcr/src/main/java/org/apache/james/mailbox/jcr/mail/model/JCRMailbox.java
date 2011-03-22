@@ -180,8 +180,13 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         if (getClass() != obj.getClass())
             return false;
         final JCRMailbox other = (JCRMailbox) obj;
-        if (getMailboxId() != other.getMailboxId())
-            return false;
+        if (getMailboxId() != null) {
+            if (!getMailboxId().equals(other.getMailboxId()))
+        	return false;
+        } else {
+            if (other.getMailboxId() != null)
+        	return false;
+        }
         return true;
     }
 

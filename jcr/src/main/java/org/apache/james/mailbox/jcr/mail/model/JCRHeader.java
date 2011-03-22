@@ -167,8 +167,20 @@ public class JCRHeader extends AbstractComparableHeader implements JCRImapConsta
         if (getClass() != obj.getClass())
             return false;
         final JCRHeader other = (JCRHeader) obj;
-        if (getValue() != other.getValue() || getFieldName() != other.getFieldName())
-            return false;
+        if (getValue() != null) {
+            if (!getValue().equals(other.getValue()))
+        	return false;
+        } else {
+            if (other.getValue() != null)
+        	return false;
+        }
+        if (getFieldName() != null) {
+            if (!getFieldName().equals(other.getFieldName()))
+        	return false;
+        } else {
+            if (other.getFieldName() != null)
+        	return false;
+        }
         return true;
     }
 

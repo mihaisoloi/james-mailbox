@@ -152,7 +152,7 @@ public class MaildirMessageName {
      * @param fullName A name of a message file in the correct Maildir format
      */
     public void setFullName(String fullName) {
-        if (this.fullName != fullName) {
+        if (this.fullName == null || !this.fullName.equals(fullName)) {
             this.fullName = fullName;
             this.file = null;
             this.isSplit = false;

@@ -147,8 +147,20 @@ public class JCRSubscription implements Subscription, Persistent, JCRImapConstan
         if (getClass() != obj.getClass())
             return false;
         final JCRSubscription other = (JCRSubscription) obj;
-        if (getUser() != other.getUser() || getMailbox() != other.getMailbox())
-            return false;
+        if (getUser() != null) {
+            if (!getUser().equals(other.getUser()))
+        	return false;
+        } else {
+            if (other.getUser() != null)
+        	return false;
+        }
+        if (getMailbox() != null) {
+            if (!getMailbox().equals(other.getMailbox()))
+        	return false;
+        } else {
+            if (other.getMailbox() != null)
+        	return false;
+        }
         return true;
     }
 

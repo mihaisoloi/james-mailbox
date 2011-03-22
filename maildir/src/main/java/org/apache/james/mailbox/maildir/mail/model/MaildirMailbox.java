@@ -127,9 +127,13 @@ public class MaildirMailbox implements Mailbox<Integer> {
 			return true;
 		}
 		if (obj instanceof MaildirMailbox) {
-			if (id == ((MaildirMailbox) obj).getMailboxId()) {
-				return true;
-			}
+		        if (id != null) {
+		            if (id.equals(((MaildirMailbox) obj).getMailboxId()))
+		        	return true;
+		        } else {
+		            if (((MaildirMailbox) obj).getMailboxId() == null)
+		        	return true;
+		        }
 		}
 		return false;
 	}

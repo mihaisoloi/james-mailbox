@@ -418,12 +418,28 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
             return false;
         
         final JCRMessage other = (JCRMessage) obj;
-        if (getUUID() != other.getUUID())
-            return false;
-        if (getMailboxId() != other.getMailboxId())
-            return false;
-        if (getId() != other.getId())
-            return false;
+
+        if (getUUID() != null) {
+            if (!getUUID().equals(other.getUUID()))
+        	return false;
+        } else {
+            if (other.getUUID() != null)
+        	return false;
+        }
+        if (getMailboxId() != null) {
+            if (!getMailboxId().equals(other.getMailboxId()))
+        	return false;
+        } else {
+            if (other.getMailboxId() != null)
+        	return false;
+        }
+        if (getId() != null) {
+            if (!getId().equals(other.getId()))
+        	return false;
+        } else {
+            if (other.getId() != null)
+        	return false;
+        }
         return true;
     }
 

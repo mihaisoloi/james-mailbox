@@ -189,8 +189,28 @@ public class JCRProperty extends AbstractComparableProperty<JCRProperty> impleme
         if (getClass() != obj.getClass())
             return false;
         final JCRProperty other = (JCRProperty) obj;
-        if (getLocalName() != other.getLocalName() || getNamespace() != other.getNamespace() || getValue() !=other.getValue())
-            return false;
+        
+        if (getLocalName() != null) {
+            if (!getLocalName().equals(other.getLocalName()))
+        	return false;
+        } else {
+            if (other.getLocalName() != null)
+        	return false;
+        }
+        if (getNamespace() != null) {
+            if (!getNamespace().equals(other.getNamespace()))
+        	return false;
+        } else {
+            if (other.getNamespace() != null)
+        	return false;
+        }
+        if (getValue() != null) {
+            if (!getValue().equals(other.getValue()))
+        	return false;
+        } else {
+            if (other.getValue() != null)
+        	return false;
+        }
         return true;
     }
 

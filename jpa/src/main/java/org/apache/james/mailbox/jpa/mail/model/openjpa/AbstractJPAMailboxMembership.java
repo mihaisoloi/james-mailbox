@@ -319,8 +319,13 @@ public abstract class AbstractJPAMailboxMembership extends AbstractMailboxMember
         if (getClass() != obj.getClass())
             return false;
         final AbstractJPAMailboxMembership other = (AbstractJPAMailboxMembership) obj;
-        if (getMailboxId() != other.getMailboxId())
-            return false;
+        if (getMailboxId() != null) {
+            if (!getMailboxId().equals(other.getMailboxId()))
+        	return false;
+        } else {
+            if (other.getMailboxId() != null)
+        	return false;
+        }
         if (uid != other.uid)
             return false;
         return true;
