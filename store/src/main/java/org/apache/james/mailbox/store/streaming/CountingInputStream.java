@@ -63,7 +63,7 @@ final public class CountingInputStream extends InputStream {
      * 
      * @return lineCount
      */
-    public final int getLineCount() {
+    public int getLineCount() {
         return lineCount;
     }
 
@@ -72,7 +72,7 @@ final public class CountingInputStream extends InputStream {
      * 
      * @return octetCount
      */
-    public final int getOctetCount() {
+    public int getOctetCount() {
         return octetCount;
     }
     

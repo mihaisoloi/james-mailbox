@@ -288,7 +288,7 @@ public class PartContentBuilder {
             this.position = position;
         }
 
-        public final int getPosition() {
+        public int getPosition() {
             return position;
         }
 
