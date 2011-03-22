@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.mail.util.SharedFileInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -132,15 +133,24 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
                 propertyBuilder.setBoundary(boundary);
             }
             if ("text".equalsIgnoreCase(mediaType)) {
+                long lines = -1;
                 final CountingInputStream bodyStream = new CountingInputStream(parser.getInputStream());
-                bodyStream.readAll();
-                long lines = bodyStream.getLineCount();
+                try {
+                    bodyStream.readAll();
+                    lines = bodyStream.getLineCount();
+                } finally {
+                    IOUtils.closeQuietly(bodyStream);
+                }
 
                 next = parser.next();
                 if (next == MimeTokenStream.T_EPILOGUE) {
                     final CountingInputStream epilogueStream = new CountingInputStream(parser.getInputStream());
-                    epilogueStream.readAll();
-                    lines += epilogueStream.getLineCount();
+                    try {
+                        epilogueStream.readAll();
+                        lines += epilogueStream.getLineCount();
+                    } finally {
+                        IOUtils.closeQuietly(epilogueStream);
+                    }
                 }
                 propertyBuilder.setTextualLineCount(lines);
             }
