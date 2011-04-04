@@ -43,7 +43,6 @@ public class MaildirProperty extends AbstractComparableProperty<MaildirProperty>
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.model.AbstractComparableProperty#getOrder()
      */
-    @Override
     public int getOrder() {
         return order;
     }
@@ -56,10 +55,18 @@ public class MaildirProperty extends AbstractComparableProperty<MaildirProperty>
         return localName;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Property#getNamespace()
+     */
     public String getNamespace() {
         return namespace;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Property#getValue()
+     */
     public String getValue() {
         return value;
     }

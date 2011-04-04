@@ -280,14 +280,26 @@ public class MaildirMessage extends AbstractMaildirMessage {
         return modified;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getFullContent()
+     */
     public InputStream getFullContent() throws IOException {
         return rawFullContent;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
+     */
     public InputStream getBodyContent() throws IOException {
         return new LazySkippingInputStream(rawFullContent, bodyStartOctet);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getBodyOctets()
+     */
     public long getBodyOctets() {
         return getFullContentOctets() - bodyStartOctet;
     }

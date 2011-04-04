@@ -432,44 +432,44 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
         final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Integer>() {
-			
-			public void onMailboxMembers(List<MailboxMembership<Integer>> members)
-					throws MailboxException {
-				for (final MailboxMembership<Integer> member:members) {
-		            Flags originalFlags = member.createFlags();
-		            if (replace) {
-		                member.setFlags(flags);
-		            } else {
-		                Flags current = member.createFlags();
-		                if (value) {
-		                    current.add(flags);
-		                } else {
-		                    current.remove(flags);
-		                }
-		                member.setFlags(current);
-		            }
-		            Flags newFlags = member.createFlags();
-		            
-		            try {
-		                AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
-		                MaildirMessageName messageName = folder.getMessageNameByUid(maildirMessage.getUid());
-		                File messageFile = messageName.getFile();
-		                //System.out.println("save existing " + message + " as " + messageFile.getName());
-		                messageName.setFlags(maildirMessage.createFlags());
-		                // this automatically moves messages from new to cur if needed
-		                String newMessageName = messageName.getFullName();
-		                messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
-		                long uid = maildirMessage.getUid();
-		                folder.update(uid, newMessageName);
-		            } catch (IOException e) {
-		                throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e );
-		            }
-		            
-		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-		        }
-			}
-		});
-        
+
+            public void onMailboxMembers(List<MailboxMembership<Integer>> members) throws MailboxException {
+                for (final MailboxMembership<Integer> member : members) {
+                    Flags originalFlags = member.createFlags();
+                    if (replace) {
+                        member.setFlags(flags);
+                    } else {
+                        Flags current = member.createFlags();
+                        if (value) {
+                            current.add(flags);
+                        } else {
+                            current.remove(flags);
+                        }
+                        member.setFlags(current);
+                    }
+                    Flags newFlags = member.createFlags();
+
+                    try {
+                        AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
+                        MaildirMessageName messageName = folder.getMessageNameByUid(maildirMessage.getUid());
+                        File messageFile = messageName.getFile();
+                        // System.out.println("save existing " + message +
+                        // " as " + messageFile.getName());
+                        messageName.setFlags(maildirMessage.createFlags());
+                        // this automatically moves messages from new to cur if
+                        // needed
+                        String newMessageName = messageName.getFullName();
+                        messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
+                        long uid = maildirMessage.getUid();
+                        folder.update(uid, newMessageName);
+                    } catch (IOException e) {
+                        throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e);
+                    }
+
+                    updatedFlags.add(new UpdatedFlags(member.getUid(), originalFlags, newFlags));
+                }
+            }
+        });
         
         return updatedFlags.iterator();       
         

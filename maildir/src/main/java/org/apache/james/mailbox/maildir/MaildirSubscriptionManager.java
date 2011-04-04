@@ -29,7 +29,10 @@ public class MaildirSubscriptionManager extends StoreSubscriptionManager {
         super(mf);
     }
 
-    @Override
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.StoreSubscriptionManager#createSubscription(org.apache.james.mailbox.MailboxSession, java.lang.String)
+     */
     protected Subscription createSubscription(MailboxSession session, String mailbox) {
         return new MaildirSubscription(session.getUser().getUserName(), mailbox);
     }

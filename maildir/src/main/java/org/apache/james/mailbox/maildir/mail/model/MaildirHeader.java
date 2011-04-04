@@ -25,11 +25,12 @@ import org.apache.james.mailbox.store.mail.model.Header;
 public class MaildirHeader extends AbstractComparableHeader {
 
     private int lineNumber;
-	private String field;
-	private String value;
+    private String field;
+    private String value;
 
-	/**
+    /**
      * Copies the content of an existing header.
+     * 
      * @param header
      */
     public MaildirHeader(Header header) {
@@ -42,29 +43,32 @@ public class MaildirHeader extends AbstractComparableHeader {
         this.field = field;
         this.value = value;
     }
-    
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.james.mailbox.store.mail.model.Header#getFieldName()
-	 */
-	public String getFieldName() {
-		return field;
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.james.mailbox.store.mail.model.Header#getLineNumber()
-	 */
-	public int getLineNumber() {
-		return lineNumber;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.store.mail.model.Header#getFieldName()
+     */
+    public String getFieldName() {
+        return field;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.apache.james.mailbox.store.mail.model.Header#getValue()
-	 */
-	public String getValue() {
-		return value;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.store.mail.model.Header#getLineNumber()
+     */
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.store.mail.model.Header#getValue()
+     */
+    public String getValue() {
+        return value;
+    }
 
 }

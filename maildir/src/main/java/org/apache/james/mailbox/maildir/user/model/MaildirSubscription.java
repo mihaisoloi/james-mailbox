@@ -30,10 +30,19 @@ public class MaildirSubscription implements Subscription {
         this.mailbox = mailbox;
     }
     
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.user.model.Subscription#getMailbox()
+     */
     public String getMailbox() {
         return mailbox;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.user.model.Subscription#getUser()
+     */
     public String getUser() {
         return user;
     }

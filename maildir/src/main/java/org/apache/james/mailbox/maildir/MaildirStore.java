@@ -220,6 +220,10 @@ public class MaildirStore implements UidProvider<Integer>{
         return getFolderName(mailboxPath.getNamespace(), mailboxPath.getUser(), mailboxPath.getName());
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.UidProvider#nextUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
+     */
     public long nextUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
         try {
             return createMaildirFolder(mailbox).getLastUid() +1;
@@ -228,6 +232,10 @@ public class MaildirStore implements UidProvider<Integer>{
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.UidProvider#lastUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
+     */
     public long lastUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
         try {
             return createMaildirFolder(mailbox).getLastUid();
