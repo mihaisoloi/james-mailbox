@@ -287,9 +287,15 @@ public class MaildirFolder {
             reader = new BufferedReader(fileReader);
             String uidString = String.valueOf(uid);
             String line = reader.readLine(); // the header
+            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
                 if (!line.equals("")) {
                     int gap = line.indexOf(" ");
+                    if (gap == -1) {
+                        // there must be some issues in the file if no gap can be found
+                        throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                    }
+                    
                     if (line.substring(0, gap).equals(uidString)) {
                         messageName = new MaildirMessageName(this, line.substring(gap + 1));
                         break;
@@ -435,6 +441,11 @@ public class MaildirFolder {
                 }
                 if (!line.equals("")) {
                     int gap = line.indexOf(" ");
+                    if (gap == -1) {
+                        // there must be some issues in the file if no gap can be found
+                        throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lines.size());
+                    }
+                    
                     Long uid = Long.valueOf(line.substring(0, gap));
                     String name = line.substring(gap + 1, line.length());
                     for (String recentFile : recentFiles) {
@@ -502,9 +513,14 @@ public class MaildirFolder {
             // the first line in the file contains the next uid and message count
             if (line != null)
                 readUidListHeader(line);
+            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
                 if (!line.equals("")) {
                     int gap = line.indexOf(" ");
+                    if (gap == -1) {
+                        // there must be some issues in the file if no gap can be found
+                        throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                    }
                     Long uid = Long.valueOf(line.substring(0, gap));
                     String name = line.substring(gap + 1, line.length());
                     reverseUidMap.put(stripMetaFromName(name), uid);
@@ -545,9 +561,16 @@ public class MaildirFolder {
             if (line != null)
                 readUidListHeader(line);
             uidMap = new HashMap<Long, MaildirMessageName>(messageCount);
+            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
                 if (!line.equals("")) {
                     int gap = line.indexOf(" ");
+                    
+                    if (gap == -1) {
+                        // there must be some issues in the file if no gap can be found
+                        throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                    }
+                    
                     Long uid = Long.valueOf(line.substring(0, gap));
                     if (uid >= from) {
                         if (to != -1 && uid > to)
@@ -590,6 +613,11 @@ public class MaildirFolder {
      */
     private void readUidListHeader(String line) throws IOException {
         int gap1 = line.indexOf(" ");
+        if (gap1 == -1) {
+            // there must be some issues in the file if no gap can be found
+            throw new IOException("Corrupted header entry in uid-file");
+            
+        }
         int version = Integer.valueOf(line.substring(0, gap1));
         if (version != 1)
             throw new IOException("Cannot read uidlists with versions other than 1.");
@@ -735,8 +763,14 @@ public class MaildirFolder {
             readUidListHeader(reader.readLine());
             ArrayList<String> lines = new ArrayList<String>(messageCount-1);
             String line;
+            int lineNumber = 1;
             while ((line = reader.readLine()) != null) {
                 int gap = line.indexOf(" ");
+                if (gap == -1) {
+                    // there must be some issues in the file if no gap can be found
+                    throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                }
+                
                 if (uid == Long.valueOf(line.substring(0, line.indexOf(" ")))) {
                     deletedMessage = new MaildirMessageName(this, line.substring(gap + 1, line.length()));
                     messageCount--;
