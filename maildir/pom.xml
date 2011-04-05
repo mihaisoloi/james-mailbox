@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james</groupId>
   <artifactId>apache-james-mailbox-maildir</artifactId>
-  <name>Apache James Maildir Mailbox Manager</name>
+  <name>Apache James Maildir Mailbox</name>
   <build>
     <plugins>
       <plugin>

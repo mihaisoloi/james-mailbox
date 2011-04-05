@@ -29,7 +29,7 @@
   <artifactId>apache-james-mailbox</artifactId>
   <name>Apache JAMES Mailbox</name>
   <version>0.2-M2-SNAPSHOT</version>
-  <description>JAMES Mailbox</description>
+  <description>Apache James Mailbox</description>
   <url>http://james.apache.org/mailbox</url>
   <inceptionYear>2010</inceptionYear>
   <packaging>pom</packaging>

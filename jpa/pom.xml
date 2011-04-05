@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james</groupId>
   <artifactId>apache-james-mailbox-jpa</artifactId>
-  <name>Apache James JPA Mailbox Manager</name>
+  <name>Apache James JPA Mailbox</name>
   <dependencies>
     <dependency>
       <groupId>org.apache.james</groupId>
