@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james</groupId>
   <artifactId>apache-james-mailbox-api</artifactId>
-  <name>Apache James Mailbox  API</name>
+  <name>Apache James Mailbox API</name>
   <dependencies>
     <dependency>
       <groupId>${javax.mail.groupId}</groupId>
