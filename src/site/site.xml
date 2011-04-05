@@ -43,7 +43,7 @@
     <menu name="Mailbox">
       <item name="Introduction" href="/index.html" />
       <item name="Source Code" href="/source-code.html" />
-      <item name="Javadoc" href="../mailbox/apidocs/index.html" />
+      <item name="Javadoc" href="/apidocs/index.html" />
 <!--    <item name="Reports" href="https://hudson.apache.org/hudson/view/G-L/view/James/job/mailbox/site/" />-->
 <!--    <item name="Changes" href="/changes.html" />-->
 <!--    <item name="JIRA Report" href="/jira-report.html" />-->
