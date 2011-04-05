@@ -45,7 +45,7 @@
        from the build the Apache James Mailbox libraries.</p>
   </section>
 
-  <section name="Mailbox Source Projects">
+  <section name="Source Code Organization">
     <div style="float:left; margin=4px;">
       <img src="images/uml/org.apache.james.mailbox-package.png"/>
     </div>

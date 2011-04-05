@@ -43,11 +43,15 @@
     <menu name="Mailbox">
       <item name="Introduction" href="/index.html" />
       <item name="Source Code" href="/source-code.html" />
-      <item name="Javadoc" href="/apidocs/index.html" />
+    </menu>  
+     
+    <menu name="References">
+        <item name="Javadoc" href="/apidocs/index.html" />
+        <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/MAILBOX" />
+<!--    Report link is unavailable on hudson-->
 <!--    <item name="Reports" href="https://hudson.apache.org/hudson/view/G-L/view/James/job/mailbox/site/" />-->
 <!--    <item name="Changes" href="/changes.html" />-->
 <!--    <item name="JIRA Report" href="/jira-report.html" />-->
-<!--    <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/MAILBOX" />-->
     </menu>
 
   </body>  

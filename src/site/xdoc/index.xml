@@ -39,19 +39,19 @@
        (see <a href="https://issues.apache.org/jira/browse/MAILBOX-44">MAILBOX-44</a> and
        <a href="https://issues.apache.org/jira/browse/MAILBOX-45">MAILBOX-45</a>).</p>
     <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 
-       0.2-M2 milestone. The <a href="apidocs/">API</a> is susceptible to evolve 
-       (see <a href="https://issues.apache.org/jira/browse/MAILBOX-46">MAILBOX-46</a>).</p>
+       0.2-M2 milestone. The <a href="apidocs/">API</a> as the Database schema are susceptible to evolve 
+       (see for example <a href="https://issues.apache.org/jira/browse/MAILBOX-46">MAILBOX-46</a>).</p>
   </section>
 
-  <section name="Mailbox In Apache James Server and other Apache James librairies">
+  <section name="Apache James Mailbox in Server and other librairies">
     <p><a href="http://james.apache.org/server/3">Apache James Server 3</a> uses this library to implement its user mailboxes.
        A backport to <a href="http://james.apache.org/server/2">Apache James Server 2.3.2</a> would require
        a volunteer.</p>
     <p>The Mailbox is tested and fully compatible with other Apache James libraries
-       such as the <a href="">Apache James IMAP</a> (see <a href="https://svn.apache.org/repos/asf/james/mailbox-integration-tester/trunk/">this link</a> for the Mailbox/IMAP tests source code) </p>
+       such as the <a href="http://james.apache.org/imap">Apache James IMAP</a> (see <a href="https://svn.apache.org/repos/asf/james/mailbox-integration-tester/trunk/">this link</a> for the Mailbox/IMAP tests source code) </p>
   </section>
 
-  <section name='Develop'>
+  <section name="Develop on Apache James Mailbox">
     <p>Go to the <a href="source-code.html">source code</a> page to get more information on how to develop on James Mailbox.</p>
     <img src="images/uml/org.apache.james.mailbox-package.png"/>
   </section>
