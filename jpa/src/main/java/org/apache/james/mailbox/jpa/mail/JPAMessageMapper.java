@@ -236,15 +236,20 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
                     for (int i = 0; i < ranges.length; i++) {
                         final long low = ranges[i].getLowValue();
                         final long high = ranges[i].getHighValue();
-
+                        if (i == 0) {
+                            queryBuilder.append(" AND ");
+                        } else {
+                            // We need to use an OR here. See MAILBOX-49
+                            queryBuilder.append(" OR ");
+                        }
                         if (low == Long.MAX_VALUE) {
-                            queryBuilder.append(" AND membership.uid<=").append(high);
+                            queryBuilder.append("membership.uid<=").append(high);
                             range = true;
                         } else if (low == high) {
-                            queryBuilder.append(" AND membership.uid=").append(low);
+                            queryBuilder.append("membership.uid=").append(low);
                             range = false;
                         } else {
-                            queryBuilder.append(" AND membership.uid BETWEEN ").append(low).append(" AND ").append(high);
+                            queryBuilder.append("membership.uid BETWEEN ").append(low).append(" AND ").append(high);
                             range = true;
                         }
                     }

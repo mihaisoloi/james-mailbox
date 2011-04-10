@@ -627,7 +627,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
                     final long low = ranges[i].getLowValue();
                     final long high = ranges[i].getHighValue();
                     if (i > 0) {
-                        queryBuilder.append(" and ");
+                        // We need to use an OR here. See MAILBOX-49
+                        queryBuilder.append(" or ");
                     } else {
                         queryBuilder.append("[");
                     }
