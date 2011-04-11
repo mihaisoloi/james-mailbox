@@ -74,7 +74,27 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
                     listeners.remove(path);
                 }
             }
-        }        
+        }  
+        
+        List<MailboxListener> globalListeners = getGlobalListeners();
+        if (globalListeners != null && globalListeners.isEmpty() == false) {
+            List<MailboxListener> closedListener = new ArrayList<MailboxListener>();
+            
+            int sz = globalListeners.size();
+            for (int i = 0; i < sz; i++) {
+                MailboxListener l = globalListeners.get(i);
+                if (l.isClosed()) {
+                    closedListener.add(l);
+                } else {
+                    l.event(event);
+                }
+            }
+            
+          
+            if (closedListener.isEmpty() == false) {
+                globalListeners.removeAll(closedListener);
+            }
+        }  
     }
 
     /**
@@ -107,10 +127,26 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         }        
     }
 
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#addGlobalListener(org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     */
+    public synchronized void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
+        getGlobalListeners().add(listener);
+    }
+
     /**
      * Return the {@link Map} which is used to store the {@link MailboxListener}
      * 
      * @return listeners
      */
     protected abstract Map<MailboxPath, List<MailboxListener>> getListeners();
+    
+    /**
+     * Return the {@link List} which is used tos tore the global {@link MailboxListener}
+     * 
+     * @return globalListeners
+     */
+    protected abstract List<MailboxListener> getGlobalListeners();
 }

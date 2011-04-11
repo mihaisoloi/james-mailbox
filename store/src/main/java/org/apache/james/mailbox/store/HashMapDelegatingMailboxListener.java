@@ -19,6 +19,7 @@
 
 package org.apache.james.mailbox.store;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,16 @@ import org.apache.james.mailbox.MailboxPath;
 public class HashMapDelegatingMailboxListener extends AbstractDelegatingMailboxListener{
 
     private Map<MailboxPath, List<MailboxListener>> listeners = new HashMap<MailboxPath, List<MailboxListener>>();
+    private List<MailboxListener> globalListeners = new ArrayList<MailboxListener>();
 
     @Override
     protected Map<MailboxPath, List<MailboxListener>> getListeners() {
         return listeners;
+    }
+
+    @Override
+    protected List<MailboxListener> getGlobalListeners() {
+        return globalListeners;
     }
     
 }

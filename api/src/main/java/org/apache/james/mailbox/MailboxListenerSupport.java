@@ -36,4 +36,14 @@ public interface MailboxListenerSupport {
      * @throws MailboxException
      */
     void addListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException;
+    
+    /**
+     * Add a {@link MailboxListener} which get fired for ever {@link MailboxPath}
+     * 
+     * @param listener
+     * @param session
+     * @throws MailboxException
+     */
+    void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException;
+
 }

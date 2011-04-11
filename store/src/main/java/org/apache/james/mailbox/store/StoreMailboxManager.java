@@ -477,6 +477,14 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         return Collections.unmodifiableList(mList);
         
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#addGlobalListener(org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     */
+    public void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
+        delegatingListener.addGlobalListener(listener, session);
+    }
     
     
 
