@@ -19,7 +19,6 @@
 
 package org.apache.james.mailbox;
 
-
 /**
  * Indicates that the requested search is not supported by this implementation.
  */

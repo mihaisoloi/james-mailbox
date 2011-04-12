@@ -19,7 +19,6 @@
 
 package org.apache.james.mailbox;
 
-
 import java.util.Iterator;
 
 import org.apache.james.mailbox.MessageResult.FetchGroup;

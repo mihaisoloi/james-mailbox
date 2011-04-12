@@ -20,8 +20,7 @@
 package org.apache.james.mailbox;
 
 /**
- * Indicates that an operation required is not supported
- * by this mailbox.
+ * Indicates that an operation required is not supported by this mailbox.
  */
 public class UnsupportedOperationException extends MailboxException {
 

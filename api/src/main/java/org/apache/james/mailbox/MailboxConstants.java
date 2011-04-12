@@ -20,22 +20,16 @@
 package org.apache.james.mailbox;
 
 public interface MailboxConstants {
-   
+
     public static final char NAMESPACE_PREFIX_CHAR = '#';
 
-    /**
-     * The namespace used for store user inboxes
-     */
+    /** The namespace used for store user inboxes */
     public static final String USER_NAMESPACE = NAMESPACE_PREFIX_CHAR + "private";
 
-    /**
-     * The default delimiter used to seperated parent/child folders
-     */
+    /** The default delimiter used to seperated parent/child folders */
     public static final char DEFAULT_DELIMITER = '.';
 
-    /**
-     * The name of the INBOX
-     */
+    /** The name of the INBOX */
     public static final String INBOX = "INBOX";
 
 }

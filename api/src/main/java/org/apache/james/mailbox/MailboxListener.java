@@ -23,55 +23,60 @@ import java.util.Iterator;
 
 import javax.mail.Flags;
 
-
 /**
- * Listens to <code>Mailbox</code> events.
- * Note that listeners may be removed asynchronously.
- * When {@link #isClosed()} returns true,
- * the listener may be removed from the mailbox by
- * the dispatcher.
+ * Listens to <code>Mailbox</code> events.<br>
+ * Note that listeners may be removed asynchronously.<br>
+ * When {@link #isClosed()} returns true, the listener may be removed from the
+ * mailbox by the dispatcher.
  */
 public interface MailboxListener {
 
     /**
      * Informs this listener about the given event.
-     * @param event not null
+     * 
+     * @param event
+     *            not null
      */
     void event(final Event event);
-    
+
     /**
-     * Is this listener closed?
-     * Closed listeners may be unsubscribed. 
+     * <p>
+     * Is this listener closed?<br>
+     * Closed listeners may be unsubscribed.
+     * </p>
+     * <p>
+     * Be aware that if the listener is marked as close it will not get any
+     * events passed anymore!
+     * </p>
      * 
-     * Be aware that if the listener is marked as close it will not get any events passed anymore!
-     * 
-     * @return true when closed,
-     * false when open
+     * @return true when closed, false when open
      */
     boolean isClosed();
-    
+
     /**
      * A mailbox event.
      */
     public class Event {
         private final MailboxSession session;
         private final MailboxPath path;
+
         public Event(final MailboxSession session, final MailboxPath path) {
             this.session = session;
             this.path = path;
         }
-        
+
         /**
-         * Gets the {@link MailboxSession} in whichs context the {@link Event} happened
+         * Gets the {@link MailboxSession} in which's context the {@link Event}
+         * happened
          * 
-         * @return session 
+         * @return session
          */
         public MailboxSession getSession() {
             return session;
         }
-        
+
         /**
-         * Return the path of the Mailbox this event belongs to. 
+         * Return the path of the Mailbox this event belongs to.
          * 
          * @return path
          */
@@ -89,7 +94,7 @@ public interface MailboxListener {
             super(session, path);
         }
     }
-    
+
     /**
      * Indicates that a mailbox has been Added.
      */
@@ -99,8 +104,6 @@ public interface MailboxListener {
         }
     }
 
-    
-    
     /**
      * Indicates that a mailbox has been renamed.
      */
@@ -108,6 +111,7 @@ public interface MailboxListener {
         public MailboxRenamed(final MailboxSession session, MailboxPath path) {
             super(session, path);
         }
+
         /**
          * Gets the new name for this mailbox.
          * 
@@ -142,8 +146,6 @@ public interface MailboxListener {
 
     /**
      * A mailbox event related to updated flags
-     * 
-     *
      */
     public abstract class FlagsUpdated extends MessageEvent {
 
@@ -166,8 +168,6 @@ public interface MailboxListener {
 
     /**
      * A mailbox event related to added message
-     * 
-     *
      */
     public abstract class Added extends MessageEvent {
 

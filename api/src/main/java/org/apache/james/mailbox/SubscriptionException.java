@@ -19,7 +19,6 @@
 
 package org.apache.james.mailbox;
 
-
 /**
  * Indicates exception during subscription processing.
  */

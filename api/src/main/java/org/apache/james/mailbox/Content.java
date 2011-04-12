@@ -23,17 +23,17 @@ import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 
 /**
- * IMAP needs to know the size of the content before it starts to write it
- * out. This interface allows direct writing whilst exposing total size.
+ * IMAP needs to know the size of the content before it starts to write it out.
+ * This interface allows direct writing whilst exposing total size.
  */
 public interface Content {
 
     /**
      * Writes content to the given channel.
      * 
-     * Be aware that this operation may only be called once one the content because its possible dispose
-     * temp data. If you need to write the content more then one time you 
-     * should "re-create" the content
+     * Be aware that this operation may only be called once one the content
+     * because its possible dispose temp data. If you need to write the content
+     * more then one time you should "re-create" the content
      * 
      * @param channel
      *            <code>Channel</code> open, not null

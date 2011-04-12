@@ -19,17 +19,12 @@
 
 package org.apache.james.mailbox;
 
-
 /**
- * Exception which should get thrown if an invalid message set was specified 
- * via an IMAP command
- *
+ * Exception which should get thrown if an invalid message set was specified via
+ * an IMAP command
  */
 public class MessageRangeException extends Exception {
-    
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = 5016914557908202117L;
 
     public MessageRangeException(String msg) {

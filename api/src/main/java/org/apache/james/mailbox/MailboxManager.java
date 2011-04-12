@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-
 /**
  * <p>
  * Central MailboxManager which creates, lists, provides, renames and deletes
@@ -40,8 +39,8 @@ import org.slf4j.Logger;
  * <p>
  * Internally MailboxManager deals with named repositories that could have
  * different implementations. E.g. JDBC connections to different hosts or
- * Maildir / Mbox like stores. These repositories are identified by their names and
- * maybe are configured in config.xml. The names of the mailboxes have to be
+ * Maildir / Mbox like stores. These repositories are identified by their names
+ * and maybe are configured in config.xml. The names of the mailboxes have to be
  * mapped to the corresponding repository name. For user mailboxes this could be
  * done by a "User.getRepositoryName()" property. It is imaginable that
  * repositories lookup further properties from the user object like a path name
@@ -60,7 +59,7 @@ import org.slf4j.Logger;
 public interface MailboxManager extends RequestAware, MailboxListenerSupport {
 
     /**
-     * Return the delimter to use for folders
+     * Return the delimiter to use for folders
      * 
      * @return delimiter
      */
@@ -69,8 +68,10 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
     /**
      * Gets an session suitable for IMAP.
      * 
-     * @param mailboxPath the Path of the mailbox, not null
-     * @param session the context for this call, not null
+     * @param mailboxPath
+     *            the Path of the mailbox, not null
+     * @param session
+     *            the context for this call, not null
      * @return <code>ImapMailboxSession</code>, not null
      * @throws MailboxException
      *             when the mailbox cannot be opened
@@ -84,8 +85,10 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      * hierarchy should be created.
      * 
      * @param mailboxPath
-     * @param mailboxSession the context for this call, not null
-     * @throws MailboxException when creation fails
+     * @param mailboxSession
+     *            the context for this call, not null
+     * @throws MailboxException
+     *             when creation fails
      */
     void createMailbox(MailboxPath mailboxPath, MailboxSession mailboxSession) throws MailboxException;
 
@@ -105,8 +108,10 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      *            original mailbox
      * @param to
      *            new mailbox
-     * @param session the context for this call, not nul
-     * @throws MailboxException otherwise
+     * @param session
+     *            the context for this call, not nul
+     * @throws MailboxException
+     *             otherwise
      * @throws MailboxExistsException
      *             when the <code>to</code> mailbox exists
      * @throws MailboxNotFound
@@ -115,7 +120,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
     void renameMailbox(MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException;
 
     /**
-     * this is done by the MailboxRepository because maybe this operation could
+     * This is done by the MailboxRepository because maybe this operation could
      * be optimized in the corresponding store.
      * 
      * @param set
@@ -132,76 +137,97 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
 
     /**
      * Searches for mailboxes matching the given query.
-     * @param expression not null
-     * @param session the context for this call, not null
+     * 
+     * @param expression
+     *            not null
+     * @param session
+     *            the context for this call, not null
      * @throws MailboxException
      */
     List<MailboxMetaData> search(MailboxQuery expression, MailboxSession session) throws MailboxException;
 
     /**
      * Does the given mailbox exist?
-     * @param mailboxName not null
-     * @param session the context for this call, not null
-     * @return true when the mailbox exists and is accessible for the given user, false otherwise
+     * 
+     * @param mailboxName
+     *            not null
+     * @param session
+     *            the context for this call, not null
+     * @return true when the mailbox exists and is accessible for the given
+     *         user, false otherwise
      * @throws MailboxException
      */
     boolean mailboxExists(MailboxPath mailboxPath, MailboxSession session) throws MailboxException;
 
     /**
-     * Creates a new system session.
-     * A system session is intended to be used for programmatic access.
-     * Use {@link #login(String, String, Log)} when accessing this API
-     * from a protocol.
-     * @param userName the name of the user whose session is being created
-     * @param log context sensitive log
+     * Creates a new system session.<br>
+     * A system session is intended to be used for programmatic access.<br>
+     * Use {@link #login(String, String, Log)} when accessing this API from a
+     * protocol.
+     * 
+     * @param userName
+     *            the name of the user whose session is being created
+     * @param log
+     *            context sensitive log
      * @return <code>MailboxSession</code>, not null
-     * @throws BadCredentialsException when system access is not allowed for the given user
-     * @throws MailboxException when the creation fails for other reasons
+     * @throws BadCredentialsException
+     *             when system access is not allowed for the given user
+     * @throws MailboxException
+     *             when the creation fails for other reasons
      */
     public MailboxSession createSystemSession(String userName, Logger log) throws BadCredentialsException, MailboxException;
 
     /**
-     * Autenticates the given user against the given password.
+     * Autenticates the given user against the given password.<br>
      * When authentic and authorized, a session will be supplied
+     * 
      * @param userid
      *            user name
      * @param passwd
      *            password supplied
-     * @param log context sensitive log    
-     * @return a <code>MailboxSession</code> when the user is authentic and authorized to access
-     * @throws BadCredentialsException when system access is denighed for the given user
-     * @throws MailboxException when the creation fails for other reasons
+     * @param log
+     *            context sensitive log
+     * @return a <code>MailboxSession</code> when the user is authentic and
+     *         authorized to access
+     * @throws BadCredentialsException
+     *             when system access is denighed for the given user
+     * @throws MailboxException
+     *             when the creation fails for other reasons
      */
     MailboxSession login(String userid, String passwd, Logger log) throws BadCredentialsException, MailboxException;
-    
+
     /**
-     * <p>Logs the session out, freeing any resources.
-     * Clients who open session should make best efforts to call this
-     * when the session is closed.
+     * <p>
+     * Logs the session out, freeing any resources. Clients who open session
+     * should make best efforts to call this when the session is closed.
      * </p>
      * <p>
-     * Note that clients may not always be able to call logout (whether forced or not).
-     * Mailboxes that create sessions which are expensive to maintain
-     * <code>MUST</code> retain a reference and periodically check {@link MailboxSession#isOpen()}.
+     * Note that clients may not always be able to call logout (whether forced
+     * or not). Mailboxes that create sessions which are expensive to maintain
+     * <code>MUST</code> retain a reference and periodically check
+     * {@link MailboxSession#isOpen()}.
      * </p>
      * <p>
-     * Note that implementations much be aware that it is possible that this method 
-     * may be called more than once with the same session.
+     * Note that implementations much be aware that it is possible that this
+     * method may be called more than once with the same session.
      * </p>
-     * @param session not null
-     * @param force true when the session logout is forced by premature connection termination
-     * @throws MailboxException when logout fails
+     * 
+     * @param session
+     *            not null
+     * @param force
+     *            true when the session logout is forced by premature connection
+     *            termination
+     * @throws MailboxException
+     *             when logout fails
      */
     void logout(MailboxSession session, boolean force) throws MailboxException;
 
-
- 
     /**
      * Return a unmodifiable {@link List} of {@link MailboxPath} objects
      * 
      * @param session
      * @return pathList
-     * @throws MailboxException 
+     * @throws MailboxException
      */
     public List<MailboxPath> list(MailboxSession session) throws MailboxException;
 

@@ -27,19 +27,16 @@ public class MailboxNotFoundException extends MailboxException {
 
     private static final long serialVersionUID = -8493370806722264915L;
 
-
     private final String mailboxName;
 
-    
     /**
-     * 
      * @param mailboxName
      *            name of the mailbox, not null
      */
     public MailboxNotFoundException(String mailboxName) {
         this.mailboxName = mailboxName;
     }
-    
+
     /**
      * @param mailboxPath
      *            name of the mailbox, not null

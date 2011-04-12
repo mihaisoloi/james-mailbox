@@ -25,7 +25,6 @@ import java.util.Set;
 
 import javax.mail.Flags;
 
-
 /**
  * <p>
  * Used to get specific informations about a Message without dealing with a
@@ -42,8 +41,8 @@ import javax.mail.Flags;
  * operation) Javamail would do it that way:
  * <ol>
  * <li>get all Message objects (Message[])</li>
- * <li>call Message.getMessageNumber() </li>
- * <li>call Message.getFlags() </li>
+ * <li>call Message.getMessageNumber()</li>
+ * <li>call Message.getFlags()</li>
  * <li>call Folder.getUid(Message)</li>
  * </ol>
  * <p>
@@ -52,8 +51,6 @@ import javax.mail.Flags;
  * MessageResult.FLAGS)? This would leave a lot of room for the implementation
  * to optimize
  * </p>
- * 
- * 
  */
 
 public interface MessageResult extends Comparable<MessageResult>, Headers {
@@ -102,8 +99,8 @@ public interface MessageResult extends Comparable<MessageResult>, Headers {
          * Gets contents to be fetched for contained parts. For each part to be
          * contained, only one descriptor should be contained.
          * 
-         * @return <code>Set</code> of {@link PartContentDescriptor}, or null
-         *         if there is no part content to be fetched
+         * @return <code>Set</code> of {@link PartContentDescriptor}, or null if
+         *         there is no part content to be fetched
          */
         public Set<PartContentDescriptor> getPartContentDescriptors();
 
@@ -145,26 +142,23 @@ public interface MessageResult extends Comparable<MessageResult>, Headers {
     long getUid();
 
     /**
-     * 
      * <p>
      * IMAP defines this as the time when the message has arrived to the server
-     * (by smtp). Clients are also allowed to set the internalDate on apppend.
+     * (by smtp). Clients are also allowed to set the internalDate on append.
      * </p>
      * <p>
      * Is this Mail.getLastUpdates() for James delivery? Should we use
      * MimeMessage.getReceivedDate()?
      * </p>
-     * 
      */
 
     Date getInternalDate();
 
     /**
-     * TODO optional, to be decided <br />
+     * TODO optional, to be decided <br>
      * maybe this is a good thing because IMAP often requests only the Flags and
      * this way we don't need to create a lazy-loading MimeMessage instance just
      * for the Flags.
-     * 
      */
     Flags getFlags() throws MailboxException;
 
@@ -175,7 +169,6 @@ public interface MessageResult extends Comparable<MessageResult>, Headers {
      */
     long getSize();
 
-  
     /**
      * Iterates the message headers for the given part in a multipart message.
      * 

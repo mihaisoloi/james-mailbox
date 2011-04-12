@@ -19,17 +19,16 @@
 
 package org.apache.james.mailbox;
 
-
 /**
- * The {@link MailboxPathLocker} is responsible to help to synchronize the access to a {@link MailboxPath}
- * and execute an given {@link LockAwareExecution}
- *
+ * The {@link MailboxPathLocker} is responsible to help to synchronize the
+ * access to a {@link MailboxPath} and execute an given
+ * {@link LockAwareExecution}
  */
 public interface MailboxPathLocker {
-    
-    
+
     /**
-     * Execute the {@link LockAwareExecution} while holding a lock on the {@link MailboxPath}
+     * Execute the {@link LockAwareExecution} while holding a lock on the
+     * {@link MailboxPath}
      * 
      * @param session
      * @param path
@@ -37,15 +36,12 @@ public interface MailboxPathLocker {
      * @throws MailboxException
      */
     public void executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution execution) throws MailboxException;
-    
-    
+
     /**
      * Execute code while holding a lock
-     * 
-     *
      */
     public interface LockAwareExecution {
-        
+
         /**
          * Execute code block
          * 

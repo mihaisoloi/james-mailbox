@@ -19,7 +19,6 @@
 
 package org.apache.james.mailbox;
 
-
 /**
  * Expresses select criteria for mailboxes.
  */
@@ -36,6 +35,7 @@ public class MailboxQuery {
     private final int expressionLength;
 
     private final char pathDelimiter;
+
     /**
      * Constructs an expression determining a set of mailbox names.
      * 
@@ -93,7 +93,7 @@ public class MailboxQuery {
     }
 
     /**
-     * Gets wildacard character that matches any series of characters excluding
+     * Gets wildcard character that matches any series of characters excluding
      * hierarchy delimiters. Effectively, this means that it matches any
      * sequence within a name part.
      * 
@@ -126,8 +126,7 @@ public class MailboxQuery {
         return result;
     }
 
-    private final boolean isWildcardMatch(final String name,
-            final int nameIndex, final int expressionIndex) {
+    private final boolean isWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
         final boolean result;
         if (expressionIndex < expressionLength) {
             final char expressionNext = expression.charAt(expressionIndex);
@@ -139,8 +138,7 @@ public class MailboxQuery {
                 if (nameIndex < name.length()) {
                     final char nameNext = name.charAt(nameIndex);
                     if (nameNext == expressionNext) {
-                        result = isWildcardMatch(name, nameIndex + 1,
-                                expressionIndex + 1);
+                        result = isWildcardMatch(name, nameIndex + 1, expressionIndex + 1);
                     } else {
                         result = false;
                     }
@@ -157,14 +155,12 @@ public class MailboxQuery {
         return result;
     }
 
-    private boolean isLocalWildcardMatch(final String name,
-            final int nameIndex, final int expressionIndex) {
+    private boolean isLocalWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
         final boolean result;
         if (expressionIndex < expressionLength) {
             final char expressionNext = expression.charAt(expressionIndex);
             if (expressionNext == localWildcard) {
-                result = isLocalWildcardMatch(name, nameIndex,
-                        expressionIndex + 1);
+                result = isLocalWildcardMatch(name, nameIndex, expressionIndex + 1);
             } else if (expressionNext == freeWildcard) {
                 result = isFreeWildcardMatch(name, nameIndex, expressionIndex + 1);
             } else {
@@ -199,12 +195,10 @@ public class MailboxQuery {
         return character == freeWildcard || character == localWildcard;
     }
 
-    private boolean isFreeWildcardMatch(final String name, final int nameIndex,
-            final int expressionIndex) {
+    private boolean isFreeWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
         final boolean result;
         int nextNormal = expressionIndex;
-        while (nextNormal < expressionLength
-                && isWildcard(expression.charAt(nextNormal))) {
+        while (nextNormal < expressionLength && isWildcard(expression.charAt(nextNormal))) {
             nextNormal++;
         }
         if (nextNormal < expressionLength) {
@@ -212,11 +206,10 @@ public class MailboxQuery {
             boolean matchRest = false;
             for (int i = nameIndex; i < name.length(); i++) {
                 final char tasteNextName = name.charAt(i);
-		if ((expressionNextNormal == tasteNextName)
-			&& (isWildcardMatch(name, i, nextNormal))) {
-		    matchRest = true;
-		    break;
-		}
+                if ((expressionNextNormal == tasteNextName) && (isWildcardMatch(name, i, nextNormal))) {
+                    matchRest = true;
+                    break;
+                }
             }
             result = matchRest;
         } else {
@@ -227,11 +220,12 @@ public class MailboxQuery {
     }
 
     /**
-     * Get combined name formed by adding the expression to the base using the given
-     * hierarchy delimiter. Note that the wildcards are retained in the combined
-     * name.
+     * Get combined name formed by adding the expression to the base using the
+     * given hierarchy delimiter. Note that the wildcards are retained in the
+     * combined name.
      * 
-     * @return {@link #getBase()} combined with {@link #getExpression()}, notnull
+     * @return {@link #getBase()} combined with {@link #getExpression()},
+     *         notnull
      */
     public String getCombinedName() {
         final String result;
@@ -270,9 +264,7 @@ public class MailboxQuery {
      * @return true if wildcard contained, false otherwise
      */
     public boolean isWild() {
-        return expression != null
-                && (expression.indexOf(freeWildcard) >= 0
-                    || expression.indexOf(localWildcard) >= 0);
+        return expression != null && (expression.indexOf(freeWildcard) >= 0 || expression.indexOf(localWildcard) >= 0);
     }
 
     /**
@@ -282,10 +274,7 @@ public class MailboxQuery {
      */
     public String toString() {
         final String TAB = " ";
-        return "MailboxExpression [ " + "base = " + this.base + TAB
-                + "expression = " + this.expression + TAB + "freeWildcard = "
-                + this.freeWildcard + TAB + "localWildcard = "
-                + this.localWildcard + TAB + " ]";
+        return "MailboxExpression [ " + "base = " + this.base + TAB + "expression = " + this.expression + TAB + "freeWildcard = " + this.freeWildcard + TAB + "localWildcard = " + this.localWildcard + TAB + " ]";
     }
 
 }

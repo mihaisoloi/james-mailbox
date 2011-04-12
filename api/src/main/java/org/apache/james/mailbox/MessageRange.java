@@ -20,11 +20,11 @@
 package org.apache.james.mailbox;
 
 /**
- * Used to define a range of messages by uid.<br />
+ * Used to define a range of messages by uid.<br>
  * The type of the set should be defined by using an appropriate constructor.
  */
 public class MessageRange {
-    
+
     public enum Type {
         /** All messages */
         ALL,
@@ -37,46 +37,53 @@ public class MessageRange {
     }
 
     private static final int NOT_A_UID = -1;
-    
-    // return all rows at ones 
+
+    // return all rows at ones
     private static final int UNLIMITED_BATCH = 0;
-    
+
     /**
      * Constructs a range consisting of a single message only.
-     * @param uid UID of the message
+     * 
+     * @param uid
+     *            UID of the message
      * @return not null
      */
     public static MessageRange one(long uid) {
         final MessageRange result = new MessageRange(Type.ONE, uid, uid, UNLIMITED_BATCH);
         return result;
     }
-    
+
     /**
      * Constructs a range consisting of all messages.
-     * @param batchSize return max batchSize rows in chunk
+     * 
+     * @param batchSize
+     *            return max batchSize rows in chunk
      * @return not null
      */
     public static MessageRange all(int batchSize) {
-        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID,
-                NOT_A_UID, batchSize);
+        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID, NOT_A_UID, batchSize);
         return result;
     }
 
     /**
      * Constructs a range consisting of all messages.
+     * 
      * @return not null
      */
     public static MessageRange all() {
-    	return all(UNLIMITED_BATCH);
+        return all(UNLIMITED_BATCH);
     }
-    
+
     /**
-     * Constructs an inclusive ranges of messages.
-     * The parameters will be checked and {@link #from(long)}
-     * used where appropriate.
-     * @param from first message UID
-     * @param to last message UID
-     * @param batchSize return max batchSize rows in chunk 
+     * Constructs an inclusive ranges of messages. The parameters will be
+     * checked and {@link #from(long)} used where appropriate.
+     * 
+     * @param from
+     *            first message UID
+     * @param to
+     *            last message UID
+     * @param batchSize
+     *            return max batchSize rows in chunk
      * @return not null
      */
     public static MessageRange range(long from, long to, int batchSize) {
@@ -84,7 +91,7 @@ public class MessageRange {
         if (to == Long.MAX_VALUE || to < from) {
             to = NOT_A_UID;
             result = from(from);
-        } else if (from == to){ 
+        } else if (from == to) {
             // from and to is the same so no need to construct a real range
             result = one(from);
         } else {
@@ -92,33 +99,40 @@ public class MessageRange {
         }
         return result;
     }
-    
+
     /**
-     * Constructs an inclusive ranges of messages.
-     * The parameters will be checked and {@link #from(long)}
-     * used where appropriate.
-     * @param from first message UID
-     * @param to last message UID
+     * Constructs an inclusive ranges of messages. The parameters will be
+     * checked and {@link #from(long)} used where appropriate.
+     * 
+     * @param from
+     *            first message UID
+     * @param to
+     *            last message UID
      * @return not null
      */
     public static MessageRange range(long from, long to) {
-    	return range(from, to, UNLIMITED_BATCH);
+        return range(from, to, UNLIMITED_BATCH);
     }
-    
+
     /**
      * Constructs an inclusive, open ended range of messages.
-     * @param from first message UID in range
-     * @param batchSize return max batchSize rows in chunk 
+     * 
+     * @param from
+     *            first message UID in range
+     * @param batchSize
+     *            return max batchSize rows in chunk
      * @return not null
      */
     public static MessageRange from(long from, int batchSize) {
-        final MessageRange result= new MessageRange(Type.FROM, from, NOT_A_UID, batchSize);
+        final MessageRange result = new MessageRange(Type.FROM, from, NOT_A_UID, batchSize);
         return result;
     }
-    
+
     /**
      * Constructs an inclusive, open ended range of messages.
-     * @param from first message UID in range
+     * 
+     * @param from
+     *            first message UID in range
      * @return not null
      */
     public static MessageRange from(long from) {
@@ -130,11 +144,10 @@ public class MessageRange {
     private final long uidFrom;
 
     private final long uidTo;
-    
+
     private final int batchSize;
 
-    protected MessageRange(final Type type, final long uidFrom,
-            final long uidTo, final int batchSize) {
+    protected MessageRange(final Type type, final long uidFrom, final long uidTo, final int batchSize) {
         super();
         this.type = type;
         this.uidFrom = uidFrom;
@@ -168,7 +181,7 @@ public class MessageRange {
         switch (type) {
         case ALL:
             return true;
-        case FROM: 
+        case FROM:
             if (uid > getUidFrom()) {
                 return true;
             }
@@ -185,15 +198,15 @@ public class MessageRange {
         }
         return false;
     }
-    
+
     public String toString() {
-        return "TYPE: " + type + " UID: " + uidFrom + ":" + uidTo + (batchSize > 0 ? " BATCH: "+batchSize : "");
+        return "TYPE: " + type + " UID: " + uidFrom + ":" + uidTo + (batchSize > 0 ? " BATCH: " + batchSize : "");
     }
 
-	public MessageRange getUnlimitedRange() {
-		if(this.batchSize == UNLIMITED_BATCH)
-			return this;
-		else
-			return new MessageRange(type, uidFrom, uidTo, UNLIMITED_BATCH);
-	}
+    public MessageRange getUnlimitedRange() {
+        if (this.batchSize == UNLIMITED_BATCH)
+            return this;
+        else
+            return new MessageRange(type, uidFrom, uidTo, UNLIMITED_BATCH);
+    }
 }

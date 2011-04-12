@@ -21,36 +21,44 @@ package org.apache.james.mailbox;
 
 import java.util.Collection;
 
-
 /**
  * Subscribes users.
  */
-public interface SubscriptionManager extends RequestAware{
-    
+public interface SubscriptionManager extends RequestAware {
+
     /**
      * Subscribes the user in the session to the given mailbox.
-     * @param session not null
-     * @param mailbox not null
-     * @throws SubscriptionException when subscription fails
+     * 
+     * @param session
+     *            not null
+     * @param mailbox
+     *            not null
+     * @throws SubscriptionException
+     *             when subscription fails
      */
-    public void subscribe(MailboxSession session, String mailbox)
-            throws SubscriptionException;
+    public void subscribe(MailboxSession session, String mailbox) throws SubscriptionException;
 
     /**
      * Finds all subscriptions for the user in the session.
-     * @param user not null
+     * 
+     * @param user
+     *            not null
      * @return not null
-     * @throws SubscriptionException when subscriptions cannot be read
+     * @throws SubscriptionException
+     *             when subscriptions cannot be read
      */
     public Collection<String> subscriptions(MailboxSession session) throws SubscriptionException;
 
     /**
      * Unsubscribes the user in the session from the given mailbox.
-     * @param session not null
-     * @param mailbox not null
-     * @throws SubscriptionException when subscriptions cannot be read
+     * 
+     * @param session
+     *            not null
+     * @param mailbox
+     *            not null
+     * @throws SubscriptionException
+     *             when subscriptions cannot be read
      */
-    public void unsubscribe(MailboxSession session, String mailbox)
-            throws SubscriptionException;
-   
+    public void unsubscribe(MailboxSession session, String mailbox) throws SubscriptionException;
+
 }

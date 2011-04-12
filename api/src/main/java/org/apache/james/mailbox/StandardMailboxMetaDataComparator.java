@@ -23,13 +23,15 @@ import java.util.Comparator;
 /**
  * Orders by name with INBOX first.
  */
-public class StandardMailboxMetaDataComparator implements
-        Comparator<MailboxMetaData> {
+public class StandardMailboxMetaDataComparator implements Comparator<MailboxMetaData> {
 
     /**
      * Static comparison.
-     * @param one possibly null
-     * @param two possibly null
+     * 
+     * @param one
+     *            possibly null
+     * @param two
+     *            possibly null
      * @return {@link Comparator#compare(Object, Object)}
      */
     public static int order(MailboxMetaData one, MailboxMetaData two) {
@@ -49,7 +51,6 @@ public class StandardMailboxMetaDataComparator implements
         }
         return result;
     }
-    
 
     /**
      * @see Comparator#compare(Object, Object)

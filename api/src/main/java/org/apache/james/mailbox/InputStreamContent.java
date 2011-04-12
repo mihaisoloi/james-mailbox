@@ -23,16 +23,14 @@ import java.io.InputStream;
 
 /**
  * {@link Content} which offers the content via {@link InputStream} too
- * 
- *
  */
-public interface InputStreamContent extends Content{
+public interface InputStreamContent extends Content {
 
     /**
      * Return the content as {@link InputStream}
      * 
      * @return content
-     * @throws IOException 
+     * @throws IOException
      */
     public InputStream getInputStream() throws IOException;
 }

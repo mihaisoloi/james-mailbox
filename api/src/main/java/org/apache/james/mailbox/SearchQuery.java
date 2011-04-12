@@ -91,8 +91,7 @@ public class SearchQuery {
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion internalDateAfter(int day, int month, int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.AFTER,
-                day, month, year));
+        return new InternalDateCriterion(new DateOperator(DateComparator.AFTER, day, month, year));
     }
 
     /**
@@ -107,8 +106,7 @@ public class SearchQuery {
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion internalDateOn(int day, int month, int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.ON, day,
-                month, year));
+        return new InternalDateCriterion(new DateOperator(DateComparator.ON, day, month, year));
     }
 
     /**
@@ -123,10 +121,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion internalDateBefore(int day, int month,
-            int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.BEFORE,
-                day, month, year));
+    public static final Criterion internalDateBefore(int day, int month, int year) {
+        return new InternalDateCriterion(new DateOperator(DateComparator.BEFORE, day, month, year));
     }
 
     /**
@@ -144,10 +140,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateAfter(String headerName, int day,
-            int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(
-                DateComparator.AFTER, day, month, year));
+    public static final Criterion headerDateAfter(String headerName, int day, int month, int year) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.AFTER, day, month, year));
     }
 
     /**
@@ -165,10 +159,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateOn(String headerName, int day,
-            int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(
-                DateComparator.ON, day, month, year));
+    public static final Criterion headerDateOn(String headerName, int day, int month, int year) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.ON, day, month, year));
     }
 
     /**
@@ -186,10 +178,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateBefore(String headerName, int day,
-            int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(
-                DateComparator.BEFORE, day, month, year));
+    public static final Criterion headerDateBefore(String headerName, int day, int month, int year) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.BEFORE, day, month, year));
     }
 
     /**
@@ -434,10 +424,12 @@ public class SearchQuery {
     public Set<Long> getRecentMessageUids() {
         return recentMessageUids;
     }
-    
+
     /**
      * Adds all the uids to the collection of recents.
-     * @param uids not null
+     * 
+     * @param uids
+     *            not null
      */
     public void addRecentMessageUids(final Collection<Long> uids) {
         recentMessageUids.addAll(uids);
@@ -455,8 +447,7 @@ public class SearchQuery {
     public int hashCode() {
         final int PRIME = 31;
         int result = 1;
-        result = PRIME * result
-                + ((criterias == null) ? 0 : criterias.hashCode());
+        result = PRIME * result + ((criterias == null) ? 0 : criterias.hashCode());
         return result;
     }
 
@@ -556,14 +547,13 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
         public String toString() {
-            return new StringBuffer().append(this.lowValue).append("->")
-                    .append(this.highValue).toString();
+            return new StringBuffer().append(this.lowValue).append("->").append(this.highValue).toString();
         }
 
     }
@@ -577,10 +567,10 @@ public class SearchQuery {
     public enum Conjunction {
         AND, OR, NOR
     }
-    
+
     /**
-     * Conjuction applying to the contained criteria. {@link #getType} indicates
-     * how the conjoined criteria should be related.
+     * Conjunction applying to the contained criteria. {@link #getType}
+     * indicates how the conjoined criteria should be related.
      */
     public static final class ConjunctionCriterion extends Criterion {
         private final Conjunction type;
@@ -594,7 +584,7 @@ public class SearchQuery {
         }
 
         /**
-         * Gets the criteria related through this conjuction.
+         * Gets the criteria related through this conjunction.
          * 
          * @return <code>List</code> of {@link Criterion}
          */
@@ -618,8 +608,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((criteria == null) ? 0 : criteria.hashCode());
+            result = PRIME * result + ((criteria == null) ? 0 : criteria.hashCode());
             return result;
         }
 
@@ -646,8 +635,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -656,9 +645,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("ConjunctionCriterion ( ").append("criteria = ")
-                    .append(this.criteria).append(TAB).append("type = ")
-                    .append(this.type).append(TAB).append(" )");
+            retValue.append("ConjunctionCriterion ( ").append("criteria = ").append(this.criteria).append(TAB).append("type = ").append(this.type).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -697,13 +684,13 @@ public class SearchQuery {
     }
 
     public enum Scope {
-        /** Only message body content */        
+        /** Only message body content */
         BODY,
 
         /** Full message content including headers */
         FULL
     }
-    
+
     /**
      * Message text.
      */
@@ -744,8 +731,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -772,8 +758,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -782,9 +768,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("TextCriterion ( ").append("operator = ").append(
-                    this.operator).append(TAB).append("type = ").append(
-                    this.type).append(TAB).append(" )");
+            retValue.append("TextCriterion ( ").append("operator = ").append(this.operator).append(TAB).append("type = ").append(this.type).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -798,8 +782,7 @@ public class SearchQuery {
 
         private final String headerName;
 
-        private HeaderCriterion(final String headerName,
-                final HeaderOperator operator) {
+        private HeaderCriterion(final String headerName, final HeaderOperator operator) {
             super();
             this.operator = operator;
             this.headerName = headerName;
@@ -830,10 +813,8 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((headerName == null) ? 0 : headerName.hashCode());
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((headerName == null) ? 0 : headerName.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -863,8 +844,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -873,9 +854,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("HeaderCriterion ( ").append("headerName = ")
-                    .append(this.headerName).append(TAB).append("operator = ")
-                    .append(this.operator).append(TAB).append(" )");
+            retValue.append("HeaderCriterion ( ").append("headerName = ").append(this.headerName).append(TAB).append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -909,8 +888,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -935,8 +913,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -945,8 +923,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("InternalDateCriterion ( ").append("operator = ")
-                    .append(this.operator).append(TAB).append(" )");
+            retValue.append("InternalDateCriterion ( ").append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -979,8 +956,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -1005,8 +981,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1015,8 +991,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("SizeCriterion ( ").append("operator = ").append(
-                    this.operator).append(TAB).append(" )");
+            retValue.append("SizeCriterion ( ").append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1030,8 +1005,7 @@ public class SearchQuery {
 
         private final BooleanOperator operator;
 
-        private CustomFlagCriterion(final String flag,
-                final BooleanOperator operator) {
+        private CustomFlagCriterion(final String flag, final BooleanOperator operator) {
             super();
             this.flag = flag;
             this.operator = operator;
@@ -1063,8 +1037,7 @@ public class SearchQuery {
             final int PRIME = 31;
             int result = 1;
             result = PRIME * result + ((flag == null) ? 0 : flag.hashCode());
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -1094,8 +1067,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1104,9 +1077,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("CustomFlagCriterion ( ").append("flag = ").append(
-                    this.flag).append(TAB).append("operator = ").append(
-                    this.operator).append(TAB).append(" )");
+            retValue.append("CustomFlagCriterion ( ").append("flag = ").append(this.flag).append(TAB).append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1152,8 +1123,7 @@ public class SearchQuery {
             final int PRIME = 31;
             int result = 1;
             result = PRIME * result + ((flag == null) ? 0 : flag.hashCode());
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -1183,8 +1153,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1193,9 +1163,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("FlagCriterion ( ").append("flag = ").append(
-                    this.flag).append(TAB).append("operator = ").append(
-                    this.operator).append(TAB).append(" )");
+            retValue.append("FlagCriterion ( ").append("flag = ").append(this.flag).append(TAB).append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1229,8 +1197,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result
-                    + ((operator == null) ? 0 : operator.hashCode());
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
             return result;
         }
 
@@ -1255,8 +1222,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1265,8 +1232,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("UidCriterion ( ").append("operator = ").append(
-                    this.operator).append(TAB).append(" )");
+            retValue.append("UidCriterion ( ").append("operator = ").append(this.operator).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1337,8 +1303,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1347,8 +1313,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("ContainsOperator ( ").append("value = ").append(
-                    this.value).append(TAB).append(" )");
+            retValue.append("ContainsOperator ( ").append("value = ").append(this.value).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1453,8 +1418,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1463,8 +1428,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("BooleanOperator ( ").append("set = ").append(
-                    this.set).append(TAB).append(" )");
+            retValue.append("BooleanOperator ( ").append("set = ").append(this.set).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1474,9 +1438,9 @@ public class SearchQuery {
     public enum NumericComparator {
         EQUALS, LESS_THAN, GREATER_THAN
     }
-    
+
     /**
-     * Searches numberic values.
+     * Searches numeric values.
      */
     public static final class NumericOperator implements Operator {
         public static final int EQUALS = 1;
@@ -1544,8 +1508,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1554,9 +1518,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("NumericOperator ( ").append("type = ").append(
-                    this.type).append(TAB).append("value = ")
-                    .append(this.value).append(TAB).append(" )");
+            retValue.append("NumericOperator ( ").append("type = ").append(this.type).append(TAB).append("value = ").append(this.value).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1565,7 +1527,7 @@ public class SearchQuery {
     public enum DateComparator {
         BEFORE, AFTER, ON
     }
-    
+
     /**
      * Operates on a date.
      */
@@ -1584,8 +1546,7 @@ public class SearchQuery {
 
         private final int year;
 
-        public DateOperator(final DateComparator type, final int day, final int month,
-                final int year) {
+        public DateOperator(final DateComparator type, final int day, final int month, final int year) {
             super();
             this.type = type;
             this.day = day;
@@ -1667,8 +1628,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1677,11 +1638,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("DateOperator ( ").append("day = ")
-                    .append(this.day).append(TAB).append("month = ").append(
-                            this.month).append(TAB).append("type = ").append(
-                            this.type).append(TAB).append("year = ").append(
-                            this.year).append(TAB).append(" )");
+            retValue.append("DateOperator ( ").append("day = ").append(this.day).append(TAB).append("month = ").append(this.month).append(TAB).append("type = ").append(this.type).append(TAB).append("year = ").append(this.year).append(TAB).append(" )");
 
             return retValue.toString();
         }
@@ -1735,8 +1692,8 @@ public class SearchQuery {
         }
 
         /**
-         * Constructs a <code>String</code> with all attributes in name =
-         * value format.
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
          * 
          * @return a <code>String</code> representation of this object.
          */
@@ -1745,8 +1702,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("InOperator ( ").append("range = ").append(
-                    Arrays.toString(this.range)).append(TAB).append(" )");
+            retValue.append("InOperator ( ").append("range = ").append(Arrays.toString(this.range)).append(TAB).append(" )");
 
             return retValue.toString();
         }

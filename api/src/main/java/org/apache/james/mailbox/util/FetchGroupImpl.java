@@ -31,17 +31,13 @@ import org.apache.james.mailbox.MessageResult.MimePath;
  */
 public class FetchGroupImpl implements MessageResult.FetchGroup {
 
-    public static final MessageResult.FetchGroup MINIMAL = new FetchGroupImpl(
-            MessageResult.FetchGroup.MINIMAL);
+    public static final MessageResult.FetchGroup MINIMAL = new FetchGroupImpl(MessageResult.FetchGroup.MINIMAL);
 
-    public static final MessageResult.FetchGroup HEADERS = new FetchGroupImpl(
-            MessageResult.FetchGroup.HEADERS);
+    public static final MessageResult.FetchGroup HEADERS = new FetchGroupImpl(MessageResult.FetchGroup.HEADERS);
 
-    public static final MessageResult.FetchGroup FULL_CONTENT = new FetchGroupImpl(
-            MessageResult.FetchGroup.FULL_CONTENT);
+    public static final MessageResult.FetchGroup FULL_CONTENT = new FetchGroupImpl(MessageResult.FetchGroup.FULL_CONTENT);
 
-    public static final MessageResult.FetchGroup BODY_CONTENT = new FetchGroupImpl(
-            MessageResult.FetchGroup.BODY_CONTENT);
+    public static final MessageResult.FetchGroup BODY_CONTENT = new FetchGroupImpl(MessageResult.FetchGroup.BODY_CONTENT);
 
     private int content = MessageResult.FetchGroup.MINIMAL;
 
@@ -98,8 +94,7 @@ public class FetchGroupImpl implements MessageResult.FetchGroup {
         }
         PartContentDescriptorImpl currentDescriptor = null;
         for (Iterator<PartContentDescriptor> it = partContentDescriptors.iterator(); it.hasNext();) {
-            PartContentDescriptor descriptor = (PartContentDescriptor) it
-                    .next();
+            PartContentDescriptor descriptor = (PartContentDescriptor) it.next();
             if (path.equals(descriptor.path())) {
                 currentDescriptor = (PartContentDescriptorImpl) descriptor;
                 break;

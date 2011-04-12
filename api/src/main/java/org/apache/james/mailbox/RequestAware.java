@@ -20,23 +20,22 @@ package org.apache.james.mailbox;
 
 /**
  * Implementations of this interface are aware of processing requests
- * 
- *
  */
 public interface RequestAware {
 
-    
     /**
-     * Start the processing of a request for the given MailboxSession. If the user is not logged in already then the MailboxSession will be null
+     * Start the processing of a request for the given MailboxSession. If the
+     * user is not logged in already then the MailboxSession will be null
      * 
-     * @param session 
+     * @param session
      */
     public void startProcessingRequest(MailboxSession session);
-    
+
     /**
-     * End the processing of a request for the given MailboxSession. If the user is not logged in already then the MailboxSession will be null
+     * End the processing of a request for the given MailboxSession. If the user
+     * is not logged in already then the MailboxSession will be null
      * 
-     * @param session 
+     * @param session
      */
     public void endProcessingRequest(MailboxSession session);
 }

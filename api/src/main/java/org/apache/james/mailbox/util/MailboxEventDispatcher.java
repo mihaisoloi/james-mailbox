@@ -35,20 +35,18 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 
 /**
- * Helper class to dispatch {@link Event}'s to registerend MailboxListener 
- * 
- *
+ * Helper class to dispatch {@link Event}'s to registerend MailboxListener
  */
 public class MailboxEventDispatcher implements MailboxListener {
 
     private final Set<MailboxListener> listeners = new CopyOnWriteArraySet<MailboxListener>();
 
     /**
-     * Remove all closed MailboxListener 
+     * Remove all closed MailboxListener
      */
     private void pruneClosed() {
         final Collection<MailboxListener> closedListeners = new ArrayList<MailboxListener>();
-        for (MailboxListener listener:listeners) {
+        for (MailboxListener listener : listeners) {
             if (listener.isClosed()) {
                 closedListeners.add(listener);
             }
@@ -57,7 +55,7 @@ public class MailboxEventDispatcher implements MailboxListener {
             listeners.removeAll(closedListeners);
         }
     }
-    
+
     /**
      * Add a MailboxListener to this dispatcher
      * 
@@ -69,7 +67,8 @@ public class MailboxEventDispatcher implements MailboxListener {
     }
 
     /**
-     * Should get called when a new message was added to a Mailbox. All registered MailboxListener will get triggered then
+     * Should get called when a new message was added to a Mailbox. All
+     * registered MailboxListener will get triggered then
      * 
      * @param uid
      * @param sessionId
@@ -82,7 +81,8 @@ public class MailboxEventDispatcher implements MailboxListener {
     }
 
     /**
-     * Should get called when a message was expunged from a Mailbox. All registered MailboxListener will get triggered then
+     * Should get called when a message was expunged from a Mailbox. All
+     * registered MailboxListener will get triggered then
      * 
      * @param session
      * @param uid
@@ -94,24 +94,26 @@ public class MailboxEventDispatcher implements MailboxListener {
     }
 
     /**
-     * Should get called when the message flags were update in a Mailbox. All registered MailboxListener will get triggered then
-     *
+     * Should get called when the message flags were update in a Mailbox. All
+     * registered MailboxListener will get triggered then
+     * 
      * @param session
      * @param uid
      * @param path
      * @param original
      * @param updated
      */
-    public void flagsUpdated(MailboxSession session, final long uid, final MailboxPath path,
-            final Flags original, final Flags updated) {
-        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uid,
-                original, updated);
+    public void flagsUpdated(MailboxSession session, final long uid, final MailboxPath path, final Flags original, final Flags updated) {
+        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uid, original, updated);
         event(flags);
     }
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxListener#event(org.apache.james.mailbox.MailboxListener.Event)
+     * 
+     * @see
+     * org.apache.james.mailbox.MailboxListener#event(org.apache.james.mailbox
+     * .MailboxListener.Event)
      */
     public void event(Event event) {
         List<MailboxListener> closed = new ArrayList<MailboxListener>();
@@ -128,16 +130,17 @@ public class MailboxEventDispatcher implements MailboxListener {
     }
 
     /**
-     * Return the the count of all registered MailboxListener 
+     * Return the the count of all registered MailboxListener
      * 
      * @return count
      */
     public int count() {
         return listeners.size();
     }
-    
+
     /**
-     * Should get called when a Mailbox was renamed. All registered MailboxListener will get triggered then
+     * Should get called when a Mailbox was renamed. All registered
+     * MailboxListener will get triggered then
      * 
      * @param from
      * @param to
@@ -158,7 +161,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
+         * 
+         * @see
+         * org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
          */
         public long getSubjectUid() {
             return subjectUid;
@@ -179,18 +184,13 @@ public class MailboxEventDispatcher implements MailboxListener {
         }
     }
 
-    private final static class FlagsUpdatedImpl extends
-            MailboxListener.FlagsUpdated {
+    private final static class FlagsUpdatedImpl extends MailboxListener.FlagsUpdated {
 
-        private static boolean isChanged(final Flags original,
-                final Flags updated, Flags.Flag flag) {
-            return original != null && updated != null
-                    && (original.contains(flag) ^ updated.contains(flag));
+        private static boolean isChanged(final Flags original, final Flags updated, Flags.Flag flag) {
+            return original != null && updated != null && (original.contains(flag) ^ updated.contains(flag));
         }
 
-        private static final Flags.Flag[] FLAGS = { Flags.Flag.ANSWERED,
-                Flags.Flag.DELETED, Flags.Flag.DRAFT, Flags.Flag.FLAGGED,
-                Flags.Flag.RECENT, Flags.Flag.SEEN };
+        private static final Flags.Flag[] FLAGS = { Flags.Flag.ANSWERED, Flags.Flag.DELETED, Flags.Flag.DRAFT, Flags.Flag.FLAGGED, Flags.Flag.RECENT, Flags.Flag.SEEN };
 
         private static final int NUMBER_OF_SYSTEM_FLAGS = 6;
 
@@ -200,22 +200,12 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         private final Flags newFlags;
 
-        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid,
-                final Flags original, final Flags updated) {
-            this(session, path, subjectUid, updated, isChanged(original, updated,
-                    Flags.Flag.ANSWERED), isChanged(original, updated,
-                    Flags.Flag.DELETED), isChanged(original, updated,
-                    Flags.Flag.DRAFT), isChanged(original, updated,
-                    Flags.Flag.FLAGGED), isChanged(original, updated,
-                    Flags.Flag.RECENT), isChanged(original, updated,
-                    Flags.Flag.SEEN));
+        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid, final Flags original, final Flags updated) {
+            this(session, path, subjectUid, updated, isChanged(original, updated, Flags.Flag.ANSWERED), isChanged(original, updated, Flags.Flag.DELETED), isChanged(original, updated, Flags.Flag.DRAFT), isChanged(original, updated, Flags.Flag.FLAGGED),
+                    isChanged(original, updated, Flags.Flag.RECENT), isChanged(original, updated, Flags.Flag.SEEN));
         }
 
-        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid,
-                final Flags newFlags, boolean answeredUpdated,
-                boolean deletedUpdated, boolean draftUpdated,
-                boolean flaggedUpdated, boolean recentUpdated,
-                boolean seenUpdated) {
+        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid, final Flags newFlags, boolean answeredUpdated, boolean deletedUpdated, boolean draftUpdated, boolean flaggedUpdated, boolean recentUpdated, boolean seenUpdated) {
             super(session, path);
             this.subjectUid = subjectUid;
             this.modifiedFlags = new boolean[NUMBER_OF_SYSTEM_FLAGS];
@@ -230,7 +220,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
+         * 
+         * @see
+         * org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
          */
         public long getSubjectUid() {
             return subjectUid;
@@ -238,7 +230,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.FlagsUpdated#flagsIterator()
+         * 
+         * @see
+         * org.apache.james.mailbox.MailboxListener.FlagsUpdated#flagsIterator()
          */
         public Iterator<Flag> flagsIterator() {
             return new FlagsIterator();
@@ -246,7 +240,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.FlagsUpdated#getNewFlags()
+         * 
+         * @see
+         * org.apache.james.mailbox.MailboxListener.FlagsUpdated#getNewFlags()
          */
         public Flags getNewFlags() {
             return newFlags;
@@ -261,15 +257,15 @@ public class MailboxEventDispatcher implements MailboxListener {
             }
 
             private void nextPosition() {
-		if ((position < NUMBER_OF_SYSTEM_FLAGS)
-			&& (!modifiedFlags[position])) {
-		    position++;
-		    nextPosition();
-		}
+                if ((position < NUMBER_OF_SYSTEM_FLAGS) && (!modifiedFlags[position])) {
+                    position++;
+                    nextPosition();
+                }
             }
 
             /*
              * (non-Javadoc)
+             * 
              * @see java.util.Iterator#hasNext()
              */
             public boolean hasNext() {
@@ -278,6 +274,7 @@ public class MailboxEventDispatcher implements MailboxListener {
 
             /*
              * (non-Javadoc)
+             * 
              * @see java.util.Iterator#next()
              */
             public Flag next() {
@@ -291,6 +288,7 @@ public class MailboxEventDispatcher implements MailboxListener {
 
             /*
              * (non-Javadoc)
+             * 
              * @see java.util.Iterator#remove()
              */
             public void remove() {
@@ -299,31 +297,30 @@ public class MailboxEventDispatcher implements MailboxListener {
         }
     }
 
-
     /**
-     * Should get called when a Mailbox was deleted. All registered MailboxListener will get triggered then
-     *
+     * Should get called when a Mailbox was deleted. All registered
+     * MailboxListener will get triggered then
+     * 
      * @param session
      * @param path
      */
     public void mailboxDeleted(MailboxSession session, MailboxPath path) {
-        final MailboxDeletion event = new MailboxDeletion(
-                session, path);
+        final MailboxDeletion event = new MailboxDeletion(session, path);
         event(event);
     }
 
     /**
-     * Should get called when a Mailbox was added. All registered MailboxListener will get triggered then
-     *
+     * Should get called when a Mailbox was added. All registered
+     * MailboxListener will get triggered then
+     * 
      * @param session
      * @param path
      */
     public void mailboxAdded(MailboxSession session, MailboxPath path) {
-        final MailboxAdded event = new MailboxAdded(
-                session, path);
+        final MailboxAdded event = new MailboxAdded(session, path);
         event(event);
     }
-    
+
     private static final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
         private final MailboxPath newPath;
 
@@ -332,10 +329,11 @@ public class MailboxEventDispatcher implements MailboxListener {
             this.newPath = newPath;
         }
 
-
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.MailboxRenamed#getNewPath()
+         * 
+         * @see
+         * org.apache.james.mailbox.MailboxListener.MailboxRenamed#getNewPath()
          */
         public MailboxPath getNewPath() {
             return newPath;
@@ -344,6 +342,7 @@ public class MailboxEventDispatcher implements MailboxListener {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.apache.james.mailbox.MailboxListener#isClosed()
      */
     public boolean isClosed() {

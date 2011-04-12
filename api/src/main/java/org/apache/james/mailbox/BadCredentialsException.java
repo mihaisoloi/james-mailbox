@@ -29,6 +29,5 @@ public class BadCredentialsException extends MailboxException {
     public BadCredentialsException() {
         super();
     }
-    
 
 }

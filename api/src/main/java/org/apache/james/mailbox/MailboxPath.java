@@ -36,73 +36,80 @@ public class MailboxPath {
         this.user = user;
         this.name = name;
     }
-    
+
     public MailboxPath(MailboxPath mailboxPath) {
         this.namespace = mailboxPath.getNamespace();
         this.user = mailboxPath.getUser();
         this.name = mailboxPath.getName();
     }
-    
+
     public MailboxPath(MailboxPath mailboxPath, String name) {
         this.namespace = mailboxPath.getNamespace();
         this.user = mailboxPath.getUser();
         this.name = name;
     }
-    
+
     /**
      * Get the namespace this mailbox is in
+     * 
      * @return The namespace
      */
     public String getNamespace() {
         return namespace;
     }
-    
+
     /**
      * Set the namespace this mailbox is in
      */
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
-    
+
     /**
-     * Get the name of the user who owns the mailbox.
-     * This can be null e.g. for shared mailboxes.
+     * Get the name of the user who owns the mailbox. This can be null e.g. for
+     * shared mailboxes.
+     * 
      * @return The username
      */
     public String getUser() {
         return user;
     }
-    
+
     /**
      * Set the name of the user who owns the mailbox.
      */
     public void setUser(String user) {
         this.user = user;
     }
-    
+
     /**
-     * Get the name of the mailbox. This is the pure name without
-     * user or namespace, so this is what a user would see in his client.
+     * Get the name of the mailbox. This is the pure name without user or
+     * namespace, so this is what a user would see in his client.
+     * 
      * @return The name string
      */
     public String getName() {
         return name;
     }
-    
+
     /**
-     * Set the name of the mailbox. This is the pure name without
-     * user or namespace, so this is what a user would see in his client.
+     * Set the name of the mailbox. This is the pure name without user or
+     * namespace, so this is what a user would see in his client.
      */
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
-     * Return a list of MailboxPath representing the hierarchy levels
-     * of this MailboxPath. E.g. INBOX.main.sub would yield
+     * Return a list of MailboxPath representing the hierarchy levels of this
+     * MailboxPath. E.g. INBOX.main.sub would yield
+     * 
+     * <pre>
      * INBOX
      * INBOX.main
      * INBOX.main.sub
+     * </pre>
+     * 
      * @param delimiter
      * @return
      */
@@ -117,45 +124,45 @@ public class MailboxPath {
         levels.add(this);
         return levels;
     }
-    
-    /* 
+
+    /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return namespace + ":" + user + ":" + name;
     }
-    
-    /* 
+
+    /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object mailboxPath) {
-        if (this == mailboxPath) return true;
-        
+        if (this == mailboxPath)
+            return true;
+
         if (!(mailboxPath instanceof MailboxPath))
             return false;
         MailboxPath mp = (MailboxPath) mailboxPath;
         if (namespace == null) {
             if (mp.getNamespace() != null)
                 return false;
-        }
-        else if (!namespace.equals(mp.getNamespace()))
-                return false;
+        } else if (!namespace.equals(mp.getNamespace()))
+            return false;
         if (user == null) {
             if (mp.getUser() != null)
                 return false;
-        }
-        else if (!user.equals(mp.getUser()))
-                return false;
+        } else if (!user.equals(mp.getUser()))
+            return false;
         if (name == null) {
             if (mp.getName() != null)
                 return false;
-        }
-        else if (!name.equals(mp.getName()))
-                return false;
+        } else if (!name.equals(mp.getName()))
+            return false;
         return true;
     }
 
@@ -163,14 +170,18 @@ public class MailboxPath {
     public int hashCode() {
         final int PRIME = 31;
         int result = 1;
-        if (getName() != null) result = PRIME * result + getName().hashCode();
-        if  (getUser() != null) result = PRIME * result + getUser().hashCode();  
-        if  (getNamespace() != null) result = PRIME * result + getNamespace().hashCode();  
+        if (getName() != null)
+            result = PRIME * result + getName().hashCode();
+        if (getUser() != null)
+            result = PRIME * result + getUser().hashCode();
+        if (getNamespace() != null)
+            result = PRIME * result + getNamespace().hashCode();
         return result;
-   }
-    
+    }
+
     /**
-     * Return a {@link MailboxPath} which represent the INBOX of the given username
+     * Return a {@link MailboxPath} which represent the INBOX of the given
+     * username
      * 
      * @param username
      * @return inbox
@@ -178,5 +189,5 @@ public class MailboxPath {
     public static MailboxPath inbox(String username) {
         return new MailboxPath(MailboxConstants.USER_NAMESPACE, username, MailboxConstants.INBOX);
     }
-    
+
 }

@@ -19,22 +19,19 @@
 
 package org.apache.james.mailbox;
 
-
-
 /**
  * Returned by the list method of MailboxRepository and others
  */
 public interface MailboxMetaData {
-   
+
     /** RFC3501 Selectability flag */
     public enum Selectability {
         NONE, MARKED, UNMARKED, NOSELECT
     }
-    
+
     /**
-     * Indicates whether this mailbox allows
-     * children and - if so - whether it has 
-     * any.
+     * Indicates whether this mailbox allows children and - if so - whether it
+     * has any.
      */
     public enum Children {
         /**
@@ -42,8 +39,8 @@ public interface MailboxMetaData {
          */
         NO_INFERIORS,
         /**
-         * Children allowed by this mailbox 
-         * but it is unknown whether this mailbox has children.
+         * Children allowed by this mailbox but it is unknown whether this
+         * mailbox has children.
          */
         CHILDREN_ALLOWED_BUT_UNKNOWN,
         /**
@@ -51,14 +48,15 @@ public interface MailboxMetaData {
          */
         HAS_CHILDREN,
         /**
-         * Indicates that this mailbox allows interiors
-         * but currently has no children.
+         * Indicates that this mailbox allows interiors but currently has no
+         * children.
          */
         HAS_NO_CHILDREN
     }
-    
+
     /**
      * Gets the inferiors status of this mailbox.
+     * 
      * @return not null
      */
     public Children inferiors();
@@ -76,7 +74,7 @@ public interface MailboxMetaData {
     char getHierarchyDelimiter();
 
     /**
-     * Return the MailboxPath 
+     * Return the MailboxPath
      * 
      * @return path
      */

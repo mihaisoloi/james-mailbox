@@ -77,8 +77,8 @@ public interface MimeDescriptor extends Headers {
     public String getTransferContentEncoding();
 
     /**
-     * Gets the languages, From the MIME <code>Content-Language</code>
-     * header value.
+     * Gets the languages, From the MIME <code>Content-Language</code> header
+     * value.
      * 
      * @return <code>List</code> of <code>String</code> names
      */
@@ -87,8 +87,8 @@ public interface MimeDescriptor extends Headers {
     /**
      * Gets MIME <code>Content-Disposition</code>.
      * 
-     * @return <code>Content-Disposition</code>, or null if no
-     *         disposition header exists
+     * @return <code>Content-Disposition</code>, or null if no disposition
+     *         header exists
      */
     public String getDisposition();
 
@@ -97,14 +97,14 @@ public interface MimeDescriptor extends Headers {
      * 
      * @return <code>Content-Disposition</code> values indexed by names
      */
-    public Map<String,String> getDispositionParams();
+    public Map<String, String> getDispositionParams();
 
     /**
-     * Gets the number of lines of text in a part of type <code>TEXT</code>
-     * when transfer encoded.
+     * Gets the number of lines of text in a part of type <code>TEXT</code> when
+     * transfer encoded.
      * 
-     * @return <code>CRLF</code> count when a <code>TEXT</code> type,
-     *         otherwise -1
+     * @return <code>CRLF</code> count when a <code>TEXT</code> type, otherwise
+     *         -1
      */
     public long getLines();
 
@@ -130,7 +130,6 @@ public interface MimeDescriptor extends Headers {
      *         <code>message</code>, null otherwise
      */
     public MimeDescriptor embeddedMessage();
-
 
     /**
      * Gets MIME body parameters parsed from <code>Content-Type</code>.
