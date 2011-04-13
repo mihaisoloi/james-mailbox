@@ -25,14 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
@@ -556,15 +554,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return messageMapper.execute(new Mapper.Transaction<Iterator<Long>>() {
 
             public Iterator<Long> run() throws MailboxException {
-                final Collection<Long> uids = new TreeSet<Long>();
-
-                final List<MailboxMembership<Id>> members = messageMapper.findMarkedForDeletionInMailbox(getMailboxEntity(), range);
-                for (MailboxMembership<Id> message:members) {
-                    uids.add(message.getUid());
-                    messageMapper.delete(getMailboxEntity(), message);
-                    
-                }  
-                return uids.iterator();
+                return messageMapper.deleteMarkedForDeletionInMailbox(getMailboxEntity(), range);
             }
             
         });       

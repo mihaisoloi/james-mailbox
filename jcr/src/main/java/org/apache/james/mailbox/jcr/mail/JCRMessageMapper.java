@@ -375,14 +375,12 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
+
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.james.mailbox.store.mail.MessageMapper#findMarkedForDeletionInMailbox
-     * (org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public List<MailboxMembership<String>> findMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
+    public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
         try {
             final List<MailboxMembership<String>> results;
             final long from = set.getUidFrom();
@@ -403,7 +401,14 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
                     results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
                     break;       
             }
-            return results;
+            List<Long> uids = new ArrayList<Long>();
+            for (int i = 0; i < results.size(); i++) {
+                MailboxMembership<String> m = results.get(i);
+                long uid = m.getUid();
+                delete(mailbox, m);
+                uids.add(uid);
+            }
+            return uids.iterator();
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
         }

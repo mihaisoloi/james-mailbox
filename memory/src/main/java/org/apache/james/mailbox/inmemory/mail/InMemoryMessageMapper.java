@@ -142,27 +142,28 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         }
     }
     
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findMarkedForDeletionInMailbox(org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public List<MailboxMembership<Long>> findMarkedForDeletionInMailbox(Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
-    	final List<MailboxMembership<Long>> filteredResult = new ArrayList<MailboxMembership<Long>>();
-    	
+    public Iterator<Long> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
+        final List<Long> filteredResult = new ArrayList<Long>();
+
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
-        	
-			public void onMailboxMembers(List<MailboxMembership<Long>> results)
-					throws MailboxException {
-				for(final Iterator<MailboxMembership<Long>> it=results.iterator();it.hasNext();) {
-					MailboxMembership<Long> member = it.next();
-		            if (member.isDeleted()) {
-		                filteredResult.add(member);
-		            }
-		        }
-			}
-		});
-        
-		return filteredResult;
+
+            public void onMailboxMembers(List<MailboxMembership<Long>> results) throws MailboxException {
+                for (final Iterator<MailboxMembership<Long>> it = results.iterator(); it.hasNext();) {
+                    MailboxMembership<Long> member = it.next();
+                    if (member.isDeleted()) {
+                        delete(mailbox, member);
+                        filteredResult.add(member.getUid());
+                    }
+                }
+            }
+        });
+
+        return filteredResult.iterator();
     }
 
     /*

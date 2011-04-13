@@ -194,11 +194,12 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
         return messages;
     }
 
-    /* 
+
+    /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public List<MailboxMembership<Integer>> findMarkedForDeletionInMailbox(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
+    public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
         List<MailboxMembership<Integer>> results = new ArrayList<MailboxMembership<Integer>>();
         final long from = set.getUidFrom();
         final long to = set.getUidTo();
@@ -218,7 +219,12 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
             results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, to);
             break;       
         }
-        return results;
+        List<Long> uids = new ArrayList<Long>();
+        for (int i = 0; i < results.size(); i++) {
+            MailboxMembership<Integer> m = results.get(i);
+            delete(mailbox, m);
+        }
+        return uids.iterator();
     }
 
     private List<MailboxMembership<Integer>> findMessagesInMailbox(Mailbox<Integer> mailbox,
@@ -427,6 +433,10 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
     }
 
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
+     */
     public Iterator<UpdatedFlags> updateFlags(final Mailbox<Integer> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);

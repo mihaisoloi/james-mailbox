@@ -51,14 +51,14 @@ public interface MessageMapper<Id> extends Mapper {
             throws MailboxException;
     
     /**
-     * Return a List of {@link MailboxMembership} for the given {@link MessageRange} which are marked for deletion
-     * The list must be ordered by the {@link Message} uid
+     * Return a {@link Iterator} which holds the uids for all deleted Messages for the given {@link MessageRange} which are marked for deletion
+     * The list must be ordered
      * @param mailbox
      * @param set 
-     * @return list
+     * @return uids
      * @throws MailboxException
      */
-    public abstract List<MailboxMembership<Id>> findMarkedForDeletionInMailbox(
+    public abstract Iterator<Long> expungeMarkedForDeletionInMailbox(
             Mailbox<Id> mailbox, final MessageRange set)
             throws MailboxException;
 

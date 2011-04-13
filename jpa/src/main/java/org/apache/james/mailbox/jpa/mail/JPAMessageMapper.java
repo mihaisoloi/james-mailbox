@@ -135,56 +135,88 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
          return query.getResultList();
     }
 
-    /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findMarkedForDeletionInMailbox(org.apache.james.mailbox.MessageRange)
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public List<MailboxMembership<Long>> findMarkedForDeletionInMailbox(Mailbox<Long> mailbox, final MessageRange set) throws MailboxException {
+    public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<Long> mailbox, final MessageRange set) throws MailboxException {
         try {
-            final List<MailboxMembership<Long>> results;
+            final List<Long> results;
             final long from = set.getUidFrom();
             final long to = set.getUidTo();
             switch (set.getType()) {
                 case ONE:
                     results = findDeletedMessagesInMailboxWithUID(mailbox, from);
+                    deleteDeletedMessagesInMailboxWithUID(mailbox, from);
                     break;
                 case RANGE:
                     results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
+                    deleteDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
                     break;
                 case FROM:
                     results = findDeletedMessagesInMailboxAfterUID(mailbox, from);
+                    deleteDeletedMessagesInMailboxAfterUID(mailbox, from);
                     break;
                 default:
                 case ALL:
                     results = findDeletedMessagesInMailbox(mailbox);
+                    deleteDeletedMessagesInMailbox(mailbox);
                     break;
             }
-            return results;
+            
+            return results.iterator();
         } catch (PersistenceException e) {
             throw new MailboxException("Search of MessageRange " + set + " failed in mailbox " + mailbox, e);
         }
     }
 
+
+    private int deleteDeletedMessagesInMailbox(Mailbox<Long> mailbox) {
+        return getEntityManager().createNamedQuery("deleteDeletedMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId()).executeUpdate();
+    }
+
+    private int deleteDeletedMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid) {
+        return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxAfterUID")
+        .setParameter("idParam", mailbox.getMailboxId())
+        .setParameter("uidParam", uid).executeUpdate();
+    }
+
+    private int deleteDeletedMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
+        return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxWithUID")
+        .setParameter("idParam", mailbox.getMailboxId())
+        .setParameter("uidParam", uid).setMaxResults(1).executeUpdate();
+    }
+
+    private int deleteDeletedMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to) {
+        return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxBetweenUIDs")
+        .setParameter("idParam", mailbox.getMailboxId())
+        .setParameter("fromParam", from)
+        .setParameter("toParam", to).executeUpdate();
+    }
+
+    
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findDeletedMessagesInMailbox(Mailbox<Long> mailbox) {
+    private List<Long> findDeletedMessagesInMailbox(Mailbox<Long> mailbox) {
         return getEntityManager().createNamedQuery("findDeletedMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId()).getResultList();
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findDeletedMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid) {
+    private List<Long> findDeletedMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid) {
         return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxAfterUID")
         .setParameter("idParam", mailbox.getMailboxId())
         .setParameter("uidParam", uid).getResultList();
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findDeletedMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
+    private List<Long> findDeletedMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
         return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxWithUID")
         .setParameter("idParam", mailbox.getMailboxId())
         .setParameter("uidParam", uid).setMaxResults(1).getResultList();
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findDeletedMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to) {
+    private List<Long> findDeletedMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to) {
         return getEntityManager().createNamedQuery("findDeletedMessagesInMailboxBetweenUIDs")
         .setParameter("idParam", mailbox.getMailboxId())
         .setParameter("fromParam", from)
