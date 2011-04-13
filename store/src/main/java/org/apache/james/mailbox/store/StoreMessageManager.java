@@ -554,7 +554,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return messageMapper.execute(new Mapper.Transaction<Iterator<Long>>() {
 
             public Iterator<Long> run() throws MailboxException {
-                return messageMapper.deleteMarkedForDeletionInMailbox(getMailboxEntity(), range);
+                return messageMapper.expungeMarkedForDeletionInMailbox(getMailboxEntity(), range);
             }
             
         });       
