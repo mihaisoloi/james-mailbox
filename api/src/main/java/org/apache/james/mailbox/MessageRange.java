@@ -19,6 +19,10 @@
 
 package org.apache.james.mailbox;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Used to define a range of messages by uid.<br>
  * The type of the set should be defined by using an appropriate constructor.
@@ -208,5 +212,43 @@ public class MessageRange {
             return this;
         else
             return new MessageRange(type, uidFrom, uidTo, UNLIMITED_BATCH);
+    }
+    
+    /**
+     * Converts the given {@link List} of uids to a {@link List} of {@link MessageRange} instances
+     * 
+     * @param uids
+     * @return ranges
+     */
+    public static List<MessageRange> toRanges(List<Long> uids) {
+        List<MessageRange> ranges = new ArrayList<MessageRange>();
+        
+        Collections.sort(uids);
+        
+        long firstUid = 0;
+        int a = 0;
+        for (int i = 0; i < uids.size(); i++) {
+            long u = uids.get(i);
+            if (i == 0) {
+                firstUid =  u;
+                if (uids.size() == 1) {
+                    ranges.add(MessageRange.one(firstUid));
+                }
+            } else {
+                if ((firstUid + a +1) != u) {
+                    ranges.add(MessageRange.range(firstUid, firstUid + a));
+                    
+                    // set the next first uid and reset the counter
+                    firstUid = u;
+                    a = 0;
+                    if (uids.size() <= i +1) {
+                        ranges.add(MessageRange.one(firstUid));
+                    }
+                } else {
+                    a++;
+                }
+            }
+        }
+        return ranges;
     }
 }
