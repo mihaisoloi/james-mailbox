@@ -23,16 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import javax.mail.Flags;
-import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.UpdatedFlags;
 
 /**
  * Helper class to dispatch {@link Event}'s to registerend MailboxListener
@@ -70,13 +67,13 @@ public class MailboxEventDispatcher implements MailboxListener {
      * Should get called when a new message was added to a Mailbox. All
      * registered MailboxListener will get triggered then
      * 
-     * @param uid
+     * @param uids
      * @param sessionId
      * @param path
      */
-    public void added(MailboxSession session, long uid, MailboxPath path) {
+    public void added(MailboxSession session, List<Long> uids, MailboxPath path) {
         pruneClosed();
-        final AddedImpl added = new AddedImpl(session, path, uid);
+        final AddedImpl added = new AddedImpl(session, path, uids);
         event(added);
     }
 
@@ -85,11 +82,11 @@ public class MailboxEventDispatcher implements MailboxListener {
      * registered MailboxListener will get triggered then
      * 
      * @param session
-     * @param uid
+     * @param uids
      * @param path
      */
-    public void expunged(final MailboxSession session, final long uid, MailboxPath path) {
-        final ExpungedImpl expunged = new ExpungedImpl(session, path, uid);
+    public void expunged(final MailboxSession session, final List<Long> uids, MailboxPath path) {
+        final ExpungedImpl expunged = new ExpungedImpl(session, path, uids);
         event(expunged);
     }
 
@@ -98,13 +95,13 @@ public class MailboxEventDispatcher implements MailboxListener {
      * registered MailboxListener will get triggered then
      * 
      * @param session
-     * @param uid
+     * @param uids
      * @param path
      * @param original
      * @param updated
      */
-    public void flagsUpdated(MailboxSession session, final long uid, final MailboxPath path, final Flags original, final Flags updated) {
-        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uid, original, updated);
+    public void flagsUpdated(MailboxSession session, final List<Long> uids, final MailboxPath path, final List<UpdatedFlags> uflags) {
+        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uids, uflags);
         event(flags);
     }
 
@@ -152,149 +149,69 @@ public class MailboxEventDispatcher implements MailboxListener {
 
     private final static class AddedImpl extends MailboxListener.Added {
 
-        private final long subjectUid;
+        private final List<Long> uids;
 
-        public AddedImpl(final MailboxSession session, final MailboxPath path, final long subjectUid) {
+        public AddedImpl(final MailboxSession session, final MailboxPath path, final List<Long> uids) {
             super(session, path);
-            this.subjectUid = subjectUid;
+            this.uids = uids;
         }
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
+         * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
-        public long getSubjectUid() {
-            return subjectUid;
+        public List<Long> getUids() {
+            return uids;
         }
     }
 
     private final static class ExpungedImpl extends MailboxListener.Expunged {
 
-        private final long subjectUid;
+        private final List<Long> uids;
 
-        public ExpungedImpl(MailboxSession session, final MailboxPath path, final long subjectUid) {
+        public ExpungedImpl(MailboxSession session, final MailboxPath path, final List<Long> uids) {
             super(session, path);
-            this.subjectUid = subjectUid;
+            this.uids = uids;
         }
-
-        public long getSubjectUid() {
-            return subjectUid;
+        /*
+         * (non-Javadoc)
+         * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
+         */
+        public List<Long> getUids() {
+            return uids;
         }
     }
 
     private final static class FlagsUpdatedImpl extends MailboxListener.FlagsUpdated {
 
-        private static boolean isChanged(final Flags original, final Flags updated, Flags.Flag flag) {
-            return original != null && updated != null && (original.contains(flag) ^ updated.contains(flag));
-        }
+        private final List<Long> uids;
 
-        private static final Flags.Flag[] FLAGS = { Flags.Flag.ANSWERED, Flags.Flag.DELETED, Flags.Flag.DRAFT, Flags.Flag.FLAGGED, Flags.Flag.RECENT, Flags.Flag.SEEN };
 
-        private static final int NUMBER_OF_SYSTEM_FLAGS = 6;
+        private final List<UpdatedFlags> uFlags;
 
-        private final long subjectUid;
-
-        private final boolean[] modifiedFlags;
-
-        private final Flags newFlags;
-
-        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid, final Flags original, final Flags updated) {
-            this(session, path, subjectUid, updated, isChanged(original, updated, Flags.Flag.ANSWERED), isChanged(original, updated, Flags.Flag.DELETED), isChanged(original, updated, Flags.Flag.DRAFT), isChanged(original, updated, Flags.Flag.FLAGGED),
-                    isChanged(original, updated, Flags.Flag.RECENT), isChanged(original, updated, Flags.Flag.SEEN));
-        }
-
-        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final long subjectUid, final Flags newFlags, boolean answeredUpdated, boolean deletedUpdated, boolean draftUpdated, boolean flaggedUpdated, boolean recentUpdated, boolean seenUpdated) {
+        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final List<Long> uids, final List<UpdatedFlags> uFlags) {
             super(session, path);
-            this.subjectUid = subjectUid;
-            this.modifiedFlags = new boolean[NUMBER_OF_SYSTEM_FLAGS];
-            this.modifiedFlags[0] = answeredUpdated;
-            this.modifiedFlags[1] = deletedUpdated;
-            this.modifiedFlags[2] = draftUpdated;
-            this.modifiedFlags[3] = flaggedUpdated;
-            this.modifiedFlags[4] = recentUpdated;
-            this.modifiedFlags[5] = seenUpdated;
-            this.newFlags = newFlags;
+            this.uids = uids;
+
+            this.uFlags = uFlags;
         }
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * org.apache.james.mailbox.MailboxListener.MessageEvent#getSubjectUid()
+         * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
-        public long getSubjectUid() {
-            return subjectUid;
+        public List<Long> getUids() {
+            return uids;
         }
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * org.apache.james.mailbox.MailboxListener.FlagsUpdated#flagsIterator()
+         * @see org.apache.james.mailbox.MailboxListener.FlagsUpdated#getUpdatedFlags()
          */
-        public Iterator<Flag> flagsIterator() {
-            return new FlagsIterator();
+        public List<UpdatedFlags> getUpdatedFlags() {
+            return uFlags;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.apache.james.mailbox.MailboxListener.FlagsUpdated#getNewFlags()
-         */
-        public Flags getNewFlags() {
-            return newFlags;
-        }
-
-        private class FlagsIterator implements Iterator<Flag> {
-            private int position;
-
-            public FlagsIterator() {
-                position = 0;
-                nextPosition();
-            }
-
-            private void nextPosition() {
-                if ((position < NUMBER_OF_SYSTEM_FLAGS) && (!modifiedFlags[position])) {
-                    position++;
-                    nextPosition();
-                }
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see java.util.Iterator#hasNext()
-             */
-            public boolean hasNext() {
-                return position < NUMBER_OF_SYSTEM_FLAGS;
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see java.util.Iterator#next()
-             */
-            public Flag next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                final Flag result = FLAGS[position++];
-                nextPosition();
-                return result;
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see java.util.Iterator#remove()
-             */
-            public void remove() {
-                throw new UnsupportedOperationException("Read only");
-            }
-        }
     }
 
     /**

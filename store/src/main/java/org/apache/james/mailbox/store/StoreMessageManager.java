@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
@@ -50,7 +52,6 @@ import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.mail.model.UpdatedFlags;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
@@ -132,9 +133,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         Iterator<Long> uidIt = deleteMarkedInMailbox(set, mailboxSession);
         while(uidIt.hasNext()) {
             long uid = uidIt.next();
-            dispatcher.expunged(mailboxSession, uid, new StoreMailboxPath<Id>(getMailboxEntity()));
             uids.add(uid);
         }
+        dispatcher.expunged(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
         return uids.iterator();    
     }
 
@@ -261,7 +262,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final MailboxMembership<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                         
-            dispatcher.added(mailboxSession, uid, new StoreMailboxPath<Id>(getMailboxEntity()));
+            dispatcher.added(mailboxSession, Arrays.asList(uid), new StoreMailboxPath<Id>(getMailboxEntity()));
             return uid;
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
@@ -413,12 +414,16 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             }
         });
         
-        
+        final SortedMap<Long, UpdatedFlags> uFlags = new TreeMap<Long, UpdatedFlags>();
+
         while (it.hasNext()) {
             UpdatedFlags flag = it.next();
-            dispatcher.flagsUpdated(mailboxSession, flag.getUid(), new StoreMailboxPath<Id>(getMailboxEntity()), flag.getOldFlags(), flag.getNewFlags());
             newFlagsByUid.put(flag.getUid(), flag.getNewFlags());
+            uFlags.put(flag.getUid(), flag);
         }
+        
+        dispatcher.flagsUpdated(mailboxSession, new ArrayList<Long>(uFlags.keySet()), new StoreMailboxPath<Id>(getMailboxEntity()), new ArrayList<UpdatedFlags>(uFlags.values()));
+
         return newFlagsByUid;
     }
 
@@ -436,11 +441,14 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         try {
             List<MessageRange> result=new ArrayList<MessageRange>();
             Iterator<Long> copiedUids = copy(set, toMailbox, session);
+            List<Long> uids = new ArrayList<Long>();
             while(copiedUids.hasNext()) {
                 long uid = copiedUids.next();
                 result.add(MessageRange.one(uid));
-                dispatcher.added(session, uid, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
+                uids.add(uid);
             }
+            dispatcher.added(session, uids, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
+
             return result;
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);

@@ -20,6 +20,7 @@
 package org.apache.james.mailbox;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javax.mail.Flags;
 
@@ -130,11 +131,11 @@ public interface MailboxListener {
         }
 
         /**
-         * Gets the message UID for the subject of this event.
+         * Gets the message UIDs for the subject of this event.
          * 
-         * @return message uid
+         * @return message uids
          */
-        public abstract long getSubjectUid();
+        public abstract List<Long> getUids();
     }
 
     public abstract class Expunged extends MessageEvent {
@@ -153,17 +154,7 @@ public interface MailboxListener {
             super(session, path);
         }
 
-        /**
-         * Gets new flags for this message.
-         */
-        public abstract Flags getNewFlags();
-
-        /**
-         * Gets an iterator for the system flags changed.
-         * 
-         * @return <code>Flags.Flag</code> <code>Iterator</code>, not null
-         */
-        public abstract Iterator<Flags.Flag> flagsIterator();
+        public abstract List<UpdatedFlags> getUpdatedFlags();
     }
 
     /**

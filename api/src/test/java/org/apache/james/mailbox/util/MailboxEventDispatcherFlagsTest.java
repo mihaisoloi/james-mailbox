@@ -21,6 +21,7 @@ package org.apache.james.mailbox.util;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.mail.Flags;
@@ -29,6 +30,7 @@ import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.mock.MockMailboxSession;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.jmock.Expectations;
@@ -68,46 +70,33 @@ public class MailboxEventDispatcherFlagsTest {
         dispatcher.addMailboxListener(collector);
         result = mockery.mock(MessageResult.class);
         mockery.checking(new Expectations() {{
-            oneOf (result).getUid();will(returnValue(23L));
+            allowing(result).getUid();will(returnValue(23L));
         }});
     }
 
-   
-    @Test
-    public void testShouldReturnNoChangesWhenOriginalNull() throws Exception {
-        dispatcher.flagsUpdated(session, result.getUid(), path, null, new Flags(
-                Flags.Flag.DELETED));
-        assertEquals(1, collector.events.size());
-        assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
-        MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
-                .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
-        assertNotNull(iterator);
-        assertFalse(iterator.hasNext());
-    }
 
     @Test
     public void testShouldReturnNoChangesWhenSystemFlagsUnchanged() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.DELETED), new Flags(Flags.Flag.DELETED));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.DELETED), new Flags(Flags.Flag.DELETED))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertFalse(iterator.hasNext());
     }
 
     @Test
     public void testShouldShowAnsweredAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.ANSWERED));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.ANSWERED))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.ANSWERED, iterator.next());
@@ -116,13 +105,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowAnsweredRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.ANSWERED), new Flags());
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.ANSWERED), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.ANSWERED, iterator.next());
@@ -131,13 +120,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowDeletedAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.DELETED));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.DELETED))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.DELETED, iterator.next());
@@ -146,13 +135,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowDeletedRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.DELETED), new Flags());
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.DELETED), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.DELETED, iterator.next());
@@ -161,13 +150,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowDraftAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.DRAFT));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.DRAFT))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.DRAFT, iterator.next());
@@ -176,13 +165,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowDraftRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.DRAFT), new Flags());
+        dispatcher.flagsUpdated(session,Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.DRAFT), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.DRAFT, iterator.next());
@@ -191,13 +180,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowFlaggedAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.FLAGGED));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.FLAGGED))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.FLAGGED, iterator.next());
@@ -206,13 +195,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowFlaggedRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.FLAGGED), new Flags());
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.FLAGGED), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.FLAGGED, iterator.next());
@@ -221,13 +210,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowRecentAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.RECENT));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.RECENT))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.RECENT, iterator.next());
@@ -236,13 +225,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowRecentRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.RECENT), new Flags());
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.RECENT), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.RECENT, iterator.next());
@@ -251,13 +240,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowSeenAdded() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(),
-                new Flags(Flags.Flag.SEEN));
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(),
+                new Flags(Flags.Flag.SEEN))));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.SEEN, iterator.next());
@@ -266,13 +255,13 @@ public class MailboxEventDispatcherFlagsTest {
 
     @Test
     public void testShouldShowSeenRemoved() {
-        dispatcher.flagsUpdated(session, result.getUid(), path, new Flags(
-                Flags.Flag.SEEN), new Flags());
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), new Flags(
+                Flags.Flag.SEEN), new Flags())));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.SEEN, iterator.next());
@@ -289,12 +278,12 @@ public class MailboxEventDispatcherFlagsTest {
         updated.add(Flags.Flag.DRAFT);
         updated.add(Flags.Flag.SEEN);
 
-        dispatcher.flagsUpdated(session, result.getUid(), path, originals, updated);
+        dispatcher.flagsUpdated(session, Arrays.asList(result.getUid()), path, Arrays.asList(new UpdatedFlags(result.getUid(), originals, updated)));
         assertEquals(1, collector.events.size());
         assertTrue(collector.events.get(0) instanceof MailboxListener.FlagsUpdated);
         MailboxListener.FlagsUpdated event = (MailboxListener.FlagsUpdated) collector.events
                 .get(0);
-        Iterator<Flags.Flag> iterator = event.flagsIterator();
+        Iterator<Flags.Flag> iterator = event.getUpdatedFlags().get(0).iterator();
         assertNotNull(iterator);
         assertTrue(iterator.hasNext());
         assertEquals(Flags.Flag.ANSWERED, iterator.next());
