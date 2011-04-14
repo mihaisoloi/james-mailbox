@@ -397,7 +397,7 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
     protected int getBodyStartOctet() {
         if (isPersistent()) {
             try {
-                return new Long(node.getProperty(BODY_START_OCTET_PROPERTY).getLong()).intValue();
+                return (int)node.getProperty(BODY_START_OCTET_PROPERTY).getLong();
             } catch (RepositoryException e) {
                 logger.error("Unable to retrieve property " + TEXTUAL_LINE_COUNT_PROPERTY, e);
 

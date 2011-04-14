@@ -89,7 +89,7 @@ public class JCRHeader extends AbstractComparableHeader implements JCRImapConsta
     public int getLineNumber() {
         if (isPersistent()) {
             try {
-                return new Long(node.getProperty(LINENUMBER_PROPERTY).getLong()).intValue();
+                return (int)node.getProperty(LINENUMBER_PROPERTY).getLong();
             } catch (RepositoryException e) {
                 logger.error("Unable to access property " + FIELDNAME_PROPERTY, e);
             }

@@ -71,7 +71,7 @@ public class JCRProperty extends AbstractComparableProperty<JCRProperty> impleme
     public int getOrder() {
         if (isPersistent()) {
             try {
-                return new Long(node.getProperty(ORDER_PROPERTY).getLong()).intValue();
+                return (int)node.getProperty(ORDER_PROPERTY).getLong();
             } catch (RepositoryException e) {
                 logger.error("Unable to access Property " + ORDER_PROPERTY, e);
             }

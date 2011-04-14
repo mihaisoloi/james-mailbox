@@ -120,7 +120,7 @@ public class MessageResultImpl implements MessageResult {
     public int compareTo(MessageResult that) {
         if (this.uid > 0 && that.getUid() > 0) {
             // TODO: this seems inefficient
-            return new Long(uid).compareTo(new Long(that.getUid()));
+            return Long.valueOf(uid).compareTo(Long.valueOf(that.getUid()));
         } else {
             // TODO: throwing an undocumented untyped runtime seems wrong
             // TODO: if uids must be greater than zero then this should be

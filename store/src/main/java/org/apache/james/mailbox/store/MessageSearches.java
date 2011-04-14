@@ -248,7 +248,7 @@ public class MessageSearches {
             result = isSet == message.isFlagged();
         } else if (flag == Flags.Flag.RECENT) {
             final long uid = message.getUid();
-            result = isSet == recentMessageUids.contains(new Long(uid));
+            result = isSet == recentMessageUids.contains(Long.valueOf(uid));
         } else if (flag == Flags.Flag.DELETED) {
             result = isSet == message.isDeleted();
         } else {
