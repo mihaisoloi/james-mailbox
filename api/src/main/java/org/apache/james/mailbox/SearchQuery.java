@@ -1621,7 +1621,7 @@ public class SearchQuery {
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result + (int)date.getTime();
+            //result = PRIME * result + (int)date.getTime();
             result = PRIME * result + type.hashCode();
             return result;
         }
@@ -1638,8 +1638,8 @@ public class SearchQuery {
             if (getClass() != obj.getClass())
                 return false;
             final DateOperator other = (DateOperator) obj;
-            if (date != other.date)
-                return false;
+            //if (date != other.date)
+            //    return false;
             if (res != other.res)
                 return false;
             if (type != other.type)
