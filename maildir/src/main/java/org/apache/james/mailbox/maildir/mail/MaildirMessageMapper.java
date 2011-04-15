@@ -216,7 +216,9 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
         List<Long> uids = new ArrayList<Long>();
         for (int i = 0; i < results.size(); i++) {
             MailboxMembership<Integer> m = results.get(i);
+            long uid = m.getUid();
             delete(mailbox, m);
+            uids.add(uid);
         }
         return uids.iterator();
     }
