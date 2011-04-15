@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +31,7 @@ import java.util.Locale;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
@@ -38,6 +40,7 @@ import org.apache.james.mailbox.SearchQuery.AllCriterion;
 import org.apache.james.mailbox.SearchQuery.ContainsOperator;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.DateOperator;
+import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.SearchQuery.FlagCriterion;
 import org.apache.james.mailbox.SearchQuery.HeaderCriterion;
 import org.apache.james.mailbox.SearchQuery.HeaderOperator;
@@ -54,7 +57,6 @@ import org.apache.james.mime4j.message.SimpleContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
-import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
@@ -123,11 +125,16 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public final static String HEADERS_FIELD ="headers";
     
-    /**
-     * {@link Field} which will contain the internalDate of the {@link MailboxMembership}
-     */
-    public final static String INTERNAL_DATE_FIELD ="internaldate";
+
+    public final static String INTERNAL_DATE_FIELD_YEAR_RESOLUTION ="internaldateYearResolution";
  
+    public final static String INTERNAL_DATE_FIELD_MONTH_RESOLUTION ="internaldateMonthResolution";
+    public final static String INTERNAL_DATE_FIELD_DAY_RESOLUTION ="internaldateDayResolution";
+    public final static String INTERNAL_DATE_FIELD_HOUR_RESOLUTION ="internaldateHourResolution";
+    public final static String INTERNAL_DATE_FIELD_MINUTE_RESOLUTION ="internaldateMinuteResolution";
+    public final static String INTERNAL_DATE_FIELD_SECOND_RESOLUTION ="internaldateSecondResolution";
+    public final static String INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION ="internaldateMillisecondResolution";
+
     /**
      * {@link Field} which will contain the id of the {@link Mailbox}
      */
@@ -225,8 +232,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         // add flags
         indexFlags(membership.createFlags(), doc);
 
-        // store the internal date with resulution of a DAY
-        doc.add(new NumericField(INTERNAL_DATE_FIELD,Store.NO, true).setLongValue(DateTools.round(membership.getInternalDate().getTime(),DateTools.Resolution.DAY)));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_YEAR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.YEAR).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_MONTH_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MONTH).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_DAY_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.DAY_OF_MONTH).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_HOUR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.HOUR_OF_DAY).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_MINUTE_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MINUTE).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_SECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.SECOND).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MILLISECOND).getTime()));
+
         doc.add(new NumericField(SIZE_FIELD,Store.NO, true).setLongValue(membership.getMessage().getFullContentOctets()));
         
         // content handler which will index the headers and the body of the message
@@ -273,7 +286,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         MimeStreamParser parser = new MimeStreamParser();
         parser.setContentHandler(handler);
         try {
-            // paese the message to index headers and body
+            // parse the message to index headers and body
             parser.parse(membership.getMessage().getFullContent());
         } catch (MimeException e) {
             // This should never happen as it was parsed before too without problems.            
@@ -305,6 +318,34 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
 
     }
 
+
+    private static String toInteralDateField(DateResolution res) {
+        String field;
+        switch (res) {
+        case Year:
+            field = INTERNAL_DATE_FIELD_YEAR_RESOLUTION;
+            break;
+        case Month:
+            field = INTERNAL_DATE_FIELD_MONTH_RESOLUTION;
+            break;
+        case Day:
+            field = INTERNAL_DATE_FIELD_DAY_RESOLUTION;
+            break;
+        case Hour:
+            field = INTERNAL_DATE_FIELD_HOUR_RESOLUTION;
+            break;
+        case Minute:
+            field = INTERNAL_DATE_FIELD_MINUTE_RESOLUTION;
+            break;
+        case Second:
+            field = INTERNAL_DATE_FIELD_SECOND_RESOLUTION;
+            break;
+        default:
+            field = INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION;
+            break;
+        }
+        return field;
+    }
     
     /**
      * Return a {@link Query} which is build based on the given {@link SearchQuery.InternalDateCriterion}
@@ -315,17 +356,18 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public static Query createInternalDateQuery(SearchQuery.InternalDateCriterion crit) throws UnsupportedSearchException {
         DateOperator op = crit.getOperator();
-        Calendar cal = Calendar.getInstance();
-        cal.set(op.getYear(), op.getMonth() - 1, op.getDay());         
-        long value = DateTools.round(cal.getTimeInMillis(), DateTools.Resolution.DAY);
+        DateResolution res = op.getDateResultion();
+        Date date = op.getDate();
+        long value = DateUtils.truncate(date, SearchQuery.toCalendarType(res)).getTime();
+        String field = toInteralDateField(res);
         
         switch(op.getType()) {
         case ON:
-            return NumericRangeQuery.newLongRange(INTERNAL_DATE_FIELD ,value, value, true, true);
+            return NumericRangeQuery.newLongRange(field ,value, value, true, true);
         case BEFORE: 
-            return NumericRangeQuery.newLongRange(INTERNAL_DATE_FIELD ,0L, value, true, false);
+            return NumericRangeQuery.newLongRange(field ,0L, value, true, false);
         case AFTER: 
-            return NumericRangeQuery.newLongRange(INTERNAL_DATE_FIELD ,value, Long.MAX_VALUE, false, true);
+            return NumericRangeQuery.newLongRange(field ,value, Long.MAX_VALUE, false, true);
         default:
             throw new UnsupportedSearchException();
         }

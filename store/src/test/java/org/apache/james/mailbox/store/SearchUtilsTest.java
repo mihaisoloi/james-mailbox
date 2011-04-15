@@ -22,12 +22,16 @@ package org.apache.james.mailbox.store;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.store.MessageSearches;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.junit.Before;
@@ -57,6 +61,15 @@ public class SearchUtilsTest {
 
     Collection<Long> recent;
 
+    private Calendar getGMT() {
+        return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.UK);
+    }
+    
+    private Date getDate(int day, int month, int year) {
+        Calendar cal = getGMT();
+        cal.set(year, month -1, day);
+        return cal.getTime();
+    }
     @Before
     public void setUp() throws Exception {
         recent = new ArrayList<Long>();
@@ -110,31 +123,32 @@ public class SearchUtilsTest {
     public void testMatchInternalDateEquals() throws Exception {
         builder.internalDate = SUN_SEP_9TH_2001;
         MailboxMembership<Long> row = builder.build();
-        assertFalse(searches.isMatch(SearchQuery.internalDateOn(9, 9, 2000),
+        assertFalse(searches.isMatch(SearchQuery.internalDateOn(getDate(9, 9, 2000), DateResolution.Day),
                 row, recent));
-        assertFalse(searches.isMatch(SearchQuery.internalDateOn(8, 9, 2001),
+        assertFalse(searches.isMatch(SearchQuery.internalDateOn(getDate(8, 9, 2001), DateResolution.Day),
                 row, recent));
-        assertTrue(searches.isMatch(SearchQuery.internalDateOn(9, 9, 2001),
+        assertTrue(searches.isMatch(SearchQuery.internalDateOn(getDate(9, 9, 2001), DateResolution.Day),
                 row, recent));
-        assertFalse(searches.isMatch(SearchQuery.internalDateOn(10, 9, 2001),
+        assertFalse(searches.isMatch(SearchQuery.internalDateOn(getDate(10, 9, 2001), DateResolution.Day),
                 row, recent));
-        assertFalse(searches.isMatch(SearchQuery.internalDateOn(9, 9, 2002),
+        assertFalse(searches.isMatch(SearchQuery.internalDateOn(getDate(9, 9, 2002), DateResolution.Day),
                 row, recent));
     }
 
+    
     @Test
     public void testMatchInternalDateBefore() throws Exception {
         builder.internalDate = SUN_SEP_9TH_2001;
         MailboxMembership<Long> row = builder.build();
         assertFalse(searches.isMatch(
-                SearchQuery.internalDateBefore(9, 9, 2000), row, recent));
+                SearchQuery.internalDateBefore(getDate(9, 9, 2000), DateResolution.Day), row, recent));
         assertFalse(searches.isMatch(
-                SearchQuery.internalDateBefore(8, 9, 2001), row, recent));
+                SearchQuery.internalDateBefore(getDate(8, 9, 2001), DateResolution.Day), row, recent));
         assertFalse(searches.isMatch(
-                SearchQuery.internalDateBefore(9, 9, 2001), row, recent));
+                SearchQuery.internalDateBefore(getDate(9, 9, 2001), DateResolution.Day), row, recent));
         assertTrue(searches.isMatch(
-                SearchQuery.internalDateBefore(10, 9, 2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.internalDateBefore(9, 9, 2002),
+                SearchQuery.internalDateBefore(getDate(10, 9, 2001), DateResolution.Day), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.internalDateBefore(getDate(9, 9, 2002), DateResolution.Day),
                 row, recent));
     }
 
@@ -142,15 +156,15 @@ public class SearchUtilsTest {
     public void testMatchInternalDateAfter() throws Exception {
         builder.internalDate = SUN_SEP_9TH_2001;
         MailboxMembership<Long> row = builder.build();
-        assertTrue(searches.isMatch(SearchQuery.internalDateAfter(9, 9, 2000),
+        assertTrue(searches.isMatch(SearchQuery.internalDateAfter(getDate(9, 9, 2000), DateResolution.Day),
                 row, recent));
-        assertTrue(searches.isMatch(SearchQuery.internalDateAfter(8, 9, 2001),
+        assertTrue(searches.isMatch(SearchQuery.internalDateAfter(getDate(8, 9, 2001), DateResolution.Day),
                 row, recent));
-        assertFalse(searches.isMatch(SearchQuery.internalDateAfter(9, 9, 2001),
+        assertFalse(searches.isMatch(SearchQuery.internalDateAfter(getDate(9, 9, 2001), DateResolution.Day),
                 row, recent));
         assertFalse(searches.isMatch(
-                SearchQuery.internalDateAfter(10, 9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.internalDateAfter(9, 9, 2002),
+                SearchQuery.internalDateAfter(getDate(10, 9, 2001), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.internalDateAfter(getDate(9, 9, 2002), DateResolution.Day),
                 row, recent));
     }
 
@@ -158,108 +172,108 @@ public class SearchUtilsTest {
     public void testMatchHeaderDateAfter() throws Exception {
         builder.header(DATE_FIELD, RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2000), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 8,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2001), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2000), DateResolution.Day), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(8,
+                9, 2001), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2001), DateResolution.Day), row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", 9, 9,
-                2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day), row, recent));
     }
 
     @Test
     public void testShouldMatchCapsHeaderDateAfter() throws Exception {
         builder.header(DATE_FIELD.toUpperCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2000), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 8,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2001), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2000), DateResolution.Day), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(8,
+                9, 2001), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2001), DateResolution.Day), row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", 9, 9,
-                2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day), row, recent));
     }
 
     @Test
     public void testShouldMatchLowersHeaderDateAfter() throws Exception {
         builder.header(DATE_FIELD.toLowerCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2000), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 8,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2001), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2000), DateResolution.Day), row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(8,
+                9, 2001),DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2001), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", 9, 9,
-                2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
     }
 
     @Test
     public void testMatchHeaderDateOn() throws Exception {
         builder.header(DATE_FIELD, RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2000), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 8, 9,
-                2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 10,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", 9, 9,
-                2001), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2000), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(8, 9,
+                2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(10,
+                9, 2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2002), DateResolution.Day), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day), row, recent));
     }
 
     @Test
     public void testShouldMatchCapsHeaderDateOn() throws Exception {
         builder.header(DATE_FIELD.toUpperCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2000), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 8, 9,
-                2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 10,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", 9, 9,
-                2001), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2000), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(8, 9,
+                2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(10,
+                9, 2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
     }
 
     @Test
     public void testShouldMatchLowersHeaderDateOn() throws Exception {
         builder.header(DATE_FIELD.toLowerCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2000), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 8, 9,
-                2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 10,
-                9, 2001), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, 9, 9,
-                2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", 9, 9,
-                2001), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2000), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(8, 9,
+                2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(10,
+                9, 2001), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(9, 9,
+                2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn("BOGUS", getDate(9, 9,
+                2001), DateResolution.Day),row, recent));
     }
 
     @Test
@@ -267,17 +281,17 @@ public class SearchUtilsTest {
         builder.header(DATE_FIELD.toLowerCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2000), row, recent));
+                getDate(9, 9, 2000), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                8, 9, 2001), row, recent));
+                getDate(8, 9, 2001), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2001), row, recent));
+                getDate(9, 9, 2001), DateResolution.Day),row, recent));
         assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", 9,
-                9, 2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", getDate(9,
+                9, 2001), DateResolution.Day),row, recent));
     }
 
     @Test
@@ -285,17 +299,17 @@ public class SearchUtilsTest {
         builder.header(DATE_FIELD.toLowerCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2000), row, recent));
+                getDate(9, 9, 2000), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                8, 9, 2001), row, recent));
+                getDate(8, 9, 2001), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2001), row, recent));
+                getDate(9, 9, 2001), DateResolution.Day),row, recent));
         assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", 9,
-                9, 2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", getDate(9,
+                9, 2001), DateResolution.Day),row, recent));
     }
 
     @Test
@@ -303,17 +317,17 @@ public class SearchUtilsTest {
         builder.header(DATE_FIELD.toLowerCase(), RFC822_SUN_SEP_9TH_2001);
         MailboxMembership<Long> row = builder.build();
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2000), row, recent));
+                getDate(9, 9, 2000), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                8, 9, 2001), row, recent));
+                getDate(8, 9, 2001), DateResolution.Day),row, recent));
         assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                9, 9, 2001), row, recent));
+                getDate(9, 9, 2001), DateResolution.Day),row, recent));
         assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD,
-                10, 9, 2001), row, recent));
-        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, 9,
-                9, 2002), row, recent));
-        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", 9,
-                9, 2001), row, recent));
+                getDate(10, 9, 2001), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(9,
+                9, 2002), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateBefore("BOGUS", getDate(9,
+                9, 2001), DateResolution.Day),row, recent));
     }
 
     @Test

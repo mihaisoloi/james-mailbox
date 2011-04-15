@@ -32,6 +32,7 @@ import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.SimpleHeader;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
@@ -160,7 +161,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
-        q2.andCriteria(SearchQuery.internalDateBefore(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1 , cal.get(Calendar.YEAR)));
+        q2.andCriteria(SearchQuery.internalDateBefore(cal.getTime(), DateResolution.Day));
         
         Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(2, it4.next().longValue(), 1);
@@ -173,7 +174,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
-        q2.andCriteria(SearchQuery.internalDateAfter(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1, cal.get(Calendar.YEAR)));
+        q2.andCriteria(SearchQuery.internalDateAfter(cal.getTime(), DateResolution.Day));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(3, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());
@@ -186,7 +187,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
-        q2.andCriteria(SearchQuery.internalDateOn(cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) +1, cal.get(Calendar.YEAR)));
+        q2.andCriteria(SearchQuery.internalDateOn(cal.getTime(), DateResolution.Day));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertFalse(it4.hasNext());

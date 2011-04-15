@@ -21,7 +21,9 @@ package org.apache.james.mailbox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +44,50 @@ import javax.mail.Flags.Flag;
  */
 public class SearchQuery {
 
+    /**
+     * The Resolution which should get used for {@link Date} searches
+     * 
+     *
+     */
+    public static enum DateResolution {
+        Second,
+        Minute,
+        Hour,
+        Day,
+        Month,
+        Year
+        
+        
+    }
+
+    public static int toCalendarType(DateResolution res) {
+        int type;
+        switch (res) {
+        case Year:
+            type = Calendar.YEAR;
+            break;
+        case Month:
+            type = Calendar.MONTH;
+            break;
+        case Day:
+            type = Calendar.DAY_OF_MONTH;
+            break;
+        case Hour:
+            type = Calendar.HOUR_OF_DAY;
+            break;
+        case Minute:
+            type = Calendar.MINUTE;
+            break;
+        case Second:
+            type = Calendar.SECOND;
+            break;
+        default:
+            type = Calendar.MILLISECOND;
+            break;
+        }
+        return type;
+    }
+    
     /**
      * Creates a filter for message size less than the given value
      * 
@@ -90,8 +136,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion internalDateAfter(int day, int month, int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.AFTER, day, month, year));
+    public static final Criterion internalDateAfter(Date date, DateResolution res) {
+        return new InternalDateCriterion(new DateOperator(DateComparator.AFTER, date, res));
     }
 
     /**
@@ -105,8 +151,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion internalDateOn(int day, int month, int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.ON, day, month, year));
+    public static final Criterion internalDateOn(Date date, DateResolution res) {
+        return new InternalDateCriterion(new DateOperator(DateComparator.ON, date, res));
     }
 
     /**
@@ -121,8 +167,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion internalDateBefore(int day, int month, int year) {
-        return new InternalDateCriterion(new DateOperator(DateComparator.BEFORE, day, month, year));
+    public static final Criterion internalDateBefore(Date date, DateResolution res) {
+        return new InternalDateCriterion(new DateOperator(DateComparator.BEFORE, date, res));
     }
 
     /**
@@ -140,8 +186,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateAfter(String headerName, int day, int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(DateComparator.AFTER, day, month, year));
+    public static final Criterion headerDateAfter(String headerName, Date date, DateResolution res) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.AFTER, date, res));
     }
 
     /**
@@ -159,8 +205,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateOn(String headerName, int day, int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(DateComparator.ON, day, month, year));
+    public static final Criterion headerDateOn(String headerName, Date date, DateResolution res) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.ON, date, res));
     }
 
     /**
@@ -178,8 +224,8 @@ public class SearchQuery {
      *            year
      * @return <code>Criterion</code>, not null
      */
-    public static final Criterion headerDateBefore(String headerName, int day, int month, int year) {
-        return new HeaderCriterion(headerName, new DateOperator(DateComparator.BEFORE, day, month, year));
+    public static final Criterion headerDateBefore(String headerName, Date date, DateResolution res) {
+        return new HeaderCriterion(headerName, new DateOperator(DateComparator.BEFORE, date, res));
     }
 
     /**
@@ -1540,38 +1586,24 @@ public class SearchQuery {
 
         private final DateComparator type;
 
-        private final int day;
+        private final Date date;
 
-        private final int month;
+        private final DateResolution res;
 
-        private final int year;
-
-        public DateOperator(final DateComparator type, final int day, final int month, final int year) {
+        public DateOperator(final DateComparator type, final Date date, final DateResolution res) {
             super();
             this.type = type;
-            this.day = day;
-            this.month = month;
-            this.year = year;
+            this.date = date;
+            this.res = res;
         }
 
-        /**
-         * Gets the day-of-the-month.
-         * 
-         * @return the day, one based
-         */
-        public int getDay() {
-            return day;
+        public Date getDate() {
+            return date;
         }
-
-        /**
-         * Gets the month-of-the-year.
-         * 
-         * @return the month, one based
-         */
-        public int getMonth() {
-            return month;
+        
+        public DateResolution getDateResultion() {
+            return res;
         }
-
         /**
          * Gets the operator type.
          * 
@@ -1583,24 +1615,14 @@ public class SearchQuery {
         }
 
         /**
-         * Gets the year.
-         * 
-         * @return the year
-         */
-        public int getYear() {
-            return year;
-        }
-
-        /**
          * @see java.lang.Object#hashCode()
          */
         @Override
         public int hashCode() {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result + day;
-            result = PRIME * result + month;
-            result = PRIME * result + year;
+            result = PRIME * result + (int)date.getTime();
+            result = PRIME * result + type.hashCode();
             return result;
         }
 
@@ -1616,13 +1638,11 @@ public class SearchQuery {
             if (getClass() != obj.getClass())
                 return false;
             final DateOperator other = (DateOperator) obj;
-            if (day != other.day)
+            if (date != other.date)
                 return false;
-            if (month != other.month)
+            if (res != other.res)
                 return false;
             if (type != other.type)
-                return false;
-            if (year != other.year)
                 return false;
             return true;
         }
@@ -1638,7 +1658,7 @@ public class SearchQuery {
 
             StringBuffer retValue = new StringBuffer();
 
-            retValue.append("DateOperator ( ").append("day = ").append(this.day).append(TAB).append("month = ").append(this.month).append(TAB).append("type = ").append(this.type).append(TAB).append("year = ").append(this.year).append(TAB).append(" )");
+            retValue.append("DateOperator ( ").append("date = ").append(date.toString()).append(TAB).append("res = ").append(this.res.name()).append(TAB).append("type = ").append(this.type).append(TAB).append(TAB).append(" )");
 
             return retValue.toString();
         }

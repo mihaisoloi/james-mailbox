@@ -32,8 +32,10 @@ import java.util.TimeZone;
 
 import javax.mail.Flags;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.mail.model.Header;
@@ -324,24 +326,23 @@ public class MessageSearches {
 
     private boolean matches(final SearchQuery.DateOperator operator,
             final String headerName, final MailboxMembership<?> message) throws UnsupportedSearchException {
-        final int day = operator.getDay();
-        final int month = operator.getMonth();
-        final int year = operator.getYear();
-        final int iso = toISODate(day, month, year);
+       
+        final Date date = operator.getDate();
+        final DateResolution res = operator.getDateResultion();
         final String value = headerValue(headerName, message);
         if (value == null) {
             return false;
         } else {
             try {
-                final int isoFieldValue = toISODate(value);
+                final Date isoFieldValue = toISODate(value);
                 final SearchQuery.DateComparator type = operator.getType();
                 switch (type) {
                     case AFTER:
-                        return iso < isoFieldValue;
+                        return after(isoFieldValue, date, res);
                     case BEFORE:
-                        return iso > isoFieldValue;
+                        return before(isoFieldValue, date, res);
                     case ON:
-                        return iso == isoFieldValue;
+                        return on(isoFieldValue, date, res);
                     default:
                         throw new UnsupportedSearchException();
                 }
@@ -364,12 +365,10 @@ public class MessageSearches {
         return value;
     }
 
-    private int toISODate(String value) throws ParseException {
+    private Date toISODate(String value) throws ParseException {
         final StringReader reader = new StringReader(value);
         final DateTime dateTime = new DateTimeParser(reader).parseAll();
-        final int isoFieldValue = toISODate(dateTime.getDay(), dateTime
-                .getMonth(), dateTime.getYear());
-        return isoFieldValue;
+        return dateTime.getDate();
     }
 
     private boolean matches(SearchQuery.SizeCriterion criterion, MailboxMembership<?> message)
@@ -399,58 +398,60 @@ public class MessageSearches {
     private boolean matchesInternalDate(
             final SearchQuery.DateOperator operator, final MailboxMembership<?> message)
             throws UnsupportedSearchException {
-        final int day = operator.getDay();
-        final int month = operator.getMonth();
-        final int year = operator.getYear();
+        final Date date = operator.getDate();
+        final DateResolution res = operator.getDateResultion();
         final Date internalDate = message.getInternalDate();
         final SearchQuery.DateComparator type = operator.getType();
         switch (type) {
             case ON:
-                return on(day, month, year, internalDate);
+                return on(internalDate, date, res);
             case BEFORE:
-                return before(day, month, year, internalDate);
+                return before(internalDate, date, res);
             case AFTER:
-                return after(day, month, year, internalDate);
+                return after(internalDate, date, res);
             default:
                 throw new UnsupportedSearchException();
         }
     }
 
-    private boolean on(final int day, final int month, final int year,
-            final Date date) {
-        final Calendar gmt = getGMT();
-        gmt.setTime(date);
-        return day == gmt.get(Calendar.DAY_OF_MONTH)
-                && month == (gmt.get(Calendar.MONTH) + 1)
-                && year == gmt.get(Calendar.YEAR);
+    private boolean on(Date date1,
+            final Date date2, DateResolution res) {
+        int type = SearchQuery.toCalendarType(res);
+        final Calendar gmt1 = getGMT();
+        gmt1.setTime(date1);
+        
+        final Calendar gmt2 = getGMT();
+        gmt2.setTime(date2);
+        
+        return DateUtils.truncate(gmt1, type).getTimeInMillis() == (DateUtils.truncate(gmt2, type)).getTimeInMillis();
     }
 
-    private boolean before(final int day, final int month, final int year,
-            final Date date) {
-        return toISODate(date) < toISODate(day, month, year);
+    private boolean before(Date date1,
+            final Date date2, DateResolution res) {
+        int type = SearchQuery.toCalendarType(res);
+        final Calendar gmt1 = getGMT();
+        gmt1.setTime(date1);
+        
+        final Calendar gmt2 = getGMT();
+        gmt2.setTime(date2);
+        
+        return DateUtils.truncate(gmt1, type).before(DateUtils.truncate(gmt2, type));
     }
 
-    private boolean after(final int day, final int month, final int year,
-            final Date date) {
-        return toISODate(date) > toISODate(day, month, year);
+    private boolean after(Date date1,
+            final Date date2, DateResolution res) {
+        int type = SearchQuery.toCalendarType(res);
+        final Calendar gmt1 = getGMT();
+        gmt1.setTime(date1);
+        
+        final Calendar gmt2 = getGMT();
+        gmt2.setTime(date2);
+        
+        return DateUtils.truncate(gmt1, type).after(DateUtils.truncate(gmt2, type));
     }
 
-    private int toISODate(final Date date) {
-        final Calendar gmt = getGMT();
-        gmt.setTime(date);
-        final int day = gmt.get(Calendar.DAY_OF_MONTH);
-        final int month = (gmt.get(Calendar.MONTH) + 1);
-        final int year = gmt.get(Calendar.YEAR);
-        final int result = toISODate(day, month, year);
-        return result;
-    }
 
     private Calendar getGMT() {
         return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.UK);
-    }
-
-    private static int toISODate(final int day, final int month, final int year) {
-        final int result = (year * 10000) + (month * 100) + day;
-        return result;
     }
 }
