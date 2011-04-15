@@ -99,4 +99,8 @@ public class MockMailboxSession implements MailboxSession{
 		return '.';
 	}
 
+    public SessionType getType() {
+        return SessionType.User;
+    }
+
 }
