@@ -42,6 +42,7 @@ import org.apache.james.mailbox.RequestAware;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
 import org.apache.james.mailbox.MailboxMetaData.Selectability;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
+import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MailboxMapperFactory;
 import org.apache.james.mailbox.store.mail.UidProvider;
@@ -140,7 +141,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @see org.apache.james.mailbox.MailboxManager#createSystemSession(java.lang.String, org.slf4j.Logger)
      */
     public MailboxSession createSystemSession(String userName, Logger log) {
-        return createSession(userName, null, log);
+        return createSession(userName, null, log, SessionType.System);
     }
 
     /**
@@ -150,8 +151,8 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param log
      * @return session
      */
-    private MailboxSession createSession(String userName, String password, Logger log) {
-        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter());
+    private MailboxSession createSession(String userName, String password, Logger log, SessionType type) {
+        return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter(), type);
     }
 
     /**
@@ -188,7 +189,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      */
     public MailboxSession login(String userid, String passwd, Logger log) throws BadCredentialsException, MailboxException {
         if (login(userid, passwd)) {
-            return createSession(userid, passwd, log);
+            return createSession(userid, passwd, log, SessionType.User);
         } else {
             throw new BadCredentialsException();
         }

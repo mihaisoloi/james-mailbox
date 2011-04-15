@@ -57,20 +57,23 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     
     private final char pathSeparator;
 
+    private final SessionType type;
+
+    
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Logger log, final List<Locale> localePreferences, char pathSeparator) {
-        this(sessionId, userName, password, log, localePreferences, new ArrayList<String>(), null, pathSeparator);
+            final Logger log, final List<Locale> localePreferences, char pathSeparator, SessionType type) {
+        this(sessionId, userName, password, log, localePreferences, new ArrayList<String>(), null, pathSeparator, type);
     }
 
     public SimpleMailboxSession(final long sessionId, final String userName, final String password,
-            final Logger log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace, char pathSeparator) {
+            final Logger log, final List<Locale> localePreferences, List<String> sharedSpaces, String otherUsersSpace, char pathSeparator, SessionType type) {
         this.sessionId = sessionId;
         this.log = log;
         this.userName = userName;
         this.password = password;
         this.otherUsersSpace = otherUsersSpace;
         this.sharedSpaces = sharedSpaces;
-
+        this.type = type;
         if (otherUsersSpace == null && (sharedSpaces == null || sharedSpaces.isEmpty())) {
             this.personalSpace = "";
         } else {
@@ -192,8 +195,16 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     /**
      * @see org.apache.james.mailbox.MailboxSession#getPathDelimiter()
      */
-	public char getPathDelimiter() {
-		return pathSeparator;
-	}
+    public char getPathDelimiter() {
+        return pathSeparator;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxSession#getType()
+     */
+    public SessionType getType() {
+        return type;
+    }
 
 }

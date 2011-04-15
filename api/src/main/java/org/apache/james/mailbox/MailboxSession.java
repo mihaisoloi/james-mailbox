@@ -31,6 +31,26 @@ import org.slf4j.Logger;
  */
 public interface MailboxSession {
 
+
+    public static enum SessionType {
+        /**
+         * Session was created via the System
+         */
+        System,
+        
+        /**
+         * Session belongs to a specific user which was authenticated somehow
+         */
+        User
+    }
+    
+    /**
+     * Return if the {@link MailboxSession} is of type {@link SessionType#User} or {@link SessionType#System}
+     * 
+     * @return type
+     */
+    public SessionType getType();
+    
     /**
      * Gets the session ID.
      * 
