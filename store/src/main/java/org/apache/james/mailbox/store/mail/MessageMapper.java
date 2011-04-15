@@ -25,7 +25,6 @@ import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -82,15 +81,6 @@ public interface MessageMapper<Id> extends Mapper {
     public abstract long countUnseenMessagesInMailbox(Mailbox<Id> mailbox)
             throws MailboxException;
 
-    /**
-     * Return a List of uids which matched the {@link SearchQuery}
-     * The list must be ordered by the {@link Message} uid
-     * @param mailbox
-     * @param query
-     * @return
-     * @throws StorageException
-     */
-    public abstract Iterator<Long> searchMailbox(Mailbox<Id> mailbox, SearchQuery query) throws MailboxException;
 
     /**
      * Delete the given {@link MailboxMembership}

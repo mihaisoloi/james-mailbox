@@ -30,10 +30,8 @@ import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
-import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -208,17 +206,6 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#searchMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
-     */
-    public Iterator<Long> searchMailbox(Mailbox<Long> mailbox, SearchQuery query) throws MailboxException {
-        List<MailboxMembership<?>> memberships = new ArrayList<MailboxMembership<?>>(getMembershipByUidForMailbox(mailbox).values());
-        Collections.sort(memberships, MailboxMembershipComparator.INSTANCE);
-
-        return new SearchQueryIterator(memberships.iterator(), query);
-    }
-    
     public void deleteAll() {
         mailboxByUid.clear();
     }

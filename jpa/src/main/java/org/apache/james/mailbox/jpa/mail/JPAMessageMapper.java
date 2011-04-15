@@ -29,17 +29,13 @@ import javax.persistence.Query;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageRange.Type;
-import org.apache.james.mailbox.SearchQuery.Criterion;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
+import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.jpa.JPATransactionalMapper;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
-import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -242,65 +238,6 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
             return (Long) getEntityManager().createNamedQuery("countUnseenMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId()).getSingleResult();
         } catch (PersistenceException e) {
             throw new MailboxException("Count of useen messages failed in mailbox " + mailbox, e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#searchMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
-     */
-    @SuppressWarnings("unchecked")
-    public Iterator<Long> searchMailbox(Mailbox<Long> mailbox, SearchQuery query) throws MailboxException {
-        try {
-            final StringBuilder queryBuilder = new StringBuilder(50);
-            queryBuilder.append("SELECT membership FROM Membership membership WHERE membership.mailbox.mailboxId = ").append(mailbox.getMailboxId());
-            final List<Criterion> criteria = query.getCriterias();
-            boolean range = false;
-            int rangeLength = -1;
-            
-            if (criteria.size() == 1) {
-                final Criterion firstCriterion = criteria.get(0);
-                if (firstCriterion instanceof SearchQuery.UidCriterion) {
-                    final SearchQuery.UidCriterion uidCriterion = (SearchQuery.UidCriterion) firstCriterion;
-                    final NumericRange[] ranges = uidCriterion.getOperator().getRange();
-                    rangeLength = ranges.length;
-
-                    for (int i = 0; i < ranges.length; i++) {
-                        final long low = ranges[i].getLowValue();
-                        final long high = ranges[i].getHighValue();
-                        if (i == 0) {
-                            queryBuilder.append(" AND ");
-                        } else {
-                            // We need to use an OR here. See MAILBOX-49
-                            queryBuilder.append(" OR ");
-                        }
-                        if (low == Long.MAX_VALUE) {
-                            queryBuilder.append("membership.uid<=").append(high);
-                            range = true;
-                        } else if (low == high) {
-                            queryBuilder.append("membership.uid=").append(low);
-                            range = false;
-                        } else {
-                            queryBuilder.append("membership.uid BETWEEN ").append(low).append(" AND ").append(high);
-                            range = true;
-                        }
-                    }
-                }
-            }        
-            if (rangeLength != 0 || range) {
-                queryBuilder.append(" order by membership.uid");
-            }
-            
-            Query jQuery = getEntityManager().createQuery(queryBuilder.toString());
-
-            // Check if we only need to fetch 1 message, if so we can set a limit to speed up things
-            if (rangeLength == 1 && range == false) {
-                jQuery.setMaxResults(1);
-            }
-            return new SearchQueryIterator(jQuery.getResultList().iterator(), query);
-            
-        } catch (PersistenceException e) {
-            throw new MailboxException("Search of messages via the query " + query + " failed in mailbox " + mailbox, e);
         }
     }
 

@@ -25,29 +25,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.SortedMap;
 import java.util.Map.Entry;
+import java.util.SortedMap;
 
 import javax.mail.Flags;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageRange.Type;
-import org.apache.james.mailbox.SearchQuery.Criterion;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
+import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.apache.james.mailbox.maildir.UidConstraint;
 import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
-import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -368,60 +362,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#searchMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
-     */
-    public Iterator<Long> searchMailbox(Mailbox<Integer> mailbox, SearchQuery query)
-    throws MailboxException {
-        final List<Criterion> criteria = query.getCriterias();
-        boolean range = false;
-        int rangeLength = -1;
-        UidConstraint constraint = new UidConstraint();
-        
-        if (criteria.size() == 1) {
-            final Criterion firstCriterion = criteria.get(0);
-            if (firstCriterion instanceof SearchQuery.UidCriterion) {
-                final SearchQuery.UidCriterion uidCriterion = (SearchQuery.UidCriterion) firstCriterion;
-                final NumericRange[] ranges = uidCriterion.getOperator().getRange();
-                rangeLength = ranges.length;
 
-                for (int i = 0; i < ranges.length; i++) {
-                    final long low = ranges[i].getLowValue();
-                    final long high = ranges[i].getHighValue();
-
-                    if (low == Long.MAX_VALUE) {
-                        constraint.lessOrEquals(high);
-                        range = true;
-                    } else if (low == high) {
-                        constraint.equals(low);
-                        range = false;
-                    } else {
-                        constraint.between(low, high);
-                        range = true;
-                    }
-                }
-            }
-        }
-        MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
-        SortedMap<Long, MaildirMessageName> uidMap;
-        try {
-            uidMap = folder.getUidMap(0, -1);
-        } catch (IOException e) {
-            throw new MailboxException("Failure while search in Mailbox " + mailbox, e );
-        }
-        LinkedList<MailboxMembership<?>> messages = new LinkedList<MailboxMembership<?>>();
-        for (Entry<Long, MaildirMessageName> entry : uidMap.entrySet()) {
-            //System.out.println("check " + entry.getKey());
-            if (constraint.isAllowed(entry.getKey())) {
-                //System.out.println("allow " + entry.getKey());
-                messages.add(new LazyLoadingMaildirMessage(mailbox, entry.getKey(), entry.getValue()));
-                // Check if we only need to fetch 1 message, if so we can set a limit to speed up things
-                if (rangeLength == 1 && range == false) break;
-            }
-        }
-        return new SearchQueryIterator(messages.iterator(), query);
-    }
 
     /* 
      * (non-Javadoc)

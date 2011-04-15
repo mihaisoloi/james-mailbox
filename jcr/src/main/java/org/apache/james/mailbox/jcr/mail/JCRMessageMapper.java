@@ -39,15 +39,11 @@ import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageRange.Type;
-import org.apache.james.mailbox.SearchQuery.Criterion;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
+import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.jcr.AbstractJCRMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
-import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.MailboxMembership;
@@ -571,101 +567,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#searchMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
-     */
-    public Iterator<Long> searchMailbox(Mailbox<String> mailbox, SearchQuery query) throws MailboxException {
-        try {
-            final Query xQuery = formulateXPath(mailbox, query);
-            
-            QueryResult result = xQuery.execute();
-            
-            final NodeIterator it = result.getNodes();
 
-            
-            // Lazy build the JCRMessage instances
-            return new SearchQueryIterator(new Iterator<MailboxMembership<?>>() {
-
-                public boolean hasNext() {
-                    return it.hasNext();
-                }
-
-                public MailboxMembership<?> next() {
-                    return new JCRMessage(it.nextNode(), getLogger());
-                    
-                }
-
-                public void remove() {
-                    it.remove();
-                }
-                
-            }, query, getLogger());
-        } catch (RepositoryException e) {
-            throw new MailboxException("Unable to search messages for query " + query + " in mailbox " + mailbox, e);
-        }
-    }
-
-    
-    /**
-     * Generate the XPath query for the SearchQuery
-     * 
-     * @param uuid
-     * @param query
-     * @return xpathQuery
-     * @throws RepositoryException 
-     * @throws ItemNotFoundException 
-     */
-    private Query formulateXPath(Mailbox<String> mailbox, SearchQuery query) throws ItemNotFoundException, RepositoryException {
-        final StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)");
-        final List<Criterion> criteria = query.getCriterias();
-        boolean range = false;
-        int rangeLength = -1;
-        if (criteria.size() == 1) {
-            final Criterion firstCriterion = criteria.get(0);
-            if (firstCriterion instanceof SearchQuery.UidCriterion) {
-                final SearchQuery.UidCriterion uidCriterion = (SearchQuery.UidCriterion) firstCriterion;
-                final NumericRange[] ranges = uidCriterion.getOperator().getRange();
-                rangeLength = ranges.length;
-                for (int i = 0; i < ranges.length; i++) {
-                    final long low = ranges[i].getLowValue();
-                    final long high = ranges[i].getHighValue();
-                    if (i > 0) {
-                        // We need to use an OR here. See MAILBOX-49
-                        queryBuilder.append(" or ");
-                    } else {
-                        queryBuilder.append("[");
-                    }
-                    if (low == Long.MAX_VALUE) {
-                        range = true;
-                        queryBuilder.append("@" + JCRMessage.UID_PROPERTY +"<=").append(high);
-                    } else if (low == high) {
-                        range = false;
-                        queryBuilder.append("@" + JCRMessage.UID_PROPERTY +"=").append(low);
-                    } else {
-                        range = true;
-                        queryBuilder.append("@" + JCRMessage.UID_PROPERTY +"<=").append(high).append(" and @" + JCRMessage.UID_PROPERTY + ">=").append(low);
-                    }
-                }
-            }
-        }
-        if (rangeLength > 0) queryBuilder.append("]");
-        
-        if (rangeLength != 0 || range) {
-            queryBuilder.append(" order by @" + JCRMessage.UID_PROPERTY);
-        }
-        
-        QueryManager manager = getSession().getWorkspace().getQueryManager();
-        Query xQuery = manager.createQuery(queryBuilder.toString(), Query.XPATH);
-        
-        // Check if we only need to fetch 1 message, if so we can set a limit to speed up things
-        if (rangeLength == 1 && range == false) {
-            xQuery.setLimit(1);
-        }
-        return xQuery;
-    }
-    
 
     /*
      * (non-Javadoc)
