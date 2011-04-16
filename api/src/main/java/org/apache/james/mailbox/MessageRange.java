@@ -246,6 +246,11 @@ public class MessageRange {
                     }
                 } else {
                     a++;
+                    // Handle uids which are in sequence. See MAILBOX-56
+                    if (uids.size() <= i +1) {
+                        ranges.add(MessageRange.range(firstUid, firstUid +a));
+                        break;
+                    } 
                 }
             }
         }

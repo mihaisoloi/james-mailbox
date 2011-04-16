@@ -43,6 +43,16 @@ public class MessageRangeTest {
         checkRange(1, 1, ranges.get(0));
     }
     
+    // Test for MAILBOX-56
+    @Test
+    public void testTwoSeqUidToRange() {
+        List<MessageRange> ranges = MessageRange.toRanges(Arrays.asList(1L,2L));
+        assertEquals(1, ranges.size());
+        checkRange(1, 2, ranges.get(0));
+
+    }
+    
+    
     private void checkRange(long from, long to, MessageRange range) {
         assertEquals(from, range.getUidFrom());
         assertEquals(to, range.getUidTo());
