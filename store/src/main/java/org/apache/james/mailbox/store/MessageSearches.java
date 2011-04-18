@@ -22,6 +22,7 @@ package org.apache.james.mailbox.store;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -32,7 +33,6 @@ import java.util.TimeZone;
 
 import javax.mail.Flags;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
@@ -368,7 +368,9 @@ public class MessageSearches {
     private Date toISODate(String value) throws ParseException {
         final StringReader reader = new StringReader(value);
         final DateTime dateTime = new DateTimeParser(reader).parseAll();
-        return dateTime.getDate();
+        Calendar cal = getGMT();
+        cal.set(dateTime.getYear(), dateTime.getMonth() - 1, dateTime.getDay(), dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
+        return cal.getTime();
     }
 
     private boolean matches(SearchQuery.SizeCriterion criterion, MailboxMembership<?> message)
@@ -414,44 +416,65 @@ public class MessageSearches {
         }
     }
 
+
     private boolean on(Date date1,
-            final Date date2, DateResolution res) {
-        int type = SearchQuery.toCalendarType(res);
-        final Calendar gmt1 = getGMT();
-        gmt1.setTime(date1);
-        
-        final Calendar gmt2 = getGMT();
-        gmt2.setTime(date2);
-        
-        return DateUtils.truncate(gmt1, type).getTimeInMillis() == (DateUtils.truncate(gmt2, type)).getTimeInMillis();
+            final Date date2, DateResolution res) {      
+        String d1 = createDateString(date1, res);
+        String d2 = createDateString(date2, res);
+        return d1.compareTo(d2) == 0;   
     }
 
     private boolean before(Date date1,
             final Date date2, DateResolution res) {
-        int type = SearchQuery.toCalendarType(res);
-        final Calendar gmt1 = getGMT();
-        gmt1.setTime(date1);
-        
-        final Calendar gmt2 = getGMT();
-        gmt2.setTime(date2);
-        
-        return DateUtils.truncate(gmt1, type).before(DateUtils.truncate(gmt2, type));
+        String d1 = createDateString(date1, res);
+        String d2 = createDateString(date2, res);
+
+        return d1.compareTo(d2) < 0;
     }
 
     private boolean after(Date date1,
             final Date date2, DateResolution res) {
-        int type = SearchQuery.toCalendarType(res);
-        final Calendar gmt1 = getGMT();
-        gmt1.setTime(date1);
-        
-        final Calendar gmt2 = getGMT();
-        gmt2.setTime(date2);
-        
-        return DateUtils.truncate(gmt1, type).after(DateUtils.truncate(gmt2, type));
+        String d1 = createDateString(date1, res);
+        String d2 = createDateString(date2, res);
+
+        return d1.compareTo(d2) > 0;
     }
 
+
+    
+    private String createDateString(Date date, DateResolution res) {
+        SimpleDateFormat format;
+        switch (res) {
+        case Year:
+            format = new SimpleDateFormat("yyyy");
+            break;
+        case Month:
+            format = new SimpleDateFormat("yyyyMM");
+            break;
+        case Day:
+            format = new SimpleDateFormat("yyyyMMdd");
+            break;
+        case Hour:
+            format = new SimpleDateFormat("yyyyMMddhh");
+            break;
+        case Minute:
+            format = new SimpleDateFormat("yyyyMMddhhmm");
+            break;
+        case Second:
+            format = new SimpleDateFormat("yyyyMMddhhmmss");
+            break;
+        default:
+            format = new SimpleDateFormat("yyyyMMddhhmmssSSS");
+
+            break;
+        }
+        format.setCalendar(getGMT());
+        return format.format(date);
+    }
+    
 
     private Calendar getGMT() {
         return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.UK);
     }
+    
 }

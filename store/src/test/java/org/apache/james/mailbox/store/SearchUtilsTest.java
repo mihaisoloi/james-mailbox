@@ -751,4 +751,45 @@ public class SearchUtilsTest {
                 new SearchQuery.NumericRange(lowTwo, highTwo) };
         return results;
     }
+    
+    
+    @Test
+    public void testMatchHeaderDateOnWithOffset() throws Exception {
+        builder.header(DATE_FIELD, "Mon, 26 Mar 2007 00:00:00 +0300");
+        MailboxMembership<Long> row = builder.build();
+        assertTrue(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(26, 3,
+                2007), DateResolution.Day),row, recent));
+        
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(25, 3,
+                2007), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateOn(DATE_FIELD, getDate(27, 3,
+                2007), DateResolution.Day),row, recent));
+    }
+    
+
+    @Test
+    public void testShouldMatchHeaderDateBeforeWithOffset() throws Exception {
+        builder.header(DATE_FIELD, "Mon, 26 Mar 2007 00:00:00 +0300");
+        MailboxMembership<Long> row = builder.build();
+        assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(26, 3,
+                2007), DateResolution.Day),row, recent));
+        
+        assertTrue(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(27, 3,
+                2007), DateResolution.Day),row, recent));
+        assertFalse(searches.isMatch(SearchQuery.headerDateBefore(DATE_FIELD, getDate(25, 3,
+                2007), DateResolution.Day),row, recent));
+    }
+
+    @Test
+    public void testShouldMatchHeaderDateAfterWithOffset() throws Exception {
+        builder.header(DATE_FIELD, "Mon, 26 Mar 2007 00:00:00 +0300");
+        MailboxMembership<Long> row = builder.build();
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(26, 3,
+                2007), DateResolution.Day),row, recent));
+        
+        assertFalse(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(27, 3,
+                2007), DateResolution.Day),row, recent));
+        assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(25, 3,
+                2007), DateResolution.Day),row, recent));
+    }
 }
