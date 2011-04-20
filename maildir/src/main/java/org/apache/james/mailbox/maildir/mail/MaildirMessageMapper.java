@@ -311,10 +311,11 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                     message.getMessage().getFullContentOctets());
             File messageFile = new File(tmpFolder, messageName.getFullName());
             FileOutputStream fos = null;
+            InputStream input = null;
             try {
                 messageFile.createNewFile();
                 fos = new FileOutputStream(messageFile);
-                InputStream input = message.getMessage().getFullContent();
+                input = message.getMessage().getFullContent();
                 byte[] b = new byte[BUF_SIZE];
                 int len = 0;
                 while ((len = input.read(b)) != -1)
@@ -328,7 +329,11 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                     if (fos != null)
                         fos.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                }
+                try {
+                    if (input != null)
+                        input.close();
+                } catch (IOException e) {
                 }
             }
             File newMessageFile = null;
@@ -412,7 +417,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                         // this automatically moves messages from new to cur if
                         // needed
                         String newMessageName = messageName.getFullName();
-                        messageFile.renameTo(new File(folder.getCurFolder(), newMessageName));
+                        FileUtils.moveFile(messageFile, new File(folder.getCurFolder(), newMessageName));
                         long uid = maildirMessage.getUid();
                         folder.update(uid, newMessageName);
                     } catch (IOException e) {
