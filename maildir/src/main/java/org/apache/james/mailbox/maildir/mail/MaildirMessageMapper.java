@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
@@ -352,7 +353,6 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
             try {
                 FileUtils.moveFile(messageFile, newMessageFile);
             } catch (IOException e) {
-                System.err.println(newMessageFile);
                 // TODO: Try copy and delete
                 throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e );
             }
@@ -417,7 +417,23 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                         // this automatically moves messages from new to cur if
                         // needed
                         String newMessageName = messageName.getFullName();
-                        FileUtils.moveFile(messageFile, new File(folder.getCurFolder(), newMessageName));
+
+                        File newMessageFile;
+                        
+                        // See MAILBOX-57
+                        if (newFlags.contains(Flag.RECENT)) {
+                            // message is recent so save it in the new folder
+                            newMessageFile = new File(folder.getNewFolder(), newMessageName);
+                        } else {
+                            newMessageFile = new File(folder.getCurFolder(), newMessageName);
+                        }
+                        
+                        // if the flags don't have change we should not try to move the file
+                        if (newMessageFile.equals(messageFile) == false) {
+                            FileUtils.moveFile(messageFile, newMessageFile );
+                        }
+
+                        
                         long uid = maildirMessage.getUid();
                         folder.update(uid, newMessageName);
                     } catch (IOException e) {
