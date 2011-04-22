@@ -20,6 +20,7 @@ package org.apache.james.mailbox.maildir;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
@@ -129,7 +130,9 @@ public class MaildirStore implements UidProvider<Integer>{
         String userName = user;
         if (userParts.length == 2) {
             userName = userParts[0];
-            path = path.replace(PATH_DOMAIN, userParts[1]);
+            // At least the domain part should not handled in a case-sensitive manner
+            // See MAILBOX-58
+            path = path.replace(PATH_DOMAIN, userParts[1].toLowerCase(Locale.US));
         }
         path = path.replace(PATH_USER, userName);
         return path;
