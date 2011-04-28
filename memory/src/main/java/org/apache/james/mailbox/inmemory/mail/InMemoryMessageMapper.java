@@ -35,7 +35,6 @@ import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.MessageComparator;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
 public class InMemoryMessageMapper extends NonTransactionalMapper implements MessageMapper<Long> {
@@ -127,7 +126,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
                 results = new ArrayList<Message<Long>>();
                 break;
         }
-        Collections.sort(results, MessageComparator.INSTANCE);
+        Collections.sort(results);
         
         if(batchSize > 0) {
 	        int i = 0;
@@ -175,7 +174,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
                 results.add(member);
             }
         }
-        Collections.sort(results, MessageComparator.INSTANCE);
+        Collections.sort(results);
         
         return results;
     }
@@ -186,7 +185,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      */
     public Long findFirstUnseenMessageUid(Mailbox<Long> mailbox) throws MailboxException {
         List<Message<Long>> memberships = new ArrayList<Message<Long>>(getMembershipByUidForMailbox(mailbox).values());
-        Collections.sort(memberships, MessageComparator.INSTANCE);
+        Collections.sort(memberships);
         for (int i = 0;  i < memberships.size(); i++) {
             Message<Long> m = memberships.get(i);
             if (m.isSeen() == false) {

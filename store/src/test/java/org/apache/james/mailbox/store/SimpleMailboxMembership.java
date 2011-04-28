@@ -329,4 +329,14 @@ public class SimpleMailboxMembership implements Message<Long> {
         return size;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    public int compareTo(Message<Long> other) {
+        return (int) (getUid() - other.getUid());
+    }
+    
+    
+
 }

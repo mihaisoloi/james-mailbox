@@ -26,10 +26,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import javax.swing.text.Document;
 
 import org.apache.james.mailbox.Content;
 import org.apache.james.mailbox.MailboxException;
@@ -374,25 +371,5 @@ public class ResultUtils {
             final Content content = builder.getFullContent();
             messageResult.setFullContent(mimePath, content);
         }
-    }
-
-    /**
-     * Gets a comparator that evaluates {@link Document}'s on the basis of
-     * their UIDs.
-     * 
-     * @return {@link Comparator}, not null
-     */
-    public static Comparator<Message<?>> getUidComparator() {
-        return UidComparator.INSTANCE;
-    }
-
-    private static final class UidComparator implements Comparator<Message<?>> {
-        private static final UidComparator INSTANCE = new UidComparator();
-
-        public int compare(Message<?> one, Message<?> two) {
-            final int result = (int) (one.getUid() - two.getUid());
-            return result;
-        }
-
     }
 }

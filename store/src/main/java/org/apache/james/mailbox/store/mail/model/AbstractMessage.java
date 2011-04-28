@@ -26,7 +26,7 @@ import javax.mail.Flags;
  * Abstract base class for {@link Message}
  *
  */
-public abstract class AbstractMessage<Id> implements Message<Id>, Comparable<Message<Id>> {
+public abstract class AbstractMessage<Id> implements Message<Id> {
     
 
     /*

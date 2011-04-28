@@ -30,7 +30,7 @@ import javax.mail.Flags;
  * plus body content. In the case of multipart documents, this body content
  * has internal structure described by the meta-data.
  */
-public interface Message<Id> {
+public interface Message<Id> extends Comparable<Message<Id>>{
 
     public abstract Date getInternalDate();
 

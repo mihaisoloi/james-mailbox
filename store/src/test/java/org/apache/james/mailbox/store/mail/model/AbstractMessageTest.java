@@ -19,25 +19,40 @@
 
 package org.apache.james.mailbox.store.mail.model;
 
-import java.util.Comparator;
+import static org.junit.Assert.*;
 
+import org.apache.james.mailbox.store.MessageBuilder;
+import org.apache.james.mailbox.store.mail.model.Message;
+import org.junit.Test;
 
-/**
- * UID comparator for {@link Message}.
- */
-public final class MessageComparator implements Comparator<Message<?>> {
+public class AbstractMessageTest {    
     
-    public static final MessageComparator INSTANCE = new MessageComparator();
-    
-    private MessageComparator() {}
-    
-    /*
-     * (non-Javadoc)
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
-    public int compare(Message<?> o1, Message<?> o2) {
-        final long uid = o1.getUid();
-        final long otherUid = o2.getUid();
-        return uid < otherUid ? -1 : uid == otherUid ? 0 : 1;
+    @Test
+    public void testShouldReturnPositiveWhenFirstGreaterThanSecond()
+            throws Exception {
+        Message<Long> one = buildMessage(100);
+        Message<Long> two = buildMessage(99);
+        assertTrue( one.compareTo(two) > 0);
+    }
+
+    private Message<Long> buildMessage(int uid) throws Exception {
+        MessageBuilder builder = new MessageBuilder();
+        builder.uid = uid;
+        return builder.build();
+    }
+
+    @Test
+    public void testShouldReturnNegativeWhenFirstLessThanSecond()
+            throws Exception {
+        Message<Long> one = buildMessage(98);
+        Message<Long> two = buildMessage(99);
+        assertTrue( one.compareTo(two) < 0);
+    }
+
+    @Test
+    public void testShouldReturnZeroWhenFirstEqualsSecond() throws Exception {
+        Message<Long> one = buildMessage(90);
+        Message<Long> two = buildMessage(90);
+        assertEquals(0, one.compareTo(two));
     }
 }

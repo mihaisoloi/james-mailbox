@@ -43,7 +43,7 @@ import org.apache.james.mime4j.parser.RecursionMode;
 
 public class MimeDescriptorImpl implements MimeDescriptor {
 
-    public static MimeDescriptorImpl build(final Message document) throws IOException, MimeException {
+    public static MimeDescriptorImpl build(final Message<?> document) throws IOException, MimeException {
         final MimeDescriptorImpl result;
         final String mediaType = document.getMediaType();
         if (isComposite(mediaType)) {

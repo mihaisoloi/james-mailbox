@@ -55,7 +55,6 @@ import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.MessageComparator;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
@@ -618,7 +617,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                     }
                 }
             });
-            Collections.sort(hits, MessageComparator.INSTANCE);
+            Collections.sort(hits);
             
             return new SearchQueryIterator(new Iterator<Message<?>>() {
                 final Iterator<Message<Id>> it = hits.iterator();
