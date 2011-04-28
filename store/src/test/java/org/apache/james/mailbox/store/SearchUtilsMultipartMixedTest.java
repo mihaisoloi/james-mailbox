@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.MessageSearches;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -105,7 +105,7 @@ public class SearchUtilsMultipartMixedTest {
             + "  Than both your poets can in praise devise.\r\n"
             + "\r\n--2.50290787509--\r\n" + "\r\n--1729--\r\n";
 
-    MailboxMembership<Long> row;
+    Message<Long> row;
 
     MessageSearches searches;
 

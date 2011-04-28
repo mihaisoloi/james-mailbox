@@ -34,7 +34,7 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -51,7 +51,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
     }
 
     @Override
-    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, 
+    protected Message<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, 
             InputStream  document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] byteContent;

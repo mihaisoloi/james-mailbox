@@ -22,7 +22,7 @@ package org.apache.james.mailbox.store;
 import static org.junit.Assert.*;
 
 import org.apache.james.mailbox.store.ResultUtils;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.junit.Test;
 
 public class MessageRowUtilsTest {    
@@ -30,12 +30,12 @@ public class MessageRowUtilsTest {
     @Test
     public void testShouldReturnPositiveWhenFirstGreaterThanSecond()
             throws Exception {
-        MailboxMembership<Long> one = buildMessage(100);
-        MailboxMembership<Long> two = buildMessage(99);
+        Message<Long> one = buildMessage(100);
+        Message<Long> two = buildMessage(99);
         assertTrue(ResultUtils.getUidComparator().compare(one, two) > 0);
     }
 
-    private MailboxMembership<Long> buildMessage(int uid) throws Exception {
+    private Message<Long> buildMessage(int uid) throws Exception {
         MessageBuilder builder = new MessageBuilder();
         builder.uid = uid;
         return builder.build();
@@ -44,15 +44,15 @@ public class MessageRowUtilsTest {
     @Test
     public void testShouldReturnNegativeWhenFirstLessThanSecond()
             throws Exception {
-        MailboxMembership<Long> one = buildMessage(98);
-        MailboxMembership<Long> two = buildMessage(99);
+        Message<Long> one = buildMessage(98);
+        Message<Long> two = buildMessage(99);
         assertTrue(ResultUtils.getUidComparator().compare(one, two) < 0);
     }
 
     @Test
     public void testShouldReturnZeroWhenFirstEqualsSecond() throws Exception {
-        MailboxMembership<Long> one = buildMessage(90);
-        MailboxMembership<Long> two = buildMessage(90);
+        Message<Long> one = buildMessage(90);
+        Message<Long> two = buildMessage(90);
         assertEquals(0, ResultUtils.getUidComparator().compare(one, two));
     }
 }

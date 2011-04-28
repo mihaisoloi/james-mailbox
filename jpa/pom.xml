@@ -104,7 +104,7 @@
             </property>   
             <property>
               <name>metaDataFactory</name>
-              <value>jpa(Types=org.apache.james.mailbox.jpa.mail.model.JPAHeader;org.apache.james.mailbox.jpa.mail.model.JPAMailbox;org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembership;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;org.apache.james.mailbox.jpa.mail.model.JPAProperty;org.apache.james.mailbox.jpa.user.model.JPASubscription)</value>
+              <value>jpa(Types=org.apache.james.mailbox.jpa.mail.model.JPAHeader;org.apache.james.mailbox.jpa.mail.model.JPAMailbox;org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;org.apache.james.mailbox.jpa.mail.model.JPAProperty;org.apache.james.mailbox.jpa.user.model.JPASubscription)</value>
             </property>           
           </toolProperties>
         </configuration>

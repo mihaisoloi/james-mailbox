@@ -271,15 +271,6 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
     public Date getInternalDate() {
         return messageName.getInternalDate();
     }
-  
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getBodyOctets()
-     */
-    public long getBodyOctets() {
-        parseMessage();
-        return getFullContentOctets() - bodyStartOctet;
-    }
 
     /*
      * (non-Javadoc)
@@ -297,5 +288,14 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
         parseMessage();
         return new LazySkippingInputStream(getFullContent(), bodyStartOctet);
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.AbstractMessage#getBodyStartOctet()
+     */
+    protected int getBodyStartOctet() {
+        parseMessage();
+        return bodyStartOctet;
     }
 }

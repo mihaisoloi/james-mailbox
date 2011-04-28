@@ -33,7 +33,7 @@ import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -51,7 +51,7 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
     }
 
     @Override
-    protected MailboxMembership<Integer> createMessage(long uid, Date internalDate,
+    protected Message<Integer> createMessage(long uid, Date internalDate,
             int size, int bodyStartOctet, InputStream documentIn, Flags flags,
             List<Header> headers, PropertyBuilder propertyBuilder)
             throws MailboxException {
@@ -59,7 +59,7 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
         for (Header header: headers) {
             maildirHeaders.add((MaildirHeader) header);
         }
-        final MailboxMembership<Integer> message = new MaildirMessage(getMailboxEntity(), internalDate, 
+        final Message<Integer> message = new MaildirMessage(getMailboxEntity(), internalDate, 
                 size, flags, documentIn, bodyStartOctet, maildirHeaders, propertyBuilder);
         return message;
     }

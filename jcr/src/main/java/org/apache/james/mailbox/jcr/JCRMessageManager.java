@@ -32,7 +32,7 @@ import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.slf4j.Logger;
@@ -57,12 +57,12 @@ public class JCRMessageManager extends StoreMessageManager<String> {
     }
 
     @Override
-    protected MailboxMembership<String> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
+    protected Message<String> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JCRHeader> jcrHeaders = new ArrayList<JCRHeader>(headers.size());
         for (Header header: headers) {
             jcrHeaders.add((JCRHeader) header);
         }
-        final MailboxMembership<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), uid, internalDate, 
+        final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), uid, internalDate, 
                 size, flags, document, bodyStartOctet, jcrHeaders, propertyBuilder, log);
         return message;
     }

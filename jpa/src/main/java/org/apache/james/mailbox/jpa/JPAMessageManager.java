@@ -28,12 +28,12 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -48,13 +48,13 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
     }
     
     @Override
-    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
+    protected Message<Long> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
             final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
         for (Header header: headers) {
             jpaHeaders.add((JPAHeader) header);
         }
-        final MailboxMembership<Long> message = new JPAMailboxMembership((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         return message;
     }
     

@@ -31,7 +31,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
  * {@link Iterator} implementation for {@link MessageResult}
@@ -39,14 +39,14 @@ import org.apache.james.mailbox.store.mail.model.MailboxMembership;
  */
 public class ResultIterator<Id> implements Iterator<MessageResult> {
 
-    private final Iterator<MailboxMembership<Id>> messages;
+    private final Iterator<Message<Id>> messages;
 
     private final FetchGroup fetchGroup;
 
-    public ResultIterator(final Iterator<MailboxMembership<Id>> messages, final FetchGroup fetchGroup) {
+    public ResultIterator(final Iterator<Message<Id>> messages, final FetchGroup fetchGroup) {
         super();
         if (messages == null) {
-            this.messages = new ArrayList<MailboxMembership<Id>>().iterator();
+            this.messages = new ArrayList<Message<Id>>().iterator();
         } else {
             this.messages = messages;
         }
@@ -70,7 +70,7 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
         if (hasNext() == false) {
             throw new NoSuchElementException("No such element.");
         }
-        final MailboxMembership<Id> message = messages.next();
+        final Message<Id> message = messages.next();
         MessageResult result;
         try {
 
@@ -97,11 +97,11 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
 
         private final long uid;
 
-        public UnloadedMessageResult(final MailboxMembership<Id> message,
+        public UnloadedMessageResult(final Message<Id> message,
                 final MailboxException exception) {
             super();
             internalDate = message.getInternalDate();
-            size = message.getMessage().getFullContentOctets();
+            size = message.getFullContentOctets();
             uid = message.getUid();
             this.exception = exception;
         }

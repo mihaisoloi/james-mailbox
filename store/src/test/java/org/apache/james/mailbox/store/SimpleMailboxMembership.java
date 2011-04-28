@@ -18,30 +18,35 @@
  ****************************************************************/
 package org.apache.james.mailbox.store;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.Property;
 
-public class SimpleMailboxMembership implements MailboxMembership<Long> {
+public class SimpleMailboxMembership implements Message<Long> {
     
     private static final String TOSTRING_SEPARATOR = " ";
     
     public long mailboxId;
     public long uid;
     public Date internalDate;
-    public int size = 0;
     public boolean recent = false;
     public boolean answered = false;
     public boolean deleted = false;
     public boolean draft = false;
     public boolean flagged = false;
     public boolean seen = false;
-    public SimpleMessage message;
 
     public SimpleMailboxMembership(long mailboxId, long uid, Date internalDate, int size, 
             Flags flags, byte[] body, final List<SimpleHeader> headers) throws Exception {
@@ -50,7 +55,30 @@ public class SimpleMailboxMembership implements MailboxMembership<Long> {
         this.uid = uid;
         this.internalDate = internalDate;
         this.size = size;
-        this.message = new SimpleMessage(body, size, new ArrayList<SimpleHeader>(headers));
+        this.body = body;
+        final List<SimpleHeader> originalHeaders = headers;
+        if (originalHeaders == null) {
+            this.headers = new ArrayList<SimpleHeader>();
+        } else {
+            this.headers = new ArrayList<SimpleHeader>(originalHeaders.size());
+            for (SimpleHeader header:originalHeaders) {
+                this.headers.add(new SimpleHeader(header));
+            }
+        }
+        
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final Writer writer = new OutputStreamWriter(baos, "us-ascii");
+        for (SimpleHeader header:headers) {
+            writer.write(header.getFieldName());
+            writer.write(": ");
+            writer.write(header.getValue());
+            writer.write(NEW_LINE);
+        }
+        writer.write(NEW_LINE);
+        writer.flush();
+        baos.write(body);
+        baos.flush();
+        fullContent = baos.toByteArray();
         setFlags(flags);
     }
 
@@ -72,7 +100,17 @@ public class SimpleMailboxMembership implements MailboxMembership<Long> {
         this.flagged = original.isFlagged();
         this.recent = original.isRecent();
         this.seen = original.isSeen();
-        this.message = new SimpleMessage(original.message);
+        this.body = original.body;
+        this.fullContent = original.fullContent;
+        final List<SimpleHeader> originalHeaders = original.headers;
+        if (originalHeaders == null) {
+            this.headers = new ArrayList<SimpleHeader>();
+        } else {
+            this.headers = new ArrayList<SimpleHeader>(originalHeaders.size());
+            for (SimpleHeader header:originalHeaders) {
+                this.headers.add(new SimpleHeader(header));
+            }
+        }
     }
 
     /**
@@ -202,7 +240,7 @@ public class SimpleMailboxMembership implements MailboxMembership<Long> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final MailboxMembership<Long> other = (MailboxMembership<Long>) obj;
+        final Message<Long> other = (Message<Long>) obj;
         if (mailboxId != other.getMailboxId())
             return false;
         if (uid != other.getUid())
@@ -229,8 +267,66 @@ public class SimpleMailboxMembership implements MailboxMembership<Long> {
         return retValue;
     }
 
-    public Message getMessage() {
-        return message;
+    
+    public static final char[] NEW_LINE = { 0x0D, 0x0A };
+    
+    public byte[] body;
+    public byte[] fullContent;
+    public List<SimpleHeader> headers;
+    public List<SimpleProperty> properties;
+    public String subType = null;
+    public String mediaType = null;
+    public Long textualLineCount = null;
+
+    private int size;
+    
+
+    /**
+     * @throws IOException 
+     * @see org.apache.james.imap.Message.mail.model.Document#getBodyContent()
+     */
+    public InputStream getBodyContent() throws IOException {
+        return new ByteArrayInputStream(body);
+    }
+
+    /**
+     * Gets the full content (including headers) of the document.
+     * @return read only buffer, not null
+     * @throws IOException 
+     */
+    public InputStream getFullContent() throws IOException {
+        return new ByteArrayInputStream(fullContent);
+    }
+    
+    /**
+     * @see org.apache.james.imap.Message.mail.model.Document#getHeaders()
+     */
+    public List<Header> getHeaders() {
+        return new ArrayList<Header>(headers);
+    }
+
+    public long getBodyOctets() {
+        return body.length;
+    }
+
+    public String getSubType() {
+        return subType;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public List<Property> getProperties() {
+        return new ArrayList<Property>(properties);
+    }
+
+    public Long getTextualLineCount() {
+        return textualLineCount;
+    }
+
+    public long getFullContentOctets() {
+        return size;
     }
 
 }

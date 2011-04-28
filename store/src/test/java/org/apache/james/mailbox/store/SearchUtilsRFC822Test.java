@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.MessageSearches;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class SearchUtilsRFC822Test {
             + "It has " + RHUBARD + ".\r\n" + "It has " + CUSTARD + ".\r\n"
             + "It needs naught else.\r\n";
 
-    MailboxMembership<Long> row;
+    Message<Long> row;
 
     MessageSearches searches;
 

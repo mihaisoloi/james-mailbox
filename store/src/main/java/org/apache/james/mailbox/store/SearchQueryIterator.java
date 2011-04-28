@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.slf4j.Logger;
 
 /**
@@ -36,15 +36,15 @@ import org.slf4j.Logger;
 public final class SearchQueryIterator implements Iterator<Long>{
 
     private final MessageSearches searches = new MessageSearches();
-    private Iterator<MailboxMembership<?>> it;
+    private Iterator<Message<?>> it;
     private SearchQuery query;
     private Long next;
     
-    public SearchQueryIterator(Iterator<MailboxMembership<?>> it, SearchQuery query) {
+    public SearchQueryIterator(Iterator<Message<?>> it, SearchQuery query) {
         this(it, query, null);
     }
 
-    public SearchQueryIterator(Iterator<MailboxMembership<?>> it, SearchQuery query, Logger log) {
+    public SearchQueryIterator(Iterator<Message<?>> it, SearchQuery query, Logger log) {
         this.it = it;
         this.query = query;
         if (log != null) {
@@ -61,7 +61,7 @@ public final class SearchQueryIterator implements Iterator<Long>{
         // check if we already did the lazy loading 
         if (next == null) {
             while (it.hasNext()) {
-                MailboxMembership<?> nextMembership = it.next();
+                Message<?> nextMembership = it.next();
                 try {
                     if (searches.isMatch(query, nextMembership)) {
                         next = nextMembership.getUid();

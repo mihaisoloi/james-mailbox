@@ -20,15 +20,92 @@ package org.apache.james.mailbox.store.mail.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
+
+import javax.mail.Flags;
 
 /**
  * A MIME message, consisting of meta-data (including MIME headers)
  * plus body content. In the case of multipart documents, this body content
  * has internal structure described by the meta-data.
  */
-public interface Message {
+public interface Message<Id> {
 
+    public abstract Date getInternalDate();
+
+    /**
+     * Return the mailbox id of the linked mailbox
+     * 
+     * @return mailboxId
+     */
+    public abstract Id getMailboxId();
+
+    /**
+     * Return the uid
+     * 
+     * @return uid
+     */
+    public abstract long getUid();
+    
+
+    /**
+     * Return if it was marked as answered
+     * 
+     * @return answered
+     */
+    public abstract boolean isAnswered();
+
+    /**
+     * Return if it was mark as deleted
+     * 
+     * @return deleted
+     */
+    public abstract boolean isDeleted();
+
+    /**
+     * Return if it was mark as draft
+     * 
+     * @return draft
+     */
+    public abstract boolean isDraft();
+
+    /**
+     * Return if it was flagged
+     * 
+     * @return flagged
+     */
+    public abstract boolean isFlagged();
+
+    /**
+     * Return if it was marked as recent
+     * 
+     * @return recent
+     */
+    public abstract boolean isRecent();
+
+    /**
+     * Return if it was marked as seen
+     * 
+     * @return seen
+     */
+    public abstract boolean isSeen();
+
+
+    /**
+     * Set the Flags 
+     * 
+     * @param flags
+     */
+    public abstract void setFlags(Flags flags);
+
+    /**
+     * Creates a new flags instance populated
+     * with the current flag data.
+     * 
+     * @return new instance, not null
+     */
+    public abstract Flags createFlags();
 
     /**
      * Gets the full content (including headers) of the document. 

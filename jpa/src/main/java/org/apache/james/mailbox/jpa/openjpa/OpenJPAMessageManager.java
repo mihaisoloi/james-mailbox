@@ -31,11 +31,11 @@ import org.apache.james.mailbox.jpa.JPAMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -58,13 +58,13 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     }
 
     @Override
-    protected MailboxMembership<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
+    protected Message<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         if (useStreaming) {
             final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
             for (Header header: headers) {
                 jpaHeaders.add((JPAHeader) header);
             }
-            return new JPAStreamingMailboxMembership((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+            return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         } else {
             return super.createMessage(uid, internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
         }

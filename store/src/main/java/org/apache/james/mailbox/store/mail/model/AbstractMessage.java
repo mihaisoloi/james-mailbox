@@ -18,14 +18,53 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail.model;
 
+import javax.mail.Flags;
+
 
 
 /**
  * Abstract base class for {@link Message}
  *
  */
-public abstract class AbstractMessage implements Message {
+public abstract class AbstractMessage<Id> implements Message<Id>, Comparable<Message<Id>> {
     
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    public int compareTo(Message<Id> other) {
+        return (int) (getUid() - other.getUid());
+    }
+    
+    
+
+    /**
+     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#createFlags()
+     */
+    public Flags createFlags() {
+        final Flags flags = new Flags();
+
+        if (isAnswered()) {
+            flags.add(Flags.Flag.ANSWERED);
+        }
+        if (isDeleted()) {
+            flags.add(Flags.Flag.DELETED);
+        }
+        if (isDraft()) {
+            flags.add(Flags.Flag.DRAFT);
+        }
+        if (isFlagged()) {
+            flags.add(Flags.Flag.FLAGGED);
+        }
+        if (isRecent()) {
+            flags.add(Flags.Flag.RECENT);
+        }
+        if (isSeen()) {
+            flags.add(Flags.Flag.SEEN);
+        }
+        return flags;
+    }
     
     /**
      * The number of octets contained in the body of this part.

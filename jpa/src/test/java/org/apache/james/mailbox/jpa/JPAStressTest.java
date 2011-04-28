@@ -31,9 +31,7 @@ import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
@@ -65,8 +63,6 @@ public class JPAStressTest extends AbstractStressTest {
         properties.put("openjpa.MetaDataFactory", "jpa(Types=" +
                 JPAHeader.class.getName() + ";" +
                 JPAMailbox.class.getName() + ";" +
-                AbstractJPAMailboxMembership.class.getName() + ";" +
-                JPAMailboxMembership.class.getName() + ";" +
                 AbstractJPAMessage.class.getName() + ";" +
                 JPAMessage.class.getName() + ";" +
                 JPAProperty.class.getName() + ";" +

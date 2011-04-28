@@ -27,14 +27,12 @@ import java.util.List;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.store.mail.model.AbstractMailboxMembership;
+import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Header;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
-import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
-public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> implements Message, Comparable<MailboxMembership<Long>> {
+public class SimpleMailboxMembership extends AbstractMessage<Long> {
 
     private final long uid;
     private final long mailboxId;
@@ -90,10 +88,6 @@ public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> imp
         this.subType = propertyBuilder.getSubType();
     }
 
-
-    public Message getMessage() {
-        return this;
-    }
 
     public Date getInternalDate() {
         return internalDate;
@@ -152,10 +146,6 @@ public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> imp
         return new ByteArrayInputStream(document,bodyStartOctet, (int) getFullContentOctets());      
     }
 
-    public long getBodyOctets() {
-        return getFullContentOctets() - bodyStartOctet;
-    }
-
     public InputStream getFullContent() throws IOException {
         return new ByteArrayInputStream(document);
     }
@@ -206,11 +196,6 @@ public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> imp
         return true;
     }
 
-    public int compareTo(MailboxMembership<Long> o) {
-        final long otherUid = getUid();
-        return uid < otherUid ? -1 : uid == otherUid ? 0 : 1;
-    }
-
     /**
      * Representation suitable for logging and debugging.
      *
@@ -234,6 +219,9 @@ public class SimpleMailboxMembership extends AbstractMailboxMembership<Long> imp
             + "mediaType = " + this.mediaType + " "
             + " ]";
     }
-    
-    
+
+    @Override
+    protected int getBodyStartOctet() {
+        return bodyStartOctet;
+    }
 }

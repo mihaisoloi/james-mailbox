@@ -46,7 +46,7 @@ import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.slf4j.Logger;
 
 /**
@@ -181,11 +181,12 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
 
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(java.lang.Object, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
-    public void delete(Mailbox<String> mailbox, MailboxMembership<String> message) throws MailboxException {
+    public void delete(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
         JCRMessage membership = (JCRMessage) message;
         if (membership.isPersistent()) {
             try {
@@ -207,7 +208,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
     public void findInMailbox(Mailbox<String> mailbox, MessageRange set,
     		MailboxMembershipCallback<String> callback) throws MailboxException {
         try {
-        	List<MailboxMembership<String>> results;
+        	List<Message<String>> results;
             long from = set.getUidFrom();
             final long to = set.getUidTo();
             final int batchSize = set.getBatchSize();
@@ -243,8 +244,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
    
-    private List<MailboxMembership<String>> findMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid, int batchSize) throws RepositoryException {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid, int batchSize) throws RepositoryException {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + uid + "] order by @" + JCRMessage.UID_PROPERTY;
 
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -260,8 +261,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
-    private List<MailboxMembership<String>> findMessageInMailboxWithUID(Mailbox<String> mailbox, long uid) throws RepositoryException  {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findMessageInMailboxWithUID(Mailbox<String> mailbox, long uid) throws RepositoryException  {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + "=" + uid + "]";
 
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -275,8 +276,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
-    private List<MailboxMembership<String>> findMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to, int batchSize) throws RepositoryException {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to, int batchSize) throws RepositoryException {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + from + " and @" + JCRMessage.UID_PROPERTY + "<=" + to + "] order by @" + JCRMessage.UID_PROPERTY;
         
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -292,8 +293,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
     
-    private List<MailboxMembership<String>> findMessagesInMailbox(Mailbox<String> mailbox, int batchSize) throws RepositoryException {        
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findMessagesInMailbox(Mailbox<String> mailbox, int batchSize) throws RepositoryException {        
+        List<Message<String>> list = new ArrayList<Message<String>>();
         
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY;
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -311,8 +312,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
 
     
     
-    private List<MailboxMembership<String>> findDeletedMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid) throws RepositoryException {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findDeletedMessagesInMailboxAfterUID(Mailbox<String> mailbox, long uid) throws RepositoryException {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + uid + " and @" + JCRMessage.DELETED_PROPERTY+ "='true'] order by @" + JCRMessage.UID_PROPERTY;
  
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -325,8 +326,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
-    private List<MailboxMembership<String>> findDeletedMessageInMailboxWithUID(Mailbox<String> mailbox, long uid) throws RepositoryException  {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findDeletedMessageInMailboxWithUID(Mailbox<String> mailbox, long uid) throws RepositoryException  {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + "=" + uid + " and @" + JCRMessage.DELETED_PROPERTY+ "='true']";
         QueryManager manager = getSession().getWorkspace().getQueryManager();
         Query query = manager.createQuery(queryString, Query.XPATH);
@@ -341,8 +342,8 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
 
-    private List<MailboxMembership<String>> findDeletedMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to) throws RepositoryException {
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+    private List<Message<String>> findDeletedMessagesInMailboxBetweenUIDs(Mailbox<String> mailbox, long from, long to) throws RepositoryException {
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.UID_PROPERTY + ">=" + from + " and @" + JCRMessage.UID_PROPERTY + "<=" + to + " and @" + JCRMessage.DELETED_PROPERTY+ "='true'] order by @" + JCRMessage.UID_PROPERTY;
        
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -355,9 +356,9 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         return list;
     }
     
-    private List<MailboxMembership<String>> findDeletedMessagesInMailbox(Mailbox<String> mailbox) throws RepositoryException {
+    private List<Message<String>> findDeletedMessagesInMailbox(Mailbox<String> mailbox) throws RepositoryException {
         
-        List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+        List<Message<String>> list = new ArrayList<Message<String>>();
         String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.DELETED_PROPERTY+ "='true'] order by @" + JCRMessage.UID_PROPERTY;
         
         QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -378,7 +379,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      */
     public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
         try {
-            final List<MailboxMembership<String>> results;
+            final List<Message<String>> results;
             final long from = set.getUidFrom();
             final long to = set.getUidTo();
             final Type type = set.getType();
@@ -399,7 +400,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
             }
             List<Long> uids = new ArrayList<Long>();
             for (int i = 0; i < results.size(); i++) {
-                MailboxMembership<String> m = results.get(i);
+                Message<String> m = results.get(i);
                 long uid = m.getUid();
                 delete(mailbox, m);
                 uids.add(uid);
@@ -420,11 +421,11 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox
      * ()
      */
-    public List<MailboxMembership<String>> findRecentMessagesInMailbox(Mailbox<String> mailbox) throws MailboxException {
+    public List<Message<String>> findRecentMessagesInMailbox(Mailbox<String> mailbox) throws MailboxException {
         
         try {
  
-            List<MailboxMembership<String>> list = new ArrayList<MailboxMembership<String>>();
+            List<Message<String>> list = new ArrayList<Message<String>>();
             String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.RECENT_PROPERTY +"='true'] order by @" + JCRMessage.UID_PROPERTY;
             
             QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -472,7 +473,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long add(Mailbox<String> mailbox, MailboxMembership<String> message) throws MailboxException {
+    public long add(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
         final JCRMessage membership = (JCRMessage) message;
         try {
 
@@ -573,7 +574,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<String> mailbox, long uid, MailboxMembership<String> oldmessage) throws MailboxException{
+    public long copy(Mailbox<String> mailbox, long uid, Message<String> oldmessage) throws MailboxException{
         try {
             String newMessagePath = getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid);
             getSession().getWorkspace().copy(((JCRMessage)oldmessage).getNode().getPath(), getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid));
@@ -596,10 +597,10 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
 
         findInMailbox(mailbox, set, new MailboxMembershipCallback<String>() {
 			
-			public void onMailboxMembers(List<MailboxMembership<String>> members)
+			public void onMailboxMembers(List<Message<String>> members)
 					throws MailboxException {
 
-				for (final MailboxMembership<String> member:members) {
+				for (final Message<String> member:members) {
 		            Flags originalFlags = member.createFlags();
 		            if (replace) {
 		                member.setFlags(flags);

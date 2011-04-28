@@ -27,7 +27,6 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.transaction.Mapper;
 
@@ -89,7 +88,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @param message
      * @throws StorageException
      */
-    public abstract void delete(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
+    public abstract void delete(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
 
     /**
      * Return the uid of the first unseen message. If non can be found null will get returned
@@ -109,7 +108,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return recentList
      * @throws StorageException
      */
-    public abstract List<MailboxMembership<Id>> findRecentMessagesInMailbox(Mailbox<Id> mailbox) throws MailboxException;
+    public abstract List<Message<Id>> findRecentMessagesInMailbox(Mailbox<Id> mailbox) throws MailboxException;
 
 
     /**
@@ -122,7 +121,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uid
      * @throws StorageException
      */
-    public abstract long add(Mailbox<Id> mailbox, MailboxMembership<Id> message) throws MailboxException;
+    public abstract long add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
     
     /**
      * Update flags for the given {@link MessageRange}. Only the flags may be modified after a message was saved to a mailbox.
@@ -148,6 +147,6 @@ public interface MessageMapper<Id> extends Mapper {
      * @return The uid of the copied instance
      * @throws StorageException
      */
-    public abstract long copy(Mailbox<Id> mailbox, long uid, MailboxMembership<Id> original) throws MailboxException;
+    public abstract long copy(Mailbox<Id> mailbox, long uid, Message<Id> original) throws MailboxException;
 
 }

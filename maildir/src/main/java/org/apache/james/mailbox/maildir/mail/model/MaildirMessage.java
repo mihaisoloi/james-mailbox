@@ -101,7 +101,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
     public MaildirMessage(Mailbox<Integer> mailbox, AbstractMaildirMessage message) throws MailboxException {
         super(mailbox);
         this.internalDate = message.getInternalDate();
-        this.size = message.getMessage().getFullContentOctets();
+        this.size = message.getFullContentOctets();
         this.answered = message.isAnswered();
         this.deleted = message.isDeleted();
         this.draft = message.isDraft();
@@ -189,34 +189,6 @@ public class MaildirMessage extends AbstractMaildirMessage {
 
     /* 
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#createFlags()
-     */
-    public Flags createFlags() {
-        final Flags flags = new Flags();
-
-        if (isAnswered()) {
-            flags.add(Flags.Flag.ANSWERED);
-        }
-        if (isDeleted()) {
-            flags.add(Flags.Flag.DELETED);
-        }
-        if (isDraft()) {
-            flags.add(Flags.Flag.DRAFT);
-        }
-        if (isFlagged()) {
-            flags.add(Flags.Flag.FLAGGED);
-        }
-        if (isRecent()) {
-            flags.add(Flags.Flag.RECENT);
-        }
-        if (isSeen()) {
-            flags.add(Flags.Flag.SEEN);
-        }
-        return flags;
-    }
-
-    /* 
-     * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getInternalDate()
      */
     public Date getInternalDate() {
@@ -298,10 +270,10 @@ public class MaildirMessage extends AbstractMaildirMessage {
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getBodyOctets()
+     * @see org.apache.james.mailbox.store.mail.model.AbstractMessage#getBodyStartOctet()
      */
-    public long getBodyOctets() {
-        return getFullContentOctets() - bodyStartOctet;
+    protected int getBodyStartOctet() {
+        return bodyStartOctet;
     }
    
 }

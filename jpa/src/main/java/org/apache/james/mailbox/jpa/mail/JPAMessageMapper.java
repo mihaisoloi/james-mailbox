@@ -29,16 +29,16 @@ import javax.persistence.Query;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.UpdatedFlags;
+import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.jpa.JPATransactionalMapper;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMailboxMembership;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMailboxMembership;
-import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMailboxMembership;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.openjpa.persistence.ArgumentException;
 
 /**
@@ -55,7 +55,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      */
     public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MailboxMembershipCallback<Long> callback) throws MailboxException {
         try {
-            List<MailboxMembership<Long>> results;
+            List<Message<Long>> results;
             long from = set.getUidFrom();
             final long to = set.getUidTo();
             final int batchSize = set.getBatchSize();
@@ -95,7 +95,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid, int batchSize) {
+    private List<Message<Long>> findMessagesInMailboxAfterUID(Mailbox<Long> mailbox, long uid, int batchSize) {
         Query query = getEntityManager().createNamedQuery("findMessagesInMailboxAfterUID")
         .setParameter("idParam", mailbox.getMailboxId())
         .setParameter("uidParam", uid);
@@ -107,14 +107,14 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
+    private List<Message<Long>> findMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
         return getEntityManager().createNamedQuery("findMessagesInMailboxWithUID")
         .setParameter("idParam", mailbox.getMailboxId())
         .setParameter("uidParam", uid).setMaxResults(1).getResultList();
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to, int batchSize) {
+    private List<Message<Long>> findMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to, int batchSize) {
         Query query = getEntityManager().createNamedQuery("findMessagesInMailboxBetweenUIDs").setParameter("idParam", mailbox.getMailboxId()).setParameter("fromParam", from).setParameter("toParam", to);
 
         if (batchSize > 0)
@@ -124,7 +124,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
     }
 
     @SuppressWarnings("unchecked")
-    private List<MailboxMembership<Long>> findMessagesInMailbox(Mailbox<Long> mailbox, int batchSize) {
+    private List<Message<Long>> findMessagesInMailbox(Mailbox<Long> mailbox, int batchSize) {
          Query query = getEntityManager().createNamedQuery("findMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId());
          if(batchSize > 0)
         	 query.setMaxResults(batchSize);
@@ -245,7 +245,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(java.lang.Object, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public void delete(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
+    public void delete(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
         try {
             getEntityManager().remove(message);
         } catch (PersistenceException e) {
@@ -262,7 +262,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         try {
             Query query = getEntityManager().createNamedQuery("findUnseenMessagesInMailboxOrderByUid").setParameter("idParam", mailbox.getMailboxId());
             query.setMaxResults(1);
-            List<MailboxMembership<Long>> result = query.getResultList();
+            List<Message<Long>> result = query.getResultList();
             if (result.isEmpty()) {
                 return null;
             } else {
@@ -277,7 +277,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
      */
     @SuppressWarnings("unchecked")
-    public List<MailboxMembership<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
+    public List<Message<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         try {
             Query query = getEntityManager().createNamedQuery("findRecentMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId());
             return query.getResultList();
@@ -290,13 +290,13 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long add(Mailbox<Long> mailbox, MailboxMembership<Long> message) throws MailboxException {
+    public long add(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
 
         try {
             
             // We need to reload a "JPA attached" mailbox, because the provide mailbox is already "JPA detached"
             // If we don't this, we will get an org.apache.openjpa.persistence.ArgumentException.
-            ((AbstractJPAMailboxMembership) message).setMailbox(getEntityManager().find(JPAMailbox.class, mailbox.getMailboxId()));
+            ((AbstractJPAMessage) message).setMailbox(getEntityManager().find(JPAMailbox.class, mailbox.getMailboxId()));
             
             getEntityManager().persist(message);
             
@@ -314,12 +314,12 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public long copy(Mailbox<Long> mailbox, long uid, MailboxMembership<Long> original) throws MailboxException {
-        MailboxMembership<Long> copy;
-        if (original instanceof JPAStreamingMailboxMembership) {
-            copy = new JPAStreamingMailboxMembership((JPAMailbox) mailbox, uid, (AbstractJPAMailboxMembership) original);
+    public long copy(Mailbox<Long> mailbox, long uid, Message<Long> original) throws MailboxException {
+        Message<Long> copy;
+        if (original instanceof JPAStreamingMessage) {
+            copy = new JPAStreamingMessage((JPAMailbox) mailbox, uid, original);
         } else {
-            copy = new JPAMailboxMembership((JPAMailbox) mailbox, uid,  (AbstractJPAMailboxMembership) original);
+            copy = new JPAMessage((JPAMailbox) mailbox, uid,  original);
         }
         return add(mailbox, copy);
     }
@@ -333,8 +333,8 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
 
-            public void onMailboxMembers(List<MailboxMembership<Long>> members) throws MailboxException {
-                for (final MailboxMembership<Long> member : members) {
+            public void onMailboxMembers(List<Message<Long>> members) throws MailboxException {
+                for (final Message<Long> member : members) {
                     Flags originalFlags = member.createFlags();
                     if (replace) {
                         member.setFlags(flags);

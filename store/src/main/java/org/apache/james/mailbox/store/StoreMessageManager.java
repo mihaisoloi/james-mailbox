@@ -54,8 +54,8 @@ import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
-import org.apache.james.mailbox.store.mail.model.MailboxMembershipComparator;
+import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.MessageComparator;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
@@ -264,7 +264,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 flags.add(Flags.Flag.RECENT);
             }
             long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
-            final MailboxMembership<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
+            final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                         
             dispatcher.added(mailboxSession, Arrays.asList(uid), new StoreMailboxPath<Id>(getMailboxEntity()));
@@ -345,7 +345,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @return membership
      * @throws MailboxException 
      */
-    protected abstract MailboxMembership<Id> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, 
+    protected abstract Message<Id> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, 
             final InputStream documentIn, final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException;
     
     /**
@@ -458,7 +458,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         }
     }
     
-    protected long appendMessageToStore(final MailboxMembership<Id> message, MailboxSession session) throws MailboxException {
+    protected long appendMessageToStore(final Message<Id> message, MailboxSession session) throws MailboxException {
         final MessageMapper<Id> mapper = mapperFactory.getMessageMapper(session);
         return mapperFactory.getMessageMapper(session).execute(new Mapper.Transaction<Long>() {
 
@@ -519,7 +519,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     public void getMessages(MessageRange set, final FetchGroup fetchGroup, MailboxSession mailboxSession, final MessageCallback messageCallback) throws MailboxException {
 
         mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
-            public void onMailboxMembers(List<MailboxMembership<Id>> rows) throws MailboxException {
+            public void onMailboxMembers(List<Message<Id>> rows) throws MailboxException {
                 messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
             }
         });
@@ -540,10 +540,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return messageMapper.execute(new Mapper.Transaction<List<Long>>() {
 
             public List<Long> run() throws MailboxException {
-                final List<MailboxMembership<Id>> members = messageMapper.findRecentMessagesInMailbox(getMailboxEntity());
+                final List<Message<Id>> members = messageMapper.findRecentMessagesInMailbox(getMailboxEntity());
                 final List<Long> results = new ArrayList<Long>();
 
-                for (MailboxMembership<Id> member:members) {
+                for (Message<Id> member:members) {
                     results.add(member.getUid());
                     if (reset) {
                         
@@ -590,7 +590,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 NumericRange r = ranges[i];
                 messageMapper.findInMailbox(getMailboxEntity(), MessageRange.range(r.getLowValue(), r.getHighValue()), new MailboxMembershipCallback<Id>() {
 
-                    public void onMailboxMembers(List<MailboxMembership<Id>> list) throws MailboxException {
+                    public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
                         for (int i = 0; i < list.size(); i++) {
                             long uid = list.get(i).getUid();
                             if (uids.contains(uid) == false) {
@@ -605,28 +605,28 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             
            
         } else {
-            final List<MailboxMembership<Id>> hits = new ArrayList<MailboxMembership<Id>>();
+            final List<Message<Id>> hits = new ArrayList<Message<Id>>();
 
             messageMapper.findInMailbox(getMailboxEntity(), MessageRange.all(), new MailboxMembershipCallback<Id>() {
 
-                public void onMailboxMembers(List<MailboxMembership<Id>> list) throws MailboxException {
+                public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
                     for (int i = 0; i < list.size(); i++) {
-                        MailboxMembership<Id> m = list.get(i);
+                        Message<Id> m = list.get(i);
                         if (hits.contains(m) == false) {
                             hits.add(m);
                         }
                     }
                 }
             });
-            Collections.sort(hits, MailboxMembershipComparator.INSTANCE);
+            Collections.sort(hits, MessageComparator.INSTANCE);
             
-            return new SearchQueryIterator(new Iterator<MailboxMembership<?>>() {
-                final Iterator<MailboxMembership<Id>> it = hits.iterator();
+            return new SearchQueryIterator(new Iterator<Message<?>>() {
+                final Iterator<Message<Id>> it = hits.iterator();
                 public boolean hasNext() {
                     return it.hasNext();
                 }
 
-                public MailboxMembership<?> next() {
+                public Message<?> next() {
                     return it.next();
                 }
 
@@ -640,12 +640,12 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
 
-    private Iterator<Long> copy(final List<MailboxMembership<Id>> originalRows, final MailboxSession session) throws MailboxException {
+    private Iterator<Long> copy(final List<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
         try {
             final List<Long> copiedRows = new ArrayList<Long>();
             final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            for (final MailboxMembership<Id> originalMessage:originalRows) {
+            for (final Message<Id> originalMessage:originalRows) {
                copiedRows.add(messageMapper.execute(new Mapper.Transaction<Long>() {
 
                     public Long run() throws MailboxException {
@@ -673,7 +673,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final List<Long> copiedMessages = new ArrayList<Long>();
             messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
 
-                public void onMailboxMembers(List<MailboxMembership<Id>> originalRows) throws MailboxException {
+                public void onMailboxMembers(List<Message<Id>> originalRows) throws MailboxException {
                     Iterator<Long> ids = to.copy(originalRows, session);
                     while (ids.hasNext())
                         copiedMessages.add(ids.next());

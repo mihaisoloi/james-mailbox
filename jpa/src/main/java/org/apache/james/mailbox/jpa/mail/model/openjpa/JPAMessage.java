@@ -21,8 +21,10 @@ package org.apache.james.mailbox.jpa.mail.model.openjpa;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
+import javax.mail.Flags;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +32,9 @@ import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.StreamUtils;
@@ -48,19 +52,29 @@ public class JPAMessage extends AbstractJPAMessage {
     @Deprecated
     public JPAMessage() {}
 
-    public JPAMessage(final InputStream content, final long contentOctets, final int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws IOException {
-        super(contentOctets,bodyStartOctet,headers,propertyBuilder);
-        this.content = StreamUtils.out(content).toByteArray();
+    public JPAMessage(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
+            InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
+        super(mailbox, uid, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
+        try {
+            this.content = StreamUtils.out(content).toByteArray();
+        } catch (IOException e) {
+            throw new MailboxException("Unable to parse message",e);
+        }
     }
 
     /**
      * Create a copy of the given message
      * 
      * @param message
+     * @throws MailboxException 
      */
-    public JPAMessage(Message message) throws IOException{
-        super(message);
-        this.content = StreamUtils.out(message.getFullContent()).toByteArray();
+    public JPAMessage(JPAMailbox mailbox, long uid, Message<?> message) throws MailboxException{
+        super(mailbox, uid, message);
+        try {
+            this.content = StreamUtils.out(message.getFullContent()).toByteArray();
+        } catch (IOException e) {
+            throw new MailboxException("Unable to parse message",e);
+        }
     }
 
     /*

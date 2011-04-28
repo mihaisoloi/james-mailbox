@@ -49,7 +49,7 @@ import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.BodyDescriptor;
 import org.apache.james.mime4j.message.Header;
@@ -218,7 +218,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @param membership
      * @return document
      */
-    public static Document createDocument(MailboxMembership<?> membership) throws MailboxException{
+    public static Document createDocument(Message<?> membership) throws MailboxException{
         final Document doc = new Document();
         // TODO: Better handling
         doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString(), Store.NO, Index.NOT_ANALYZED));
@@ -240,7 +240,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         doc.add(new NumericField(INTERNAL_DATE_FIELD_SECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.SECOND).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MILLISECOND).getTime()));
 
-        doc.add(new NumericField(SIZE_FIELD,Store.NO, true).setLongValue(membership.getMessage().getFullContentOctets()));
+        doc.add(new NumericField(SIZE_FIELD,Store.NO, true).setLongValue(membership.getFullContentOctets()));
         
         // content handler which will index the headers and the body of the message
         SimpleContentHandler handler = new SimpleContentHandler() {
@@ -287,7 +287,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         parser.setContentHandler(handler);
         try {
             // parse the message to index headers and body
-            parser.parse(membership.getMessage().getFullContent());
+            parser.parse(membership.getFullContent());
         } catch (MimeException e) {
             // This should never happen as it was parsed before too without problems.            
             throw new MailboxException("Unable to index content of message", e);
@@ -556,7 +556,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.MessageSearchIndex#add(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
-    public void add(MailboxSession session, Mailbox<Id> mailbox, MailboxMembership<Id> membership) throws MailboxException {
+    public void add(MailboxSession session, Mailbox<Id> mailbox, Message<Id> membership) throws MailboxException {
         Document doc = createDocument(membership);
         try {
             writer.addDocument(doc);

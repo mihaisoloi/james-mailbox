@@ -22,14 +22,18 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.Date;
 import java.util.List;
 
+import javax.mail.Flags;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Table;
 
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
+import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
@@ -57,8 +61,9 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     @Deprecated
     public JPAStreamingMessage() {}
 
-    public JPAStreamingMessage(final InputStream content, final long contentOctets, final int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) {
-        super(contentOctets,bodyStartOctet,headers,propertyBuilder);
+    public JPAStreamingMessage(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
+            InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
+        super(mailbox, uid, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
         this.content = content;
     }
 
@@ -68,9 +73,13 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
      * @param message
      * @throws IOException 
      */
-    public JPAStreamingMessage(Message message) throws IOException {
-        super(message);
-        this.content = new ByteArrayInputStream(StreamUtils.toByteArray(message.getFullContent()));
+    public JPAStreamingMessage(JPAMailbox mailbox, long uid,Message<?> message) throws MailboxException {
+        super(mailbox, uid, message);
+        try {
+            this.content = new ByteArrayInputStream(StreamUtils.toByteArray(message.getFullContent()));
+        } catch (IOException e) {
+            throw new MailboxException("Unable to parse message",e);
+        }
     }
 
     public InputStream getFullContent() throws IOException {

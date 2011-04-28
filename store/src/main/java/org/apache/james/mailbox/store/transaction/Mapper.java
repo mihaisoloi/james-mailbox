@@ -22,7 +22,7 @@ package org.apache.james.mailbox.store.transaction;
 import java.util.List;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
+import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
  * Mapper which execute units of work in a {@link Transaction}
@@ -58,7 +58,7 @@ public interface Mapper {
     }
     
     public interface MailboxMembershipCallback<Id> {
-    	void onMailboxMembers(List<MailboxMembership<Id>> list) throws MailboxException;
+    	void onMailboxMembers(List<Message<Id>> list) throws MailboxException;
     }
     
     public abstract class VoidTransaction implements Transaction<Void> {

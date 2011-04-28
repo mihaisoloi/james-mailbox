@@ -39,7 +39,6 @@ import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Header;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -51,7 +50,7 @@ import org.slf4j.Logger;
  * JCR implementation of {@link Message}
  *
  */
-public class JCRMessage extends AbstractMessage implements MailboxMembership<String>, JCRImapConstants, Persistent{
+public class JCRMessage extends AbstractMessage<String> implements JCRImapConstants, Persistent{
 
     private Node node;
     private final Logger logger;
@@ -472,21 +471,6 @@ public class JCRMessage extends AbstractMessage implements MailboxMembership<Str
         return flags;
     }
     
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#getMessage()
-     */
-    public Message getMessage() {
-        if (isPersistent()) {
-        	//TODO: Why not "this"?
-            return new JCRMessage(node, logger);
-           
-        }
-        return this;
-    }
 
     /*
      * (non-Javadoc)

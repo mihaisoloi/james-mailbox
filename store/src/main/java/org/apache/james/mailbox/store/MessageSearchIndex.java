@@ -28,18 +28,17 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.MailboxMembership;
-
+import org.apache.james.mailbox.store.mail.model.Message;
 public interface MessageSearchIndex<Id> {
 
     /**
      * Add the {@link MailboxMembership} to the search index
      * 
      * @param mailbox
-     * @param membership
+     * @param message
      * @throws MailboxException
      */
-    public void add(MailboxSession session, Mailbox<Id> mailbox, MailboxMembership<Id> membership) throws MailboxException;
+    public void add(MailboxSession session, Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
     
     /**
      * Update the Flags in the search index for the given {@link MessageRange} 
