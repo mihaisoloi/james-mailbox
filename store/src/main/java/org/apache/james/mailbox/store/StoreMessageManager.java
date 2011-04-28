@@ -118,16 +118,31 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     
 
     
-    private Flags getPermanentFlags() {
+    private Flags getPermanentFlags(MailboxSession session) {
         Flags permanentFlags = new Flags();
         permanentFlags.add(Flags.Flag.ANSWERED);
         permanentFlags.add(Flags.Flag.DELETED);
         permanentFlags.add(Flags.Flag.DRAFT);
         permanentFlags.add(Flags.Flag.FLAGGED);
         permanentFlags.add(Flags.Flag.SEEN);
+        if (areUserFlagsPermanent(session)) {
+            permanentFlags.add(Flags.Flag.USER);
+        }
         return permanentFlags;
     }
 
+    /**
+     * Sub-classes should override this and return true if they support to store user flags(keywords) permanent.
+     * 
+     * The default is to return false
+     * 
+     * @param session
+     * @return supported 
+     */
+    protected boolean areUserFlagsPermanent(MailboxSession session) {
+        return false;
+    }
+    
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.Mailbox#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
@@ -258,6 +273,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 flags = new Flags();
             } else {
                 flags = flagsToBeSet;
+
+                // Check if we need to trim the flags
+                trimFlags(flags, mailboxSession);
+
             }
             if (isRecent) {
                 flags.add(Flags.Flag.RECENT);
@@ -376,7 +395,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     public MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, 
             org.apache.james.mailbox.MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException {
         final List<Long> recent = recent(resetRecent, mailboxSession);
-        final Flags permanentFlags = getPermanentFlags();
+        final Flags permanentFlags = getPermanentFlags(mailboxSession);
         final long uidValidity = getMailboxEntity().getUidValidity();
         final long uidNext = uidProvider.lastUid(mailboxSession, mailbox) +1;
         final long messageCount = getMessageCount(mailboxSession);
@@ -400,6 +419,30 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
  
+    // Check if this mailbox supports user flags and if not remove all of them before 
+    // pass this to the mapper
+    private void trimFlags(Flags flags, MailboxSession session) {
+        
+        Flags permFlags = getPermanentFlags(session);
+        
+        Flag[] systemFlags = flags.getSystemFlags();
+        for (int i = 0; i <  systemFlags.length; i++) {
+            Flag f = systemFlags[i];
+            if (permFlags.contains(f) == false) {
+                flags.remove(f);
+            }
+        }
+        if (permFlags.contains(Flags.Flag.USER) == false) {
+            String[] uFlags = flags.getUserFlags();
+            for (int i = 0; i <uFlags.length; i++) {
+                String uFlag = uFlags[i];
+                if (permFlags.contains(uFlag) == false) {
+                    flags.remove(uFlag);
+                }
+            }
+        }
+      
+    }
     
     /*
      * (non-Javadoc)
@@ -410,7 +453,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
        
         final SortedMap<Long, Flags> newFlagsByUid = new TreeMap<Long, Flags>();
 
+        trimFlags(flags, mailboxSession);
+        
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
+      
         Iterator<UpdatedFlags> it = messageMapper.execute(new Mapper.Transaction<Iterator<UpdatedFlags>>() {
 
             public Iterator<UpdatedFlags> run() throws MailboxException {
