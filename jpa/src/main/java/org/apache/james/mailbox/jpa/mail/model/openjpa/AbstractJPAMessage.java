@@ -56,7 +56,7 @@ import org.apache.openjpa.persistence.jdbc.Index;
 @IdClass(AbstractJPAMessage.MailboxIdUidKey.class)
 @NamedQueries({
     @NamedQuery(name="findRecentMessagesInMailbox",
-            query="SELECT message FROM Message message WHERE membership.mailbox.mailboxId = :idParam AND message.recent = TRUE"),
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.recent = TRUE"),
     @NamedQuery(name="findUnseenMessagesInMailboxOrderByUid",
             query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.seen = FALSE ORDER BY message.uid ASC"),
     @NamedQuery(name="findMessagesInMailbox",
@@ -64,7 +64,7 @@ import org.apache.openjpa.persistence.jdbc.Index;
     @NamedQuery(name="findMessagesInMailboxBetweenUIDs",
             query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid BETWEEN :fromParam AND :toParam"),        
     @NamedQuery(name="findMessagesInMailboxWithUID",
-            query="SELECT membership FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid=:uidParam"),                    
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid=:uidParam"),                    
     @NamedQuery(name="findMessagesInMailboxAfterUID",
             query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid>=:uidParam"),                    
     @NamedQuery(name="findDeletedMessagesInMailbox",
@@ -72,7 +72,7 @@ import org.apache.openjpa.persistence.jdbc.Index;
     @NamedQuery(name="findDeletedMessagesInMailboxBetweenUIDs",
             query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid BETWEEN :fromParam AND :toParam AND message.deleted=TRUE"),        
     @NamedQuery(name="findDeletedMessagesInMailboxWithUID",
-            query="SELECT message.uid FROM Message message WHERE membership.mailbox.mailboxId = :idParam AND message.uid=:uidParam AND message.deleted=TRUE"),                    
+            query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid=:uidParam AND message.deleted=TRUE"),                    
     @NamedQuery(name="findDeletedMessagesInMailboxAfterUID",
             query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid>=:uidParam AND message.deleted=TRUE"),          
             
