@@ -162,7 +162,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.Mailbox#appendMessage(byte[], java.util.Date, org.apache.james.mailbox.MailboxSession, boolean, javax.mail.Flags)
      */
-    public long appendMessage(final InputStream msgIn, final Date internalDate,
+    public long appendMessage(final InputStream msgIn, Date internalDate,
             final MailboxSession mailboxSession,final boolean isRecent, final Flags flagsToBeSet)
     throws MailboxException {
         File file = null;
@@ -280,6 +280,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             }
             if (isRecent) {
                 flags.add(Flags.Flag.RECENT);
+            }
+            if (internalDate == null) {
+                internalDate = new Date();
             }
             long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
             final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
