@@ -287,7 +287,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         this.contentOctets = original.getFullContentOctets();
         this.bodyStartOctet = (int) (original.getFullContentOctets() - original.getBodyOctets());
         this.headers = new ArrayList<JPAHeader>();
-        
+        this.internalDate = original.getInternalDate();
         List<Header> originalHeaders = original.getHeaders();
         for (int i = 0; i < originalHeaders.size(); i++) {
             headers.add(new JPAHeader(originalHeaders.get(i)));
