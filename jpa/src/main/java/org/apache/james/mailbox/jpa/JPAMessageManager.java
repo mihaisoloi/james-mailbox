@@ -26,6 +26,7 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
@@ -62,6 +63,16 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
     protected Header createHeader(int lineNumber, String name, String value) {
         final Header header = new JPAHeader(lineNumber, name, value);
         return header;
+    }
+
+    /**
+     * Support user flags
+     */
+    @Override
+    protected Flags getPermanentFlags(MailboxSession session) {
+        Flags flags =  super.getPermanentFlags(session);
+        flags.add(Flags.Flag.USER);
+        return flags;
     }
     
 }

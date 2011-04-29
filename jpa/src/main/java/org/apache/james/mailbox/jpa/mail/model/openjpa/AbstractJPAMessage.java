@@ -20,6 +20,7 @@ package org.apache.james.mailbox.jpa.mail.model.openjpa;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
+import org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -235,6 +237,11 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
                 @ElementJoinColumn(name="MAIL_UID", referencedColumnName="MAIL_UID")})
     private List<JPAProperty> properties;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @ElementJoinColumns({@ElementJoinColumn(name="MAILBOX_ID", referencedColumnName="MAILBOX_ID"),
+    @ElementJoinColumn(name="MAIL_UID", referencedColumnName="MAIL_UID")})
+    private List<JPAUserFlag> userFlags;
+    
     @Deprecated
     public AbstractJPAMessage() {}
 
@@ -243,7 +250,9 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         this.mailbox = mailbox;
         this.internalDate = internalDate;
         this.uid = uid;
-        setFlags(flags);
+        userFlags = new ArrayList<JPAUserFlag>();
+
+        setFlags(flags);        
         this.contentOctets = contentOctets;
         this.bodyStartOctet = bodyStartOctet;
         this.headers = new ArrayList<JPAHeader>(headers);
@@ -256,6 +265,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         for (final Property property:properties) {
             this.properties.add(new JPAProperty(property, order++));
         }
+        
     }
 
     /**
@@ -270,13 +280,8 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         super();
         this.mailbox = mailbox;
         this.uid = uid;
-        this.internalDate = original.getInternalDate();
-        this.answered = original.isAnswered();
-        this.deleted = original.isDeleted();
-        this.draft = original.isDraft();
-        this.flagged = original.isFlagged();
-        this.recent = original.isRecent();
-        this.seen = original.isSeen();
+        userFlags = new ArrayList<JPAUserFlag>();
+        setFlags(original.createFlags());
         
 
         this.contentOctets = original.getFullContentOctets();
@@ -466,6 +471,31 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         flagged = flags.contains(Flags.Flag.FLAGGED);
         recent = flags.contains(Flags.Flag.RECENT);
         seen = flags.contains(Flags.Flag.SEEN);
+        
+        // Loop over the user flags and check which of them needs to get added / removed
+        List<String> uFlags = Arrays.asList(flags.getUserFlags());
+        for (int i = 0; i < userFlags.size(); i++) {
+            JPAUserFlag f = userFlags.get(i);
+            if (uFlags.contains(f.getName()) == false) {
+                userFlags.remove(f);
+                i++;
+            }
+        }
+        for (int i = 0; i < uFlags.size(); i++) {
+            boolean found = false;
+            String uFlag = uFlags.get(i);
+            for (int a = 0; a < userFlags.size(); a++) {
+                String userFlag = userFlags.get(a).getName();
+                if (userFlag.equals(uFlag)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false) {
+                userFlags.add(new JPAUserFlag(uFlag));
+            }
+            
+        }
     }
 
     /**
@@ -473,6 +503,20 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
      */
     public JPAMailbox getMailbox() {
         return mailbox;
+    }
+
+    /**
+     * This implementation supports user flags
+     * 
+     * 
+     */
+    @Override
+    protected String[] createUserFlags() {
+        String[] flags = new String[userFlags.size()];
+        for (int i = 0; i < userFlags.size(); i++) {
+            flags[i] = userFlags.get(i).getName();
+        }
+        return flags;
     }
 
     /**

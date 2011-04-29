@@ -25,6 +25,7 @@ import org.apache.james.mailbox.SubscriptionManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
+import org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
@@ -52,6 +53,7 @@ public class JPASubscriptionManagerTest extends AbstractSubscriptionManagerTest{
                 AbstractJPAMessage.class.getName() + ";" +
                 JPAMessage.class.getName() + ";" +
                 JPAProperty.class.getName() + ";" +
+                JPAUserFlag.class.getName() + ";" +
                 JPASubscription.class.getName() + ")");
        
         entityManagerFactory = OpenJPAPersistence.getEntityManagerFactory(properties);
