@@ -421,7 +421,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
  
     /**
      * Check if the given {@link Flags} contains {@link Flags} which are not included in the returned {@link Flags} of {@link #getPermanentFlags(MailboxSession)}.
-     * If any are found, these are removed from the given {@link Flags} instance
+     * If any are found, these are removed from the given {@link Flags} instance. The only exception is the {@link Flag#RECENT} flag.
+     * 
+     * This flag is never removed!
      * 
      * @param flags
      * @param session
@@ -433,7 +435,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         Flag[] systemFlags = flags.getSystemFlags();
         for (int i = 0; i <  systemFlags.length; i++) {
             Flag f = systemFlags[i];
-            if (permFlags.contains(f) == false) {
+            
+            if (f != Flag.RECENT && permFlags.contains(f) == false) {
                 flags.remove(f);
             }
         }
