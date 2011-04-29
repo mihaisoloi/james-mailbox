@@ -68,6 +68,9 @@ public class JCRMessageManager extends StoreMessageManager<String> {
         return message;
     }
 
+    /**
+     * This implementation allow to store ANY user flag in a permanent manner
+     */
     @Override
     protected Flags getPermanentFlags(MailboxSession session) {
         Flags perm =  super.getPermanentFlags(session);
