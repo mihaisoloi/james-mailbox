@@ -443,34 +443,6 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#createFlags()
-     */
-    public Flags createFlags() {
-        final Flags flags = new Flags();
-
-        if (isAnswered()) {
-            flags.add(Flags.Flag.ANSWERED);
-        }
-        if (isDeleted()) {
-            flags.add(Flags.Flag.DELETED);
-        }
-        if (isDraft()) {
-            flags.add(Flags.Flag.DRAFT);
-        }
-        if (isFlagged()) {
-            flags.add(Flags.Flag.FLAGGED);
-        }
-        if (isRecent()) {
-            flags.add(Flags.Flag.RECENT);
-        }
-        if (isSeen()) {
-            flags.add(Flags.Flag.SEEN);
-        }
-        return flags;
-    }
-    
 
     /*
      * (non-Javadoc)
