@@ -119,6 +119,9 @@ public class MessageSearches {
         } else if (criterion instanceof SearchQuery.FlagCriterion) {
             result = matches((SearchQuery.FlagCriterion) criterion, message,
                     recentMessageUids);
+        } else if (criterion instanceof SearchQuery.CustomFlagCriterion) {
+            result = matches((SearchQuery.CustomFlagCriterion) criterion, message,
+                    recentMessageUids);
         } else if (criterion instanceof SearchQuery.TextCriterion) {
             result = matches((SearchQuery.TextCriterion) criterion, message);
         } else if (criterion instanceof SearchQuery.AllCriterion) {
@@ -259,6 +262,14 @@ public class MessageSearches {
         return result;
     }
 
+    private boolean matches(SearchQuery.CustomFlagCriterion criterion,
+            Message<?> message, final Collection<Long> recentMessageUids) {
+        final SearchQuery.BooleanOperator operator = criterion.getOperator();
+        final boolean isSet = operator.isSet();
+        final String flag = criterion.getFlag();
+        final boolean result = isSet == message.createFlags().contains(flag);
+        return result;
+    }
     private boolean matches(SearchQuery.UidCriterion criterion, Message<?> message) {
         final SearchQuery.InOperator operator = criterion.getOperator();
         final NumericRange[] ranges = operator.getRange();
