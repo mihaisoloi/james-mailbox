@@ -117,31 +117,31 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
     
 
-    
-    private Flags getPermanentFlags(MailboxSession session) {
+    /**
+     * Return {@link Flags} which are permanent stored by the mailbox. By default this are the following flags:
+     * <br>
+     *  {@link Flag#ANSWERED}, {@link Flag#DELETED}, {@link Flag#DRAFT}, {@link Flag#FLAGGED}, {@link Flag#RECENT}, {@link Flag#SEEN}
+     * <br>
+     * 
+     * Which in fact does not allow to permanent store user flags / keywords. 
+     * 
+     * If the sub-class does allow to store "any" user flag / keyword it MUST override this method and add {@link Flag#USER} to the list
+     * of returned {@link Flags}. If only a special set of user flags / keywords should be allowed just add them directly.
+     * 
+     * @param session
+     * @return flags
+     */
+    protected Flags getPermanentFlags(MailboxSession session) {
         Flags permanentFlags = new Flags();
         permanentFlags.add(Flags.Flag.ANSWERED);
         permanentFlags.add(Flags.Flag.DELETED);
         permanentFlags.add(Flags.Flag.DRAFT);
         permanentFlags.add(Flags.Flag.FLAGGED);
         permanentFlags.add(Flags.Flag.SEEN);
-        if (areUserFlagsPermanent(session)) {
-            permanentFlags.add(Flags.Flag.USER);
-        }
+       
         return permanentFlags;
     }
 
-    /**
-     * Sub-classes should override this and return true if they support to store user flags(keywords) permanent.
-     * 
-     * The default is to return false
-     * 
-     * @param session
-     * @return supported 
-     */
-    protected boolean areUserFlagsPermanent(MailboxSession session) {
-        return false;
-    }
     
     /*
      * (non-Javadoc)
@@ -419,8 +419,13 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
  
-    // Check if this mailbox supports user flags and if not remove all of them before 
-    // pass this to the mapper
+    /**
+     * Check if the given {@link Flags} contains {@link Flags} which are not included in the returned {@link Flags} of {@link #getPermanentFlags(MailboxSession)}.
+     * If any are found, these are removed from the given {@link Flags} instance
+     * 
+     * @param flags
+     * @param session
+     */
     private void trimFlags(Flags flags, MailboxSession session) {
         
         Flags permFlags = getPermanentFlags(session);
@@ -432,6 +437,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 flags.remove(f);
             }
         }
+        // if the permFlags contains the special USER flag we can skip this as all user flags are allowed
         if (permFlags.contains(Flags.Flag.USER) == false) {
             String[] uFlags = flags.getUserFlags();
             for (int i = 0; i <uFlags.length; i++) {

@@ -42,7 +42,7 @@ public abstract class AbstractMessage<Id> implements Message<Id> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#createFlags()
      */
-    public Flags createFlags() {
+    public final Flags createFlags() {
         final Flags flags = new Flags();
 
         if (isAnswered()) {
@@ -63,8 +63,26 @@ public abstract class AbstractMessage<Id> implements Message<Id> {
         if (isSeen()) {
             flags.add(Flags.Flag.SEEN);
         }
+        String[] userFlags = createUserFlags();
+        if (userFlags != null && userFlags.length > 0) {
+            for (int i = 0; i < userFlags.length; i++) {
+                flags.add(userFlags[i]);
+            }
+        }
         return flags;
     }
+    
+    
+    /**
+     * Return all stored user flags or null if none are stored. By default this return null as no user flags are stored
+     * permanent. This method SHOULD get overridden, If the implementation supports to store user flags.
+     * 
+     * @return userFlags
+     */
+    protected String[] createUserFlags() {
+        return null;
+    }
+    
     
     /**
      * The number of octets contained in the body of this part.
