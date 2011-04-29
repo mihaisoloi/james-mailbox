@@ -72,6 +72,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     private boolean flagged;
     private boolean recent;
     private boolean seen;
+    private String[] userFlags;
     
     private static final String TOSTRING_SEPARATOR = " ";
 
@@ -82,6 +83,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     public final static String DELETED_PROPERTY = "jamesMailbox:deleted";
     public final static String DRAFT_PROPERTY =  "jamesMailbox:draft";
     public final static String FLAGGED_PROPERTY = "jamesMailbox:flagged";
+    public final static String USERFLAGS_PROPERTY = "jamesMailbox:userFlags";
+
     public final static String RECENT_PROPERTY = "jamesMailbox:recent";
     public final static String SEEN_PROPERTY = "jamesMailbox:seen";
     public final static String INTERNAL_DATE_PROPERTY = "jamesMailbox:internalDate"; 
@@ -135,12 +138,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.mailboxUUID = mailboxUUID;
         this.internalDate = message.getInternalDate();
         this.size = message.getFullContentOctets();
-        this.answered = message.isAnswered();
-        this.deleted = message.isDeleted();
-        this.draft = message.isDraft();
-        this.flagged = message.isFlagged();
-        this.recent = message.isRecent();
-        this.seen = message.isSeen();
+        setFlags(message.createFlags());
         this.uid = uid;
         
         this.logger = logger;
@@ -318,7 +316,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         node.setProperty(FLAGGED_PROPERTY, isFlagged());
         node.setProperty(RECENT_PROPERTY, isRecent());
         node.setProperty(SEEN_PROPERTY, isSeen());
-
+        node.setProperty(USERFLAGS_PROPERTY, createFlags().getUserFlags());
         // This stuff is only ever changed on a new message
         // so if it is persistent we don'T need to set all the of this.
         //
@@ -392,6 +390,11 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
 
     }
     
+    @Override
+    protected String[] createUserFlags() {
+        return userFlags;
+    }
+
     @Override
     protected int getBodyStartOctet() {
         if (isPersistent()) {
@@ -645,6 +648,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
                         flags.contains(Flags.Flag.RECENT));
                 node.setProperty(SEEN_PROPERTY,
                         flags.contains(Flags.Flag.SEEN));
+                node.setProperty(USERFLAGS_PROPERTY, flags.getUserFlags());
             } catch (RepositoryException e) {
                 logger.error("Unable to set flags", e);
             }
@@ -655,6 +659,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
             flagged = flags.contains(Flags.Flag.FLAGGED);
             recent = flags.contains(Flags.Flag.RECENT);
             seen = flags.contains(Flags.Flag.SEEN);
+            userFlags = flags.getUserFlags();
         }
     }
 

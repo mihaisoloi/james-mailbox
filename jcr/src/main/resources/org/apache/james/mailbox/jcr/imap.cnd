@@ -49,6 +49,7 @@
     - jamesMailbox:recent (BOOLEAN) 
     - jamesMailbox:seen (BOOLEAN) 
     - jamesMailbox:internalDate (DATE) 
+    - jamesMailbox:userFlags (STRING) multiple 
     - jamesMailbox:messageBodyStartOctet (LONG) mandatory
     - jamesMailbox:messageTextualLineCount (LONG)
     - jamesMailbox:messageSubType (String) mandatory

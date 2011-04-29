@@ -26,6 +26,7 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.model.JCRHeader;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
@@ -66,4 +67,13 @@ public class JCRMessageManager extends StoreMessageManager<String> {
                 size, flags, document, bodyStartOctet, jcrHeaders, propertyBuilder, log);
         return message;
     }
+
+    @Override
+    protected Flags getPermanentFlags(MailboxSession session) {
+        Flags perm =  super.getPermanentFlags(session);
+        perm.add(Flags.Flag.USER);
+        return perm;
+    }
+    
+    
 }
