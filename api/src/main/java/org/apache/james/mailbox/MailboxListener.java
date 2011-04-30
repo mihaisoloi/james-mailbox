@@ -21,6 +21,7 @@ package org.apache.james.mailbox;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.Flags;
 
@@ -165,6 +166,13 @@ public interface MailboxListener {
         public Added(MailboxSession session, MailboxPath path) {
             super(session, path);
         }
+        
+        /**
+         * Return the flags which were set for the added message
+         * 
+         * @return flags
+         */
+        public abstract Map<Long, Flags> getFlags();
     }
 
 }

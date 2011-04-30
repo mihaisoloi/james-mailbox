@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
@@ -71,7 +74,7 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param sessionId
      * @param path
      */
-    public void added(MailboxSession session, List<Long> uids, MailboxPath path) {
+    public void added(MailboxSession session, Map<Long, Flags> uids, MailboxPath path) {
         pruneClosed();
         final AddedImpl added = new AddedImpl(session, path, uids);
         event(added);
@@ -150,10 +153,12 @@ public class MailboxEventDispatcher implements MailboxListener {
     private final static class AddedImpl extends MailboxListener.Added {
 
         private final List<Long> uids;
+        private Map<Long, Flags> added;
 
-        public AddedImpl(final MailboxSession session, final MailboxPath path, final List<Long> uids) {
+        public AddedImpl(final MailboxSession session, final MailboxPath path, final Map<Long, Flags> added) {
             super(session, path);
-            this.uids = uids;
+            this.uids = new ArrayList<Long>(added.keySet());
+            this.added = added;
         }
 
         /*
@@ -162,6 +167,14 @@ public class MailboxEventDispatcher implements MailboxListener {
          */
         public List<Long> getUids() {
             return uids;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see org.apache.james.mailbox.MailboxListener.Added#getFlags()
+         */
+        public Map<Long, Flags> getFlags() {
+            return added;
         }
     }
 

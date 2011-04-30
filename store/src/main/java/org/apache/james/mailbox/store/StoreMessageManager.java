@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -287,8 +287,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
             final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
-                        
-            dispatcher.added(mailboxSession, Arrays.asList(uid), new StoreMailboxPath<Id>(getMailboxEntity()));
+                       
+            Map<Long, Flags> uids = new HashMap<Long, Flags>();
+            uids.put(uid, flags);
+            dispatcher.added(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
             return uid;
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
@@ -501,15 +503,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
         try {
-            Iterator<Long> copiedUids = copy(set, toMailbox, session);
-            List<Long> uids = new ArrayList<Long>();
-            while(copiedUids.hasNext()) {
-                long uid = copiedUids.next();
-                uids.add(uid);
-            }
-            dispatcher.added(session, uids, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
+            Map<Long, Flags> copiedUids = copy(set, toMailbox, session);
+            dispatcher.added(session, copiedUids, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
 
-            return MessageRange.toRanges(uids);
+            return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }
@@ -723,20 +720,24 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
-    protected Iterator<Long> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
+    private Map<Long, Flags> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         try {
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            final List<Long> copiedMessages = new ArrayList<Long>();
+            final Map<Long, Flags> copiedMessages = new HashMap<Long, Flags>();
             messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
 
                 public void onMailboxMembers(List<Message<Id>> originalRows) throws MailboxException {
                     Iterator<Long> ids = to.copy(originalRows, session);
-                    while (ids.hasNext())
-                        copiedMessages.add(ids.next());
+                    int i = 0; 
+                    while (ids.hasNext()) {
+                        
+                        copiedMessages.put(ids.next(), originalRows.get(i).createFlags());
+                        i++;
+                    }
                 }
             });
-            return copiedMessages.iterator();
+            return copiedMessages;
 
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
