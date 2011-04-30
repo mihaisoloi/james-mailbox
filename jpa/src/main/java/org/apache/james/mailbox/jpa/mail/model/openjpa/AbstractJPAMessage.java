@@ -238,6 +238,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     private List<JPAProperty> properties;
 
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @OrderBy("id")
     @ElementJoinColumns({@ElementJoinColumn(name="MAILBOX_ID", referencedColumnName="MAILBOX_ID"),
     @ElementJoinColumn(name="MAIL_UID", referencedColumnName="MAIL_UID")})
     private List<JPAUserFlag> userFlags;
@@ -472,6 +473,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         recent = flags.contains(Flags.Flag.RECENT);
         seen = flags.contains(Flags.Flag.SEEN);
         
+        /*
         // Loop over the user flags and check which of them needs to get added / removed
         List<String> uFlags = Arrays.asList(flags.getUserFlags());
         for (int i = 0; i < userFlags.size(); i++) {
@@ -495,6 +497,13 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
                 userFlags.add(new JPAUserFlag(uFlag));
             }
             
+            
+        }
+        */
+        String[] userflags =  flags.getUserFlags();
+        userFlags.clear();
+        for (int i = 0 ; i< userflags.length; i++) {
+            userFlags.add(new JPAUserFlag(userflags[i]));
         }
     }
 
