@@ -403,21 +403,29 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         final Flags permanentFlags = getPermanentFlags(mailboxSession);
         final long uidValidity = getMailboxEntity().getUidValidity();
         final long uidNext = uidProvider.lastUid(mailboxSession, mailbox) +1;
-        final long messageCount = getMessageCount(mailboxSession);
+        final long messageCount; 
         final long unseenCount;
         final Long firstUnseen;
         switch (fetchGroup) {
             case UNSEEN_COUNT:
                 unseenCount = countUnseenMessagesInMailbox(mailboxSession);
+                messageCount = getMessageCount(mailboxSession);
                 firstUnseen = null;
                 break;
             case FIRST_UNSEEN:
                 firstUnseen = findFirstUnseenMessageUid(mailboxSession);
+                messageCount = getMessageCount(mailboxSession); 
                 unseenCount = 0;
+                break;
+            case NO_UNSEEN:
+                firstUnseen = null;
+                unseenCount = 0;
+                messageCount = getMessageCount(mailboxSession);
                 break;
             default:
                 firstUnseen = null;
                 unseenCount = 0;
+                messageCount = -1;
                 break;
         }
         return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession));

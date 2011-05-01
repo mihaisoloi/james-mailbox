@@ -179,7 +179,7 @@ public interface MessageManager {
          * Describes the optional data types.
          */
         public enum FetchGroup {
-            NO_UNSEEN, UNSEEN_COUNT, FIRST_UNSEEN
+            NO_UNSEEN, UNSEEN_COUNT, FIRST_UNSEEN, NO_COUNT
         };
 
         /**
