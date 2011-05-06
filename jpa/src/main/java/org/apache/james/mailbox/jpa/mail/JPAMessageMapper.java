@@ -181,7 +181,7 @@ public class JPAMessageMapper extends JPATransactionalMapper implements MessageM
     private int deleteDeletedMessagesInMailboxWithUID(Mailbox<Long> mailbox, long uid) {
         return getEntityManager().createNamedQuery("deleteDeletedMessagesInMailboxWithUID")
         .setParameter("idParam", mailbox.getMailboxId())
-        .setParameter("uidParam", uid).setMaxResults(1).executeUpdate();
+        .setParameter("uidParam", uid).executeUpdate();
     }
 
     private int deleteDeletedMessagesInMailboxBetweenUIDs(Mailbox<Long> mailbox, long from, long to) {
