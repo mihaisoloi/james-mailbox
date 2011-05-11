@@ -19,6 +19,8 @@
 
 package org.apache.james.mailbox;
 
+import java.util.regex.Pattern;
+
 /**
  * Expresses select criteria for mailboxes.
  */
@@ -28,13 +30,20 @@ public class MailboxQuery {
 
     private final String expression;
 
-    private final char freeWildcard;
-
-    private final char localWildcard;
-
-    private final int expressionLength;
-
     private final char pathDelimiter;
+    
+    private final Pattern pattern;
+    
+    /**
+     * Use this wildcard to match every char including the hierarchy delimiter
+     */
+    public final static char FREEWILDCARD = '*';
+    
+    
+    /**
+     * Use this wildcard to match every char except the hierarchy delimiter
+     */
+    public final static char LOCALWILDCARD = '%';
 
     /**
      * Constructs an expression determining a set of mailbox names.
@@ -59,10 +68,10 @@ public class MailboxQuery {
         } else {
             this.expression = expression;
         }
-        expressionLength = this.expression.length();
-        this.freeWildcard = '*';
-        this.localWildcard = '%';
         this.pathDelimiter = pathDelimiter;
+
+        // Compile some pattern which is used later
+        pattern = Pattern.compile(this.expression.replaceAll("\\" + pathDelimiter ,"\\\\" + pathDelimiter).replaceAll("\\*", "\\.\\*").replaceAll("\\%", "[^\\.]*"));
     }
 
     /**
@@ -89,7 +98,7 @@ public class MailboxQuery {
      * @return the freeWildcard
      */
     public final char getFreeWildcard() {
-        return freeWildcard;
+        return FREEWILDCARD;
     }
 
     /**
@@ -100,7 +109,7 @@ public class MailboxQuery {
      * @return the localWildcard
      */
     public final char getLocalWildcard() {
-        return localWildcard;
+        return LOCALWILDCARD;
     }
 
     /**
@@ -118,107 +127,14 @@ public class MailboxQuery {
             if (name == null) {
                 result = false;
             } else {
-                result = isWildcardMatch(name, 0, 0);
+                result = pattern.matcher(name).matches();
             }
         } else {
             result = expression.equals(name);
         }
         return result;
     }
-
-    private final boolean isWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
-        final boolean result;
-        if (expressionIndex < expressionLength) {
-            final char expressionNext = expression.charAt(expressionIndex);
-            if (expressionNext == freeWildcard) {
-                result = isFreeWildcardMatch(name, nameIndex, expressionIndex);
-            } else if (expressionNext == localWildcard) {
-                result = isLocalWildcardMatch(name, nameIndex, expressionIndex);
-            } else {
-                if (nameIndex < name.length()) {
-                    final char nameNext = name.charAt(nameIndex);
-                    if (nameNext == expressionNext) {
-                        result = isWildcardMatch(name, nameIndex + 1, expressionIndex + 1);
-                    } else {
-                        result = false;
-                    }
-                } else {
-                    // more expression characters to match
-                    // but no more name
-                    result = false;
-                }
-            }
-        } else {
-            // no more expression characters to match
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean isLocalWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
-        final boolean result;
-        if (expressionIndex < expressionLength) {
-            final char expressionNext = expression.charAt(expressionIndex);
-            if (expressionNext == localWildcard) {
-                result = isLocalWildcardMatch(name, nameIndex, expressionIndex + 1);
-            } else if (expressionNext == freeWildcard) {
-                result = isFreeWildcardMatch(name, nameIndex, expressionIndex + 1);
-            } else {
-                boolean matchRest = false;
-                for (int i = nameIndex; i < name.length(); i++) {
-                    final char tasteNextName = name.charAt(i);
-                    if (expressionNext == tasteNextName) {
-                        matchRest = isLocalWildcardMatch(name, i + 1, expressionIndex + 1);
-                        break;
-                    } else if (tasteNextName == pathDelimiter) {
-                        matchRest = false;
-                        break;
-                    }
-                }
-                result = matchRest;
-            }
-        } else {
-            boolean containsDelimiter = false;
-            for (int i = nameIndex; i < name.length(); i++) {
-                final char nextRemaining = name.charAt(i);
-                if (nextRemaining == pathDelimiter) {
-                    containsDelimiter = true;
-                    break;
-                }
-            }
-            result = !containsDelimiter;
-        }
-        return result;
-    }
-
-    private boolean isWildcard(char character) {
-        return character == freeWildcard || character == localWildcard;
-    }
-
-    private boolean isFreeWildcardMatch(final String name, final int nameIndex, final int expressionIndex) {
-        final boolean result;
-        int nextNormal = expressionIndex;
-        while (nextNormal < expressionLength && isWildcard(expression.charAt(nextNormal))) {
-            nextNormal++;
-        }
-        if (nextNormal < expressionLength) {
-            final char expressionNextNormal = expression.charAt(nextNormal);
-            boolean matchRest = false;
-            for (int i = nameIndex; i < name.length(); i++) {
-                final char tasteNextName = name.charAt(i);
-                if ((expressionNextNormal == tasteNextName) && (isWildcardMatch(name, i, nextNormal))) {
-                    matchRest = true;
-                    break;
-                }
-            }
-            result = matchRest;
-        } else {
-            // no more expression characters to match
-            result = true;
-        }
-        return result;
-    }
-
+  
     /**
      * Get combined name formed by adding the expression to the base using the
      * given hierarchy delimiter. Note that the wildcards are retained in the
@@ -264,7 +180,7 @@ public class MailboxQuery {
      * @return true if wildcard contained, false otherwise
      */
     public boolean isWild() {
-        return expression != null && (expression.indexOf(freeWildcard) >= 0 || expression.indexOf(localWildcard) >= 0);
+        return expression != null && (expression.indexOf(getFreeWildcard()) >= 0 || expression.indexOf(getLocalWildcard()) >= 0);
     }
 
     /**
@@ -274,7 +190,7 @@ public class MailboxQuery {
      */
     public String toString() {
         final String TAB = " ";
-        return "MailboxExpression [ " + "base = " + this.base + TAB + "expression = " + this.expression + TAB + "freeWildcard = " + this.freeWildcard + TAB + "localWildcard = " + this.localWildcard + TAB + " ]";
+        return "MailboxExpression [ " + "base = " + this.base + TAB + "expression = " + this.expression + TAB + "freeWildcard = " + this.getFreeWildcard() + TAB + "localWildcard = " + this.getLocalWildcard() + TAB + " ]";
     }
 
 }

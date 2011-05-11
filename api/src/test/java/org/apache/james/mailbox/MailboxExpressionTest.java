@@ -267,10 +267,12 @@ public class MailboxExpressionTest {
                 + SECOND_PART));
         assertTrue(expression.isExpressionMatch(SECOND_PART + PART + '.'
                 + SECOND_PART));
-        assertTrue(expression.isExpressionMatch(SECOND_PART + PART
-                + SECOND_PART + "Whatever"));
-        assertTrue(expression.isExpressionMatch(SECOND_PART + PART
-                + SECOND_PART + ".Whatever."));
+        
+        // Disable this tests as these are wrong. See MAILBOX-65
+        //assertTrue(expression.isExpressionMatch(SECOND_PART + PART
+        //        + SECOND_PART + "Whatever"));
+        //assertTrue(expression.isExpressionMatch(SECOND_PART + PART
+        //        + SECOND_PART + ".Whatever."));
     }
 
     @Test
@@ -301,5 +303,15 @@ public class MailboxExpressionTest {
         assertFalse(expression.isExpressionMatch(PART));
         assertFalse(expression.isExpressionMatch(PART + '.' + SECOND_PART + '.' + SECOND_PART));
         assertTrue(expression.isExpressionMatch(PART + '.' + SECOND_PART));
+    }
+    
+    @Test
+    public void testMailbox65() throws Exception {
+        MailboxQuery expression = create("*.test");
+        assertTrue(expression.isExpressionMatch("blah.test"));
+        assertFalse(expression.isExpressionMatch("blah.test.go"));
+
+        assertFalse(expression.isExpressionMatch("blah.test3"));
+
     }
 }
