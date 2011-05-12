@@ -71,7 +71,7 @@ public class MailboxQuery {
         this.pathDelimiter = pathDelimiter;
 
         // Compile some pattern which is used later
-        pattern = Pattern.compile(this.expression.replaceAll("\\" + pathDelimiter ,"\\\\" + pathDelimiter).replaceAll("\\*", "\\.\\*").replaceAll("\\%", "[^\\.]*"));
+        pattern = Pattern.compile(this.expression.replaceAll("\\" + pathDelimiter ,"\\\\" + pathDelimiter).replaceAll("\\*", "\\.\\*").replaceAll("\\%", "[^\\" + pathDelimiter  + "]*"));
     }
 
     /**
