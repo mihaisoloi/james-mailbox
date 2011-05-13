@@ -40,6 +40,7 @@ import javax.mail.util.SharedFileInputStream;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
+import org.apache.james.mailbox.MailboxListener.Added.MessageMetaData;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
@@ -288,8 +289,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                        
-            Map<Long, Flags> uids = new HashMap<Long, Flags>();
-            uids.put(uid, flags);
+            Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
+            uids.put(uid, new SimpleMessageMetaData(uid, flags, size, internalDate));
             dispatcher.added(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
             return uid;
         } catch (IOException e) {
@@ -511,7 +512,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
         try {
-            Map<Long, Flags> copiedUids = copy(set, toMailbox, session);
+            Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
             dispatcher.added(session, copiedUids, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
 
             return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
@@ -728,19 +729,20 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
-    private Map<Long, Flags> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
+    private Map<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         try {
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            final Map<Long, Flags> copiedMessages = new HashMap<Long, Flags>();
+            final Map<Long, MessageMetaData> copiedMessages = new HashMap<Long, MessageMetaData>();
             messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
 
                 public void onMailboxMembers(List<Message<Id>> originalRows) throws MailboxException {
                     Iterator<Long> ids = to.copy(originalRows, session);
                     int i = 0; 
                     while (ids.hasNext()) {
-                        
-                        copiedMessages.put(ids.next(), originalRows.get(i).createFlags());
+                        Message<Id> m = originalRows.get(i);
+                        long uid = ids.next();
+                        copiedMessages.put(uid, new SimpleMessageMetaData(uid, m.createFlags(), m.getFullContentOctets(), m.getInternalDate()));
                         i++;
                     }
                 }

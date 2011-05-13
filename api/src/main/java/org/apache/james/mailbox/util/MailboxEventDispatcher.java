@@ -27,9 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.mail.Flags;
-
 import org.apache.james.mailbox.MailboxListener;
+import org.apache.james.mailbox.MailboxListener.Added.MessageMetaData;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.UpdatedFlags;
@@ -74,7 +73,7 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param sessionId
      * @param path
      */
-    public void added(MailboxSession session, Map<Long, Flags> uids, MailboxPath path) {
+    public void added(MailboxSession session, Map<Long, MessageMetaData> uids, MailboxPath path) {
         pruneClosed();
         final AddedImpl added = new AddedImpl(session, path, uids);
         event(added);
@@ -152,12 +151,10 @@ public class MailboxEventDispatcher implements MailboxListener {
 
     private final static class AddedImpl extends MailboxListener.Added {
 
-        private final List<Long> uids;
-        private Map<Long, Flags> added;
+        private Map<Long, MessageMetaData> added;
 
-        public AddedImpl(final MailboxSession session, final MailboxPath path, final Map<Long, Flags> added) {
+        public AddedImpl(final MailboxSession session, final MailboxPath path, final Map<Long, MessageMetaData> added) {
             super(session, path);
-            this.uids = new ArrayList<Long>(added.keySet());
             this.added = added;
         }
 
@@ -166,16 +163,18 @@ public class MailboxEventDispatcher implements MailboxListener {
          * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
         public List<Long> getUids() {
-            return uids;
+            return new ArrayList<Long>(added.keySet());
         }
 
         /*
          * (non-Javadoc)
-         * @see org.apache.james.mailbox.MailboxListener.Added#getFlags()
+         * @see org.apache.james.mailbox.MailboxListener.Added#getMetaData(long)
          */
-        public Map<Long, Flags> getFlags() {
-            return added;
+        public MessageMetaData getMetaData(long uid) {
+            return added.get(uid);
         }
+
+
     }
 
     private final static class ExpungedImpl extends MailboxListener.Expunged {

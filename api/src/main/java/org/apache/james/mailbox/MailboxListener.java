@@ -19,8 +19,8 @@
 
 package org.apache.james.mailbox;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.Flags;
 
@@ -171,7 +171,14 @@ public interface MailboxListener {
          * 
          * @return flags
          */
-        public abstract Map<Long, Flags> getFlags();
+        public abstract MessageMetaData getMetaData(long uid);
+        
+        public interface MessageMetaData {
+            public long getUid();
+            public Flags getFlags();
+            public long getSize();
+            public Date getInternalDate();
+        }
     }
 
 }
