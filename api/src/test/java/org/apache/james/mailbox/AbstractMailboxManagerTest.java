@@ -43,7 +43,7 @@ public abstract class AbstractMailboxManagerTest {
         manager.startProcessingRequest(session);
         
         
-        MailboxPath inbox = MailboxPath.inbox(USER1);
+        MailboxPath inbox = MailboxPath.inbox(session);
         Assert.assertFalse(manager.mailboxExists(inbox, session));
         
         manager.createMailbox(inbox, session);

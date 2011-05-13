@@ -121,7 +121,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
             manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
             
             // this threw NPE
-            manager.getMailbox(MailboxPath.inbox(user), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
+            manager.getMailbox(MailboxPath.inbox(session), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
 
         }
 

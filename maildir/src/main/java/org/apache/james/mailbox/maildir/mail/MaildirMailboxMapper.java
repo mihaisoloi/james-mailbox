@@ -32,6 +32,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
@@ -51,9 +52,12 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      * A request-scoped list of mailboxes in order to refer to them via id
      */
     private ArrayList<Mailbox<Integer>> mailboxCache = new ArrayList<Mailbox<Integer>>();
+
+    private final MailboxSession session;
     
-    public MaildirMailboxMapper(MaildirStore maildirStore) {
+    public MaildirMailboxMapper(MaildirStore maildirStore, MailboxSession session) {
         this.maildirStore = maildirStore;
+        this.session = session;
     }
 
     /*
@@ -259,7 +263,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
             }
             
             // Special case for INBOX: Let's use the user's folder.
-            MailboxPath inboxMailboxPath = MailboxPath.inbox(userName);
+            MailboxPath inboxMailboxPath = MailboxPath.inbox(session);
             mailboxList.add(maildirStore.loadMailbox(inboxMailboxPath));
             
             // List all INBOX sub folders.

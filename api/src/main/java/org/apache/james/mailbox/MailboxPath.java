@@ -31,6 +31,8 @@ public class MailboxPath {
     private String user;
     private String name;
 
+
+    
     public MailboxPath(String namespace, String user, String name) {
         this.namespace = namespace;
         this.user = user;
@@ -178,16 +180,49 @@ public class MailboxPath {
             result = PRIME * result + getNamespace().hashCode();
         return result;
     }
+    
+    /**
+     * Return the full name of the {@link MailboxPath}, which is constructed via the {@link #namespace} and {@link #name}
+     * 
+     * @param delimiter
+     * @return fullName
+     */
+    public String getFullName(char delimiter) {
+        return namespace + delimiter + name;
+    }
 
     /**
      * Return a {@link MailboxPath} which represent the INBOX of the given
-     * username
+     * session
      * 
-     * @param username
+     * @param session
      * @return inbox
      */
-    public static MailboxPath inbox(String username) {
-        return new MailboxPath(MailboxConstants.USER_NAMESPACE, username, MailboxConstants.INBOX);
+    public static MailboxPath inbox(MailboxSession session) {
+        return new MailboxPath(session.getPersonalSpace(), session.getUser().getUserName(), MailboxConstants.INBOX);
+    }
+    
+    /**
+     * Create a {@link MailboxPath} by parsing the given full mailboxname (which included the namespace)
+     * 
+     * @param session
+     * @param fullmailboxname
+     * @return path
+     */
+    public static MailboxPath parse(MailboxSession session, String fullmailboxname) {
+        char delimiter = session.getPathDelimiter();
+        int i = fullmailboxname.indexOf(delimiter);
+        String namespace = fullmailboxname.substring(0, i);
+        String mailbox = fullmailboxname.substring(i + 1, fullmailboxname.length());
+        String username = null;
+        if (namespace == null || namespace.trim().equals("")) {
+            namespace = MailboxConstants.USER_NAMESPACE;
+        } 
+        if (namespace.equals(session.getPersonalSpace())) {
+            username = session.getUser().getUserName();
+        }
+        return new MailboxPath(namespace, username, mailbox);
+
     }
 
 }
