@@ -34,7 +34,7 @@ public class MailboxPath {
 
     
     public MailboxPath(String namespace, String user, String name) {
-        if (namespace.equals("")) {
+        if (namespace == null || namespace.equals("")) {
             this.namespace = MailboxConstants.USER_NAMESPACE;
         } else {
             this.namespace = namespace;
