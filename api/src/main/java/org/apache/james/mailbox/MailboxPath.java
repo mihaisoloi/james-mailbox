@@ -34,21 +34,21 @@ public class MailboxPath {
 
     
     public MailboxPath(String namespace, String user, String name) {
-        this.namespace = namespace;
+        if (namespace.equals("")) {
+            this.namespace = MailboxConstants.USER_NAMESPACE;
+        } else {
+            this.namespace = namespace;
+        }
         this.user = user;
         this.name = name;
     }
 
     public MailboxPath(MailboxPath mailboxPath) {
-        this.namespace = mailboxPath.getNamespace();
-        this.user = mailboxPath.getUser();
-        this.name = mailboxPath.getName();
+        this(mailboxPath.getNamespace(), mailboxPath.getUser(), mailboxPath.getName());
     }
 
     public MailboxPath(MailboxPath mailboxPath, String name) {
-        this.namespace = mailboxPath.getNamespace();
-        this.user = mailboxPath.getUser();
-        this.name = name;
+        this(mailboxPath.getNamespace(), mailboxPath.getUser(), name);
     }
 
     /**
