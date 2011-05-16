@@ -59,6 +59,13 @@ public class SearchQuery {
         
         
     }
+    
+    public static enum AddressType {
+        From,
+        To,
+        Cc,
+        Bcc
+    }
 
     public static int toCalendarType(DateResolution res) {
         int type;
@@ -228,6 +235,19 @@ public class SearchQuery {
         return new HeaderCriterion(headerName, new DateOperator(DateComparator.BEFORE, date, res));
     }
 
+    /**
+     * Creates a filter matching messages whose Address header contains the given address. 
+     * The address header of the message MUST get canonicalized before try to match it.
+     * 
+     * @param type
+     * @param address
+     * @return <code>Criterion</code>
+     */
+    public static final Criterion address(AddressType type, String address) {       
+        return new HeaderCriterion(type.name(), new AddressOperator(address));
+    }
+
+    
     /**
      * Creates a filter matching messages whose header value contains the given
      * value.
@@ -1297,6 +1317,70 @@ public class SearchQuery {
     public interface HeaderOperator extends Operator {
     }
 
+    public static final class AddressOperator implements HeaderOperator {
+        private final String address;
+
+        public AddressOperator(final String address) {
+            super();
+            this.address = address;
+        }
+
+        /**
+         * Gets the value to be searched for.
+         * 
+         * @return the value
+         */
+        public String getAddress() {
+            return address;
+        }
+
+        /**
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int PRIME = 31;
+            int result = 1;
+            result = PRIME * result + ((address == null) ? 0 : address.hashCode());
+            return result;
+        }
+
+        /**
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            final AddressOperator other = (AddressOperator) obj;
+            if (address == null) {
+                if (other.address != null)
+                    return false;
+            } else if (!address.equals(other.address))
+                return false;
+            return true;
+        }
+
+        /**
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
+         * 
+         * @return a <code>String</code> representation of this object.
+         */
+        public String toString() {
+            final String TAB = " ";
+
+            StringBuffer retValue = new StringBuffer();
+
+            retValue.append("AdressOperator ( ").append("address = ").append(this.address).append(TAB).append(" )");
+
+            return retValue.toString();
+        }
+    }
     /**
      * Contained value search.
      */

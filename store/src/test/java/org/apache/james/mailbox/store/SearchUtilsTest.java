@@ -31,6 +31,7 @@ import java.util.TimeZone;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.store.MessageSearches;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -792,4 +793,13 @@ public class SearchUtilsTest {
         assertTrue(searches.isMatch(SearchQuery.headerDateAfter(DATE_FIELD, getDate(25, 3,
                 2007), DateResolution.Day),row, recent));
     }
+    
+    @Test
+    public void testShouldMatchAddressHeaderWithComments() throws Exception {
+        builder.header("To", "<user-from (comment)@ (comment) domain.org>");
+        Message<Long> row = builder.build();
+        assertTrue(searches.isMatch(SearchQuery.address(AddressType.To, "user-from@domain.org"), row, recent));
+        assertFalse(searches.isMatch(SearchQuery.address(AddressType.From, "user-from@domain.org"), row, recent));
+    }
+
 }

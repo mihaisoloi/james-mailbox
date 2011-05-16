@@ -35,12 +35,18 @@ import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.field.address.Address;
+import org.apache.james.mime4j.field.address.AddressList;
+import org.apache.james.mime4j.field.address.Group;
+import org.apache.james.mime4j.field.address.Mailbox;
+import org.apache.james.mime4j.field.address.MailboxList;
 import org.apache.james.mime4j.field.datetime.DateTime;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
 import org.apache.james.mime4j.field.datetime.parser.ParseException;
@@ -296,12 +302,57 @@ public class MessageSearches {
             result = matches((SearchQuery.ContainsOperator) operator, headerName, message);
         } else if (operator instanceof SearchQuery.ExistsOperator) {
             result = exists(headerName, message);
+        } else if (operator instanceof SearchQuery.AddressOperator) {
+            result = matchesAddress((SearchQuery.AddressOperator) operator, headerName, message);
         } else {
             throw new UnsupportedSearchException();
         }
         return result;
     }
-
+    
+    /**
+     * Match against a {@link AddressType} header
+     * 
+     * @param operator
+     * @param headerName
+     * @param message
+     * @return containsAddress
+     */
+    private boolean matchesAddress(final SearchQuery.AddressOperator operator,
+            final String headerName, final Message<?> message) {
+        final String text = operator.getAddress();
+        final List<Header> headers = message.getHeaders();
+        for (Header header:headers) {
+            final String name = header.getFieldName();
+            if (headerName.equalsIgnoreCase(name)) {
+                final String value = header.getValue();
+                try {
+                    AddressList aList = AddressList.parse(value);
+                    for (int i = 0; i < aList.size(); i++) {
+                        Address address = aList.get(i);
+                        if (address instanceof Mailbox) {
+                            System.out.println(((Mailbox) address).getAddress());
+                            if (((Mailbox) address).getAddress().contains(text)) {
+                                return true;
+                            }
+                        } else if (address instanceof Group) {
+                            MailboxList mList = ((Group) address).getMailboxes();
+                            for (int a = 0; i < mList.size(); a++) {
+                                if (mList.get(a).getAddress().contains(text)) {
+                                    return true;
+                                }                            
+                            }
+                        }
+                    }
+                } catch (org.apache.james.mime4j.field.address.parser.ParseException e) {
+                    log.debug("Unable to parse address from header " + headerName, e);
+                }
+                
+            }
+        }
+        return false;
+    }
+    
     private boolean exists(String headerName, Message<?> message) {
         boolean result = false;
         final List<Header> headers = message.getHeaders();
