@@ -331,14 +331,13 @@ public class MessageSearches {
                     for (int i = 0; i < aList.size(); i++) {
                         Address address = aList.get(i);
                         if (address instanceof Mailbox) {
-                            System.out.println(((Mailbox) address).getAddress());
-                            if (((Mailbox) address).getAddress().contains(text)) {
+                            if (((Mailbox) address).getEncodedString().contains(text)) {
                                 return true;
                             }
                         } else if (address instanceof Group) {
                             MailboxList mList = ((Group) address).getMailboxes();
                             for (int a = 0; i < mList.size(); a++) {
-                                if (mList.get(a).getAddress().contains(text)) {
+                                if (mList.get(a).getEncodedString().contains(text)) {
                                     return true;
                                 }                            
                             }
