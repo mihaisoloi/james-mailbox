@@ -320,7 +320,7 @@ public class MessageSearches {
      */
     private boolean matchesAddress(final SearchQuery.AddressOperator operator,
             final String headerName, final Message<?> message) {
-        final String text = operator.getAddress();
+        final String text = operator.getAddress().toLowerCase(Locale.US);
         final List<Header> headers = message.getHeaders();
         for (Header header:headers) {
             final String name = header.getFieldName();
@@ -331,13 +331,13 @@ public class MessageSearches {
                     for (int i = 0; i < aList.size(); i++) {
                         Address address = aList.get(i);
                         if (address instanceof Mailbox) {
-                            if (((Mailbox) address).getEncodedString().contains(text)) {
+                            if (((Mailbox) address).getEncodedString().toLowerCase(Locale.US).contains(text)) {
                                 return true;
                             }
                         } else if (address instanceof Group) {
                             MailboxList mList = ((Group) address).getMailboxes();
                             for (int a = 0; i < mList.size(); a++) {
-                                if (mList.get(a).getEncodedString().contains(text)) {
+                                if (mList.get(a).getEncodedString().toLowerCase(Locale.US).contains(text)) {
                                     return true;
                                 }                            
                             }
