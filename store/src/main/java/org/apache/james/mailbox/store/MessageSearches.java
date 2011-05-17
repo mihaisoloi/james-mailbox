@@ -343,6 +343,8 @@ public class MessageSearches {
                             }
                         }
                     }
+                    // Also try to match against raw header now
+                    return value.toLowerCase(Locale.US).contains(text);
                 } catch (org.apache.james.mime4j.field.address.parser.ParseException e) {
                     log.debug("Unable to parse address from header " + headerName, e);
                 }
