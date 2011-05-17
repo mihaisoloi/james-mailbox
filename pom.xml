@@ -28,7 +28,7 @@
   <groupId>org.apache.james</groupId>
   <artifactId>apache-james-mailbox</artifactId>
   <name>Apache JAMES Mailbox</name>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.2</version>
   <description>Apache James Mailbox</description>
   <url>http://james.apache.org/mailbox</url>
   <inceptionYear>2010</inceptionYear>
@@ -59,9 +59,9 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/james/mailbox/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/mailbox/trunk</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/james/mailbox/trunk?root=Apache-SVN</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/mailbox/tags/apache-james-mailbox-0.2</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/mailbox/tags/apache-james-mailbox-0.2</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/james/mailbox/trunk/tags/apache-james-mailbox-0.2?root=Apache-SVN</url>
   </scm>
 
   <repositories>
