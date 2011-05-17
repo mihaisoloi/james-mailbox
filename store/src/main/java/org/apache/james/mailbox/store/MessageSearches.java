@@ -336,7 +336,7 @@ public class MessageSearches {
                             }
                         } else if (address instanceof Group) {
                             MailboxList mList = ((Group) address).getMailboxes();
-                            for (int a = 0; i < mList.size(); a++) {
+                            for (int a = 0; a < mList.size(); a++) {
                                 if (mList.get(a).getEncodedString().toLowerCase(Locale.US).contains(text)) {
                                     return true;
                                 }                            
