@@ -18,8 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.james.mailbox.MailboxException;
@@ -35,7 +34,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
  */
 public abstract class CachingUidProvider<Id> implements UidProvider<Id>{
 
-    private final Map<Id, AtomicLong> uids = new HashMap<Id, AtomicLong>();
+    private final ConcurrentHashMap<Id, AtomicLong> uids = new ConcurrentHashMap<Id, AtomicLong>();
     
     /*
      * (non-Javadoc)
@@ -62,15 +61,16 @@ public abstract class CachingUidProvider<Id> implements UidProvider<Id>{
      * @throws MailboxException
      */
     protected AtomicLong retrieveLastUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException {
-        AtomicLong uid;
-        synchronized (uids) {
-            uid = uids.get(mailbox.getMailboxId());
-            if (uid == null) {
-                uid = new AtomicLong(getLastUid(session, mailbox));
-                uids.put(mailbox.getMailboxId(), uid);
+        AtomicLong uid = uids.get(mailbox.getMailboxId());
+
+        if (uid == null) {
+            uid = new AtomicLong(getLastUid(session, mailbox));
+            AtomicLong cachedUid = uids.putIfAbsent(mailbox.getMailboxId(), uid);
+            if (cachedUid != null) {
+                uid = cachedUid;
             }
-            
         }
+
         return uid;
     }
     
