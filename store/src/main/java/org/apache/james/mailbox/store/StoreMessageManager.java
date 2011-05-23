@@ -184,7 +184,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             
             tmpMsgIn = new SharedFileInputStream(file);
            
-            final int size = tmpMsgIn.available();
+            final int size = (int) file.length();
             final int bodyStartOctet = bodyStartOctet(tmpMsgIn);
 
             // Disable line length... This should be handled by the smtp server component and not the parser itself
