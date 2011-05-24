@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.Content;
 import org.apache.james.mailbox.store.mail.model.Message;
 
@@ -33,13 +34,16 @@ import org.apache.james.mailbox.store.mail.model.Message;
  *
  */
 public final class InputStreamContent implements org.apache.james.mailbox.InputStreamContent{
+    @SuppressWarnings("unchecked")
     private Message m;
     private Type type;
 
-    public enum Type {
+    public static enum Type {
         Full,
         Body
     }
+    
+    @SuppressWarnings("unchecked")
     public InputStreamContent(Message m, Type type) throws IOException{
         this.m = m;
         this.type = type;
@@ -60,14 +64,16 @@ public final class InputStreamContent implements org.apache.james.mailbox.InputS
     }
 
     /*
-     * 
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {
+        // wrap the streams in a BoundedInputStream to make sure it really match with the stored size.
         switch (type) {
         case Full:
-            return m.getFullContent();
+            return new BoundedInputStream(m.getFullContent(), size());
         default:
-            return m.getBodyContent();
+            return new BoundedInputStream(m.getBodyContent(), size());
         }
        
     }
