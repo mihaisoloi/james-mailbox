@@ -28,9 +28,9 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.james.mailbox.MailboxListener;
-import org.apache.james.mailbox.MailboxListener.Added.MessageMetaData;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.UpdatedFlags;
 
 /**
@@ -87,7 +87,7 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param uids
      * @param path
      */
-    public void expunged(final MailboxSession session, final List<Long> uids, MailboxPath path) {
+    public void expunged(final MailboxSession session,  Map<Long, MessageMetaData> uids, MailboxPath path) {
         final ExpungedImpl expunged = new ExpungedImpl(session, path, uids);
         event(expunged);
     }
@@ -179,9 +179,9 @@ public class MailboxEventDispatcher implements MailboxListener {
 
     private final static class ExpungedImpl extends MailboxListener.Expunged {
 
-        private final List<Long> uids;
+        private final Map<Long, MessageMetaData> uids;
 
-        public ExpungedImpl(MailboxSession session, final MailboxPath path, final List<Long> uids) {
+        public ExpungedImpl(MailboxSession session, final MailboxPath path, final  Map<Long, MessageMetaData> uids) {
             super(session, path);
             this.uids = uids;
         }
@@ -190,7 +190,15 @@ public class MailboxEventDispatcher implements MailboxListener {
          * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
         public List<Long> getUids() {
-            return uids;
+            return new ArrayList<Long>(uids.keySet());
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see org.apache.james.mailbox.MailboxListener.Expunged#getMetaData(long)
+         */
+        public MessageMetaData getMetaData(long uid) {
+            return uids.get(uid);
         }
     }
 

@@ -40,8 +40,8 @@ import javax.mail.util.SharedFileInputStream;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
-import org.apache.james.mailbox.MailboxListener.Added.MessageMetaData;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.SearchQuery;
@@ -52,6 +52,7 @@ import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
+import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -149,14 +150,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @see org.apache.james.mailbox.Mailbox#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> expunge(final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
-        List<Long> uids = new ArrayList<Long>();
-        Iterator<Long> uidIt = deleteMarkedInMailbox(set, mailboxSession);
-        while(uidIt.hasNext()) {
-            long uid = uidIt.next();
-            uids.add(uid);
-        }
+        Map<Long, MessageMetaData> uids = deleteMarkedInMailbox(set, mailboxSession);
+     
         dispatcher.expunged(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
-        return uids.iterator();    
+        return uids.keySet().iterator();    
     }
 
     /*
@@ -622,12 +619,12 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
     
-    protected Iterator<Long> deleteMarkedInMailbox(final MessageRange range, final MailboxSession session) throws MailboxException {
+    protected Map<Long, MessageMetaData> deleteMarkedInMailbox(final MessageRange range, final MailboxSession session) throws MailboxException {
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-        return messageMapper.execute(new Mapper.Transaction<Iterator<Long>>() {
+        return messageMapper.execute(new Mapper.Transaction<Map<Long, MessageMetaData>>() {
 
-            public Iterator<Long> run() throws MailboxException {
+            public Map<Long, MessageMetaData> run() throws MailboxException {
                 return messageMapper.expungeMarkedForDeletionInMailbox(getMailboxEntity(), range);
             }
             

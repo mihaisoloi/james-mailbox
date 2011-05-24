@@ -19,10 +19,8 @@
 
 package org.apache.james.mailbox;
 
-import java.util.Date;
 import java.util.List;
 
-import javax.mail.Flags;
 
 /**
  * Listens to <code>Mailbox</code> events.<br>
@@ -143,6 +141,13 @@ public interface MailboxListener {
         public Expunged(MailboxSession session, MailboxPath path) {
             super(session, path);
         }
+        
+        /**
+         * Return the flags which were set for the added message
+         * 
+         * @return flags
+         */
+        public abstract MessageMetaData getMetaData(long uid);
     }
 
     /**
@@ -173,12 +178,6 @@ public interface MailboxListener {
          */
         public abstract MessageMetaData getMetaData(long uid);
         
-        public interface MessageMetaData {
-            public long getUid();
-            public Flags getFlags();
-            public long getSize();
-            public Date getInternalDate();
-        }
     }
 
 }

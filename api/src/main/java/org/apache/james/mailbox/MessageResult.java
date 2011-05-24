@@ -19,11 +19,9 @@
 
 package org.apache.james.mailbox;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.mail.Flags;
 
 /**
  * <p>
@@ -53,7 +51,7 @@ import javax.mail.Flags;
  * </p>
  */
 
-public interface MessageResult extends Comparable<MessageResult>, Headers {
+public interface MessageResult extends Comparable<MessageResult>, MessageMetaData, Headers {
 
     /**
      * Indicates the results fetched.
@@ -133,41 +131,6 @@ public interface MessageResult extends Comparable<MessageResult>, Headers {
     }
 
     MimeDescriptor getMimeDescriptor() throws MailboxException;
-
-    /**
-     * Return the uid of the message which the MessageResult belongs to
-     * 
-     * @return uid
-     */
-    long getUid();
-
-    /**
-     * <p>
-     * IMAP defines this as the time when the message has arrived to the server
-     * (by smtp). Clients are also allowed to set the internalDate on append.
-     * </p>
-     * <p>
-     * Is this Mail.getLastUpdates() for James delivery? Should we use
-     * MimeMessage.getReceivedDate()?
-     * </p>
-     */
-
-    Date getInternalDate();
-
-    /**
-     * TODO optional, to be decided <br>
-     * maybe this is a good thing because IMAP often requests only the Flags and
-     * this way we don't need to create a lazy-loading MimeMessage instance just
-     * for the Flags.
-     */
-    Flags getFlags() throws MailboxException;
-
-    /**
-     * Return the size in bytes
-     * 
-     * @return size
-     */
-    long getSize();
 
     /**
      * Iterates the message headers for the given part in a multipart message.

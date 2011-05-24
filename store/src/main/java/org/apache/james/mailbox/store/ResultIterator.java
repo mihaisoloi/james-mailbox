@@ -97,17 +97,20 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
 
         private final long uid;
 
+        private final Flags flags;
+
         public UnloadedMessageResult(final Message<Id> message,
                 final MailboxException exception) {
             super();
             internalDate = message.getInternalDate();
             size = message.getFullContentOctets();
             uid = message.getUid();
+            flags = message.createFlags();
             this.exception = exception;
         }
 
-        public Flags getFlags() throws MailboxException {
-            throw exception;
+        public Flags getFlags() {
+            return flags;
         }
 
         public Content getFullContent() throws MailboxException {

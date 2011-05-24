@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
@@ -38,6 +40,7 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.ISO9075;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.UpdatedFlags;
@@ -45,6 +48,7 @@ import org.apache.james.mailbox.jcr.AbstractJCRMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.slf4j.Logger;
@@ -377,7 +381,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
         try {
             final List<Message<String>> results;
             final long from = set.getUidFrom();
@@ -398,14 +402,14 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
                     results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
                     break;       
             }
-            List<Long> uids = new ArrayList<Long>();
+            Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
             for (int i = 0; i < results.size(); i++) {
                 Message<String> m = results.get(i);
                 long uid = m.getUid();
+                uids.put(uid, new SimpleMessageMetaData(m));
                 delete(mailbox, m);
-                uids.add(uid);
             }
-            return uids.iterator();
+            return uids;
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
         }

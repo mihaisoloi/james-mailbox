@@ -20,7 +20,6 @@ package org.apache.james.mailbox.jpa.mail.model.openjpa;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -70,13 +69,13 @@ import org.apache.openjpa.persistence.jdbc.Index;
     @NamedQuery(name="findMessagesInMailboxAfterUID",
             query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid>=:uidParam"),                    
     @NamedQuery(name="findDeletedMessagesInMailbox",
-            query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.deleted=TRUE"),        
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.deleted=TRUE"),        
     @NamedQuery(name="findDeletedMessagesInMailboxBetweenUIDs",
-            query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid BETWEEN :fromParam AND :toParam AND message.deleted=TRUE"),        
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid BETWEEN :fromParam AND :toParam AND message.deleted=TRUE"),        
     @NamedQuery(name="findDeletedMessagesInMailboxWithUID",
-            query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid=:uidParam AND message.deleted=TRUE"),                    
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid=:uidParam AND message.deleted=TRUE"),                    
     @NamedQuery(name="findDeletedMessagesInMailboxAfterUID",
-            query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid>=:uidParam AND message.deleted=TRUE"),          
+            query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.uid>=:uidParam AND message.deleted=TRUE"),          
             
     @NamedQuery(name="deleteDeletedMessagesInMailbox",
             query="DELETE FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.deleted=TRUE"),        

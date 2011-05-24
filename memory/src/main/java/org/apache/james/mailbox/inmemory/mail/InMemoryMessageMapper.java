@@ -21,6 +21,7 @@ package org.apache.james.mailbox.inmemory.mail;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +30,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
@@ -144,8 +147,8 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<Long> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
-        final List<Long> filteredResult = new ArrayList<Long>();
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
+        final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
 
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
 
@@ -153,14 +156,15 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
                 for (final Iterator<Message<Long>> it = results.iterator(); it.hasNext();) {
                     Message<Long> member = it.next();
                     if (member.isDeleted()) {
+                        filteredResult.put(member.getUid(), new SimpleMessageMetaData(member));
+
                         delete(mailbox, member);
-                        filteredResult.add(member.getUid());
                     }
                 }
             }
         });
 
-        return filteredResult.iterator();
+        return filteredResult;
     }
 
     /*

@@ -17,13 +17,15 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.store;
+package org.apache.james.mailbox.store.mail;
 
 import java.util.Date;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.MailboxListener.Added.MessageMetaData;
+import org.apache.james.mailbox.MessageMetaData;
+import org.apache.james.mailbox.store.mail.model.Message;
+
 
 public class SimpleMessageMetaData implements MessageMetaData{
     private long uid;
@@ -37,6 +39,11 @@ public class SimpleMessageMetaData implements MessageMetaData{
         this.size = size;
         this.internalDate = internalDate;
     }
+    
+    public SimpleMessageMetaData(Message<?> message) {
+        this(message.getUid(), message.createFlags(), message.getFullContentOctets(), message.getInternalDate());
+    }
+    
     
     /*
      * (non-Javadoc)
@@ -68,6 +75,22 @@ public class SimpleMessageMetaData implements MessageMetaData{
      */
     public long getUid() {
         return uid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof SimpleMessageMetaData) {
+            return uid == ((SimpleMessageMetaData) obj).getUid();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 31;
+        int result = 1;
+        result = PRIME * result + (int) (uid ^ (uid >>> 32));
+        return result;
     }
 
 }

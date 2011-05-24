@@ -20,10 +20,12 @@ package org.apache.james.mailbox.store.mail;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -56,7 +58,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uids
      * @throws MailboxException
      */
-    public abstract Iterator<Long> expungeMarkedForDeletionInMailbox(
+    public abstract Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(
             Mailbox<Id> mailbox, final MessageRange set)
             throws MailboxException;
 

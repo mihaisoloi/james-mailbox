@@ -24,8 +24,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
@@ -34,6 +36,7 @@ import javax.mail.Flags.Flag;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.UpdatedFlags;
@@ -44,6 +47,7 @@ import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
@@ -194,7 +198,7 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<Long> expungeMarkedForDeletionInMailbox(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
         List<Message<Integer>> results = new ArrayList<Message<Integer>>();
         final long from = set.getUidFrom();
         final long to = set.getUidTo();
@@ -214,14 +218,14 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
             results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, to);
             break;       
         }
-        List<Long> uids = new ArrayList<Long>();
+        Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
         for (int i = 0; i < results.size(); i++) {
             Message<Integer> m = results.get(i);
             long uid = m.getUid();
+            uids.put(uid, new SimpleMessageMetaData(m));
             delete(mailbox, m);
-            uids.add(uid);
         }
-        return uids.iterator();
+        return uids;
     }
 
     private List<Message<Integer>> findMessagesInMailbox(Mailbox<Integer> mailbox,
