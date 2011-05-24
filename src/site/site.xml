@@ -43,6 +43,13 @@
     <menu name="Mailbox">
       <item name="Introduction" href="/index.html" />
       <item name="Source Code" href="/source-code.html" />
+      <item name="Mailbox API" href="/mailbox-api.html" />
+      <item name="Mailbox Store" href="/mailbox-store.html" />
+      <item name="Mailbox Memory" href="/mailbox-memory.html" />
+      <item name="Mailbox Maildir" href="/mailbox-maildir.html" />
+      <item name="Mailbox JPA" href="/mailbox-jpa.html" />
+      <item name="Mailbox JCR" href="/mailbox-jcr.html" />
+      <item name="Mailbox Tool" href="/mailbox-tool.html" />
     </menu>  
      
     <menu name="References">

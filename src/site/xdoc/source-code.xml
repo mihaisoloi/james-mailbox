@@ -47,7 +47,7 @@
 
   <section name="Source Code Organization">
     <div style="float:left; margin=4px;">
-      <img src="images/uml/org.apache.james.mailbox-package.png"/>
+      <img src="images/uml/org-apache-james-mailbox-package.png"/>
     </div>
   </section>
 
