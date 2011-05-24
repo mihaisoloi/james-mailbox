@@ -20,10 +20,10 @@
 package org.apache.james.mailbox.store;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -36,8 +36,9 @@ import java.util.TreeMap;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
-import javax.mail.util.SharedFileInputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.TeeInputStream;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
@@ -58,6 +59,7 @@ import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
+import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
@@ -164,26 +166,20 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final MailboxSession mailboxSession,final boolean isRecent, final Flags flagsToBeSet)
     throws MailboxException {
         File file = null;
-        SharedFileInputStream tmpMsgIn = null;
+        TeeInputStream tmpMsgIn = null;
+        BodyOffsetInputStream bIn = null;
+        FileOutputStream out = null;
+        FileInputStream contentIn = null;
+        
         try {
             // Create a temporary file and copy the message to it. We will work with the file as
             // source for the InputStream
             file = File.createTempFile("imap", ".msg");
-            FileOutputStream out = new FileOutputStream(file);
+            out = new FileOutputStream(file);
             
-            byte[] buf = new byte[1024];
-            int i = 0;
-            while ((i = msgIn.read(buf)) != -1) {
-                out.write(buf, 0, i);
-            }
-            out.flush();
-            out.close();
-            
-            tmpMsgIn = new SharedFileInputStream(file);
+            tmpMsgIn = new TeeInputStream(msgIn, out);
            
-            final int size = (int) file.length();
-            final int bodyStartOctet = bodyStartOctet(tmpMsgIn);
-
+            bIn = new BodyOffsetInputStream(tmpMsgIn);
             // Disable line length... This should be handled by the smtp server component and not the parser itself
             // https://issues.apache.org/jira/browse/IMAP-122
             MimeEntityConfig config = new MimeEntityConfig();
@@ -192,7 +188,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             final ConfigurableMimeTokenStream parser = new ConfigurableMimeTokenStream(config);
            
             parser.setRecursionMode(MimeTokenStream.M_NO_RECURSE);
-            parser.parse(tmpMsgIn.newStream(0, -1));
+            parser.parse(bIn);
             final List<Header> headers = new ArrayList<Header>();
             
             int lineNumber = 0;
@@ -256,12 +252,14 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 final CountingInputStream bodyStream = new CountingInputStream(parser.getInputStream());
                 bodyStream.readAll();
                 long lines = bodyStream.getLineCount();
-                
+                bodyStream.close();
                 next = parser.next();
                 if (next == MimeTokenStream.T_EPILOGUE)  {
                     final CountingInputStream epilogueStream = new CountingInputStream(parser.getInputStream());
                     epilogueStream.readAll();
                     lines+=epilogueStream.getLineCount();
+                    epilogueStream.close();
+
                 }
                 propertyBuilder.setTextualLineCount(lines);
             }
@@ -282,8 +280,17 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             if (internalDate == null) {
                 internalDate = new Date();
             }
+            byte[] discard = new byte[4096];
+            while(tmpMsgIn.read(discard) != -1) {
+                // consume the rest of the stream so everything get copied to the file now
+                // via the TeeInputStream
+            }
+            int bodyStartOctet = (int) bIn.getBodyStartOffset();
+            contentIn = new FileInputStream(file);
+            final int size = (int) file.length();
+
             long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
-            final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, tmpMsgIn.newStream(0, -1), flags, headers, propertyBuilder);
+            final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, contentIn, flags, headers, propertyBuilder);
             long uid = appendMessageToStore(message, mailboxSession);
                        
             Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
@@ -297,13 +304,11 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         } finally {
-            if (tmpMsgIn != null) {
-                try {
-                    tmpMsgIn.close();
-                } catch (IOException e) {
-                    // ignore on close
-                }
-            }
+            IOUtils.closeQuietly(bIn);
+            IOUtils.closeQuietly(tmpMsgIn);
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(contentIn);
+
             // delete the temporary file if one was specified
             if (file != null) {
                 file.delete();
@@ -311,46 +316,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         }
 
     }
-    
-    /**
-     * Return the position in the given {@link InputStream} at which the Body of the 
-     * Message starts
-     * 
-     * @param msgIn
-     * @return bodyStartOctet
-     * @throws IOException
-     */
-    private int bodyStartOctet(InputStream msgIn) throws IOException{
-        // we need to pushback maximal 3 bytes
-        PushbackInputStream in = new PushbackInputStream(msgIn,3);
-        
-        int bodyStartOctet = in.available();
-        int i = -1;
-        int count = 0;
-        while ((i = in.read()) != -1 && in.available() > 4) {
-            if (i == 0x0D) {
-                int a = in.read();
-                if (a == 0x0A) {
-                    int b = in.read();
 
-                    if (b == 0x0D) {
-                        int c = in.read();
-
-                        if (c == 0x0A) {
-                            bodyStartOctet = count+4;
-                            break;
-                        }
-                        in.unread(c);
-                    }
-                    in.unread(b);
-                }
-                in.unread(a);
-            }
-            count++;
-        }
-        
-        return bodyStartOctet;
-    }
 
     /**
      * Create a new {@link MailboxMembership} for the given data

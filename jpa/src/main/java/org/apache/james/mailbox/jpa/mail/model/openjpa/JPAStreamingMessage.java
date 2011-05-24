@@ -31,13 +31,13 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Table;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
-import org.apache.james.mailbox.store.streaming.StreamUtils;
 import org.apache.openjpa.persistence.Persistent;
 
 /**
@@ -76,7 +76,7 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     public JPAStreamingMessage(JPAMailbox mailbox, long uid,Message<?> message) throws MailboxException {
         super(mailbox, uid, message);
         try {
-            this.content = new ByteArrayInputStream(StreamUtils.toByteArray(message.getFullContent()));
+            this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }

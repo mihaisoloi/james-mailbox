@@ -32,6 +32,7 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.mail.Flags;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.james.mailbox.MailboxException;
@@ -43,7 +44,6 @@ import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
-import org.apache.james.mailbox.store.streaming.StreamUtils;
 import org.slf4j.Logger;
 
 /**
@@ -143,7 +143,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         
         this.logger = logger;
         try {
-            this.content = new ByteArrayInputStream(StreamUtils.toByteArray(message.getFullContent()));
+            this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }

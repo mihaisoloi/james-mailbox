@@ -32,12 +32,12 @@ import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.StreamUtils;
 
 @Entity(name="Message")
 @Table(name="JAMES_MAIL")
@@ -56,7 +56,7 @@ public class JPAMessage extends AbstractJPAMessage {
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
         super(mailbox, uid, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
         try {
-            this.content = StreamUtils.out(content).toByteArray();
+            this.content = IOUtils.toByteArray(content);
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
@@ -71,7 +71,7 @@ public class JPAMessage extends AbstractJPAMessage {
     public JPAMessage(JPAMailbox mailbox, long uid, Message<?> message) throws MailboxException{
         super(mailbox, uid, message);
         try {
-            this.content = StreamUtils.out(message.getFullContent()).toByteArray();
+            this.content = IOUtils.toByteArray(message.getFullContent());
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }

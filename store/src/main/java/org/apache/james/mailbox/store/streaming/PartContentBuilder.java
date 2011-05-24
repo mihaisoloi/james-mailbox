@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.Content;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.Header;
@@ -159,7 +160,7 @@ public class PartContentBuilder {
                     }
                 }
                 if (valid) {
-                    content = StreamUtils.toByteArray(parser.getInputStream());
+                    content = IOUtils.toByteArray(parser.getInputStream());
                 } else {
                     content = EMPTY;
                 }
@@ -191,7 +192,7 @@ public class PartContentBuilder {
                 }
             }
             if (valid) {
-                content = StreamUtils.toByteArray(parser.getInputStream());
+                content = IOUtils.toByteArray(parser.getInputStream());
             } else {
                 content = EMPTY;
             }

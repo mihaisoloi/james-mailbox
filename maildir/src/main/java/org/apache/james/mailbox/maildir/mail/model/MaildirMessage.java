@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.mail.Flags;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.store.mail.model.Header;
@@ -34,7 +35,6 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
-import org.apache.james.mailbox.store.streaming.StreamUtils;
 
 public class MaildirMessage extends AbstractMaildirMessage {
 
@@ -110,7 +110,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.seen = message.isSeen();
         
         try {
-            this.rawFullContent = new ByteArrayInputStream(StreamUtils.toByteArray(message.getFullContent()));
+            this.rawFullContent = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
         } catch (IOException e) {
             throw new MailboxException("Parsing of message failed",e);
         }
