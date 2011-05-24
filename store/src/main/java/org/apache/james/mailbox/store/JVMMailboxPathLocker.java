@@ -19,8 +19,7 @@
 
 package org.apache.james.mailbox.store;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.james.mailbox.MailboxException;
@@ -37,7 +36,7 @@ import org.apache.james.mailbox.MailboxSession;
  */
 public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
 
-    private final Map<MailboxPath, ReentrantLock> paths = new HashMap<MailboxPath, ReentrantLock>();
+    private final ConcurrentHashMap<MailboxPath, ReentrantLock> paths = new ConcurrentHashMap<MailboxPath, ReentrantLock>();
 
 
     /*
@@ -45,13 +44,12 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#lock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
     protected void lock(MailboxSession session, MailboxPath path) throws MailboxException {
-        ReentrantLock lock;
-        synchronized (paths) {
-            lock = paths.get(path);
-
-            if (lock == null) {
-                lock = new ReentrantLock();
-                paths.put(path, lock);
+        ReentrantLock lock = paths.get(path);
+        if (lock == null) {
+            lock = new ReentrantLock();
+            ReentrantLock storedLock = paths.putIfAbsent(path, lock);
+            if (storedLock != null) {
+                lock = storedLock;
             }
         }
         lock.lock();        
@@ -62,10 +60,8 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
     protected void unlock(MailboxSession session, MailboxPath path) throws MailboxException {
-        ReentrantLock lock;
-        synchronized (paths) {
-            lock = paths.remove(path);
-        }
+        ReentrantLock lock = paths.remove(path);
+        
         if (lock != null) {
             lock.unlock();
         }        
