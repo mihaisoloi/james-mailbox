@@ -433,13 +433,14 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
                         if (newMessageFile.equals(messageFile) == false) {
                             FileUtils.moveFile(messageFile, newMessageFile );
                             modSeq = newMessageFile.lastModified();
-                            updatedFlags.add(new UpdatedFlags(member.getUid(), modSeq, originalFlags, newFlags));
 
                         } else {
                             modSeq = messageFile.lastModified();
                         } 
                         maildirMessage.setModSeq(modSeq);
                         
+                        updatedFlags.add(new UpdatedFlags(member.getUid(), modSeq, originalFlags, newFlags));
+
                         long uid = maildirMessage.getUid();
                         folder.update(uid, newMessageName);
                     } catch (IOException e) {

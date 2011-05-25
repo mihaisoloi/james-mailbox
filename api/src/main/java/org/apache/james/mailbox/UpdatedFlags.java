@@ -161,4 +161,12 @@ public class UpdatedFlags {
             return false;
         }
     }
+    
+    public boolean flagsChanged() {
+        if (modifiedFlags.getSystemFlags().length > 0 || modifiedFlags.getUserFlags().length > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

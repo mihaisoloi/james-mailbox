@@ -168,11 +168,12 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                         member.setModSeq(nextModSeq(mailbox));
                         save(mailbox, member);
 
-                        UpdatedFlags uFlags = new UpdatedFlags(member.getUid(), member.getModSeq(), originalFlags, newFlags);
-                        
-                        updatedFlags.add(uFlags);
-                        
                     }
+
+                    UpdatedFlags uFlags = new UpdatedFlags(member.getUid(), member.getModSeq(), originalFlags, newFlags);
+                    
+                    updatedFlags.add(uFlags);
+                    
 
                 }
 
