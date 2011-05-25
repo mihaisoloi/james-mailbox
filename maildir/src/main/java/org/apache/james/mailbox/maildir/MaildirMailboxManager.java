@@ -28,7 +28,6 @@ import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
@@ -36,20 +35,20 @@ public class MaildirMailboxManager extends StoreMailboxManager<Integer> {
 
     public MaildirMailboxManager(
             MailboxSessionMapperFactory<Integer> mailboxSessionMapperFactory,
-            Authenticator authenticator, MaildirStore store) {
-        this(mailboxSessionMapperFactory, authenticator, store, new JVMMailboxPathLocker());
+            Authenticator authenticator) {
+        this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker());
     }
 
     public MaildirMailboxManager(
             MailboxSessionMapperFactory<Integer> mailboxSessionMapperFactory,
-            Authenticator authenticator, MaildirStore store, MailboxPathLocker locker) {
-        super(mailboxSessionMapperFactory, authenticator, store, locker);
+            Authenticator authenticator,  MailboxPathLocker locker) {
+        super(mailboxSessionMapperFactory, authenticator,locker);
     }
 
     @Override
-    protected StoreMessageManager<Integer> createMessageManager(UidProvider<Integer> uidProvider, MailboxEventDispatcher dispatcher,
+    protected StoreMessageManager<Integer> createMessageManager( MailboxEventDispatcher dispatcher,
             Mailbox<Integer> mailboxEntiy, MailboxSession session) throws MailboxException {
-        return new MaildirMessageManager((MailboxSessionMapperFactory<Integer>)mailboxSessionMapperFactory, uidProvider, dispatcher, mailboxEntiy);
+        return new MaildirMessageManager((MailboxSessionMapperFactory<Integer>)mailboxSessionMapperFactory, dispatcher, mailboxEntiy);
     }
 
     @Override

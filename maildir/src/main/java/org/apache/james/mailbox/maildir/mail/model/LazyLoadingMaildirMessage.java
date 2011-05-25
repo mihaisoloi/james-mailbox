@@ -51,9 +51,10 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
 
     private boolean parsed;
 
-    public LazyLoadingMaildirMessage(Mailbox<Integer> mailbox, long uid, MaildirMessageName messageName) {
+    public LazyLoadingMaildirMessage(Mailbox<Integer> mailbox, long uid, MaildirMessageName messageName) throws IOException {
         super(mailbox);
         setUid(uid);
+        setModSeq(messageName.getFile().lastModified());
         setFlags(messageName.getFlags());
         this.messageName = messageName;
     }
@@ -298,4 +299,6 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
         parseMessage();
         return bodyStartOctet;
     }
+
+
 }

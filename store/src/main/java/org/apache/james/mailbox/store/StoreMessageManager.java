@@ -53,8 +53,6 @@ import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
-import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -86,14 +84,11 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     
     private final MailboxEventDispatcher dispatcher;    
     
-    protected final UidProvider<Id> uidProvider;
-
     protected MessageMapperFactory<Id> mapperFactory;
     
-    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final UidProvider<Id> uidProvider, final MailboxEventDispatcher dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
+    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MailboxEventDispatcher dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
         this.mailbox = mailbox;
         this.dispatcher = dispatcher;
-        this.uidProvider = uidProvider;
         this.mapperFactory = mapperFactory;
     }
     
@@ -289,14 +284,13 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             contentIn = new FileInputStream(file);
             final int size = (int) file.length();
 
-            long nextUid = uidProvider.nextUid(mailboxSession, getMailboxEntity());
-            final Message<Id> message = createMessage(nextUid, internalDate, size, bodyStartOctet, contentIn, flags, headers, propertyBuilder);
-            long uid = appendMessageToStore(message, mailboxSession);
+            final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, contentIn, flags, headers, propertyBuilder);
+            MessageMetaData data = appendMessageToStore(message, mailboxSession);
                        
             Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
-            uids.put(uid, new SimpleMessageMetaData(uid, flags, size, internalDate));
+            uids.put(data.getUid(), data);
             dispatcher.added(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
-            return uid;
+            return data.getUid();
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
         } catch (MimeException e) {
@@ -321,7 +315,6 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     /**
      * Create a new {@link MailboxMembership} for the given data
      * 
-     * @param uid
      * @param internalDate
      * @param size
      * @param bodyStartOctet
@@ -332,7 +325,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @return membership
      * @throws MailboxException 
      */
-    protected abstract Message<Id> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, 
+    protected abstract Message<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
             final InputStream documentIn, final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException;
     
     /**
@@ -366,7 +359,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         final List<Long> recent = recent(resetRecent, mailboxSession);
         final Flags permanentFlags = getPermanentFlags(mailboxSession);
         final long uidValidity = getMailboxEntity().getUidValidity();
-        final long uidNext = uidProvider.lastUid(mailboxSession, mailbox) +1;
+        final long uidNext = mapperFactory.getMessageMapper(mailboxSession).getLastUid(mailbox) +1;
+        final long highestModSeq =  mapperFactory.getMessageMapper(mailboxSession).getHighestModSeq(mailbox);
         final long messageCount; 
         final long unseenCount;
         final Long firstUnseen;
@@ -392,7 +386,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 messageCount = -1;
                 break;
         }
-        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession));
+        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession));
     }
 
  
@@ -484,11 +478,11 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         }
     }
     
-    protected long appendMessageToStore(final Message<Id> message, MailboxSession session) throws MailboxException {
+    protected MessageMetaData appendMessageToStore(final Message<Id> message, MailboxSession session) throws MailboxException {
         final MessageMapper<Id> mapper = mapperFactory.getMessageMapper(session);
-        return mapperFactory.getMessageMapper(session).execute(new Mapper.Transaction<Long>() {
+        return mapperFactory.getMessageMapper(session).execute(new Mapper.Transaction<MessageMetaData>() {
 
-            public Long run() throws MailboxException {
+            public MessageMetaData run() throws MailboxException {
                 return mapper.add(getMailboxEntity(), message);
             }
             
@@ -666,21 +660,21 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
 
-    private Iterator<Long> copy(final List<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
+    private Iterator<MessageMetaData> copy(final List<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
         try {
-            final List<Long> copiedRows = new ArrayList<Long>();
+            final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
             final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
             for (final Message<Id> originalMessage:originalRows) {
-               copiedRows.add(messageMapper.execute(new Mapper.Transaction<Long>() {
+               MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
 
-                    public Long run() throws MailboxException {
-                        long uid = uidProvider.nextUid(session, getMailboxEntity());
-                        return messageMapper.copy(getMailboxEntity(), uid, originalMessage);
+                    public MessageMetaData run() throws MailboxException {
+                        return messageMapper.copy(getMailboxEntity(), originalMessage);
                         
                     }
                     
-                }));
+                });
+               copiedRows.add(data);
             }
             return copiedRows.iterator();
         } catch (MailboxException e) {
@@ -700,13 +694,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
 
                 public void onMailboxMembers(List<Message<Id>> originalRows) throws MailboxException {
-                    Iterator<Long> ids = to.copy(originalRows, session);
-                    int i = 0; 
+                    Iterator<MessageMetaData> ids = to.copy(originalRows, session);
                     while (ids.hasNext()) {
-                        Message<Id> m = originalRows.get(i);
-                        long uid = ids.next();
-                        copiedMessages.put(uid, new SimpleMessageMetaData(uid, m.createFlags(), m.getFullContentOctets(), m.getInternalDate()));
-                        i++;
+                        MessageMetaData data = ids.next();
+                        copiedMessages.put(data.getUid(), data);
                     }
                 }
             });

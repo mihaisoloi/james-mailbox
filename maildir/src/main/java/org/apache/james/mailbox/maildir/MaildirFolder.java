@@ -171,6 +171,7 @@ public class MaildirFolder {
         }
         return lastUid;
     }
+    
 
     /**
      * Read the lastUid of the given mailbox from the file system.

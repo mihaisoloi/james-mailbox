@@ -32,7 +32,6 @@ import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -46,27 +45,27 @@ public class OpenJPAMessageManager extends JPAMessageManager {
 
     private final boolean useStreaming;
 
-    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, UidProvider<Long> uidProvider,
+    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory,
             MailboxEventDispatcher dispatcher, Mailbox<Long> mailbox) throws MailboxException {
-        this(mapperFactory, uidProvider, dispatcher, mailbox, false);
+        this(mapperFactory, dispatcher, mailbox, false);
     }
 
-    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, UidProvider<Long> uidProvider,
+    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory,
             MailboxEventDispatcher dispatcher, Mailbox<Long> mailbox, final boolean useStreaming) throws MailboxException {
-        super(mapperFactory, uidProvider, dispatcher, mailbox);
+        super(mapperFactory,  dispatcher, mailbox);
         this.useStreaming = useStreaming;
     }
 
     @Override
-    protected Message<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
+    protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         if (useStreaming) {
             final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
             for (Header header: headers) {
                 jpaHeaders.add((JPAHeader) header);
             }
-            return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+            return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         } else {
-            return super.createMessage(uid, internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
+            return super.createMessage(internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
         }
     }
 

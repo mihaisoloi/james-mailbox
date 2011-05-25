@@ -112,7 +112,8 @@ public class ResultUtils {
             messageResult.setFlags(message.createFlags());
             messageResult.setSize((int)message.getFullContentOctets());
             messageResult.setInternalDate(message.getInternalDate());
-
+            messageResult.setModSeq(message.getModSeq());
+            
             try {
 
                 if ((content & FetchGroup.HEADERS) > 0) {

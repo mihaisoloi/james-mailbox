@@ -132,6 +132,42 @@ public class SearchQuery {
     }
 
     /**
+     * Creates a filter for message mod-sequence less than the given value
+     * 
+     * @param value
+     *            messages with mod-sequence less than this value will be selected by
+     *            the returned criterion
+     * @return <code>Criterion</code>, not null
+     */
+    public static final Criterion modSeqLessThan(long value) {
+        return new ModSeqCriterion(new NumericOperator(value, NumericComparator.LESS_THAN));
+    }
+
+    /**
+     * Creates a filter for message mod-sequence greater than the given value
+     * 
+     * @param value
+     *            messages with mod-sequence greater than this value will be selected by
+     *            the returned criterion
+     * @return <code>Criterion</code>, not null
+     */
+    public static final Criterion modSeqGreaterThan(long value) {
+        return new ModSeqCriterion(new NumericOperator(value, NumericComparator.GREATER_THAN));
+    }
+
+    /**
+     * Creates a filter for message mod-sequence equal to the given value
+     * 
+     * @param value
+     *            messages with mod-sequence equal to this value will be selected by the
+     *            returned criterion
+     * @return <code>Criterion</code>, not null
+     */
+    public static final Criterion modSeqEquals(long value) {
+        return new ModSeqCriterion(new NumericOperator(value, NumericComparator.EQUALS));
+    }
+    
+    /**
      * Creates a filter matching messages with internal date after the given
      * date.
      * 
@@ -996,8 +1032,73 @@ public class SearchQuery {
     }
 
     /**
-     * Filters on the size of the message in octets.
+     * Filters on the mod-sequence of the messages.
      */
+    public static final class ModSeqCriterion extends Criterion {
+        private final NumericOperator operator;
+
+        private ModSeqCriterion(final NumericOperator operator) {
+            super();
+            this.operator = operator;
+        }
+
+        /**
+         * Gets the search operation and value to be evaluated.
+         * 
+         * @return the <code>NumericOperator</code>, not null
+         */
+        public NumericOperator getOperator() {
+            return operator;
+        }
+
+        /**
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int PRIME = 31;
+            int result = 1;
+            result = PRIME * result + ((operator == null) ? 0 : operator.hashCode());
+            return result;
+        }
+
+        /**
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            final ModSeqCriterion other = (ModSeqCriterion) obj;
+            if (operator == null) {
+                if (other.operator != null)
+                    return false;
+            } else if (!operator.equals(other.operator))
+                return false;
+            return true;
+        }
+
+        /**
+         * Constructs a <code>String</code> with all attributes in name = value
+         * format.
+         * 
+         * @return a <code>String</code> representation of this object.
+         */
+        public String toString() {
+            final String TAB = " ";
+
+            StringBuffer retValue = new StringBuffer();
+
+            retValue.append("SizeCriterion ( ").append("operator = ").append(this.operator).append(TAB).append(" )");
+
+            return retValue.toString();
+        }
+    }
+
     public static final class SizeCriterion extends Criterion {
         private final NumericOperator operator;
 
@@ -1063,6 +1164,7 @@ public class SearchQuery {
         }
     }
 
+    
     /**
      * Filters on a custom flag valuation.
      */

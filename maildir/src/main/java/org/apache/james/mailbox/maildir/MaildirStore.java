@@ -28,10 +28,9 @@ import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
-public class MaildirStore implements UidProvider<Integer>{
+public class MaildirStore {
 
     public static final String PATH_USER = "%user";
     public static final String PATH_DOMAIN = "%domain";
@@ -232,18 +231,6 @@ public class MaildirStore implements UidProvider<Integer>{
             return createMaildirFolder(mailbox).getLastUid() +1;
         } catch (IOException e) {
             throw new MailboxException("Unable to generate next uid", e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.UidProvider#lastUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    public long lastUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
-        try {
-            return createMaildirFolder(mailbox).getLastUid();
-        } catch (IOException e) {
-            throw new MailboxException("Unable to get last uid", e);
         }
     }
 }

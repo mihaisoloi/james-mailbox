@@ -48,7 +48,7 @@ public class SimpleMailboxMembership implements Message<Long> {
     public boolean flagged = false;
     public boolean seen = false;
 
-    public SimpleMailboxMembership(long mailboxId, long uid, Date internalDate, int size, 
+    public SimpleMailboxMembership(long mailboxId, long uid, long modSeq, Date internalDate, int size, 
             Flags flags, byte[] body, final List<SimpleHeader> headers) throws Exception {
         super();
         this.mailboxId = mailboxId;
@@ -80,37 +80,6 @@ public class SimpleMailboxMembership implements Message<Long> {
         baos.flush();
         fullContent = baos.toByteArray();
         setFlags(flags);
-    }
-
-    /**
-     * Constructs a copy of the given message.
-     * All properties are cloned except mailbox and UID.
-     * @param mailboxId new mailbox ID
-     * @param uid new UID
-     * @param original message to be copied, not null
-     */
-    public SimpleMailboxMembership(long mailboxId, long uid, SimpleMailboxMembership original) {
-        super();
-        this.mailboxId = mailboxId;
-        this.uid = uid;
-        this.internalDate = original.getInternalDate();
-        this.answered = original.isAnswered();
-        this.deleted = original.isDeleted();
-        this.draft = original.isDraft();
-        this.flagged = original.isFlagged();
-        this.recent = original.isRecent();
-        this.seen = original.isSeen();
-        this.body = original.body;
-        this.fullContent = original.fullContent;
-        final List<SimpleHeader> originalHeaders = original.headers;
-        if (originalHeaders == null) {
-            this.headers = new ArrayList<SimpleHeader>();
-        } else {
-            this.headers = new ArrayList<SimpleHeader>(originalHeaders.size());
-            for (SimpleHeader header:originalHeaders) {
-                this.headers.add(new SimpleHeader(header));
-            }
-        }
     }
 
     /**
@@ -279,6 +248,8 @@ public class SimpleMailboxMembership implements Message<Long> {
     public Long textualLineCount = null;
 
     private int size;
+
+    private long modSeq;
     
 
     /**
@@ -335,6 +306,18 @@ public class SimpleMailboxMembership implements Message<Long> {
      */
     public int compareTo(Message<Long> other) {
         return (int) (getUid() - other.getUid());
+    }
+
+    public long getModSeq() {
+        return modSeq;
+    }
+
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
+    }
+
+    public void setUid(long uid) {
+        this.uid = uid;
     }
     
     

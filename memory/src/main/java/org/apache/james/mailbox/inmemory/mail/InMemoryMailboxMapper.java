@@ -29,9 +29,8 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
-public class InMemoryMailboxMapper extends NonTransactionalMapper implements MailboxMapper<Long> {
+public class InMemoryMailboxMapper implements MailboxMapper<Long> {
     
     private static final int INITIAL_SIZE = 128;
     private final Map<Long, InMemoryMailbox> mailboxesById;
@@ -123,6 +122,10 @@ public class InMemoryMailboxMapper extends NonTransactionalMapper implements Mai
      */
     public List<Mailbox<Long>> list() throws MailboxException {
         return new ArrayList<Mailbox<Long>>(mailboxesById.values());
+    }
+
+    public <T> T execute(Transaction<T> transaction) throws MailboxException {
+        return transaction.run();
     }
     
 }

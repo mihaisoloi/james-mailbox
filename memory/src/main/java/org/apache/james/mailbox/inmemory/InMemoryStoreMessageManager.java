@@ -32,7 +32,6 @@ import org.apache.james.mailbox.inmemory.mail.model.SimpleHeader;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -40,9 +39,8 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
 
-    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, UidProvider<Long> uidProvider,
-            MailboxEventDispatcher dispatcher, InMemoryMailbox mailbox) throws MailboxException {
-        super(mapperFactory, uidProvider, dispatcher,mailbox);
+    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MailboxEventDispatcher dispatcher, InMemoryMailbox mailbox) throws MailboxException {
+        super(mapperFactory, dispatcher,mailbox);
     }
     
     @Override
@@ -51,7 +49,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
     }
 
     @Override
-    protected Message<Long> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, 
+    protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, 
             InputStream  document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] byteContent;
@@ -70,7 +68,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
             byteContent = new byte[0];
         }
         InMemoryMailbox mailbox = (InMemoryMailbox) getMailboxEntity();
-        return new SimpleMailboxMembership(internalDate, uid, size, bodyStartOctet, byteContent, flags, headers, propertyBuilder, mailbox.getMailboxId());
+        return new SimpleMailboxMembership(internalDate, size, bodyStartOctet, byteContent, flags, headers, propertyBuilder, mailbox.getMailboxId());
     }
     
 }

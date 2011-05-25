@@ -39,7 +39,7 @@ public class MaildirStressTest extends AbstractStressTest {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%user");
 
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        mailboxManager = new MaildirMailboxManager(mf, null, store);
+        mailboxManager = new MaildirMailboxManager(mf, null);
         mailboxManager.init();
 
     }

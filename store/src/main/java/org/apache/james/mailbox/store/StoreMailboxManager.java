@@ -45,7 +45,6 @@ import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MailboxMapperFactory;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
@@ -78,14 +77,11 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
 
     private MailboxPathLocker locker;
 
-    private UidProvider<Id> uidProvider;
     
-    public StoreMailboxManager(MailboxMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final UidProvider<Id> uidProvider,final MailboxPathLocker locker) {
+    public StoreMailboxManager(MailboxMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
         this.authenticator = authenticator;
         this.locker = locker;
-        this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;
-        this.uidProvider = uidProvider;
-       
+        this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;       
     }
    
     /**
@@ -210,7 +206,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param mailboxRow
      * @return storeMailbox
      */
-    protected abstract StoreMessageManager<Id> createMessageManager(UidProvider<Id> uidProvider,MailboxEventDispatcher dispatcher, Mailbox<Id> mailboxRow, MailboxSession session) throws MailboxException;
+    protected abstract StoreMessageManager<Id> createMessageManager(MailboxEventDispatcher dispatcher, Mailbox<Id> mailboxRow, MailboxSession session) throws MailboxException;
 
     /**
      * Create a Mailbox for the given namespace
@@ -236,7 +232,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         } else {
             getLog().debug("Loaded mailbox " + mailboxPath);
             
-            StoreMessageManager<Id>  m = createMessageManager(uidProvider, dispatcher, mailboxRow, session);
+            StoreMessageManager<Id>  m = createMessageManager(dispatcher, mailboxRow, session);
             return m;
         }
     }

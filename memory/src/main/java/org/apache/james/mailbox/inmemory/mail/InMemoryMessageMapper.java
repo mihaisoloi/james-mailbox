@@ -27,20 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.mail.Flags;
-
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
-import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
-public class InMemoryMessageMapper extends NonTransactionalMapper implements MessageMapper<Long> {
+public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 
     private Map<Long, Map<Long, Message<Long>>> mailboxByUid;
     private static final int INITIAL_SIZE = 256;
@@ -147,7 +143,7 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
+    public Map<Long, MessageMetaData> expungeMarkedForDeletion(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
         final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
 
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
@@ -199,16 +195,6 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.MailboxMembership)
-     */
-    public long add(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
-        getMembershipByUidForMailbox(mailbox).put(message.getUid(), message);
-        return message.getUid();
-    }
-
-
     public void deleteAll() {
         mailboxByUid.clear();
     }
@@ -220,46 +206,59 @@ public class InMemoryMessageMapper extends NonTransactionalMapper implements Mes
         // Do nothing
     }
 
-  
+
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
-    public long copy(Mailbox<Long> mailbox, long uid, Message<Long> original) throws MailboxException {        
-        SimpleMailboxMembership membership = new SimpleMailboxMembership(mailbox.getMailboxId(), uid, (SimpleMailboxMembership) original);
-        return add(mailbox, membership);
+    protected void copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
+        save(mailbox, new SimpleMailboxMembership(mailbox.getMailboxId(), uid, modSeq, (SimpleMailboxMembership)original));
     }
 
-    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Long> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
+     */
+    protected long calculateHigestModSeq(Mailbox<Long> mailbox) throws MailboxException {
+        return 0;
+    }
 
-        findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
-			
-			public void onMailboxMembers(List<Message<Long>> members)
-					throws MailboxException {
-				for (final Message<Long> member:members) {
-		            Flags originalFlags = member.createFlags();
-		            if (replace) {
-		                member.setFlags(flags);
-		            } else {
-		                Flags current = member.createFlags();
-		                if (value) {
-		                    current.add(flags);
-		                } else {
-		                    current.remove(flags);
-		                }
-		                member.setFlags(current);
-		            }
-		            Flags newFlags = member.createFlags();
-		            
-		            add(mailbox, member);
-		            
-		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-		        }
-				
-			}
-		});
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
+     */
+    protected long calculateLastUid(Mailbox<Long> mailbox) throws MailboxException {
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
+     */
+    protected void save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
+        getMembershipByUidForMailbox(mailbox).put(message.getUid(), message);
+    }
+
+    /**
+     * Do nothing
+     */
+    protected void begin() throws MailboxException {
         
-        return updatedFlags.iterator();       
+    }
+
+    /**
+     * Do nothing
+     */
+    protected void commit() throws MailboxException {
+        
+    }
+
+
+    /**
+     * Do nothing
+     */
+    protected void rollback() throws MailboxException {        
     }
 }

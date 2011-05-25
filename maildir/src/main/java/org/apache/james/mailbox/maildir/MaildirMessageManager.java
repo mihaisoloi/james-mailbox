@@ -30,7 +30,6 @@ import org.apache.james.mailbox.maildir.mail.model.MaildirHeader;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -39,10 +38,9 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 public class MaildirMessageManager extends StoreMessageManager<Integer> {
 
-    public MaildirMessageManager(MessageMapperFactory<Integer> mapperFactory, UidProvider<Integer> uidProvider,
-            MailboxEventDispatcher dispatcher, Mailbox<Integer> mailboxEntiy)
+    public MaildirMessageManager(MessageMapperFactory<Integer> mapperFactory, MailboxEventDispatcher dispatcher, Mailbox<Integer> mailboxEntiy)
     throws MailboxException {
-        super(mapperFactory, uidProvider, dispatcher, mailboxEntiy);
+        super(mapperFactory, dispatcher, mailboxEntiy);
     }
 
     @Override
@@ -51,7 +49,7 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
     }
 
     @Override
-    protected Message<Integer> createMessage(long uid, Date internalDate,
+    protected Message<Integer> createMessage(Date internalDate,
             int size, int bodyStartOctet, InputStream documentIn, Flags flags,
             List<Header> headers, PropertyBuilder propertyBuilder)
             throws MailboxException {

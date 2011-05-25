@@ -18,13 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.copier;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Calendar;
 import java.util.List;
-
-import javax.mail.Flags;
 
 import junit.framework.Assert;
 
@@ -36,8 +31,6 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
-import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
-import org.apache.james.mailbox.mock.MockMail;
 import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.apache.james.mailbox.store.Authenticator;
 import org.junit.Before;
@@ -154,8 +147,7 @@ public class MailboxCopierTest {
                 public boolean isAuthentic(String userid, CharSequence passwd) {
                     return true;
                 }
-            }, 
-            new InMemoryCachingUidProvider());
+            });
     
     }
 

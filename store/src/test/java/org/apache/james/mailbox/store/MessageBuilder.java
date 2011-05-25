@@ -39,7 +39,7 @@ public class MessageBuilder {
     public int lineNumber = 0;
     
     public Message<Long> build() throws Exception {
-        Message<Long> result = new SimpleMailboxMembership(mailboxId, uid, internalDate, size, flags, body, headers);
+        Message<Long> result = new SimpleMailboxMembership(mailboxId, uid, -1,  internalDate, size, flags, body, headers);
         return result;
     }
     

@@ -73,6 +73,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     private boolean recent;
     private boolean seen;
     private String[] userFlags;
+    private long modSeq;
     
     private static final String TOSTRING_SEPARATOR = " ";
 
@@ -95,13 +96,14 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     public final static String PROPERTY_NODE_TYPE =  "jamesMailbox:messageProperty";
     public final static String TEXTUAL_LINE_COUNT_PROPERTY  = "jamesMailbox:messageTextualLineCount";
     public final static String SUBTYPE_PROPERTY  = "jamesMailbox:messageSubType";
+    public final static String MODSEQ_PROPERTY = "jamesMailbox:modSeq";
 
     public JCRMessage(Node node, Logger logger) {
         this.logger= logger;
         this.node = node;
     }
     
-    public JCRMessage(String mailboxUUID, long uid, Date internalDate, int size, Flags flags, InputStream content,
+    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, InputStream content,
             int bodyStartOctet, final List<JCRHeader> headers,
             final PropertyBuilder propertyBuilder, Logger logger) {
         super();
@@ -110,7 +112,6 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.size = size;
         this.logger = logger;
         setFlags(flags);
-        this.uid = uid;
         this.content = content;
        
         this.bodyStartOctet = bodyStartOctet;
@@ -134,13 +135,13 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
      * @param message
      * @throws IOException 
      */
-    public JCRMessage(String mailboxUUID, long uid,  JCRMessage message, Logger logger) throws MailboxException {
+    public JCRMessage(String mailboxUUID, long uid,  long modSeq, JCRMessage message, Logger logger) throws MailboxException {
         this.mailboxUUID = mailboxUUID;
         this.internalDate = message.getInternalDate();
         this.size = message.getFullContentOctets();
         setFlags(message.createFlags());
         this.uid = uid;
-        
+        this.modSeq = modSeq;
         this.logger = logger;
         try {
             this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
@@ -325,6 +326,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
             node.setProperty(SIZE_PROPERTY, getFullContentOctets());
             node.setProperty(MAILBOX_UUID_PROPERTY, getMailboxId());
             node.setProperty(UID_PROPERTY, getUid());
+            node.setProperty(MODSEQ_PROPERTY, getModSeq());
+
             if (getInternalDate() == null) {
                 internalDate = new Date();
             }
@@ -747,5 +750,54 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
      */
     public InputStream getBodyContent() throws IOException {
         return new LazySkippingInputStream(getFullContent(), getBodyStartOctet());
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
+     */
+    public long getModSeq() {
+        if (isPersistent()) {
+            try {
+                return node.getProperty(MODSEQ_PROPERTY).getLong();
+
+            } catch (RepositoryException e) {
+                logger.error("Unable to access property " + MODSEQ_PROPERTY, e);
+            }
+            return 0;
+        }
+        return modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
+     */
+    public void setModSeq(long modSeq) {
+        if (isPersistent()) {
+            try {
+                node.setProperty(MODSEQ_PROPERTY, modSeq);
+            } catch (RepositoryException e) {
+                logger.error("Unable to set mod-sequence", e);
+            }
+        } else {
+            this.modSeq = modSeq;
+        }  
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setUid(long)
+     */
+    public void setUid(long uid) {
+        if (isPersistent()) {
+            try {
+                node.setProperty(UID_PROPERTY, uid);
+            } catch (RepositoryException e) {
+                logger.error("Unable to set uid", e);
+            }
+        } else {
+            this.uid = uid;
+        }          
     }
 }

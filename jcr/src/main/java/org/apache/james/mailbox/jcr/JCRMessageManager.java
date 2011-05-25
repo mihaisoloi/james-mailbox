@@ -31,7 +31,6 @@ import org.apache.james.mailbox.jcr.mail.model.JCRHeader;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -46,9 +45,9 @@ public class JCRMessageManager extends StoreMessageManager<String> {
 
     private final Logger log;
 
-    public JCRMessageManager(JCRMailboxSessionMapperFactory mapperFactory, final UidProvider<String> uidProvider,
+    public JCRMessageManager(JCRMailboxSessionMapperFactory mapperFactory, 
             final MailboxEventDispatcher dispatcher, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
-        super(mapperFactory, uidProvider, dispatcher, mailbox);
+        super(mapperFactory, dispatcher, mailbox);
         this.log = log;
     }
 
@@ -58,12 +57,12 @@ public class JCRMessageManager extends StoreMessageManager<String> {
     }
 
     @Override
-    protected Message<String> createMessage(long uid, Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
+    protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JCRHeader> jcrHeaders = new ArrayList<JCRHeader>(headers.size());
         for (Header header: headers) {
             jcrHeaders.add((JCRHeader) header);
         }
-        final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), uid, internalDate, 
+        final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), internalDate, 
                 size, flags, document, bodyStartOctet, jcrHeaders, propertyBuilder, log);
         return message;
     }

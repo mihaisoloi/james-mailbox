@@ -215,11 +215,17 @@ public interface MessageManager {
          * the one that is assigned to the next message. Its only guaranteed
          * that it will be at least equals or bigger then the value
          * 
-         * @param mailboxSession
-         *            not null
          * @return the uid that will be assigned to the next appended message
          */
         long getUidNext();
+        
+        /**
+         * Return the highest mod-sequence for the mailbox. If this value has changed
+         * till the last check you can be sure that some changes where happen on the mailbox
+         * 
+         * @return higestModSeq
+         */
+        long getHighestModSeq();
 
         /**
          * Gets the number of messages that this mailbox contains.

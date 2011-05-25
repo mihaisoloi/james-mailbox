@@ -35,17 +35,19 @@ public class UpdatedFlags {
     private final Flags oldFlags;
     private final Flags newFlags;
     private final Flags modifiedFlags;
+    private long modSeq;
 
-    public UpdatedFlags(long uid, Flags oldFlags, Flags newFlags) {
+    public UpdatedFlags(long uid, long modSeq, Flags oldFlags, Flags newFlags) {
        this.uid = uid;
+       this.modSeq = modSeq;
        this.oldFlags = oldFlags;
        this.newFlags = newFlags;
        this.modifiedFlags = new Flags();
-       addModifiedSystemFlags();
-       addModifiedUserFlags();
+       addModifiedSystemFlags(oldFlags, newFlags, modifiedFlags);
+       addModifiedUserFlags(oldFlags, newFlags, modifiedFlags);
     }
     
-    private void addModifiedSystemFlags() {
+    private static void addModifiedSystemFlags(Flags oldFlags, Flags newFlags, Flags modifiedFlags) {
         if (isChanged(oldFlags, newFlags, Flags.Flag.ANSWERED)) {
             modifiedFlags.add(Flags.Flag.ANSWERED);
         }
@@ -66,14 +68,14 @@ public class UpdatedFlags {
         }
     }
     
-    private void addModifiedUserFlags() {
-        addModifiedUserFlags(oldFlags.getUserFlags());
-        addModifiedUserFlags(newFlags.getUserFlags());
+    private static void addModifiedUserFlags(Flags oldFlags, Flags newFlags, Flags modifiedFlags) {
+        addModifiedUserFlags(oldFlags, newFlags, oldFlags.getUserFlags(), modifiedFlags);
+        addModifiedUserFlags(oldFlags, newFlags, newFlags.getUserFlags(), modifiedFlags);
 
     }
     
 
-    private void addModifiedUserFlags(String[] userflags) {
+    private static void addModifiedUserFlags(Flags oldFlags, Flags newFlags, String[] userflags, Flags modifiedFlags) {
         for (int i = 0; i < userflags.length; i++) {
             String userFlag = userflags[i];
             if (isChanged(oldFlags, newFlags, userFlag)) {
@@ -137,5 +139,26 @@ public class UpdatedFlags {
 
     public Iterator<String> userFlagIterator() {
         return Arrays.asList(modifiedFlags.getUserFlags()).iterator();
+    }
+    
+    
+    /**
+     * Return the new mod-sequence for the message
+     * 
+     * @return mod-seq
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+    
+    public static boolean flagsChanged(Flags flagsOld, Flags flagsNew) {
+        Flags modifiedFlags = new Flags();
+        addModifiedSystemFlags(flagsOld, flagsNew, modifiedFlags);
+        addModifiedUserFlags(flagsOld, flagsNew, modifiedFlags);
+        if (modifiedFlags.getSystemFlags().length > 0 || modifiedFlags.getUserFlags().length > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

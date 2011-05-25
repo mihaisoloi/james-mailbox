@@ -31,7 +31,6 @@ import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
@@ -96,10 +95,8 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
         JCRUtils.registerCnd(repository, workspace, user, pass);
         MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
 
-        JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
-
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        JCRMailboxManager manager = new JCRMailboxManager(mf, null, uidProvider);
+        JCRMailboxManager manager = new JCRMailboxManager(mf, null);
         manager.init();
         setMailboxManager(manager);
     }

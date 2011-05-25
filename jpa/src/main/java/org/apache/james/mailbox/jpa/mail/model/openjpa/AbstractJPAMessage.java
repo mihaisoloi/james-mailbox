@@ -94,11 +94,15 @@ import org.apache.openjpa.persistence.jdbc.Index;
             query="DELETE FROM Message message WHERE message.mailbox.mailboxId = :idParam"),
     @NamedQuery(name="findLastUidInMailbox",
             query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam ORDER BY message.uid DESC"),
+    @NamedQuery(name="findHighestModSeqInMailbox",
+            query="SELECT message.modSeq FROM Message message WHERE message.mailbox.mailboxId = :idParam ORDER BY message.modSeq DESC"),
     @NamedQuery(name="deleteAllMemberships",
             query="DELETE FROM Message message")
 })
 @MappedSuperclass
 public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
+
+
 
     private static final String TOSTRING_SEPARATOR = " ";
 
@@ -157,6 +161,11 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     @Id
     @Column(name = "MAIL_UID")
     private long uid;
+
+    /** The value for the modSeq field */
+    @Index
+    @Column(name = "MAIL_MODSEQ")
+    private long modSeq;
 
     /** The value for the internalDate field */
     @Basic(optional = false)
@@ -245,11 +254,10 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     @Deprecated
     public AbstractJPAMessage() {}
 
-    public AbstractJPAMessage(JPAMailbox mailbox, long uid, Date internalDate, Flags flags, final long contentOctets, final int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) {
+    public AbstractJPAMessage(JPAMailbox mailbox, Date internalDate, Flags flags, final long contentOctets, final int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) {
         super();
         this.mailbox = mailbox;
         this.internalDate = internalDate;
-        this.uid = uid;
         userFlags = new ArrayList<JPAUserFlag>();
 
         setFlags(flags);        
@@ -276,10 +284,11 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
      * @param original message to be copied, not null
      * @throws IOException 
      */
-    public AbstractJPAMessage(JPAMailbox mailbox, long uid, Message<?> original) throws MailboxException {
+    public AbstractJPAMessage(JPAMailbox mailbox, long uid, long modSeq,  Message<?> original) throws MailboxException {
         super();
         this.mailbox = mailbox;
         this.uid = uid;
+        this.modSeq = modSeq;
         userFlags = new ArrayList<JPAUserFlag>();
         setFlags(original.createFlags());
         
@@ -343,6 +352,22 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
+     */
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
+    }
+    
     /**
      * Gets the top level MIME content media type.
      * 

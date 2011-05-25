@@ -26,7 +26,6 @@ import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jpa.mail.JPACachingUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
@@ -96,10 +95,9 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
                 JPASubscription.class.getName() + ")");
        
         entityManagerFactory = OpenJPAPersistence.getEntityManagerFactory(properties);
-        JPACachingUidProvider uidProvider = new JPACachingUidProvider(entityManagerFactory);
         JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory);
 
-        JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null, uidProvider);
+        JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null);
         mailboxManager.init();
 
         setMailboxManager(mailboxManager);

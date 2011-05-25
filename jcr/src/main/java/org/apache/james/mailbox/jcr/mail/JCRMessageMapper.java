@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +30,10 @@ import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
-import javax.mail.Flags;
 
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.util.ISO9075;
@@ -43,10 +42,10 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
-import org.apache.james.mailbox.UpdatedFlags;
-import org.apache.james.mailbox.jcr.AbstractJCRMapper;
+import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
+import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -58,7 +57,7 @@ import org.slf4j.Logger;
  * a seperate child node under the mailbox
  *
  */
-public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper<String> {
+public class JCRMessageMapper extends AbstractMessageMapper<String> implements JCRImapConstants {
     
     /**
      * Store the messages directly in the mailbox: .../mailbox/
@@ -96,7 +95,12 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
     public final static int MESSAGE_SCALE_MINUTE = 5;
 
     private final int scaleType;
+    
+    private final Logger logger;
+    private final MailboxSessionJCRRepository repository;
+    protected final MailboxSession mSession;
 
+    
     /**
      * Construct a new {@link JCRMessageMapper} instance
      * 
@@ -104,15 +108,72 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Logger logger, int scaleType) {
-        super(repos, session, logger);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, final Logger logger, int scaleType) {
+        this.repository = repository;
+        this.mSession = mSession;
+        this.logger = logger;
         this.scaleType = scaleType;
     }
     
     public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Logger logger) {
         this(repos, session, logger, MESSAGE_SCALE_DAY);
     }
+
+    /**
+     * Return the logger
+     * 
+     * @return logger
+     */
+    protected Logger getLogger() {
+        return logger;
+    }
     
+    /**
+     * Return the JCR Session
+     * 
+     * @return session
+     */
+    protected Session getSession() throws RepositoryException{
+        return repository.login(mSession);
+    }
+
+    /**
+     * Begin is not supported by level 1 JCR implementations, however we refresh the session
+     */
+    protected void begin() throws MailboxException {  
+        try {
+            getSession().refresh(true);
+        } catch (RepositoryException e) {
+            // do nothin on refresh
+        }
+        // Do nothing
+    }
+
+    /**
+     * Just call save on the underlying JCR Session, because level 1 JCR implementation does not offer Transactions
+     */
+    protected void commit() throws MailboxException {
+        try {
+            if (getSession().hasPendingChanges()) {
+                getSession().save();
+            }
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to commit", e);
+        }
+    }
+
+    /**
+     * Rollback is not supported by level 1 JCR implementations, so just do nothing
+     */
+    protected void rollback() throws MailboxException {
+        try {
+            // just refresh session and discard all pending changes
+            getSession().refresh(false);
+        } catch (RepositoryException e) {
+            // just catch on rollback by now
+        }
+    }
+
     /**
      * Return the path to the mailbox. This path is escaped to be able to use it in xpath queries
      * 
@@ -381,7 +442,7 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
+    public Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
         try {
             final List<Message<String>> results;
             final long from = set.getUidFrom();
@@ -473,11 +534,98 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
         }
     }
 
+    /**
+     * Convert the given int value to a String. If the int value is smaller then
+     * 9 it will prefix the String with 0.
+     * 
+     * @param value
+     * @return stringValue
+     */
+    private String convertIntToString(int value) {
+        if (value <= 9) {
+            return "0" + String.valueOf(value);
+        } else {
+            return String.valueOf(value);
+        }
+    }
+
+
+
+   
+
+
+
+    /**
+     * Logout from open JCR Session
+     */
+    public void endRequest() {
+       repository.logout(mSession);
+    }
+    
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public long add(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
+    protected long calculateHigestModSeq(Mailbox<String> mailbox) throws MailboxException {
+        try {
+            Session s = getSession();
+            // we use order by because without it count will always be 0 in jackrabbit
+            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.MODSEQ_PROPERTY + " descending";
+            QueryManager manager = s.getWorkspace().getQueryManager();
+            Query q = manager.createQuery(queryString, Query.XPATH);
+            q.setLimit(1);
+            QueryResult result = q.execute();
+            NodeIterator nodes = result.getNodes();
+            if (nodes.hasNext()) {
+                return nodes.nextNode().getProperty(JCRMessage.UID_PROPERTY).getLong();
+            }
+            return 0;
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
+     */
+    protected long calculateLastUid(Mailbox<String> mailbox) throws MailboxException {
+        try {
+            Session s = getSession();
+            // we use order by because without it count will always be 0 in jackrabbit
+            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " descending";
+            QueryManager manager = s.getWorkspace().getQueryManager();
+            Query q = manager.createQuery(queryString, Query.XPATH);
+            q.setLimit(1);
+            QueryResult result = q.execute();
+            NodeIterator nodes = result.getNodes();
+            if (nodes.hasNext()) {
+                return nodes.nextNode().getProperty(JCRMessage.UID_PROPERTY).getLong();
+            }
+            return 0;
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
+        }
+    }
+
+    @Override
+    protected void copy(Mailbox<String> mailbox, long uid, long modSeq, Message<String> original) throws MailboxException {
+        try {
+            String newMessagePath = getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid);
+            getSession().getWorkspace().copy(((JCRMessage)original).getNode().getPath(), getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid));
+            Node node = getSession().getNode(newMessagePath);
+            node.setProperty(JCRMessage.MAILBOX_UUID_PROPERTY, mailbox.getMailboxId());
+            node.setProperty(JCRMessage.UID_PROPERTY, uid);
+            node.setProperty(JCRMessage.MODSEQ_PROPERTY, modSeq);
+
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to copy message " +original + " in mailbox " + mailbox, e);
+        }        
+    }
+
+    @Override
+    protected void save(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
         final JCRMessage membership = (JCRMessage) message;
         try {
 
@@ -538,108 +686,18 @@ public class JCRMessageMapper extends AbstractJCRMapper implements MessageMapper
                 messageNode.addMixin("jamesMailbox:message");
                 try {
                     membership.merge(messageNode);
-                    messageNode.setProperty(JCRMessage.UID_PROPERTY, uid);
 
                 } catch (IOException e) {
                     throw new RepositoryException("Unable to merge message in to tree", e);
-                }
-                return uid;
-                
+                }                
             } else {
                 membership.merge(messageNode);
-                return membership.getUid();
             }
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         } catch (IOException e) {
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
-        }
-
+        }        
     }
 
-    /**
-     * Convert the given int value to a String. If the int value is smaller then
-     * 9 it will prefix the String with 0.
-     * 
-     * @param value
-     * @return stringValue
-     */
-    private String convertIntToString(int value) {
-        if (value <= 9) {
-            return "0" + String.valueOf(value);
-        } else {
-            return String.valueOf(value);
-        }
-    }
-
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, org.apache.james.mailbox.store.mail.model.MailboxMembership)
-     */
-    public long copy(Mailbox<String> mailbox, long uid, Message<String> oldmessage) throws MailboxException{
-        try {
-            String newMessagePath = getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid);
-            getSession().getWorkspace().copy(((JCRMessage)oldmessage).getNode().getPath(), getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid));
-            Node node = getSession().getNode(newMessagePath);
-            node.setProperty(JCRMessage.MAILBOX_UUID_PROPERTY, mailbox.getMailboxId());
-            node.setProperty(JCRMessage.UID_PROPERTY, uid);
-            return uid;
-        } catch (RepositoryException e) {
-            throw new MailboxException("Unable to copy message " +oldmessage + " in mailbox " + mailbox, e);
-        }
-    }
-    
-   
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
-     */
-    public Iterator<UpdatedFlags> updateFlags(final Mailbox<String> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
-        final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
-
-        findInMailbox(mailbox, set, new MailboxMembershipCallback<String>() {
-			
-			public void onMailboxMembers(List<Message<String>> members)
-					throws MailboxException {
-
-				for (final Message<String> member:members) {
-		            Flags originalFlags = member.createFlags();
-		            if (replace) {
-		                member.setFlags(flags);
-		            } else {
-		                Flags current = member.createFlags();
-		                if (value) {
-		                    current.add(flags);
-		                } else {
-		                    current.remove(flags);
-		                }
-		                member.setFlags(current);
-		            }
-		            Flags newFlags = member.createFlags();
-		            
-		            JCRMessage membership = (JCRMessage) member;
-		            if (membership.isPersistent()) {
-		                try {
-		                    Node messageNode = getSession().getNodeByIdentifier(membership.getId());
-		                    membership.merge(messageNode);
-		                } catch (RepositoryException e) {
-		                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
-
-		                } catch (IOException e) {
-		                    throw new MailboxException("Unable to update flags for message " + membership + " in mailbox " + mailbox, e);
-
-		                }
-		            }
-		            
-		            updatedFlags.add(new UpdatedFlags(member.getUid(),originalFlags, newFlags));
-		        }
-
-				
-			}
-		});
-        
-        return updatedFlags.iterator();       
-    }
 }

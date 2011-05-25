@@ -61,9 +61,9 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     @Deprecated
     public JPAStreamingMessage() {}
 
-    public JPAStreamingMessage(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
+    public JPAStreamingMessage(JPAMailbox mailbox, Date internalDate, int size, Flags flags, 
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailbox, uid, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
+        super(mailbox, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
         this.content = content;
     }
 
@@ -73,8 +73,8 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
      * @param message
      * @throws IOException 
      */
-    public JPAStreamingMessage(JPAMailbox mailbox, long uid,Message<?> message) throws MailboxException {
-        super(mailbox, uid, message);
+    public JPAStreamingMessage(JPAMailbox mailbox, long uid, long modSeq, Message<?> message) throws MailboxException {
+        super(mailbox, uid, modSeq, message);
         try {
             this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
         } catch (IOException e) {

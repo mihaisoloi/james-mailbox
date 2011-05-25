@@ -52,9 +52,9 @@ public class JPAMessage extends AbstractJPAMessage {
     @Deprecated
     public JPAMessage() {}
 
-    public JPAMessage(JPAMailbox mailbox, long uid, Date internalDate, int size, Flags flags, 
+    public JPAMessage(JPAMailbox mailbox,Date internalDate, int size, Flags flags, 
             InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailbox, uid, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
+        super(mailbox, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
         try {
             this.content = IOUtils.toByteArray(content);
         } catch (IOException e) {
@@ -68,8 +68,8 @@ public class JPAMessage extends AbstractJPAMessage {
      * @param message
      * @throws MailboxException 
      */
-    public JPAMessage(JPAMailbox mailbox, long uid, Message<?> message) throws MailboxException{
-        super(mailbox, uid, message);
+    public JPAMessage(JPAMailbox mailbox, long uid, long modSeq, Message<?> message) throws MailboxException{
+        super(mailbox, uid, modSeq, message);
         try {
             this.content = IOUtils.toByteArray(message.getFullContent());
         } catch (IOException e) {

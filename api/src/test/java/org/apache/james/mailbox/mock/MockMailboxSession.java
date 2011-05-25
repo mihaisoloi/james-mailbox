@@ -26,9 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MailboxSession.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

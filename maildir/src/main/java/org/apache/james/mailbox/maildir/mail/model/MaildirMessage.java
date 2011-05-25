@@ -211,22 +211,20 @@ public class MaildirMessage extends AbstractMaildirMessage {
         throw new NotImplementedException();
     }
 
-    
-    /**
-     * Set the Uid
-     * @param uid
-     */
+
+    @Override
     public void setUid(long uid) {
         modified = true;
         super.setUid(uid);
     }
 
-  
+    @Override
+    public void setModSeq(long modSeq) {
+        modified = true;
+        super.setModSeq(modSeq);
+    }
 
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(javax.mail.Flags)
-     */
+    @Override
     public void setFlags(Flags flags) {
         if (flags != null) {
             modified = true;

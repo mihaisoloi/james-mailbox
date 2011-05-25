@@ -28,19 +28,18 @@ import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
 
-    public InMemoryMailboxManager(MailboxSessionMapperFactory<Long> mapperFactory, Authenticator authenticator, UidProvider<Long> uidProvider) {
-        super(mapperFactory, authenticator, uidProvider, new JVMMailboxPathLocker());
+    public InMemoryMailboxManager(MailboxSessionMapperFactory<Long> mapperFactory, Authenticator authenticator) {
+        super(mapperFactory, authenticator, new JVMMailboxPathLocker());
     }
 
     @Override
-    protected StoreMessageManager<Long> createMessageManager(UidProvider<Long> uidProvider, MailboxEventDispatcher dispatcher, Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
-        return new InMemoryStoreMessageManager((MailboxSessionMapperFactory<Long>)mailboxSessionMapperFactory, uidProvider, dispatcher, (InMemoryMailbox)mailboxRow);
+    protected StoreMessageManager<Long> createMessageManager(MailboxEventDispatcher dispatcher, Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
+        return new InMemoryStoreMessageManager((MailboxSessionMapperFactory<Long>)mailboxSessionMapperFactory, dispatcher, (InMemoryMailbox)mailboxRow);
     }
 
     @Override

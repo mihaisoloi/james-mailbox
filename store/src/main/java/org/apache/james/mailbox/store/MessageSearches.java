@@ -135,6 +135,8 @@ public class MessageSearches {
         } else if (criterion instanceof SearchQuery.ConjunctionCriterion) {
             result = matches((SearchQuery.ConjunctionCriterion) criterion, message,
                     recentMessageUids);
+        } else if (criterion instanceof SearchQuery.ModSeqCriterion) {
+            result = matches((SearchQuery.ModSeqCriterion) criterion, message); 
         } else {
             throw new UnsupportedSearchException();
         }
@@ -450,6 +452,22 @@ public class MessageSearches {
                 return size == value;
             default:
                 throw new UnsupportedSearchException();
+        }
+    }
+
+    private boolean matches(SearchQuery.ModSeqCriterion criterion, Message<?> message) throws UnsupportedSearchException {
+        final SearchQuery.NumericOperator operator = criterion.getOperator();
+        final long modSeq = message.getModSeq();
+        final long value = operator.getValue();
+        switch (operator.getType()) {
+        case LESS_THAN:
+            return modSeq < value;
+        case GREATER_THAN:
+            return modSeq > value;
+        case EQUALS:
+            return modSeq == value;
+        default:
+            throw new UnsupportedSearchException();
         }
     }
 

@@ -28,7 +28,6 @@ import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jcr.mail.JCRCachingUidProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
@@ -55,10 +54,8 @@ public class JCRStressTest extends AbstractStressTest {
         JCRUtils.registerCnd(repository, workspace, user, pass);
         MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
 
-        JCRCachingUidProvider uidProvider = new JCRCachingUidProvider(sessionRepos);
-
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        mailboxManager = new JCRMailboxManager(mf, null, uidProvider);
+        mailboxManager = new JCRMailboxManager(mf, null);
         mailboxManager.init();
 
     }

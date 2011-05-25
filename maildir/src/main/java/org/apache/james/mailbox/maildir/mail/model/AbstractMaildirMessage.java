@@ -37,6 +37,7 @@ public abstract class AbstractMaildirMessage extends AbstractMessage<Integer>{
     private Mailbox<Integer> mailbox;
     private long uid;
     protected boolean newMessage;
+    private long modSeq;
 
     public AbstractMaildirMessage(Mailbox<Integer> mailbox) {
         this.mailbox = mailbox;
@@ -173,4 +174,19 @@ public abstract class AbstractMaildirMessage extends AbstractMessage<Integer>{
         return theString.toString();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
+     */
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
+    }
 }

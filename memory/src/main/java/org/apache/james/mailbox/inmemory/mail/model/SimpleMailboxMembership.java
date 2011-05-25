@@ -34,7 +34,7 @@ import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
 public class SimpleMailboxMembership extends AbstractMessage<Long> {
 
-    private final long uid;
+    private long uid;
     private final long mailboxId;
     private int size;
     private boolean answered;
@@ -51,8 +51,10 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
     private Long lineCount;
     private byte[] document;
     private int bodyStartOctet;
-    public SimpleMailboxMembership(long mailboxId, long uid, final SimpleMailboxMembership original) {
+    private long modSeq;
+    public SimpleMailboxMembership(long mailboxId, long uid, long modSeq, final SimpleMailboxMembership original) {
         this.uid = uid;
+        this.modSeq = modSeq;
         this.mailboxId = mailboxId;
         this.size = original.size;
         this.answered = original.answered;
@@ -71,9 +73,8 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
         this.bodyStartOctet = original.bodyStartOctet;
     }
     
-    public SimpleMailboxMembership(Date internalDate, long uid,  int size, int bodyStartOctet, byte[] document, 
+    public SimpleMailboxMembership(Date internalDate, int size, int bodyStartOctet, byte[] document, 
             Flags flags, List<Header> headers, PropertyBuilder propertyBuilder, final long mailboxId) {
-        this.uid = uid;
         this.document = document;
         
         this.size = size;
@@ -223,5 +224,29 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
     @Override
     protected int getBodyStartOctet() {
         return bodyStartOctet;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
+     */
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setUid(long)
+     */
+    public void setUid(long uid) {
+        this.uid = uid;
     }
 }

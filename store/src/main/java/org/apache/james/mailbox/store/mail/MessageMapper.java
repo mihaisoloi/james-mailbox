@@ -123,7 +123,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uid
      * @throws StorageException
      */
-    public abstract long add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
+    public abstract MessageMetaData add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
     
     /**
      * Update flags for the given {@link MessageRange}. Only the flags may be modified after a message was saved to a mailbox.
@@ -146,9 +146,29 @@ public interface MessageMapper<Id> extends Mapper {
      * @param mailbox the Mailbox to copy to
      * @param uid the uid to use for the new MailboxMembership.
      * @param original the original to copy
-     * @return The uid of the copied instance
      * @throws StorageException
      */
-    public abstract long copy(Mailbox<Id> mailbox, long uid, Message<Id> original) throws MailboxException;
+    public abstract MessageMetaData copy(Mailbox<Id> mailbox,Message<Id> original) throws MailboxException;
+    
+    
+    /**
+     * Return the last uid which were used for storing a Message in the {@link Mailbox}
+     * 
+     * @param mailbox
+     * @return lastUid
+     * @throws MailboxException
+     */
+    public abstract long getLastUid(Mailbox<Id> mailbox) throws MailboxException;;
+    
+    
+    /**
+     * Return the higest mod-sequence which were used for storing a Message in the {@link Mailbox}
+     * 
+     * @param session
+     * @param mailbox
+     * @return lastUid
+     * @throws MailboxException
+     */
+    public abstract long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
 
 }

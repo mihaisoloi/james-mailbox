@@ -32,16 +32,18 @@ public class SimpleMessageMetaData implements MessageMetaData{
     private Flags flags;
     private long size;
     private Date internalDate;
+    private long modSeq;
 
-    public SimpleMessageMetaData(long uid, Flags flags, long size, Date internalDate) {
+    public SimpleMessageMetaData(long uid, long modSeq, Flags flags, long size, Date internalDate) {
         this.uid = uid;
         this.flags = flags;
         this.size = size;
+        this.modSeq = modSeq;
         this.internalDate = internalDate;
     }
     
     public SimpleMessageMetaData(Message<?> message) {
-        this(message.getUid(), message.createFlags(), message.getFullContentOctets(), message.getInternalDate());
+        this(message.getUid(), message.getModSeq(), message.createFlags(), message.getFullContentOctets(), message.getInternalDate());
     }
     
     
@@ -91,6 +93,14 @@ public class SimpleMessageMetaData implements MessageMetaData{
         int result = 1;
         result = PRIME * result + (int) (uid ^ (uid >>> 32));
         return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MessageMetaData#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
     }
 
 }

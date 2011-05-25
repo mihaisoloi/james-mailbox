@@ -48,6 +48,32 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      */
     public abstract long getUid();
     
+    /**
+     * Set the uid for the message. This must be called before the message is added to the store
+     * and must be unique / sequential.
+     * 
+     * @param uid
+     */
+    public abstract void setUid(long uid);
+
+    
+    
+    /**
+     * Set the mod-sequence for the message. This must be called before the message is added to the store 
+     * or any flags are changed. This must be unique / sequential.
+     * 
+     * @param uid
+     */
+    public abstract void setModSeq(long modSeq);
+    
+    /**
+     * Return the mod-sequence for the message
+     * 
+     * @return message
+     */
+    public abstract long getModSeq();
+
+    
 
     /**
      * Return if it was marked as answered

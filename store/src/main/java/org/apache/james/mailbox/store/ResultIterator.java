@@ -99,6 +99,8 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
 
         private final Flags flags;
 
+        private long modSeq = -1;
+
         public UnloadedMessageResult(final Message<Id> message,
                 final MailboxException exception) {
             super();
@@ -106,6 +108,7 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
             size = message.getFullContentOctets();
             uid = message.getUid();
             flags = message.createFlags();
+            modSeq  = message.getModSeq();
             this.exception = exception;
         }
 
@@ -169,6 +172,10 @@ public class ResultIterator<Id> implements Iterator<MessageResult> {
         public MimeDescriptor getMimeDescriptor()
                 throws MailboxException {
             throw exception;
+        }
+
+        public long getModSeq() {
+            return modSeq;
         }
 
     }

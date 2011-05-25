@@ -31,7 +31,6 @@ import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -43,19 +42,18 @@ import org.apache.james.mailbox.util.MailboxEventDispatcher;
  */
 public class JPAMessageManager extends StoreMessageManager<Long> {
     
-    public JPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, UidProvider<Long> uidProvider,
-            final MailboxEventDispatcher dispatcher,final Mailbox<Long> mailbox) throws MailboxException {
-        super(mapperFactory, uidProvider, dispatcher, mailbox);     
+    public JPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, final MailboxEventDispatcher dispatcher,final Mailbox<Long> mailbox) throws MailboxException {
+        super(mapperFactory, dispatcher, mailbox);     
     }
     
     @Override
-    protected Message<Long> createMessage(long uid, Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
+    protected Message<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
             final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
         final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
         for (Header header: headers) {
             jpaHeaders.add((JPAHeader) header);
         }
-        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), uid, internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
         return message;
     }
     

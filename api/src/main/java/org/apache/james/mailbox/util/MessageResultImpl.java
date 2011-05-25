@@ -56,6 +56,8 @@ public class MessageResultImpl implements MessageResult {
 
     private MimeDescriptor mimeDescriptor;
 
+    private long modSeq;
+
     public MessageResultImpl(long uid) {
         setUid(uid);
     }
@@ -67,6 +69,8 @@ public class MessageResultImpl implements MessageResult {
         setUid(uid);
         setFlags(flags);
     }
+    
+    
 
     /*
      * (non-Javadoc)
@@ -403,5 +407,17 @@ public class MessageResultImpl implements MessageResult {
      */
     public MimeDescriptor getMimeDescriptor() {
         return mimeDescriptor;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MessageMetaData#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+    
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
     }
 }

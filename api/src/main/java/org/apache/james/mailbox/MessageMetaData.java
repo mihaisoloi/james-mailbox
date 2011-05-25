@@ -35,6 +35,15 @@ public interface MessageMetaData {
      * @return uid
      */
     long getUid();
+    
+    
+    /**
+     * Return the modify-sequence number of the message. This is kind of optional and the mailbox
+     * implementation may not support this. If so it will return -1
+     * 
+     * @return modSeq
+     */
+    long getModSeq();
 
     /**
      * Return the {@link Flags} 

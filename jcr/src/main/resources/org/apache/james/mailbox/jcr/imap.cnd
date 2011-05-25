@@ -41,6 +41,7 @@
     mixin
     - jamesMailbox:mailboxUUID (String) mandatory
     - jamesMailbox:uid (LONG) mandatory
+    - jamesMailbox:modSeq (LONG)
     - jamesMailbox:size (LONG) mandatory
     - jamesMailbox:answered (BOOLEAN) 
     - jamesMailbox:deleted (BOOLEAN) 

@@ -22,7 +22,6 @@ import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.inmemory.mail.InMemoryCachingUidProvider;
 import org.apache.james.mailbox.store.MockAuthenticator;
 import org.junit.After;
 import org.junit.Before;
@@ -62,8 +61,7 @@ public class InMemoryMailboxManagerTest extends MailboxManagerTest {
     protected void createMailboxManager() throws MailboxException {
         
         InMemoryMailboxSessionMapperFactory factory = new InMemoryMailboxSessionMapperFactory();
-        InMemoryCachingUidProvider uidProvider = new InMemoryCachingUidProvider();
-        InMemoryMailboxManager mailboxManager = new InMemoryMailboxManager(factory, new MockAuthenticator(), uidProvider);
+        InMemoryMailboxManager mailboxManager = new InMemoryMailboxManager(factory, new MockAuthenticator());
         mailboxManager.init();
         
         setMailboxManager(mailboxManager);
