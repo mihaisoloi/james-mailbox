@@ -26,22 +26,46 @@
 <body>
 
   <section name="Responsibility">
+    <p>This module contains the interfaces and exceptions to be used by the 
+       mailbox clients. It represents the "external view" of the mailbox
+       library client.</p>
+    <p>The services the mailbox library provides can be summarized as "store/retrieve/search/delete mails" 
+       and update the mails metadata (via uid and flags)</p>
+    <p>The main entrance interfaces are represented by 3 managers, each responsible
+       for a specific area: the mailbox manager, the message manager and the
+       subscription manager.</p>
+    <p>For example, Apache James Server injects the managers in the POP3, SMTP, IMAP4 servers
+       and in the Mailet container.</p>
+     <p>Each implementation (<a href="mailbox-memory.html">Memory</a>, 
+        <a href="mailbox-maildir.html">Maildir</a>, 
+        <a href="mailbox-jpa.html">JPA</a>, 
+        <a href="mailbox-jcr.html">JCR)</a>) is responsible
+        to implement the management interfaces. All "common/util" implementations
+        reside in the <a href="mailbox-store.html">Mailbox Store</a> module.</p>
   </section>
 
-  <section name="Interfaces">
+  <section name="Manager Interfaces">
   
     <subsection name="Mailbox Manager">
+      <p>The Mailbox Manager is responsible for session creation, operations on mailbox (create, delete, search)
+         and to return a Message Manager. It also allows to copy and list messages.</p>
       <p><img src="images/uml/org-apache-james-mailbox-api-mailboxmanager.png"/></p>
     </subsection>
     
     <subsection name="Message Manager">
+      <p>The Message Manager is responsible to create, delete message and its associated metadata (the uid and the flags).</p>
       <p><img src="images/uml/org-apache-james-mailbox-api-messagemanager.png"/></p>
     </subsection>
 
     <subsection name="Subscription Manager">
+      <p>The Subscription Manager is responsible for the (un)subscription between a user and a mailbox.</p>
       <p><img src="images/uml/org-apache-james-mailbox-api-subscriptionmanager.png"/></p>
     </subsection>
 
+  </section>
+  
+  <section name="Other Interfaces and Classes">
+      <p><img src="images/uml/org-apache-james-mailbox-api-msc.png"/></p>
   </section>
 
 </body>

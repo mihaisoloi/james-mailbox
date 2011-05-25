@@ -29,7 +29,11 @@
   </section>
 
   <section name="Classes">
-    <p><img src="images/uml/org-apache-james-mailbox-maildir-managers.png"/></p>
+
+    <subsection name="Managers">
+      <p><img src="images/uml/org-apache-james-mailbox-maildir-managers.png"/></p>
+    </subsection>
+    
   </section>
 
 </body>
