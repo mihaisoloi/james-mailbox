@@ -464,6 +464,11 @@
         <artifactId>apache-james-mailbox-maildir</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-mailbox-tool</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <!--
         END Modules
       -->
@@ -498,6 +503,11 @@
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>
         <version>${version.activation}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>${version.javax.inject}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.geronimo.specs</groupId>
@@ -759,6 +769,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.openjpa>2.1.0</version.openjpa>
     <version.javax.persistence>1.0.2</version.javax.persistence>
+    <version.javax.inject>1</version.javax.inject>
     <version.commons-lang>2.4</version.commons-lang>
     <version.apache-mime4j>0.6.1</version.apache-mime4j>
     <version.javax.mail>1.4.3</version.javax.mail>
