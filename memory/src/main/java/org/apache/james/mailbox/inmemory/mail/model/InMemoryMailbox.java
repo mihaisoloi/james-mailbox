@@ -85,4 +85,20 @@ public class InMemoryMailbox implements Mailbox<Long> {
     public long getUidValidity() {
         return uidValidity;
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
+     */
+    public long getLastKnownUid() {
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
+     */
+    public long getHighestKnownModSeq() {
+        return 0;
+    }
 }

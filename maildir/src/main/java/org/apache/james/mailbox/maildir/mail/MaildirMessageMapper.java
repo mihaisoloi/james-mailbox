@@ -473,13 +473,11 @@ public class MaildirMessageMapper extends NonTransactionalMapper implements Mess
      */
     public long getHighestModSeq(Mailbox<Integer> mailbox) throws MailboxException {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
-            
-        long newModified = folder.getNewFolder().lastModified();
-        long curModified = folder.getTmpFolder().lastModified();
-        if (newModified  == 0L && curModified == 0L) {
-            throw new MailboxException("Unable to read last modification time for mailbox " + mailbox);
+        try {
+            return folder.getHighestModSeq();
+        } catch (IOException e) {
+            throw new MailboxException("Unable to get highest mod-seq for mailbox " + mailbox, e);
         }
-        return Math.max(newModified, curModified);
             
        
     }

@@ -42,6 +42,8 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
     public final static String NAMESPACE_PROPERTY = "jamesMailbox:mailboxNamespace";
     public final static String NAME_PROPERTY = "jamesMailbox:mailboxName";
     public final static String UIDVALIDITY_PROPERTY = "jamesMailbox:mailboxUidValidity";
+    public final static String LASTKNOWNUID_PROPERTY = "jamesMailbox:mailboxLastKnownUid";
+    public final static String HIGHESTKNOWNMODSEQ_PROPERTY = "jamesMailbox:mailboxHighestKnownModSeq";
 
     private String name;
     private long uidValidity;
@@ -51,6 +53,8 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
 
     private String namespace;
     private String user;
+    private long lastKnownUid;
+    private long highestKnownModSeq;
     
     
     public JCRMailbox( final MailboxPath path, final long uidValidity, Logger logger) {
@@ -150,6 +154,8 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         }
         node.setProperty(USER_PROPERTY, user);
         node.setProperty(NAMESPACE_PROPERTY, getNamespace());
+        node.setProperty(HIGHESTKNOWNMODSEQ_PROPERTY, getHighestKnownModSeq());
+        node.setProperty(LASTKNOWNUID_PROPERTY, getLastKnownUid());
         this.node = node;
     }
     
@@ -274,5 +280,37 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         } else {
             this.user = user;
         }        
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
+     */
+    public long getLastKnownUid() {
+        if (isPersistent()) {
+            try {
+                return node.getProperty(LASTKNOWNUID_PROPERTY).getLong();
+            } catch (RepositoryException e) {
+                logger.error("Unable to access property " + LASTKNOWNUID_PROPERTY, e);
+            }
+        }
+        return lastKnownUid;
+    }
+
+    
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
+     */
+    public long getHighestKnownModSeq() {
+        if (isPersistent()) {
+            try {
+                return node.getProperty(HIGHESTKNOWNMODSEQ_PROPERTY).getLong();
+            } catch (RepositoryException e) {
+                logger.error("Unable to access property " + HIGHESTKNOWNMODSEQ_PROPERTY, e);
+            }
+        }
+        return highestKnownModSeq;
     }
 }

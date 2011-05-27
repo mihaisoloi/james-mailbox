@@ -94,7 +94,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         AtomicLong seq = seqs.get(mailbox.getMailboxId());
 
         if (seq == null) {
-            seq = new AtomicLong(calculateHigestModSeq(mailbox));
+            seq = new AtomicLong(higestModSeq(mailbox));
             AtomicLong cachedSeq = seqs.putIfAbsent(mailbox.getMailboxId(), seq);
             if (cachedSeq != null) {
                 seq = cachedSeq;
@@ -102,6 +102,14 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         }
 
         return seq;
+    }
+    
+    private long higestModSeq(Mailbox<Id> mailbox) throws MailboxException {
+        long modSeq = calculateHigestModSeq(mailbox);
+        if (modSeq < 1) {
+            modSeq = mailbox.getHighestKnownModSeq();
+        }
+        return modSeq;
     }
     
     /**
@@ -115,13 +123,21 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         AtomicLong uid = uids.get(mailbox.getMailboxId());
 
         if (uid == null) {
-            uid = new AtomicLong(calculateLastUid(mailbox));
+            uid = new AtomicLong(lastUid(mailbox));
             AtomicLong cachedUid = uids.putIfAbsent(mailbox.getMailboxId(), uid);
             if (cachedUid != null) {
                 uid = cachedUid;
             }
         }
 
+        return uid;
+    }
+    
+    private long lastUid(Mailbox<Id> mailbox) throws MailboxException {
+        long uid = calculateLastUid(mailbox);
+        if (uid < 1) {
+            uid = mailbox.getLastKnownUid();
+        }
         return uid;
     }
     
@@ -132,14 +148,16 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<Id> mailbox, MessageRange set) throws MailboxException {
         Map<Long, MessageMetaData> data = expungeMarkedForDeletion(mailbox, set);
         if (data.isEmpty() == false) {
-            
-            // Increase the mod-sequence for this mailbox
-            nextModSeq(mailbox);
+
+            // Increase the mod-sequence  and the uid for this mailbox and save it permanent way
+            // See MAILBOX-75 
+            saveSequences(mailbox, nextUid(mailbox), nextModSeq(mailbox));
+
         }
         return data;
     }
 
-
+    
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
@@ -149,6 +167,11 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Id>() {
 
             public void onMailboxMembers(List<Message<Id>> members) throws MailboxException {
+                
+                long modSeq = -1;
+                if (members.isEmpty() == false) {
+                    modSeq = nextModSeq(mailbox);
+                }
                 for (final Message<Id> member : members) {
                     Flags originalFlags = member.createFlags();
                     if (replace) {
@@ -165,7 +188,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                     Flags newFlags = member.createFlags();
                     if (UpdatedFlags.flagsChanged(originalFlags, newFlags)) {
                         // increase the mod-seq as we changed the flags
-                        member.setModSeq(nextModSeq(mailbox));
+                        member.setModSeq(modSeq);
                         save(mailbox, member);
 
                     }
@@ -263,4 +286,14 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      */
     protected abstract Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<Id> mailbox, MessageRange set) throws MailboxException;
 
+    /**
+     * Save the sequence meta-data for the mailbox in a permanent way
+     * 
+     * @param mailbox
+     * @param lastUid
+     * @param highestModSeq
+     * @throws MailboxException
+     */
+    protected abstract void saveSequences(Mailbox<Id> mailbox, long lastUid, long highestModSeq) throws MailboxException;
+    
 }

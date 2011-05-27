@@ -70,4 +70,22 @@ public interface Mailbox<Id> {
      * @return uid validity
      */
     public abstract long getUidValidity();
+    
+    /**
+     * Return the last known uid for this mailbox which 
+     * was stored in a persist way. This does not guaranteer
+     * that there is no "higher" uid already allocated
+     * 
+     * @return lastKnownUid
+     */
+    public abstract long getLastKnownUid();
+    
+    /**
+     * Return the highest known mod-seq for this mailbox which 
+     * was stored in a persist way. This does not guaranteer
+     * that there is no "higher" mod-seq already allocated
+     * 
+     * @return highestKnownModSeq
+     */
+    public abstract long getHighestKnownModSeq();
 }

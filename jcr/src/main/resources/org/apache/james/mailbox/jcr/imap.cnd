@@ -64,4 +64,7 @@
     - jamesMailbox:mailboxLastUid (LONG) 
     - jamesMailbox:mailboxNamespace (STRING) 
     - jamesMailbox:mailboxUser (STRING) 
+    - jamesMailbox:mailboxLastKnownUid (LONG) 
+    - jamesMailbox:mailboxHighestKnownModSeq (LONG) 
+
     + * (nt:unstructured) multiple

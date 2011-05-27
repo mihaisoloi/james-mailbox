@@ -44,6 +44,7 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
+import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
@@ -698,6 +699,21 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
         } catch (IOException e) {
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         }        
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#saveSequences(org.apache.james.mailbox.store.mail.model.Mailbox, long, long)
+     */
+    protected void saveSequences(Mailbox<String> mailbox, long lastUid, long highestModSeq) throws MailboxException {
+        try {
+            Node mailboxNode = getSession().getNodeByIdentifier(mailbox.getMailboxId());
+            mailboxNode.setProperty(JCRMailbox.HIGHESTKNOWNMODSEQ_PROPERTY, highestModSeq);
+            mailboxNode.setProperty(JCRMailbox.LASTKNOWNUID_PROPERTY, lastUid);
+           
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to save sequences", e);
+        }
     }
 
 }

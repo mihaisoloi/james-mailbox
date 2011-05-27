@@ -29,13 +29,16 @@ public class MaildirMailbox implements Mailbox<Integer> {
     private String name;
     private long lastUid;
     private long uidValidity;
+    private long lastKnownUid;
+    private long highestKnownModSeq;
 
-    public MaildirMailbox(MailboxPath path, long uidValidity, long lastUid) {
+    public MaildirMailbox(MailboxPath path, long uidValidity, long lastKnownUid, long highestKnownModSeq) {
         this.namespace = path.getNamespace();
         this.user = path.getUser();
         this.name = path.getName();
         this.uidValidity = uidValidity;
-        this.lastUid = lastUid;
+        this.lastKnownUid = lastKnownUid;
+        this.highestKnownModSeq = highestKnownModSeq;
     }
     
     public MaildirMailbox(Mailbox<Integer> mailbox) {
@@ -171,6 +174,22 @@ public class MaildirMailbox implements Mailbox<Integer> {
     @Override
     public String toString() {
         return namespace + ":" + user + ":" + name;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
+     */
+    public long getLastKnownUid() {
+        return lastKnownUid;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
+     */
+    public long getHighestKnownModSeq() {
+        return highestKnownModSeq;
     }
 
 }

@@ -433,4 +433,20 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
             throw new MailboxException("Save of message " + message + " failed in mailbox " + mailbox, e);
         }        
     }
+
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#saveSequences(org.apache.james.mailbox.store.mail.model.Mailbox, long, long)
+     */
+    protected void saveSequences(Mailbox<Long> mailbox, long lastUid, long highestModSeq) throws MailboxException {
+        try {
+            getEntityManager().createNamedQuery("updateSequences")
+            .setParameter("idParam", mailbox.getMailboxId())
+            .setParameter("lastKnownUid", lastUid)
+            .setParameter("lastKnowHighestModSeq", highestModSeq).executeUpdate();      
+        } catch (PersistenceException e) {
+            throw new MailboxException("Save of sequences for mailbox " + mailbox + " failed", e);
+        }
+    }
 }

@@ -112,10 +112,11 @@ public class MaildirStore {
         try {
             uidValidity = folder.getUidValidity();
             lastUid = folder.getLastUid();
+            return new MaildirMailbox(mailboxPath, uidValidity, lastUid, folder.getHighestModSeq());
+
         } catch (IOException e) {
             throw new MailboxException("Unable to load Mailbox " + mailboxPath, e);
         }
-        return new MaildirMailbox(mailboxPath, uidValidity, lastUid);
     }
     
     /**

@@ -50,7 +50,10 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
     @NamedQuery(name="countMailboxesWithNameLike",
         query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="listMailboxes",
-        query="SELECT mailbox FROM Mailbox mailbox")
+        query="SELECT mailbox FROM Mailbox mailbox"),
+    @NamedQuery(name="updateSequences", 
+        query= "UPDATE Mailbox mailbox SET mailbox.lastKnownUid = :lastKnownUidParam, SET mailbox.lastKnownHighestModSeq = :lastKnownHighestModSeq  WHERE mailbox.mailbox.mailboxId = :idParam")
+    
 })
 public class JPAMailbox implements Mailbox<Long> {
     
@@ -80,6 +83,14 @@ public class JPAMailbox implements Mailbox<Long> {
     @Column(name = "MAILBOX_NAMESPACE", nullable = false, length = 200)
     private String namespace;
 
+    @Basic(optional = false)
+    @Column(name = "MAILBOX_LAST_KNOWN_UID", nullable = false)
+    private long lastKnowUid;
+    
+    @Basic(optional = false)
+    @Column(name = "MAILBOX_HIGHEST_KNOWN_MODSEQ", nullable = false)
+    private long highestKnownModSeq;
+    
     /**
      * JPA only
      */
@@ -186,6 +197,24 @@ public class JPAMailbox implements Mailbox<Long> {
      */
     public void setUser(String user) {
         this.user = user;
+    }
+
+    
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
+     */
+    public long getLastKnownUid() {
+        return lastKnowUid;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
+     */
+    public long getHighestKnownModSeq() {
+        return highestKnownModSeq;
     }
     
 }

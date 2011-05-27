@@ -172,6 +172,14 @@ public class MaildirFolder {
         return lastUid;
     }
     
+    public long getHighestModSeq() throws IOException {
+        long newModified = getNewFolder().lastModified();
+        long curModified = getCurFolder().lastModified();
+        if (newModified  == 0L && curModified == 0L) {
+            throw new IOException("Unable to read highest modSeq");
+        }
+        return Math.max(newModified, curModified);
+    }
 
     /**
      * Read the lastUid of the given mailbox from the file system.

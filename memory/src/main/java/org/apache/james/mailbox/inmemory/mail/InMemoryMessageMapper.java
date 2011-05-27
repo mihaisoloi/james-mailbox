@@ -261,4 +261,12 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      */
     protected void rollback() throws MailboxException {        
     }
+
+    /**
+     * Do nothing
+     */
+    protected void saveSequences(Mailbox<Long> mailbox, long lastUid, long highestModSeq) throws MailboxException {
+        // Nothing todo as its a in memory implementation
+        
+    }
 }

@@ -54,7 +54,7 @@ public class MaildirMailboxManager extends StoreMailboxManager<Integer> {
     @Override
     protected Mailbox<Integer> doCreateMailbox(MailboxPath mailboxPath, MailboxSession session)
             throws MailboxException {
-        return new MaildirMailbox(mailboxPath, randomUidValidity(), 0);
+        return new MaildirMailbox(mailboxPath, randomUidValidity(), 0, 0);
     }
 
 }
