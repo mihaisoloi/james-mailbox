@@ -170,7 +170,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
 
             // Increase the mod-sequence  and the uid for this mailbox and save it permanent way
             // See MAILBOX-75 
-            saveSequences(mailbox, nextUid(mailbox), nextModSeq(mailbox));
+            saveSequences(mailbox, getLastUid(mailbox), getHighestModSeq(mailbox));
 
         }
         if (index != null) {
