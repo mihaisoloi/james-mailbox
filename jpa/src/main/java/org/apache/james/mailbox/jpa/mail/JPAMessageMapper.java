@@ -446,8 +446,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         try {
             getEntityManager().createNamedQuery("updateSequences")
             .setParameter("idParam", mailbox.getMailboxId())
-            .setParameter("lastKnownUid", lastUid)
-            .setParameter("lastKnowHighestModSeq", highestModSeq).executeUpdate();      
+            .setParameter("lastKnownUidParam", lastUid)
+            .setParameter("lastKnownHighestModSeqParam", highestModSeq).executeUpdate();      
         } catch (PersistenceException e) {
             throw new MailboxException("Save of sequences for mailbox " + mailbox + " failed", e);
         }

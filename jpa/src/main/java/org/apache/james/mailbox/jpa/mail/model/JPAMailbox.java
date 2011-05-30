@@ -52,7 +52,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
     @NamedQuery(name="listMailboxes",
         query="SELECT mailbox FROM Mailbox mailbox"),
     @NamedQuery(name="updateSequences", 
-        query= "UPDATE Mailbox mailbox SET mailbox.lastKnownUid = :lastKnownUidParam, SET mailbox.lastKnownHighestModSeq = :lastKnownHighestModSeq  WHERE mailbox.mailbox.mailboxId = :idParam")
+        query= "UPDATE Mailbox mailbox SET mailbox.lastKnownUid = :lastKnownUidParam, mailbox.highestKnownModSeq = :lastKnownHighestModSeqParam  WHERE mailbox.mailboxId = :idParam")
     
 })
 public class JPAMailbox implements Mailbox<Long> {
@@ -85,7 +85,7 @@ public class JPAMailbox implements Mailbox<Long> {
 
     @Basic(optional = false)
     @Column(name = "MAILBOX_LAST_KNOWN_UID", nullable = false)
-    private long lastKnowUid;
+    private long lastKnownUid;
     
     @Basic(optional = false)
     @Column(name = "MAILBOX_HIGHEST_KNOWN_MODSEQ", nullable = false)
@@ -206,7 +206,7 @@ public class JPAMailbox implements Mailbox<Long> {
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
      */
     public long getLastKnownUid() {
-        return lastKnowUid;
+        return lastKnownUid;
     }
 
     /*
