@@ -25,6 +25,7 @@ import org.apache.james.mailbox.maildir.mail.MaildirMailboxMapper;
 import org.apache.james.mailbox.maildir.mail.MaildirMessageMapper;
 import org.apache.james.mailbox.maildir.user.MaildirSubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
+import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
@@ -33,10 +34,18 @@ public class MaildirMailboxSessionMapperFactory extends
         MailboxSessionMapperFactory<Integer> {
 
     private final MaildirStore store;
+    private final MessageSearchIndex<Integer> index;
     
     public MaildirMailboxSessionMapperFactory(MaildirStore store) {
-        this.store = store;
+        this(store, null);
     }
+    
+    
+    public MaildirMailboxSessionMapperFactory(MaildirStore store, MessageSearchIndex<Integer> index) {
+        this.store = store;
+        this.index = index;
+    }
+    
     
     @Override
     protected MailboxMapper<Integer> createMailboxMapper(MailboxSession session)
@@ -47,7 +56,7 @@ public class MaildirMailboxSessionMapperFactory extends
     @Override
     protected MessageMapper<Integer> createMessageMapper(MailboxSession session)
             throws MailboxException {
-        return new MaildirMessageMapper(store);
+        return new MaildirMessageMapper(session, index, store);
     }
 
     @Override

@@ -30,6 +30,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
@@ -37,6 +38,7 @@ import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
+import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
@@ -51,7 +53,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     protected EntityManagerFactory entityManagerFactory;
     protected EntityManager entityManager;
     
-    public JPAMessageMapper(final EntityManagerFactory entityManagerFactory) {
+    public JPAMessageMapper(final MailboxSession session, MessageSearchIndex<Long> index, final EntityManagerFactory entityManagerFactory) {
+        super(session, index);
         this.entityManagerFactory = entityManagerFactory;
     }
 

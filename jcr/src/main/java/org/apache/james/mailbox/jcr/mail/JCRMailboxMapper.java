@@ -42,7 +42,6 @@ import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.slf4j.Logger;
 
 /**
  * JCR implementation of a MailboxMapper
@@ -52,8 +51,8 @@ import org.slf4j.Logger;
 public class JCRMailboxMapper extends AbstractJCRScalingMapper implements MailboxMapper<String> {
 
 
-	public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Logger logger) {
-        super(repos, session, scaling, logger);
+	public JCRMailboxMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling) {
+        super(repos, session, scaling);
     }
 
     /*

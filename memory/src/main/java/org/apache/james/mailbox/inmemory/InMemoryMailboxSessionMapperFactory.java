@@ -37,7 +37,7 @@ public class InMemoryMailboxSessionMapperFactory extends MailboxSessionMapperFac
     
     public InMemoryMailboxSessionMapperFactory() {
         mailboxMapper = new InMemoryMailboxMapper();
-        messageMapper = new InMemoryMessageMapper();
+        messageMapper = new InMemoryMessageMapper(null);
         subscriptionMapper = new InMemorySubscriptionMapper();
     }
     

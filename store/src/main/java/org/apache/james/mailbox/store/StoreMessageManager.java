@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,11 +45,8 @@ import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
-import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
-import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Header;
@@ -600,62 +596,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public Iterator<Long> search(SearchQuery query, MailboxSession mailboxSession) throws MailboxException {
         MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
-        List<Criterion> crits = query.getCriterias();
-
-        if (crits.size() == 1  && crits.get(0) instanceof UidCriterion) {
-            final List<Long> uids = new ArrayList<Long>();
-            UidCriterion uidCrit = (UidCriterion) crits.get(0);
-            NumericRange[] ranges = uidCrit.getOperator().getRange();
-            for (int i = 0; i < ranges.length; i++) {
-                NumericRange r = ranges[i];
-                messageMapper.findInMailbox(getMailboxEntity(), MessageRange.range(r.getLowValue(), r.getHighValue()), new MailboxMembershipCallback<Id>() {
-
-                    public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
-                        for (int i = 0; i < list.size(); i++) {
-                            long uid = list.get(i).getUid();
-                            if (uids.contains(uid) == false) {
-                                uids.add(uid);
-                            }
-                        }
-                    }
-                });
-            }
-            Collections.sort(uids);
-            return uids.iterator();
-            
-           
-        } else {
-            final List<Message<Id>> hits = new ArrayList<Message<Id>>();
-
-            messageMapper.findInMailbox(getMailboxEntity(), MessageRange.all(), new MailboxMembershipCallback<Id>() {
-
-                public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
-                    for (int i = 0; i < list.size(); i++) {
-                        Message<Id> m = list.get(i);
-                        if (hits.contains(m) == false) {
-                            hits.add(m);
-                        }
-                    }
-                }
-            });
-            Collections.sort(hits);
-            
-            return new SearchQueryIterator(new Iterator<Message<?>>() {
-                final Iterator<Message<Id>> it = hits.iterator();
-                public boolean hasNext() {
-                    return it.hasNext();
-                }
-
-                public Message<?> next() {
-                    return it.next();
-                }
-
-                public void remove() {
-                    it.remove();
-                }
-                
-            }, query, mailboxSession.getLog());
-        }
+        return messageMapper.search(getMailboxEntity(), query);
         
     }
 

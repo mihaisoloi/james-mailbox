@@ -25,6 +25,7 @@ import org.apache.james.mailbox.jcr.mail.JCRMailboxMapper;
 import org.apache.james.mailbox.jcr.mail.JCRMessageMapper;
 import org.apache.james.mailbox.jcr.user.JCRSubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
+import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
@@ -39,37 +40,37 @@ import org.slf4j.LoggerFactory;
 public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<String> {
 
     private final MailboxSessionJCRRepository repository;
-    private final Logger logger;
     private final static int DEFAULT_SCALING = 2;
     private final int scaling;
     private int messageScaling;
+    private final MessageSearchIndex<String> index;
 
     public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository) {
-        this(repository, DEFAULT_SCALING, JCRMessageMapper.MESSAGE_SCALE_DAY);
+        this(repository, null, DEFAULT_SCALING, JCRMessageMapper.MESSAGE_SCALE_DAY);
     }
 
-    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final int scaling, final int messageScaling) {
+    public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final MessageSearchIndex<String> index, final int scaling, final int messageScaling) {
         this.repository = repository;
-        this.logger = LoggerFactory.getLogger(JCRMailboxSessionMapperFactory.class);
+        this.index = index;
         this.scaling = scaling;
         this.messageScaling = messageScaling;
     }
     
     @Override
     public MailboxMapper<String> createMailboxMapper(MailboxSession session) throws MailboxException {
-        JCRMailboxMapper mapper = new JCRMailboxMapper(repository, session, scaling, logger);
+        JCRMailboxMapper mapper = new JCRMailboxMapper(repository, session, scaling);
         return mapper;
     }
 
     @Override
     public MessageMapper<String> createMessageMapper(MailboxSession session) throws MailboxException {
-        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, logger, messageScaling);
+        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, index, messageScaling);
         return messageMapper;
     }
 
     @Override
     public SubscriptionMapper createSubscriptionMapper(MailboxSession session) throws SubscriptionException {
-        JCRSubscriptionMapper mapper = new JCRSubscriptionMapper(repository, session, DEFAULT_SCALING, logger);
+        JCRSubscriptionMapper mapper = new JCRSubscriptionMapper(repository, session, DEFAULT_SCALING);
         return mapper;
     }
     

@@ -41,7 +41,6 @@ import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.user.model.JCRSubscription;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.model.Subscription;
-import org.slf4j.Logger;
 
 /**
  * JCR implementation of a SubscriptionManager
@@ -49,8 +48,8 @@ import org.slf4j.Logger;
  */
 public class JCRSubscriptionMapper extends AbstractJCRScalingMapper implements SubscriptionMapper {
 
-    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling, final Logger log) {
-        super(repos,session, scaling, log);
+    public JCRSubscriptionMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final int scaling) {
+        super(repos,session, scaling);
     }
 
     /*

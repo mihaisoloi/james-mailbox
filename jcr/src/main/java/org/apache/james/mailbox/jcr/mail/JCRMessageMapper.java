@@ -46,12 +46,12 @@ import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
+import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.slf4j.Logger;
 
 /**
  * JCR implementation of a {@link MessageMapper}. The implementation store each message as 
@@ -97,9 +97,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
     private final int scaleType;
     
-    private final Logger logger;
     private final MailboxSessionJCRRepository repository;
-    protected final MailboxSession mSession;
 
     
     /**
@@ -109,25 +107,16 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, final Logger logger, int scaleType) {
-        this.repository = repository;
-        this.mSession = mSession;
-        this.logger = logger;
+    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, final MessageSearchIndex<String> index,  int scaleType) {
+        super(mSession, index);
+        this.repository = repository;        
         this.scaleType = scaleType;
     }
     
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, final Logger logger) {
-        this(repos, session, logger, MESSAGE_SCALE_DAY);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session) {
+        this(repos, session, null, MESSAGE_SCALE_DAY);
     }
 
-    /**
-     * Return the logger
-     * 
-     * @return logger
-     */
-    protected Logger getLogger() {
-        return logger;
-    }
     
     /**
      * Return the JCR Session
@@ -135,7 +124,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * @return session
      */
     protected Session getSession() throws RepositoryException{
-        return repository.login(mSession);
+        return repository.login(mailboxSession);
     }
 
     /**
@@ -322,7 +311,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -337,7 +326,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
         QueryResult result = query.execute();
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -354,7 +343,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -371,7 +360,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -387,7 +376,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -402,7 +391,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            JCRMessage member = new JCRMessage(iterator.nextNode(), getLogger());
+            JCRMessage member = new JCRMessage(iterator.nextNode(), mailboxSession.getLog());
             list.add(member);
         }
         return list;
@@ -417,7 +406,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+            list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
         }
         return list;
     }
@@ -432,7 +421,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
         NodeIterator iterator = result.getNodes();
         while (iterator.hasNext()) {
-            JCRMessage member = new JCRMessage(iterator.nextNode(), getLogger());
+            JCRMessage member = new JCRMessage(iterator.nextNode(), mailboxSession.getLog());
             list.add(member);
         }
         return list;
@@ -500,7 +489,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             
             NodeIterator iterator = result.getNodes();
             while(iterator.hasNext()) {
-                list.add(new JCRMessage(iterator.nextNode(), getLogger()));
+                list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
             }
             return list;
 
@@ -526,7 +515,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
             NodeIterator iterator = result.getNodes();
             if(iterator.hasNext()) {
-                return new JCRMessage(iterator.nextNode(), getLogger()).getUid();
+                return new JCRMessage(iterator.nextNode(), mailboxSession.getLog()).getUid();
             } else {
                 return null;
             }
@@ -560,7 +549,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * Logout from open JCR Session
      */
     public void endRequest() {
-       repository.logout(mSession);
+       repository.logout(mailboxSession);
     }
     
 

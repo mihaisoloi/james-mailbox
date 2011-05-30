@@ -35,15 +35,13 @@ import org.slf4j.Logger;
 public abstract class AbstractJCRMapper extends TransactionalMapper implements JCRImapConstants {
     public final static String MAILBOXES_PATH =  "mailboxes";
 
-    private final Logger logger;
     private final MailboxSessionJCRRepository repository;
     protected final MailboxSession mSession;
 
     
-    public AbstractJCRMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, Logger logger) {
+    public AbstractJCRMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession) {
         this.repository = repository;
         this.mSession = mSession;
-        this.logger = logger;
     }
 
     /**
@@ -52,7 +50,7 @@ public abstract class AbstractJCRMapper extends TransactionalMapper implements J
      * @return logger
      */
     protected Logger getLogger() {
-        return logger;
+        return mSession.getLog();
     }
     
     /**

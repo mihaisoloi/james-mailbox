@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
@@ -41,7 +42,8 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     private Map<Long, Map<Long, Message<Long>>> mailboxByUid;
     private static final int INITIAL_SIZE = 256;
     
-    public InMemoryMessageMapper() {
+    public InMemoryMessageMapper(MailboxSession session) {
+        super(session);
         this.mailboxByUid = new ConcurrentHashMap<Long, Map<Long, Message<Long>>>(INITIAL_SIZE);
     }
     

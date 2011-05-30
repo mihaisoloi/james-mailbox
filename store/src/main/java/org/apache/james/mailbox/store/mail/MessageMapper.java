@@ -25,8 +25,10 @@ import java.util.Map;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -170,5 +172,8 @@ public interface MessageMapper<Id> extends Mapper {
      * @throws MailboxException
      */
     public abstract long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
+    
+    public Iterator<Long> search(Mailbox<Id> mailbox, SearchQuery query) throws MailboxException;
+
 
 }
