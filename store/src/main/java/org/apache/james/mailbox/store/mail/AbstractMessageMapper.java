@@ -296,6 +296,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                 
                
             } else {
+                
                 final List<Message<Id>> hits = new ArrayList<Message<Id>>();
 
                 findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
@@ -311,7 +312,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                 });
                 Collections.sort(hits);
                 
-                return new SearchQueryIterator(new Iterator<Message<?>>() {
+                Iterator<Message<?>> it = new Iterator<Message<?>>() {
                     final Iterator<Message<Id>> it = hits.iterator();
                     public boolean hasNext() {
                         return it.hasNext();
@@ -325,7 +326,13 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                         it.remove();
                     }
                     
-                }, query, mailboxSession.getLog());
+                };
+                
+                if (mailboxSession == null) {
+                    return new SearchQueryIterator(it, query);
+                } else {
+                    return new SearchQueryIterator(it, query, mailboxSession.getLog());
+                }
             }
         } else {
             return index.search(mailboxSession, mailbox, query);
