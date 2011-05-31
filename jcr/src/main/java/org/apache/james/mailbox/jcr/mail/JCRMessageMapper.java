@@ -600,7 +600,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
     }
 
     @Override
-    protected void copy(Mailbox<String> mailbox, long uid, long modSeq, Message<String> original) throws MailboxException {
+    protected MessageMetaData copy(Mailbox<String> mailbox, long uid, long modSeq, Message<String> original) throws MailboxException {
         try {
             String newMessagePath = getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid);
             getSession().getWorkspace().copy(((JCRMessage)original).getNode().getPath(), getSession().getNodeByIdentifier(mailbox.getMailboxId()).getPath() + NODE_DELIMITER + String.valueOf(uid));
@@ -608,14 +608,15 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             node.setProperty(JCRMessage.MAILBOX_UUID_PROPERTY, mailbox.getMailboxId());
             node.setProperty(JCRMessage.UID_PROPERTY, uid);
             node.setProperty(JCRMessage.MODSEQ_PROPERTY, modSeq);
-
+            
+            return new SimpleMessageMetaData(new JCRMessage(node, mailboxSession.getLog()));
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to copy message " +original + " in mailbox " + mailbox, e);
         }        
     }
 
     @Override
-    protected void save(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
+    protected MessageMetaData save(Mailbox<String> mailbox, Message<String> message) throws MailboxException {
         final JCRMessage membership = (JCRMessage) message;
         try {
 
@@ -683,6 +684,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             } else {
                 membership.merge(messageNode);
             }
+            return new SimpleMessageMetaData(membership);
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         } catch (IOException e) {

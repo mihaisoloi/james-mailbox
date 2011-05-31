@@ -18,8 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +42,10 @@ import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.SearchQueryIterator;
+import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 
 /**
@@ -250,11 +255,12 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     public MessageMetaData add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException {
         message.setUid(nextUid(mailbox));
         message.setModSeq(nextModSeq(mailbox));
-        save(mailbox, message);
+        MessageMetaData data = save(mailbox, message);
         if (index != null) {
             index.add(mailboxSession, mailbox, message);
         }
-        return new SimpleMessageMetaData(message);
+        return data;
+        
     }
 
     
@@ -262,11 +268,141 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
-    public MessageMetaData copy(Mailbox<Id> mailbox, Message<Id> original) throws MailboxException {
+    public MessageMetaData copy(final Mailbox<Id> mailbox, final Message<Id> original) throws MailboxException {
         long uid = nextUid(mailbox);
         long modSeq = nextModSeq(mailbox);
-        copy(mailbox, uid, modSeq, original);
-        return new SimpleMessageMetaData(uid, modSeq, original.createFlags(), original.getFullContentOctets(), original.getInternalDate());
+        final MessageMetaData metaData = copy(mailbox, uid, modSeq, original);  
+        if (index != null) {
+            // index the copied message by building a wrapper around the original message and the returned metadata
+            index.add(mailboxSession, mailbox, new Message<Id>() {
+
+                @Override
+                public Flags createFlags() {
+                    return original.createFlags();
+                }
+
+                @Override
+                public InputStream getBodyContent() throws IOException {
+                    return original.getBodyContent();
+                }
+
+                @Override
+                public long getBodyOctets() {
+                    return original.getBodyOctets();
+                }
+
+                @Override
+                public InputStream getFullContent() throws IOException {
+                    return original.getFullContent();
+                }
+
+                @Override
+                public long getFullContentOctets() {
+                    return original.getFullContentOctets();
+                }
+
+                @Override
+                public List<Header> getHeaders() {
+                    return original.getHeaders();
+                }
+
+                @Override
+                public Date getInternalDate() {
+                    return metaData.getInternalDate();
+                }
+
+                @Override
+                public Id getMailboxId() {
+                    return mailbox.getMailboxId();
+                }
+
+                @Override
+                public String getMediaType() {
+                    return original.getMediaType();
+                }
+
+                @Override
+                public long getModSeq() {
+                    return metaData.getModSeq();
+                }
+
+                @Override
+                public List<Property> getProperties() {
+                    return original.getProperties();
+                }
+
+                @Override
+                public String getSubType() {
+                    return original.getSubType();
+                }
+
+                @Override
+                public Long getTextualLineCount() {
+                    return original.getTextualLineCount();
+                }
+
+                @Override
+                public long getUid() {
+                    return metaData.getUid();
+                }
+
+                @Override
+                public boolean isAnswered() {
+                    return original.isAnswered();
+                }
+
+                @Override
+                public boolean isDeleted() {
+                    return original.isDeleted();
+
+                }
+
+                @Override
+                public boolean isDraft() {
+                    return original.isDraft();
+
+                }
+
+                @Override
+                public boolean isFlagged() {
+                    return original.isFlagged();
+                }
+
+                @Override
+                public boolean isRecent() {
+                    return original.isRecent();
+                }
+
+                @Override
+                public boolean isSeen() {
+                    return original.isSeen();
+                }
+
+                @Override
+                public void setFlags(Flags flags) {
+                    throw new UnsupportedOperationException("Read-Only Message");
+                }
+
+                @Override
+                public void setModSeq(long modSeq) {
+                    throw new UnsupportedOperationException("Read-Only Message");
+                }
+
+                @Override
+                public void setUid(long uid) {
+                    throw new UnsupportedOperationException("Read-Only Message");
+                }
+
+                @Override
+                public int compareTo(Message<Id> o) {
+                    return (int) (metaData.getUid() - o.getUid());
+                }
+                
+            
+            });
+        } 
+        
+        return metaData;
     }
 
     
@@ -370,13 +506,14 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     
     
     /**
-     * Save the {@link Message} for the given {@link Mailbox}
+     * Save the {@link Message} for the given {@link Mailbox} and return the {@link MessageMetaData} 
      * 
      * @param mailbox
      * @param message
+     * @return metaData
      * @throws MailboxException
      */
-    protected abstract void save(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
+    protected abstract MessageMetaData save(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
 
     
     /**
@@ -386,9 +523,10 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @param uid
      * @param modSeq
      * @param original
+     * @return metaData
      * @throws MailboxException
      */
-    protected abstract void copy(Mailbox<Id> mailbox, long uid, long modSeq, Message<Id> original) throws MailboxException;
+    protected abstract MessageMetaData copy(Mailbox<Id> mailbox, long uid, long modSeq, Message<Id> original) throws MailboxException;
     
     
     /**

@@ -405,14 +405,14 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
-    protected void copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
+    protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
         Message<Long> copy;
         if (original instanceof JPAStreamingMessage) {
             copy = new JPAStreamingMessage((JPAMailbox) mailbox, uid, modSeq, original);
         } else {
             copy = new JPAMessage((JPAMailbox) mailbox, uid, modSeq, original);
         }
-        save(mailbox, copy);        
+        return save(mailbox, copy);        
     }
 
 
@@ -420,7 +420,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
-    protected void save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
+    protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
 
         try {
             
@@ -429,7 +429,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
             ((AbstractJPAMessage) message).setMailbox(getEntityManager().find(JPAMailbox.class, mailbox.getMailboxId()));
             
             getEntityManager().persist(message);
-                    
+            return new SimpleMessageMetaData(message);
         } catch (PersistenceException e) {
             throw new MailboxException("Save of message " + message + " failed in mailbox " + mailbox, e);
         } catch (ArgumentException e) {

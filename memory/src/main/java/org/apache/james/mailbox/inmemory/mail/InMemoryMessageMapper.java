@@ -214,8 +214,8 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
-    protected void copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
-        save(mailbox, new SimpleMailboxMembership(mailbox.getMailboxId(), uid, modSeq, (SimpleMailboxMembership)original));
+    protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
+        return save(mailbox, new SimpleMailboxMembership(mailbox.getMailboxId(), uid, modSeq, (SimpleMailboxMembership)original));
     }
 
     /*
@@ -239,8 +239,9 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
-    protected void save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
+    protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
         getMembershipByUidForMailbox(mailbox).put(message.getUid(), message);
+        return new SimpleMessageMetaData(message);
     }
 
     /**
