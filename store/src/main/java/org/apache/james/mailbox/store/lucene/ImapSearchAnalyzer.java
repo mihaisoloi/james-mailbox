@@ -21,9 +21,11 @@ package org.apache.james.mailbox.store.lucene;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.cn.smart.SentenceTokenizer;
 import org.apache.lucene.analysis.ngram.NGramTokenFilter;
+import org.apache.lucene.util.Version;
 
 /**
 *
@@ -38,12 +40,22 @@ import org.apache.lucene.analysis.ngram.NGramTokenFilter;
 */
 public final class ImapSearchAnalyzer extends Analyzer {
 
+    private final int minTokenLength;
+    private final int maxTokenLength;
+    
+    public ImapSearchAnalyzer() {
+        this(3, 40);
+    }
+    public ImapSearchAnalyzer(int minTokenLength, int maxTokenLength) {
+        this.minTokenLength = minTokenLength;
+        this.maxTokenLength = maxTokenLength;
+    }
    /*
     * (non-Javadoc)
     * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String, java.io.Reader)
     */
    public TokenStream tokenStream(String fieldName, Reader reader) {
-       return new NGramTokenFilter(new WhitespaceTokenizer(reader),2 , 4);
+       return new NGramTokenFilter(new LowerCaseFilter(Version.LUCENE_31, new SentenceTokenizer(reader)), minTokenLength, maxTokenLength);
    }
    
 }

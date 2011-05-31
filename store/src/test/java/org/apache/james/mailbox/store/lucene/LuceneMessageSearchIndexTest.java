@@ -22,21 +22,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
+import org.apache.james.mailbox.store.MessageBuilder;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.SimpleHeader;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,11 +51,26 @@ public class LuceneMessageSearchIndexTest {
 
     private SimpleMailbox mailbox = new SimpleMailbox(0);
     private SimpleMailbox mailbox2 = new SimpleMailbox(1);
+    private SimpleMailbox mailbox3 = new SimpleMailbox(2);
 
+
+    private static final String FROM_ADDRESS = "Harry <harry@example.org";
+
+    private static final String SUBJECT_PART = "Mixed";
+
+    private static final String CUSTARD = "CUSTARD";
+
+    private static final String RHUBARD = "Rhubard";
+
+    private static final String BODY = "This is a simple email\r\n "
+            + "It has " + RHUBARD + ".\r\n" + "It has " + CUSTARD + ".\r\n"
+            + "It needs naught else.\r\n";
+
+    Message<Long> row;
 
     @Before
     public void setUp() throws Exception {
-        index = new LuceneMessageSearchIndex<Long>(new RAMDirectory());
+        index = new LuceneMessageSearchIndex<Long>(new RAMDirectory(), false);
         List<org.apache.james.mailbox.store.SimpleHeader> headersSubject = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
         headersSubject.add(new SimpleHeader("Subject", 1, "test"));
        
@@ -62,12 +81,14 @@ public class LuceneMessageSearchIndexTest {
         headersTestSubject.add(new SimpleHeader("Test", 1, "test"));
         headersTestSubject.add(new SimpleHeader("Subject", 2, "test2"));
 
-        SimpleMailboxMembership m = new SimpleMailboxMembership(mailbox.getMailboxId(),1, 0, new Date(), 200, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
-        index.add(null, mailbox, m);
+
         
         SimpleMailboxMembership m2 = new SimpleMailboxMembership(mailbox2.getMailboxId(),1, 0, new Date(), 20, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
         index.add(null, mailbox2, m2);
 
+        SimpleMailboxMembership m = new SimpleMailboxMembership(mailbox.getMailboxId(),1, 0, new Date(), 200, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
+        index.add(null, mailbox, m);
+        
         Calendar cal = Calendar.getInstance();
         cal.set(1980, 2, 10);
         SimpleMailboxMembership m3 = new SimpleMailboxMembership(mailbox.getMailboxId(),2, 0, cal.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody".getBytes(), headersTest);
@@ -77,6 +98,100 @@ public class LuceneMessageSearchIndexTest {
         cal2.set(8000, 2, 10);
         SimpleMailboxMembership m4 = new SimpleMailboxMembership(mailbox.getMailboxId(),3, 0, cal2.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody2".getBytes(), headersTestSubject);
         index.add(null, mailbox, m4);
+        
+        MessageBuilder builder = new MessageBuilder();
+        builder.header("From", "Alex <alex@example.org");
+        builder.header("To", FROM_ADDRESS);
+        builder.header("Subject", "A " + SUBJECT_PART + " Multipart Mail");
+        builder.header("Date", "Thu, 14 Feb 2008 12:00:00 +0000 (GMT)");
+        builder.body = Charset.forName("us-ascii").encode(BODY).array();
+        builder.uid = 10;
+        builder.mailboxId = mailbox3.getMailboxId();
+        
+        index.add(null, mailbox3, builder.build());
+                
+    }
+    
+
+
+    @Test
+    public void testBodyShouldMatchPhraseInBody() throws Exception {
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.bodyContains(CUSTARD));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+        
+        
+        query = new SearchQuery();
+        query.andCriteria(SearchQuery.bodyContains(CUSTARD + CUSTARD));
+        result = index.search(null, mailbox3, query);
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testBodyMatchShouldBeCaseInsensitive() throws Exception {
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.bodyContains(RHUBARD));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testBodyShouldNotMatchPhraseOnlyInHeader() throws Exception {
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.bodyContains(FROM_ADDRESS));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertFalse(result.hasNext());
+        
+        query = new SearchQuery();
+        query.andCriteria(SearchQuery.bodyContains(SUBJECT_PART));
+        result = index.search(null, mailbox3, query);
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testTextShouldMatchPhraseInBody() throws Exception {
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.mailContains(CUSTARD));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+        
+        query = new SearchQuery();
+        query.andCriteria(SearchQuery.mailContains(CUSTARD + CUSTARD));
+        result = index.search(null, mailbox3, query);
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testTextMatchShouldBeCaseInsensitive() throws Exception {
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.mailContains(RHUBARD));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+        
+        query.andCriteria(SearchQuery.mailContains(RHUBARD.toLowerCase(Locale.US)));
+        result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testBodyShouldMatchPhraseOnlyInHeader() throws Exception {
+        
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.mailContains(FROM_ADDRESS));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
+        
+        query.andCriteria(SearchQuery.mailContains(SUBJECT_PART));
+        result = index.search(null, mailbox3, query);
+        assertEquals(10, result.next(), 1);
+        assertFalse(result.hasNext());
     }
     
     @Test
@@ -107,6 +222,8 @@ public class LuceneMessageSearchIndexTest {
         Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
+        assertEquals(3, it4.next().longValue(), 1);
+
         assertFalse(it4.hasNext());
     }
     
@@ -117,6 +234,7 @@ public class LuceneMessageSearchIndexTest {
         Iterator<Long> it4 = index.search(null, mailbox, q2);
         assertEquals(1, it4.next().longValue(), 1);
         assertEquals(2, it4.next().longValue(), 1);
+        assertEquals(3, it4.next().longValue(), 1);
 
         assertFalse(it4.hasNext());
     }

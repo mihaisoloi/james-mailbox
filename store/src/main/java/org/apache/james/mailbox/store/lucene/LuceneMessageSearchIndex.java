@@ -46,24 +46,32 @@ import org.apache.james.mailbox.SearchQuery.HeaderCriterion;
 import org.apache.james.mailbox.SearchQuery.HeaderOperator;
 import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
+import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.BodyDescriptor;
+import org.apache.james.mime4j.field.AddressListField;
+import org.apache.james.mime4j.field.address.Address;
+import org.apache.james.mime4j.field.address.AddressList;
+import org.apache.james.mime4j.field.address.Group;
+import org.apache.james.mime4j.field.address.MailboxList;
 import org.apache.james.mime4j.message.Header;
 import org.apache.james.mime4j.message.SimpleContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -78,6 +86,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.Version;
 
 /**
  * Lucene based {@link MessageSearchIndex} which offers message searching.
@@ -96,6 +105,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * {@link Field} which will contain the unique index of the {@link Document}
      */
     public final static String ID_FIELD ="id";
+    
     
     /**
      * {@link Field} which will contain uid of the {@link MailboxMembership}
@@ -124,7 +134,15 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * {@link Field} which will contain the whole message header of the {@link MailboxMembership}
      */
     public final static String HEADERS_FIELD ="headers";
+
+    public final static String MODSEQ_FIELD = "modSeq";
+
     
+    public final static String TO_FIELD ="to";
+    public final static String CC_FIELD ="cc";
+    public final static String BCC_FIELD ="bcc";
+    public final static String FROM_FIELD ="from";
+
 
     public final static String INTERNAL_DATE_FIELD_YEAR_RESOLUTION ="internaldateYearResolution";
  
@@ -150,11 +168,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     
     private final static Sort UID_SORT = new Sort(new SortField(UID_FIELD, SortField.LONG));
     
-    public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
-        this(new IndexWriter(directory, createAnalyzer(), true, IndexWriter.MaxFieldLength.UNLIMITED));
+    public LuceneMessageSearchIndex(Directory directory, boolean breakIMAPRFC) throws CorruptIndexException, LockObtainFailedException, IOException {
+        this(new IndexWriter(directory,  new IndexWriterConfig(Version.LUCENE_31, createAnalyzer(breakIMAPRFC))));
     }
     
-   
+    
     public LuceneMessageSearchIndex(IndexWriter writer) {
         this.writer = writer;
     }
@@ -170,12 +188,19 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     /**
      * Create a {@link Analyzer} which is used to index the {@link MailboxMembership}'s
      * 
+     * @param breakIMAPRFC 
+     * 
      * @return analyzer
      */
-    public static Analyzer createAnalyzer() {
-        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new ImapSearchAnalyzer());
-        return wrapper;
+    private static Analyzer createAnalyzer(boolean breakIMAPRFC) {
+        if (breakIMAPRFC) {
+            return new SimpleAnalyzer(Version.LUCENE_31);
+        } else {
+            return new ImapSearchAnalyzer();
+        }
+
     }
+    
     
     /*
      * (non-Javadoc)
@@ -186,10 +211,10 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         IndexSearcher searcher = null;
 
         try {
-            searcher = new IndexSearcher(writer.getReader());
+            searcher = new IndexSearcher(IndexReader.open(writer, true));
             BooleanQuery query = new BooleanQuery();
             query.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
-            query.add(createQuery(searchQuery), BooleanClause.Occur.MUST);
+            query.add(createQuery(searchQuery, mailbox), BooleanClause.Occur.MUST);
             
             // query for all the documents sorted by uid
             TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
@@ -213,24 +238,23 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     }
 
     /**
-     * Create a new {@link Document} for the given {@link MailboxMembership}
+     * Create a new {@link Document} for the given {@link MailboxMembership}. This Document does not contain any flags data. The {@link Flags} are stored in a seperate Document. 
+     * 
+     * See {@link #createFlagsDocument(Message)}
      * 
      * @param membership
      * @return document
      */
-    public static Document createDocument(Message<?> membership) throws MailboxException{
+    private Document createMessageDocument(Message<?> membership) throws MailboxException{
         final Document doc = new Document();
         // TODO: Better handling
-        doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString(), Store.NO, Index.NOT_ANALYZED));
-        
-        
+        doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
         doc.add(new NumericField(UID_FIELD,Store.YES, true).setLongValue(membership.getUid()));
         
         // create an unqiue key for the document which can be used later on updates to find the document
-        doc.add(new Field(ID_FIELD, membership.getMailboxId().toString() +"-" + Long.toString(membership.getUid()), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US) +"-" + Long.toString(membership.getUid()), Store.YES, Index.NOT_ANALYZED));
         
-        // add flags
-        indexFlags(membership.createFlags(), doc);
+      
 
         doc.add(new NumericField(INTERNAL_DATE_FIELD_YEAR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.YEAR).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MONTH_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MONTH).getTime()));
@@ -253,9 +277,47 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 
                 Iterator<org.apache.james.mime4j.parser.Field> fields = header.iterator();
                 while(fields.hasNext()) {
-                   org.apache.james.mime4j.parser.Field f = fields.next();
-                    doc.add(new Field(HEADERS_FIELD, f.toString() ,Store.NO, Index.ANALYZED));
-                    doc.add(new Field(PREFIX_HEADER_FIELD + f.getName(), f.getBody() ,Store.NO, Index.ANALYZED));
+                    org.apache.james.mime4j.parser.Field f = fields.next();
+                    String headerName = f.getName().toLowerCase(Locale.US);
+                    String fullValue =  f.toString().toLowerCase(Locale.US);
+                    doc.add(new Field(HEADERS_FIELD, fullValue, Store.NO, Index.ANALYZED));
+                    doc.add(new Field(PREFIX_HEADER_FIELD + headerName, f.getBody().toLowerCase(Locale.US) ,Store.NO, Index.ANALYZED));
+                    
+                    if (f instanceof AddressListField) {
+                        AddressListField addressField = (AddressListField) f;
+                        String field = null;;
+                        if ("To".equalsIgnoreCase(headerName)) {
+                            field = TO_FIELD;
+                        } else if ("From".equalsIgnoreCase(headerName)) {
+                            field = FROM_FIELD;
+                        } else if ("Bcc".equalsIgnoreCase(headerName)) {
+                            field = BCC_FIELD;
+                        } else if ("Cc".equalsIgnoreCase(headerName)) {
+                            field = CC_FIELD;
+                        }
+                        
+                        // Check if we can index the the addressfield in the right manner
+                        if (field != null) {
+                            AddressList aList = addressField.getAddressList();
+
+                            if (aList != null) {
+                                for (int i = 0; i < aList.size(); i++) {
+                                    Address address = aList.get(i);
+                                    if (address instanceof org.apache.james.mime4j.field.address.Mailbox) {
+                                        String value = ((org.apache.james.mime4j.field.address.Mailbox) address).getEncodedString().toLowerCase(Locale.US);
+                                        doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
+                                        
+                                    } else if (address instanceof Group) {
+                                        MailboxList mList = ((Group) address).getMailboxes();
+                                        for (int a = 0; a < mList.size(); a++) {
+                                            String value = mList.get(i).getEncodedString().toLowerCase(Locale.US);
+                                            doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
            
             }
@@ -276,7 +338,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                         out.write(b);
                     }
                     out.flush();
-                    doc.add(new Field(BODY_FIELD,  out.toString(charset),Store.NO, Index.ANALYZED));
+                    doc.add(new Field(BODY_FIELD,  out.toString(charset).toLowerCase(Locale.US),Store.NO, Index.ANALYZED));
                     out.close();
                     
                 }
@@ -307,19 +369,19 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createQuery(SearchQuery searchQuery) throws UnsupportedSearchException {
+    private Query createQuery(SearchQuery searchQuery, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
         List<Criterion> crits = searchQuery.getCriterias();
         BooleanQuery booleanQuery = new BooleanQuery();
 
         for (int i = 0; i < crits.size(); i++) {
-            booleanQuery.add(createQuery(crits.get(i)), BooleanClause.Occur.MUST);
+            booleanQuery.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
         }
         return booleanQuery;
 
     }
 
 
-    private static String toInteralDateField(DateResolution res) {
+    private String toInteralDateField(DateResolution res) {
         String field;
         switch (res) {
         case Year:
@@ -354,7 +416,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createInternalDateQuery(SearchQuery.InternalDateCriterion crit) throws UnsupportedSearchException {
+    private Query createInternalDateQuery(SearchQuery.InternalDateCriterion crit) throws UnsupportedSearchException {
         DateOperator op = crit.getOperator();
         DateResolution res = op.getDateResultion();
         Date date = op.getDate();
@@ -380,7 +442,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createSizeQuery(SearchQuery.SizeCriterion crit) throws UnsupportedSearchException {
+    private Query createSizeQuery(SearchQuery.SizeCriterion crit) throws UnsupportedSearchException {
         NumericOperator op = crit.getOperator();
         switch (op.getType()) {
         case EQUALS:
@@ -401,14 +463,16 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createHeaderQuery(SearchQuery.HeaderCriterion crit) throws UnsupportedSearchException {
+    private Query createHeaderQuery(SearchQuery.HeaderCriterion crit) throws UnsupportedSearchException {
         HeaderOperator op = crit.getOperator();
-        String fieldName = PREFIX_HEADER_FIELD + crit.getHeaderName();
+        String fieldName = PREFIX_HEADER_FIELD + crit.getHeaderName().toLowerCase(Locale.US);
         if (op instanceof SearchQuery.ContainsOperator) {
             ContainsOperator cop = (ContainsOperator) op;
-            return new TermQuery(new Term(fieldName, cop.getValue()));
+            return new PrefixQuery(new Term(fieldName, cop.getValue().toLowerCase(Locale.US)));
         } else if (op instanceof SearchQuery.ExistsOperator){
             return new PrefixQuery(new Term(fieldName, ""));
+        } else if (op instanceof SearchQuery.AddressOperator) {
+            return new PrefixQuery(new Term(fieldName.toLowerCase(), ((SearchQuery.AddressOperator) op).getAddress().toLowerCase(Locale.US)));
         } else {
             // Operator not supported
             throw new UnsupportedSearchException();
@@ -422,35 +486,120 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createUidQuery(SearchQuery.UidCriterion crit) throws UnsupportedSearchException {
+    private Query createUidQuery(SearchQuery.UidCriterion crit) throws UnsupportedSearchException {
         NumericRange[] ranges = crit.getOperator().getRange();
         BooleanQuery rangesQuery = new BooleanQuery();
         for (int i = 0; i < ranges.length; i++) {
             NumericRange range = ranges[i];
             rangesQuery.add(NumericRangeQuery.newLongRange(UID_FIELD, range.getLowValue(), range.getHighValue(), true, true), BooleanClause.Occur.SHOULD);
-        }
+        }        
+        rangesQuery.add(new PrefixQuery(new Term(FLAGS_FIELD, "")), BooleanClause.Occur.MUST_NOT);
         return rangesQuery;
     }
     
+    
     /**
-     * Return a {@link Query} which is build based on the given {@link SearchQuery.FlagCriterion}
+     * Return a {@link Query} which is build based on the given {@link SearchQuery.UidCriterion}
      * 
      * @param crit
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createFlagQuery(SearchQuery.FlagCriterion crit) throws UnsupportedSearchException {
+    private Query createModSeqQuery(SearchQuery.ModSeqCriterion crit) throws UnsupportedSearchException {
+        NumericOperator op = crit.getOperator();
+        switch (op.getType()) {
+        case EQUALS:
+            return NumericRangeQuery.newLongRange(MODSEQ_FIELD, op.getValue(), op.getValue(), true, true);
+        case GREATER_THAN:
+            return NumericRangeQuery.newLongRange(MODSEQ_FIELD, op.getValue(), Long.MAX_VALUE, false, true);
+        case LESS_THAN:
+            return NumericRangeQuery.newLongRange(MODSEQ_FIELD, Long.MIN_VALUE, op.getValue(), true, false);
+        default:
+            throw new UnsupportedSearchException();
+        }
+    }
+    
+    /**
+     * Return a {@link Query} which is build based on the given {@link SearchQuery.FlagCriterion}. This is kind of a hack
+     * as it will do a search for the flags in this method and 
+     * 
+     * @param crit
+     * @return query
+     * @throws UnsupportedSearchException
+     */
+    private Query createFlagQuery(SearchQuery.FlagCriterion crit, Mailbox<?> mailbox) throws MailboxException, UnsupportedSearchException {
         Flag flag = crit.getFlag();
-        String value = flag.toString();
-        TermQuery query = new TermQuery(new Term(FLAGS_FIELD, value));
+        String value = toString(flag);
+        BooleanQuery query = new BooleanQuery();
+        
         if (crit.getOperator().isSet()) {   
-            return query;
+            query.add(new TermQuery(new Term(FLAGS_FIELD, value)), BooleanClause.Occur.MUST);
         } else {
             // lucene does not support simple NOT queries so we do some nasty hack here
             BooleanQuery bQuery = new BooleanQuery();
             bQuery.add(new PrefixQuery(new Term(UID_FIELD, "")), BooleanClause.Occur.MUST);
-            bQuery.add(query, BooleanClause.Occur.MUST_NOT);
-            return bQuery;
+            bQuery.add(new TermQuery(new Term(FLAGS_FIELD, value)),BooleanClause.Occur.MUST_NOT);
+            
+            query.add(bQuery, BooleanClause.Occur.MUST);
+        }
+        query.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
+        
+        
+        IndexSearcher searcher = null;
+
+        try {
+            List<Long> uids = new ArrayList<Long>();
+            searcher = new IndexSearcher(IndexReader.open(writer, true));
+            
+            // query for all the documents sorted by uid
+            TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
+            ScoreDoc[] sDocs = docs.scoreDocs;
+            for (int i = 0; i < sDocs.length; i++) {
+                long uid = Long.valueOf(searcher.doc(sDocs[i].doc).get(UID_FIELD));
+                uids.add(uid);
+            }
+            
+            List<MessageRange> ranges = MessageRange.toRanges(uids);
+            NumericRange[] nRanges = new NumericRange[ranges.size()];
+            for (int i = 0; i < ranges.size(); i++) {
+                MessageRange range = ranges.get(i);
+                nRanges[i] = new NumericRange(range.getUidFrom(), range.getUidTo());
+            }
+            return createUidQuery((UidCriterion) SearchQuery.uid(nRanges));
+        } catch (IOException e) {
+            throw new MailboxException("Unable to search mailbox " + mailbox, e);
+        } finally {
+            if (searcher != null) {
+                try {
+                    searcher.close();
+                } catch (IOException e) {
+                    // ignore on close
+                }
+            }
+        }
+    }
+    
+    /**
+     * Convert the given {@link Flag} to a String
+     * 
+     * @param flag
+     * @return flagString
+     */
+    private String toString(Flag flag) {
+        if (Flag.ANSWERED.equals(flag)) {
+            return "\\ANSWERED";
+        } else if (Flag.DELETED.equals(flag)) {
+            return "\\DELETED";
+        } else if (Flag.DRAFT.equals(flag)) {
+            return "\\DRAFT";
+        } else if (Flag.FLAGGED.equals(flag)) {
+            return "\\FLAGGED";
+        } else if (Flag.RECENT.equals(flag)) {
+            return "\\RECENT";
+        } else if (Flag.SEEN.equals(flag)) {
+            return "\\FLAG";
+        } else {
+            return flag.toString();
         }
     }
     
@@ -461,14 +610,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createTextQuery(SearchQuery.TextCriterion crit) throws UnsupportedSearchException {
+    private Query createTextQuery(SearchQuery.TextCriterion crit) throws UnsupportedSearchException {
         switch(crit.getType()) {
         case BODY:
-            return new TermQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US)));
+            return new PrefixQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US)));
         case FULL: 
             BooleanQuery query = new BooleanQuery();
-            query.add(new TermQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
-            query.add(new TermQuery(new Term(HEADERS_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
+            query.add(new PrefixQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
+            query.add(new PrefixQuery(new Term(HEADERS_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
             return query;
         default:
             throw new UnsupportedSearchException();
@@ -482,8 +631,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createAllQuery(SearchQuery.AllCriterion crit) throws UnsupportedSearchException{
-        return NumericRangeQuery.newLongRange(UID_FIELD, Long.MIN_VALUE, Long.MAX_VALUE, true, true);
+    private Query createAllQuery(SearchQuery.AllCriterion crit) throws UnsupportedSearchException{
+        BooleanQuery query = new BooleanQuery();
+        
+        query.add(NumericRangeQuery.newLongRange(UID_FIELD, Long.MIN_VALUE, Long.MAX_VALUE, true, true), BooleanClause.Occur.MUST);
+        query.add(new PrefixQuery(new Term(FLAGS_FIELD, "")), BooleanClause.Occur.MUST_NOT);
+        
+        return query;
     }
     
     /**
@@ -493,7 +647,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createConjunctionQuery(SearchQuery.ConjunctionCriterion crit) throws UnsupportedSearchException {
+    private Query createConjunctionQuery(SearchQuery.ConjunctionCriterion crit, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
         BooleanClause.Occur occur;
         switch (crit.getType()) {
         case AND:
@@ -511,7 +665,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         List<Criterion> crits = crit.getCriteria();
         BooleanQuery conQuery = new BooleanQuery();
         for (int i = 0; i < crits.size(); i++) {
-            conQuery.add(createQuery(crits.get(i)), occur);
+            conQuery.add(createQuery(crits.get(i), mailbox), occur);
         }
         return conQuery;
     }
@@ -523,7 +677,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @return query
      * @throws UnsupportedSearchException
      */
-    public static Query createQuery(Criterion criterion) throws UnsupportedSearchException {
+    private Query createQuery(Criterion criterion, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
         if (criterion instanceof SearchQuery.InternalDateCriterion) {
             SearchQuery.InternalDateCriterion crit = (SearchQuery.InternalDateCriterion) criterion;
             return createInternalDateQuery(crit);
@@ -538,7 +692,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             return createUidQuery(crit);
         } else if (criterion instanceof SearchQuery.FlagCriterion) {
             FlagCriterion crit = (FlagCriterion) criterion;
-            return createFlagQuery(crit);
+            return createFlagQuery(crit, mailbox);
         } else if (criterion instanceof SearchQuery.TextCriterion) {
             SearchQuery.TextCriterion crit = (SearchQuery.TextCriterion) criterion;
             return createTextQuery(crit);
@@ -546,20 +700,27 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             return createAllQuery((AllCriterion) criterion);
         } else if (criterion instanceof SearchQuery.ConjunctionCriterion) {
             SearchQuery.ConjunctionCriterion crit = (SearchQuery.ConjunctionCriterion) criterion;
-            return createConjunctionQuery(crit);
+            return createConjunctionQuery(crit, mailbox);
+        } else if (criterion instanceof SearchQuery.ModSeqCriterion) {
+            return createModSeqQuery((SearchQuery.ModSeqCriterion) criterion);
         }
         throw new UnsupportedSearchException();
 
     }
+
+    
 
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.MessageSearchIndex#add(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
      */
     public void add(MailboxSession session, Mailbox<Id> mailbox, Message<Id> membership) throws MailboxException {
-        Document doc = createDocument(membership);
+        Document doc = createMessageDocument(membership);
+        Document flagsDoc = createFlagsDocument(membership);
+
         try {
             writer.addDocument(doc);
+            writer.addDocument(flagsDoc);
         } catch (CorruptIndexException e) {
             throw new MailboxException("Unable to add message to index", e);
         } catch (IOException e) {
@@ -573,16 +734,18 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public void update(MailboxSession session, Mailbox<Id> mailbox, MessageRange range, Flags f) throws MailboxException {
         try {
-            IndexSearcher searcher = new IndexSearcher(writer.getReader());
+            IndexSearcher searcher = new IndexSearcher(IndexReader.open(writer, true));
             BooleanQuery query = new BooleanQuery();
             query.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
             query.add(NumericRangeQuery.newLongRange(UID_FIELD, range.getUidFrom(), range.getUidTo(), true, true), BooleanClause.Occur.MUST);
+            query.add( new PrefixQuery(new Term(FLAGS_FIELD, "")), BooleanClause.Occur.MUST);
+
             TopDocs docs = searcher.search(query, 100000);
             ScoreDoc[] sDocs = docs.scoreDocs;
             for (int i = 0; i < sDocs.length; i++) {
                 Document doc = searcher.doc(sDocs[i].doc);
                 doc.removeFields(FLAGS_FIELD);
-                indexFlags(f, doc);
+                indexFlags(doc, f);
                 writer.updateDocument(new Term(ID_FIELD, doc.get(ID_FIELD)), doc);
             }
         } catch (IOException e) {
@@ -598,10 +761,26 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @param f
      * @param doc
      */
-    private static void indexFlags(Flags f, Document doc) {
+    private Document createFlagsDocument(Message<?> message) {
+        Document doc = new Document();
+        doc.add(new Field(ID_FIELD, "flags-" + message.getMailboxId().toString() +"-" + Long.toString(message.getUid()), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(MAILBOX_ID_FIELD, message.getMailboxId().toString(), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new NumericField(UID_FIELD,Store.YES, true).setLongValue(message.getUid()));
+        
+        indexFlags(doc, message.createFlags());
+        return doc;
+    }
+    
+    /**
+     * Add the given {@link Flags} to the {@link Document}
+     * 
+     * @param doc
+     * @param f
+     */
+    private void indexFlags(Document doc, Flags f) {
         Flag[] flags = f.getSystemFlags();
         for (int a = 0; a < flags.length; a++) {
-            doc.add(new Field(FLAGS_FIELD, flags[a].toString(),Store.NO, Index.NOT_ANALYZED));
+            doc.add(new Field(FLAGS_FIELD, toString(flags[a]),Store.NO, Index.NOT_ANALYZED));
         }
         
         String[] userFlags = f.getUserFlags();
