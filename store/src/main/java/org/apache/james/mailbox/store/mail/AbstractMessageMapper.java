@@ -168,9 +168,9 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         Map<Long, MessageMetaData> data = expungeMarkedForDeletion(mailbox, set);
         if (data.isEmpty() == false) {
 
-            // Increase the mod-sequence  and the uid for this mailbox and save it permanent way
+            // Increase the mod-sequence and save it with the uid for this mailbox in a permanent way
             // See MAILBOX-75 
-            saveSequences(mailbox, getLastUid(mailbox), getHighestModSeq(mailbox));
+            saveSequences(mailbox, getLastUid(mailbox), nextModSeq(mailbox));
 
         }
         if (index != null) {
@@ -187,7 +187,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
+    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         findInMailbox(mailbox, set, new MailboxMembershipCallback<Id>() {
 
@@ -215,12 +215,12 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                         // increase the mod-seq as we changed the flags
                         member.setModSeq(modSeq);
                         save(mailbox, member);
+
                         
 
-                        if (index != null) {
+                        if (replace == false && index != null) {
                             index.update(mailboxSession, mailbox, MessageRange.one(member.getUid()), newFlags);
                         }
-
                     }
 
                     
@@ -230,6 +230,13 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                     
 
                 }
+                
+
+                // as it was a replace operation we can just use the given message for update the index
+                if (replace && index != null) {
+                    index.update(mailboxSession, mailbox, set, flags);
+                }
+                
             }
         });
 
