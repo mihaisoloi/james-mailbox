@@ -29,8 +29,6 @@ import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * JCR implementation of a {@link MailboxSessionMapperFactory}
@@ -43,15 +41,14 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
     private final static int DEFAULT_SCALING = 2;
     private final int scaling;
     private int messageScaling;
-    private final MessageSearchIndex<String> index;
 
     public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository) {
         this(repository, null, DEFAULT_SCALING, JCRMessageMapper.MESSAGE_SCALE_DAY);
     }
 
     public JCRMailboxSessionMapperFactory(final MailboxSessionJCRRepository repository, final MessageSearchIndex<String> index, final int scaling, final int messageScaling) {
+        super(index);
         this.repository = repository;
-        this.index = index;
         this.scaling = scaling;
         this.messageScaling = messageScaling;
     }
@@ -64,7 +61,7 @@ public class JCRMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     @Override
     public MessageMapper<String> createMessageMapper(MailboxSession session) throws MailboxException {
-        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, index, messageScaling);
+        JCRMessageMapper messageMapper = new JCRMessageMapper(repository, session, getSearchIndex(), messageScaling);
         return messageMapper;
     }
 

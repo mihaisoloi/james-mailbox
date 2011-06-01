@@ -40,7 +40,6 @@ import org.apache.james.mailbox.store.SimpleHeader;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.search.lucene.LuceneMessageSearchIndex;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;
@@ -48,7 +47,7 @@ import org.junit.Test;
 
 public class LuceneMessageSearchIndexTest {
 
-    private MessageSearchIndex<Long> index;
+    private LuceneMessageSearchIndex<Long> index;
 
     private SimpleMailbox mailbox = new SimpleMailbox(0);
     private SimpleMailbox mailbox2 = new SimpleMailbox(1);
@@ -69,9 +68,14 @@ public class LuceneMessageSearchIndexTest {
 
     Message<Long> row;
 
+    protected boolean useLenient() {
+        return true;
+    }
+    
     @Before
     public void setUp() throws Exception {
-        index = new LuceneMessageSearchIndex<Long>(new RAMDirectory(), false);
+        index = new LuceneMessageSearchIndex<Long>(new RAMDirectory(), useLenient());
+        index.setEnableSuffixMatch(true);
         List<org.apache.james.mailbox.store.SimpleHeader> headersSubject = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
         headersSubject.add(new SimpleHeader("Subject", 1, "test"));
        

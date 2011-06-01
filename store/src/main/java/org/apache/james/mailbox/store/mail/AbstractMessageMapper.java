@@ -252,12 +252,21 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
-    public MessageMetaData add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException {
+    public MessageMetaData add(final Mailbox<Id> mailbox, Message<Id> message) throws MailboxException {
         message.setUid(nextUid(mailbox));
         message.setModSeq(nextModSeq(mailbox));
         MessageMetaData data = save(mailbox, message);
         if (index != null) {
-            index.add(mailboxSession, mailbox, message);
+            findInMailbox(mailbox, MessageRange.one(data.getUid()), new MailboxMembershipCallback<Id>() {
+
+                @Override
+                public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
+                    if (!list.isEmpty()) {
+                        index.add(mailboxSession, mailbox, list.get(0));
+                    }
+                }
+            });
+            
         }
         return data;
         

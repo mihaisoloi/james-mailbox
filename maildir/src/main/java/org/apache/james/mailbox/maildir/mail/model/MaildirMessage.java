@@ -28,7 +28,6 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -202,15 +201,6 @@ public class MaildirMessage extends AbstractMaildirMessage {
     public void setInternalDate(Date date) {
         this.internalDate = date;
     }
-
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getMailboxId()
-     */
-    public Integer getMailboxId() {
-        throw new NotImplementedException();
-    }
-
 
     @Override
     public void setUid(long uid) {

@@ -38,15 +38,15 @@ import org.apache.lucene.util.Version;
 *      case-insensitive.
 *
 */
-public final class ImapSearchAnalyzer extends Analyzer {
+public final class StrictImapSearchAnalyzer extends Analyzer {
 
     private final int minTokenLength;
     private final int maxTokenLength;
     
-    public ImapSearchAnalyzer() {
+    public StrictImapSearchAnalyzer() {
         this(3, 40);
     }
-    public ImapSearchAnalyzer(int minTokenLength, int maxTokenLength) {
+    public StrictImapSearchAnalyzer(int minTokenLength, int maxTokenLength) {
         this.minTokenLength = minTokenLength;
         this.maxTokenLength = maxTokenLength;
     }

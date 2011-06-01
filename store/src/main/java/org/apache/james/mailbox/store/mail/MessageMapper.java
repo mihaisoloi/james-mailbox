@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;

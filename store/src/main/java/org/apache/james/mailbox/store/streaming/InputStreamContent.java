@@ -34,8 +34,7 @@ import org.apache.james.mailbox.store.mail.model.Message;
  *
  */
 public final class InputStreamContent implements org.apache.james.mailbox.InputStreamContent{
-    @SuppressWarnings("unchecked")
-    private Message m;
+    private Message<?> m;
     private Type type;
 
     public static enum Type {
@@ -43,8 +42,7 @@ public final class InputStreamContent implements org.apache.james.mailbox.InputS
         Body
     }
     
-    @SuppressWarnings("unchecked")
-    public InputStreamContent(Message m, Type type) throws IOException{
+    public InputStreamContent(Message<?> m, Type type) throws IOException{
         this.m = m;
         this.type = type;
     }

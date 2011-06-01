@@ -18,9 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.search.lucene;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,6 +38,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.AllCriterion;
 import org.apache.james.mailbox.SearchQuery.ContainsOperator;
 import org.apache.james.mailbox.SearchQuery.Criterion;
@@ -47,7 +50,6 @@ import org.apache.james.mailbox.SearchQuery.HeaderOperator;
 import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
-import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
@@ -60,14 +62,14 @@ import org.apache.james.mime4j.field.address.Group;
 import org.apache.james.mime4j.field.address.MailboxList;
 import org.apache.james.mime4j.message.Header;
 import org.apache.james.mime4j.message.SimpleContentHandler;
+import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.NumericField;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -84,12 +86,14 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 /**
- * Lucene based {@link MessageSearchIndex} which offers message searching.
+ * Lucene based {@link MessageSearchIndex} which offers message searching via a Lucene index
+ * 
  * 
 
  * @param <Id>
@@ -128,6 +132,9 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     public final static String BODY_FIELD = "body";
     
     
+    /**
+     * Prefix which will be used for each message header to store it also in a seperate {@link Field}
+     */
     public final static String PREFIX_HEADER_FIELD ="header_";
     
     /**
@@ -135,22 +142,68 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public final static String HEADERS_FIELD ="headers";
 
+    /**
+     * {@link Field} which will contain the mod-sequence of the message
+     */
     public final static String MODSEQ_FIELD = "modSeq";
 
-    
+    /**
+     * {@link Field} which will contain the TO-Address of the message
+     */
     public final static String TO_FIELD ="to";
+    
+
+    /**
+     * {@link Field} which will contain the CC-Address of the message
+     */
     public final static String CC_FIELD ="cc";
+
+    /**
+     * {@link Field} which will contain the BCC-Address of the message
+     */
     public final static String BCC_FIELD ="bcc";
+    
+
+    /**
+     * {@link Field} which will contain the FROM-Address of the message
+     */
     public final static String FROM_FIELD ="from";
-
-
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with YEAR-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_YEAR_RESOLUTION ="internaldateYearResolution";
- 
+    
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with MONTH-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_MONTH_RESOLUTION ="internaldateMonthResolution";
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with DAY-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_DAY_RESOLUTION ="internaldateDayResolution";
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with HOUR-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_HOUR_RESOLUTION ="internaldateHourResolution";
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with MINUTE-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_MINUTE_RESOLUTION ="internaldateMinuteResolution";
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with SECOND-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_SECOND_RESOLUTION ="internaldateSecondResolution";
+    
+    
+    /**
+     * {@link Field} which contain the internalDate of the message with MILLISECOND-Resolution
+     */
     public final static String INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION ="internaldateMillisecondResolution";
 
     /**
@@ -159,17 +212,26 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     public final static String MAILBOX_ID_FIELD ="mailboxid";
 
     
+    
     private final static String MEDIA_TYPE_TEXT = "text"; 
     private final static String MEDIA_TYPE_MESSAGE = "message"; 
-
+    private final static String DEFAULT_ENCODING = "US-ASCII";
+    
     private final IndexWriter writer;
     
     private int maxQueryResults = DEFAULT_MAX_QUERY_RESULTS;
+
+    private boolean suffixMatch = false;
     
     private final static Sort UID_SORT = new Sort(new SortField(UID_FIELD, SortField.LONG));
     
-    public LuceneMessageSearchIndex(Directory directory, boolean breakIMAPRFC) throws CorruptIndexException, LockObtainFailedException, IOException {
-        this(new IndexWriter(directory,  new IndexWriterConfig(Version.LUCENE_31, createAnalyzer(breakIMAPRFC))));
+    public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
+        this(directory, true);
+    }
+    
+    
+    public LuceneMessageSearchIndex(Directory directory, boolean lenient) throws CorruptIndexException, LockObtainFailedException, IOException {
+        this(new IndexWriter(directory,  new IndexWriterConfig(Version.LUCENE_31, createAnalyzer(lenient))));
     }
     
     
@@ -178,7 +240,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     }
     
     /**
-     * Set the max count of results which will get returned from a query
+     * Set the max count of results which will get returned from a query. The default is {@link #DEFAULT_MAX_QUERY_RESULTS}
      * 
      * @param maxQueryResults
      */
@@ -188,18 +250,32 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     /**
      * Create a {@link Analyzer} which is used to index the {@link MailboxMembership}'s
      * 
-     * @param breakIMAPRFC 
+     * @param lenient 
      * 
      * @return analyzer
      */
-    private static Analyzer createAnalyzer(boolean breakIMAPRFC) {
-        if (breakIMAPRFC) {
-            return new SimpleAnalyzer(Version.LUCENE_31);
+    private static Analyzer createAnalyzer(boolean lenient) {
+        if (lenient) {
+           return new LenientImapSearchAnalyzer();
         } else {
-            return new ImapSearchAnalyzer();
+            return new StrictImapSearchAnalyzer();
         }
-
     }
+    
+    /**
+     * If set to true this implementation will use {@link WildcardQuery} to match suffix and prefix. This is what RFC3501 expects but is often not what the user does.
+     * It also slow things a lot if you have complex queries which use many "TEXT" arguments. If you want the implementation to behave strict like RFC3501 says, you should
+     * set this to true. 
+     * 
+     * The default is false for performance reasons
+     * 
+     * 
+     * @param suffixMatch
+     */
+    public void setEnableSuffixMatch(boolean suffixMatch) {
+        this.suffixMatch = suffixMatch;
+    }
+    
     
     
     /*
@@ -237,6 +313,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         return uids.iterator();
     }
 
+   
     /**
      * Create a new {@link Document} for the given {@link MailboxMembership}. This Document does not contain any flags data. The {@link Flags} are stored in a seperate Document. 
      * 
@@ -253,8 +330,6 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         
         // create an unqiue key for the document which can be used later on updates to find the document
         doc.add(new Field(ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US) +"-" + Long.toString(membership.getUid()), Store.YES, Index.NOT_ANALYZED));
-        
-      
 
         doc.add(new NumericField(INTERNAL_DATE_FIELD_YEAR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.YEAR).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MONTH_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MONTH).getTime()));
@@ -265,14 +340,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MILLISECOND).getTime()));
 
         doc.add(new NumericField(SIZE_FIELD,Store.NO, true).setLongValue(membership.getFullContentOctets()));
-        
+
         // content handler which will index the headers and the body of the message
         SimpleContentHandler handler = new SimpleContentHandler() {
             
-            
-            /**
-             * Add the headers to the Document
-             */
+
             public void headers(Header header) {
                 
                 Iterator<org.apache.james.mime4j.parser.Field> fields = header.iterator();
@@ -321,32 +393,42 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 }
            
             }
-            
-
-
-            /**
-             * Add the body parts to the Document
+            /*
+             * (non-Javadoc)
+             * @see org.apache.james.mime4j.message.SimpleContentHandler#bodyDecoded(org.apache.james.mime4j.descriptor.BodyDescriptor, java.io.InputStream)
              */
             public void bodyDecoded(BodyDescriptor desc, InputStream in) throws IOException {
                 String mediaType = desc.getMediaType();
-                String charset = desc.getCharset();
                 if (MEDIA_TYPE_TEXT.equalsIgnoreCase(mediaType) || MEDIA_TYPE_MESSAGE.equalsIgnoreCase(mediaType)) {
-                    // TODO: maybe we want to limit the length here ?
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    int b = -1;
-                    while ((b = in.read()) != -1) {
-                        out.write(b);
+                    String cset = desc.getCharset();
+                    if (cset == null) {
+                        cset = DEFAULT_ENCODING;
                     }
-                    out.flush();
-                    doc.add(new Field(BODY_FIELD,  out.toString(charset).toLowerCase(Locale.US),Store.NO, Index.ANALYZED));
-                    out.close();
+                    Charset charset;
+                    try {
+                        charset = Charset.forName(cset);
+                    } catch (Exception e) {
+                        // Invalid charset found so fallback toe the DEFAULT_ENCODING
+                        charset = Charset.forName(DEFAULT_ENCODING);
+                    }
+                    
+                    // Read the content one line after the other and add it to the document
+                    BufferedReader bodyReader = new BufferedReader(new InputStreamReader(in, charset));
+                    String line = null;
+                    while((line = bodyReader.readLine()) != null) {
+                        doc.add(new Field(BODY_FIELD,  line.toLowerCase(Locale.US),Store.NO, Index.ANALYZED));
+                    }
                     
                 }
             }
         };
-        
-        MimeStreamParser parser = new MimeStreamParser();
+        MimeEntityConfig config = new MimeEntityConfig();
+        config.setMaxLineLen(-1);
+        config.setStrictParsing(false);
+        config.setMaxContentLen(-1);
+        MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(handler);
+       
         try {
             // parse the message to index headers and body
             parser.parse(membership.getFullContent());
@@ -358,7 +440,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             // anyway let us just skip the body and headers in the index
             throw new MailboxException("Unable to index content of message", e);
         }
-
+       
 
         return doc;
     }
@@ -457,6 +539,20 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     }
     
     /**
+     * This method will return the right {@link Query} depending if {@link #suffixMatch} is enabled
+     * 
+     * @param fieldName
+     * @param value
+     * @return query
+     */
+    private Query createTermQuery(String fieldName, String value) {
+        if (suffixMatch) {
+            return new WildcardQuery(new Term(fieldName, "*" + value + "*"));
+        } else {
+            return new PrefixQuery(new Term(fieldName, value));
+        }
+    }
+    /**
      * Return a {@link Query} which is build based on the given {@link SearchQuery.HeaderCriterion}
      * 
      * @param crit
@@ -468,11 +564,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         String fieldName = PREFIX_HEADER_FIELD + crit.getHeaderName().toLowerCase(Locale.US);
         if (op instanceof SearchQuery.ContainsOperator) {
             ContainsOperator cop = (ContainsOperator) op;
-            return new PrefixQuery(new Term(fieldName, cop.getValue().toLowerCase(Locale.US)));
+            return createTermQuery(fieldName, cop.getValue().toLowerCase(Locale.US));
         } else if (op instanceof SearchQuery.ExistsOperator){
             return new PrefixQuery(new Term(fieldName, ""));
         } else if (op instanceof SearchQuery.AddressOperator) {
-            return new PrefixQuery(new Term(fieldName.toLowerCase(), ((SearchQuery.AddressOperator) op).getAddress().toLowerCase(Locale.US)));
+            return createTermQuery(fieldName.toLowerCase(), ((SearchQuery.AddressOperator) op).getAddress().toLowerCase(Locale.US));
         } else {
             // Operator not supported
             throw new UnsupportedSearchException();
@@ -611,13 +707,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @throws UnsupportedSearchException
      */
     private Query createTextQuery(SearchQuery.TextCriterion crit) throws UnsupportedSearchException {
+        String value = crit.getOperator().getValue().toLowerCase(Locale.US);
         switch(crit.getType()) {
         case BODY:
-            return new PrefixQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US)));
+            return createTermQuery(BODY_FIELD, value);
         case FULL: 
             BooleanQuery query = new BooleanQuery();
-            query.add(new PrefixQuery(new Term(BODY_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
-            query.add(new PrefixQuery(new Term(HEADERS_FIELD, crit.getOperator().getValue().toLowerCase(Locale.US))), BooleanClause.Occur.SHOULD);
+            query.add(createTermQuery(BODY_FIELD, value), BooleanClause.Occur.SHOULD);
+            query.add(createTermQuery(HEADERS_FIELD,value), BooleanClause.Occur.SHOULD);
             return query;
         default:
             throw new UnsupportedSearchException();

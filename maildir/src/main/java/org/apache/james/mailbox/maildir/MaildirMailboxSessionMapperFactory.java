@@ -34,7 +34,6 @@ public class MaildirMailboxSessionMapperFactory extends
         MailboxSessionMapperFactory<Integer> {
 
     private final MaildirStore store;
-    private final MessageSearchIndex<Integer> index;
     
     public MaildirMailboxSessionMapperFactory(MaildirStore store) {
         this(store, null);
@@ -42,8 +41,8 @@ public class MaildirMailboxSessionMapperFactory extends
     
     
     public MaildirMailboxSessionMapperFactory(MaildirStore store, MessageSearchIndex<Integer> index) {
+        super(index);
         this.store = store;
-        this.index = index;
     }
     
     
@@ -56,7 +55,7 @@ public class MaildirMailboxSessionMapperFactory extends
     @Override
     protected MessageMapper<Integer> createMessageMapper(MailboxSession session)
             throws MailboxException {
-        return new MaildirMessageMapper(session, index, store);
+        return new MaildirMessageMapper(session, getSearchIndex(), store);
     }
 
     @Override
