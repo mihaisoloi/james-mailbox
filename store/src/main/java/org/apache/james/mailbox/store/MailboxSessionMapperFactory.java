@@ -137,8 +137,8 @@ public abstract class MailboxSessionMapperFactory <Id> implements RequestAware, 
     @SuppressWarnings("unchecked")
     public void endProcessingRequest(MailboxSession session) {
         if (session == null) return;
-        MessageMapper<Id> messageMapper = (MessageMapper) session.getAttributes().get(MESSAGEMAPPER);
-        MailboxMapper<Id> mailboxMapper = (MailboxMapper) session.getAttributes().get(MAILBOXMAPPER);
+        MessageMapper<Id> messageMapper = (MessageMapper<Id>) session.getAttributes().get(MESSAGEMAPPER);
+        MailboxMapper<Id> mailboxMapper = (MailboxMapper<Id>) session.getAttributes().get(MAILBOXMAPPER);
         SubscriptionMapper subscriptionMapper = (SubscriptionMapper) session.getAttributes().get(SUBSCRIPTIONMAPPER);
         if (messageMapper != null)
             messageMapper.endRequest();
