@@ -33,8 +33,8 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
-import org.apache.james.mailbox.store.MessageSearches;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.search.MessageSearches;
 import org.junit.Before;
 import org.junit.Test;
 

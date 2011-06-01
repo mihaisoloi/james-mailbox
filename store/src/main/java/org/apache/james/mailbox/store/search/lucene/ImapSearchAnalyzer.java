@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.lucene;
+package org.apache.james.mailbox.store.search.lucene;
 
 import java.io.Reader;
 

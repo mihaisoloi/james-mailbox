@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.lucene;
+package org.apache.james.mailbox.store.search.lucene;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,9 +48,9 @@ import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.UnsupportedSearchException;
-import org.apache.james.mailbox.store.MessageSearchIndex;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.BodyDescriptor;
 import org.apache.james.mime4j.field.AddressListField;

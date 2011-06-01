@@ -40,12 +40,12 @@ import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
-import org.apache.james.mailbox.store.MessageSearchIndex;
-import org.apache.james.mailbox.store.SearchQueryIterator;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
+import org.apache.james.mailbox.store.search.SearchQueryIterator;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 
 /**
