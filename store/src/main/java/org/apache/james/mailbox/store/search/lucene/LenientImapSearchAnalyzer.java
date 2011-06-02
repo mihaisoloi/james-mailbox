@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
  * most times exactly what the user would expect. 
  *
  */
-public class LenientImapSearchAnalyzer extends Analyzer{
+public final class LenientImapSearchAnalyzer extends Analyzer{
 
     public final static int DEFAULT_MAX_TOKEN_LENGTH = 4;
     
