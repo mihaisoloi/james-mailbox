@@ -47,6 +47,11 @@
     <module>maildir</module>
     <module>tool</module>
   </modules>
+  
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.apache.org/jira/browse/MAILBOX</url>
+  </issueManagement>
 
   <ciManagement>
     <system>hudson</system>
@@ -263,6 +268,7 @@
                 <report>dependency-convergence</report>
                 <report>distribution-management</report>
                 <report>index</report>
+                <report>issue-tracking</report>
                 <report>license</report>
                 <report>mailing-list</report>
                 <report>modules</report>
