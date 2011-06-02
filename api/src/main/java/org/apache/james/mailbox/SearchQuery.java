@@ -66,6 +66,63 @@ public class SearchQuery {
         Cc,
         Bcc
     }
+    
+    public static final class Sort {
+        
+        public static enum SortClause {
+            
+            /**
+             * Internal date and time of the message
+             */
+            Arrival,
+            
+            /**
+             * addr-mailbox of the first "cc" address.
+             */
+            Cc,
+            
+            /**
+             * addr-mailbox of the first "from" address.
+             */
+            From,
+            
+            /**
+             * Base subject text.
+             */
+            Subject,
+            
+            /**
+             * Size of the message in octets.
+             */
+            Size,
+            
+            /**
+             * addr-mailbox of the first "To" address
+             */
+            To,
+            
+            /**
+             * Uid of the message. This is the DEFAULT if no other is specified
+             */
+            Uid
+        }
+        
+        private final boolean reverse;
+        private final SortClause sortClause;
+
+        public Sort(SortClause sortClause, boolean reverse) {
+            this.reverse = reverse;
+            this.sortClause = sortClause;
+        }
+        
+        public boolean isReverse() {
+            return reverse;
+        }
+        
+        public SortClause getSortClause() {
+            return sortClause;
+        }
+    }
 
     public static int toCalendarType(DateResolution res) {
         int type;
@@ -508,6 +565,8 @@ public class SearchQuery {
 
     private final List<Criterion> criterias = new ArrayList<Criterion>();
 
+    private  List<Sort> sorts = new ArrayList<SearchQuery.Sort>(Arrays.asList(new Sort(Sort.SortClause.Uid, false)));
+    
     public void andCriteria(Criterion crit) {
         criterias.add(crit);
     }
@@ -515,6 +574,15 @@ public class SearchQuery {
     public List<Criterion> getCriterias() {
         return criterias;
     }
+    
+    public void setSorts(List<Sort> sorts) {
+        this.sorts = sorts;
+    }
+
+    public List<Sort> getSorts() {
+        return sorts;
+    }
+    
 
     /**
      * Gets the UIDS of messages which are recent for this client session. The
