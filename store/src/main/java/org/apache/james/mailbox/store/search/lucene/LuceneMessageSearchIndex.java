@@ -290,7 +290,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             searcher = new IndexSearcher(IndexReader.open(writer, true));
             BooleanQuery query = new BooleanQuery();
             query.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
-            query.add(createQuery(searchQuery, mailbox), BooleanClause.Occur.MUST);
+
+            List<Criterion> crits = searchQuery.getCriterias();
+            for (int i = 0; i < crits.size(); i++) {
+                query.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
+            }
+            
+            //System.out.println(query.toString());
             
             // query for all the documents sorted by uid
             TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
@@ -443,23 +449,6 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
        
 
         return doc;
-    }
-    /**
-     * Create a {@link Query} based on the given {@link SearchQuery}
-     * 
-     * @param searchQuery
-     * @return query
-     * @throws UnsupportedSearchException
-     */
-    private Query createQuery(SearchQuery searchQuery, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
-        List<Criterion> crits = searchQuery.getCriterias();
-        BooleanQuery booleanQuery = new BooleanQuery();
-
-        for (int i = 0; i < crits.size(); i++) {
-            booleanQuery.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
-        }
-        return booleanQuery;
-
     }
 
 
