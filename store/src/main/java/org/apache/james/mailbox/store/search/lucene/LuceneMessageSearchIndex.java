@@ -155,11 +155,15 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public final static String TO_FIELD ="to";
     
+    public final static String FIRST_TO_MAILBOX_NAME_FIELD ="firstToMailboxName";
+
 
     /**
      * {@link Field} which will contain the CC-Address of the message
      */
     public final static String CC_FIELD ="cc";
+
+    public final static String FIRST_CC_MAILBOX_NAME_FIELD ="firstCcMailboxName";
 
     /**
      * {@link Field} which will contain the BCC-Address of the message
@@ -172,6 +176,8 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public final static String FROM_FIELD ="from";
     
+    public final static String FIRST_FROM_MAILBOX_NAME_FIELD ="firstFromMailboxName";
+
     /**
      * {@link Field} which contain the internalDate of the message with YEAR-Resolution
      */
@@ -214,6 +220,8 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     public final static String MAILBOX_ID_FIELD ="mailboxid";
 
+    public final static String SENT_DATE_FIELD_MILLISECOND_RESOLUTION ="sentDateMillisecondResolution";
+
     
     
     private final static String MEDIA_TYPE_TEXT = "text"; 
@@ -226,8 +234,24 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
 
     private boolean suffixMatch = false;
     
-    private final static Sort UID_SORT = new Sort(new SortField(UID_FIELD, SortField.LONG));
-    
+    private final static SortField UID_SORT = new SortField(UID_FIELD, SortField.LONG);
+    private final static SortField UID_SORT_REVERSE = new SortField(UID_FIELD, SortField.LONG, true);
+
+    private final static SortField SIZE_SORT = new SortField(SIZE_FIELD, SortField.LONG);
+    private final static SortField SIZE_SORT_REVERSE = new SortField(SIZE_FIELD, SortField.LONG, true);
+
+    private final static SortField FIRST_CC_MAILBOX_SORT = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.LONG);
+    private final static SortField FIRST_CC_MAILBOX_SORT_REVERSE = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.LONG, true);
+
+    private final static SortField FIRST_TO_MAILBOX_SORT = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.LONG);
+    private final static SortField FIRST_TO_MAILBOX_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.LONG, true);
+
+    private final static SortField FIRST_FROM_MAILBOX_SORT = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG);
+    private final static SortField FIRST_FROM_MAILBOX_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG, true);
+
+    private final static SortField ARRIVAL_MAILBOX_SORT = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
+    private final static SortField ARRIVAL_MAILBOX_SORT_REVERSE = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
+
     public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
         this(directory, true);
     }
@@ -300,7 +324,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             }
                       
             // query for all the documents sorted by uid
-            TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
+            TopDocs docs = searcher.search(query, null, maxQueryResults, createSort(searchQuery.getSorts()));
             ScoreDoc[] sDocs = docs.scoreDocs;
             for (int i = 0; i < sDocs.length; i++) {
                 long uid = Long.valueOf(searcher.doc(sDocs[i].doc).get(UID_FIELD));
@@ -343,10 +367,10 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         doc.add(new NumericField(INTERNAL_DATE_FIELD_DAY_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.DAY_OF_MONTH).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_HOUR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.HOUR_OF_DAY).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MINUTE_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MINUTE).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_SECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.SECOND).getTime()));
+        doc.add(new NumericField(INTERNAL_DATE_FIELD_SECOND_RESOLUTION,Store.YES, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.SECOND).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MILLISECOND).getTime()));
 
-        doc.add(new NumericField(SIZE_FIELD,Store.NO, true).setLongValue(membership.getFullContentOctets()));
+        doc.add(new NumericField(SIZE_FIELD,Store.YES, true).setLongValue(membership.getFullContentOctets()));
 
         // content handler which will index the headers and the body of the message
         SimpleContentHandler handler = new SimpleContentHandler() {
@@ -362,17 +386,23 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     doc.add(new Field(HEADERS_FIELD, fullValue, Store.NO, Index.ANALYZED));
                     doc.add(new Field(PREFIX_HEADER_FIELD + headerName, f.getBody().toLowerCase(Locale.US) ,Store.NO, Index.ANALYZED));
                     
+                    // TODO: Handle base subject
                     if (f instanceof AddressListField) {
                         AddressListField addressField = (AddressListField) f;
-                        String field = null;;
+                        String field = null;
+                        String firstField = null;
                         if ("To".equalsIgnoreCase(headerName)) {
                             field = TO_FIELD;
+                            firstField = FIRST_TO_MAILBOX_NAME_FIELD;
                         } else if ("From".equalsIgnoreCase(headerName)) {
                             field = FROM_FIELD;
+                            firstField = FIRST_FROM_MAILBOX_NAME_FIELD;
+
                         } else if ("Bcc".equalsIgnoreCase(headerName)) {
                             field = BCC_FIELD;
                         } else if ("Cc".equalsIgnoreCase(headerName)) {
                             field = CC_FIELD;
+                            firstField = FIRST_CC_MAILBOX_NAME_FIELD;
                         }
                         
                         // Check if we can index the the addressfield in the right manner
@@ -383,14 +413,25 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                                 for (int i = 0; i < aList.size(); i++) {
                                     Address address = aList.get(i);
                                     if (address instanceof org.apache.james.mime4j.field.address.Mailbox) {
-                                        String value = ((org.apache.james.mime4j.field.address.Mailbox) address).getEncodedString().toLowerCase(Locale.US);
+                                        org.apache.james.mime4j.field.address.Mailbox mailbox = (org.apache.james.mime4j.field.address.Mailbox) address;
+                                        String value = mailbox.getEncodedString().toLowerCase(Locale.US);
+                                        String mailboxName = mailbox.getName();
+                                        
                                         doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
                                         
+                                        if (i == 0 && firstField != null && mailboxName != null) {
+                                            doc.add(new Field(firstField, mailboxName.toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
+                                        }
                                     } else if (address instanceof Group) {
                                         MailboxList mList = ((Group) address).getMailboxes();
                                         for (int a = 0; a < mList.size(); a++) {
-                                            String value = mList.get(i).getEncodedString().toLowerCase(Locale.US);
+                                            String value = mList.get(a).getEncodedString().toLowerCase(Locale.US);
                                             doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
+                                            String mailboxName = mList.get(a).getName();
+
+                                            if (i == 0 && a == 0 && firstField != null && mailboxName != null) {
+                                                doc.add(new Field(firstField, mailboxName.toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
+                                            }
                                         }
                                     }
                                 }
@@ -642,7 +683,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             searcher = new IndexSearcher(IndexReader.open(writer, true));
             
             // query for all the documents sorted by uid
-            TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
+            TopDocs docs = searcher.search(query, null, maxQueryResults, new Sort(UID_SORT));
             ScoreDoc[] sDocs = docs.scoreDocs;
             for (int i = 0; i < sDocs.length; i++) {
                 long uid = Long.valueOf(searcher.doc(sDocs[i].doc).get(UID_FIELD));
@@ -667,6 +708,73 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 }
             }
         }
+    }
+    
+    private Sort createSort(List<SearchQuery.Sort> sorts) {
+        Sort sort = new Sort();
+        List<SortField> fields = new ArrayList<SortField>();
+        
+        for (int i = 0; i < sorts.size(); i++) {
+            SearchQuery.Sort s = sorts.get(i);
+            boolean reverse = s.isReverse();
+            SortField sf = null;
+            
+            switch (s.getSortClause()) {
+            case Arrival:
+                if (reverse) {
+                    sf = ARRIVAL_MAILBOX_SORT_REVERSE;
+                } else {
+                    sf = ARRIVAL_MAILBOX_SORT;
+                }
+                break;
+            case Cc:
+                if (reverse) {
+                    sf = FIRST_CC_MAILBOX_SORT_REVERSE;
+                } else {
+                    sf = FIRST_CC_MAILBOX_SORT;
+                }
+                break;
+            case From:
+                if (reverse) {
+                    sf = FIRST_FROM_MAILBOX_SORT_REVERSE;
+                } else {
+                    sf = FIRST_FROM_MAILBOX_SORT;
+                }
+                break;
+            case Size:
+                if (reverse) {
+                    sf = SIZE_SORT_REVERSE;
+                } else {
+                    sf = SIZE_SORT;
+                }
+                break;
+            case Subject:
+                // TODO: Fix me
+                break;
+            case To:
+                if (reverse) {
+                    sf = FIRST_TO_MAILBOX_SORT_REVERSE;
+                } else {
+                    sf = FIRST_TO_MAILBOX_SORT;
+                }
+                break;
+                
+            case Uid:
+                if (reverse) {
+                    sf = UID_SORT_REVERSE;
+                } else {
+                    sf = UID_SORT;
+                }
+                break;
+            default:
+                break;
+            }
+            if (sf != null) {
+                fields.add(sf);
+            }
+        }
+        sort.setSort(fields.toArray(new SortField[0]));
+        return sort;
     }
     
     /**
