@@ -124,7 +124,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.bodyContains(CUSTARD));
         Iterator<Long> result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
         
         
@@ -139,7 +139,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.bodyContains(RHUBARD));
         Iterator<Long> result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
     }
 
@@ -161,7 +161,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.mailContains(CUSTARD));
         Iterator<Long> result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
         
         query = new SearchQuery();
@@ -175,12 +175,12 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.mailContains(RHUBARD));
         Iterator<Long> result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
         
         query.andCriteria(SearchQuery.mailContains(RHUBARD.toLowerCase(Locale.US)));
         result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
     }
 
@@ -190,12 +190,12 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery query = new SearchQuery();
         query.andCriteria(SearchQuery.mailContains(FROM_ADDRESS));
         Iterator<Long> result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
         
         query.andCriteria(SearchQuery.mailContains(SUBJECT_PART));
         result = index.search(null, mailbox3, query);
-        assertEquals(10, result.next(), 1);
+        assertEquals(10L, result.next().longValue());
         assertFalse(result.hasNext());
     }
     
@@ -205,7 +205,7 @@ public class LuceneMessageSearchIndexTest {
         query.andCriteria(SearchQuery.all());
         Iterator<Long> it2 = index.search(null, mailbox2, query);
         assertTrue(it2.hasNext());
-        assertEquals(1, it2.next().longValue(), 1);
+        assertEquals(1L, it2.next().longValue());
         assertFalse(it2.hasNext());
     }
     
@@ -215,8 +215,8 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q = new SearchQuery();
         q.andCriteria(SearchQuery.flagIsSet(Flag.DELETED));
         Iterator<Long> it3 = index.search(null, mailbox, q);
-        assertEquals(3, it3.next().longValue(), 1);
-        assertEquals(4, it3.next().longValue(), 1);
+        assertEquals(2L, it3.next().longValue());
+        assertEquals(3L, it3.next().longValue());
         assertFalse(it3.hasNext());
     }
     
@@ -225,9 +225,9 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.bodyContains("body"));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -237,9 +237,9 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.mailContains("body"));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -249,8 +249,8 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.headerContains("Subject", "test"));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -260,8 +260,8 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.headerExists("Subject"));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -271,9 +271,9 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.flagIsUnSet(Flag.DRAFT));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -287,7 +287,7 @@ public class LuceneMessageSearchIndexTest {
         q2.andCriteria(SearchQuery.internalDateBefore(cal.getTime(), DateResolution.Day));
         
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(2, it4.next().longValue(), 1);
+        assertEquals(2L, it4.next().longValue());
         assertFalse(it4.hasNext());
     }
     
@@ -299,7 +299,7 @@ public class LuceneMessageSearchIndexTest {
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.internalDateAfter(cal.getTime(), DateResolution.Day));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(3L, it4.next().longValue());
         assertFalse(it4.hasNext());
     }
     
@@ -312,7 +312,7 @@ public class LuceneMessageSearchIndexTest {
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.internalDateOn(cal.getTime(), DateResolution.Day));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
         assertFalse(it4.hasNext());
     }
     
@@ -323,7 +323,7 @@ public class LuceneMessageSearchIndexTest {
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.uid(new SearchQuery.NumericRange[] {new SearchQuery.NumericRange(1)}));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next(), 1);
+        assertEquals(1L, it4.next().longValue());
         assertFalse(it4.hasNext());
     }
     
@@ -335,9 +335,9 @@ public class LuceneMessageSearchIndexTest {
         cal.setTime(new Date());
         q2.andCriteria(SearchQuery.uid(new SearchQuery.NumericRange[] {new SearchQuery.NumericRange(1), new SearchQuery.NumericRange(2,3)}));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -349,7 +349,7 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeEquals(200));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -359,8 +359,8 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeLessThan(200));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
@@ -371,12 +371,23 @@ public class LuceneMessageSearchIndexTest {
         SearchQuery q2 = new SearchQuery();
         q2.andCriteria(SearchQuery.sizeGreaterThan(6));
         Iterator<Long> it4 = index.search(null, mailbox, q2);
-        assertEquals(1, it4.next().longValue(), 1);
-        assertEquals(2, it4.next().longValue(), 1);
-        assertEquals(3, it4.next().longValue(), 1);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
 
         assertFalse(it4.hasNext());
     }
+    
+    @Test
+    public void testNot() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.not(SearchQuery.uid(new SearchQuery.NumericRange[] { new SearchQuery.NumericRange(1)})));
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    
     private final class SimpleMailbox implements Mailbox<Long> {
         private long id;
 

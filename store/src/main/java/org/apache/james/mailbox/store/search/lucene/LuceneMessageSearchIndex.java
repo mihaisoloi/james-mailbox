@@ -26,9 +26,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
@@ -38,6 +40,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.Conjunction;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.AllCriterion;
 import org.apache.james.mailbox.SearchQuery.ContainsOperator;
@@ -283,7 +286,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @see org.apache.james.mailbox.store.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
      */
     public Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
-        List<Long> uids = new ArrayList<Long>();
+        Set<Long> uids = new HashSet<Long>();
         IndexSearcher searcher = null;
 
         try {
@@ -295,9 +298,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             for (int i = 0; i < crits.size(); i++) {
                 query.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
             }
-            
-            //System.out.println(query.toString());
-            
+                      
             // query for all the documents sorted by uid
             TopDocs docs = searcher.search(query, null, maxQueryResults, UID_SORT);
             ScoreDoc[] sDocs = docs.scoreDocs;
@@ -573,13 +574,17 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     private Query createUidQuery(SearchQuery.UidCriterion crit) throws UnsupportedSearchException {
         NumericRange[] ranges = crit.getOperator().getRange();
-        BooleanQuery rangesQuery = new BooleanQuery();
-        for (int i = 0; i < ranges.length; i++) {
-            NumericRange range = ranges[i];
-            rangesQuery.add(NumericRangeQuery.newLongRange(UID_FIELD, range.getLowValue(), range.getHighValue(), true, true), BooleanClause.Occur.SHOULD);
-        }        
-        rangesQuery.add(new PrefixQuery(new Term(FLAGS_FIELD, "")), BooleanClause.Occur.MUST_NOT);
-        return rangesQuery;
+        if (ranges.length == 1) {
+            NumericRange range = ranges[0];
+            return NumericRangeQuery.newLongRange(UID_FIELD, range.getLowValue(), range.getHighValue(), true, true);
+        } else {
+            BooleanQuery rangesQuery = new BooleanQuery();
+            for (int i = 0; i < ranges.length; i++) {
+                NumericRange range = ranges[i];
+                rangesQuery.add(NumericRangeQuery.newLongRange(UID_FIELD, range.getLowValue(), range.getHighValue(), true, true), BooleanClause.Occur.SHOULD);
+            }        
+            return rangesQuery;
+        }
     }
     
     
@@ -752,6 +757,9 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         BooleanQuery conQuery = new BooleanQuery();
         for (int i = 0; i < crits.size(); i++) {
             conQuery.add(createQuery(crits.get(i), mailbox), occur);
+        }
+        if (Conjunction.NOR.equals(crit.getType())) {
+            conQuery.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
         }
         return conQuery;
     }
