@@ -70,6 +70,7 @@ public class SentDateComparator implements Comparator<Message<?>>{
                         DateTime dateTime = new DateTimeParser(reader).parseAll();
                         return dateTime.getDate();
                     } catch (ParseException e) {
+                        // if we can not parse the date header we should break here and use the internaldate as fallback
                         break;
                     }
                 
