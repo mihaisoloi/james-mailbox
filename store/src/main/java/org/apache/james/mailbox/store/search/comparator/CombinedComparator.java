@@ -18,8 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.search.comparator;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
+import org.apache.james.mailbox.SearchQuery.Sort;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
@@ -46,6 +49,46 @@ public class CombinedComparator implements Comparator<Message<?>>{
             }
         }
         return i;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public Comparator<Message<?>> create(List<Sort> sorts) {
+        List<Comparator<?>> comps = new ArrayList<Comparator<?>>();
+        for (int i = 0; i < sorts.size(); i++) {
+            Sort sort = sorts.get(i);
+            boolean reverse = sort.isReverse();
+            Comparator<Message<?>> comparator = null;
+            
+            switch (sort.getSortClause()) {
+            case Arrival:
+                comparator = InternalDateComparator.internalDate(reverse);
+                break;
+            case Cc:
+                comparator = HeaderMailboxComparator.cc(reverse);
+                break;
+            case From:
+                comparator = HeaderMailboxComparator.from(reverse);
+                break;
+            case Size:
+                comparator = SizeComparator.size(reverse);
+                break;
+            case Subject:
+                // TODO: fix me
+                break;
+            case To:
+                comparator = HeaderMailboxComparator.to(reverse);
+                break;
+            case Uid:
+                comparator = UidComparator.uid(reverse);
+                break;
+            default:
+                break;
+            }
+            if (comparator != null) {
+                comps.add(comparator);
+            }
+        }
+        return new CombinedComparator(comps.toArray(new Comparator[0]));
     }
 
 }

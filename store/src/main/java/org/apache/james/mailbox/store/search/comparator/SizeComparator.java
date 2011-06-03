@@ -38,7 +38,7 @@ public class SizeComparator implements Comparator<Message<?>>{
         return (int) (o1.getFullContentOctets() - o2.getFullContentOctets());
     }
 
-    public Comparator<Message<?>> size(boolean reverse) {
+    public static Comparator<Message<?>> size(boolean reverse) {
         if (reverse) {
             return REVERSE_SIZE;
         } else {
