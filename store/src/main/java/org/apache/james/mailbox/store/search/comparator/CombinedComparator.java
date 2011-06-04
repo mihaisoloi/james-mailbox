@@ -52,7 +52,7 @@ public class CombinedComparator implements Comparator<Message<?>>{
     }
     
     @SuppressWarnings("unchecked")
-    public Comparator<Message<?>> create(List<Sort> sorts) {
+    public static Comparator<Message<?>> create(List<Sort> sorts) {
         List<Comparator<?>> comps = new ArrayList<Comparator<?>>();
         for (int i = 0; i < sorts.size(); i++) {
             Sort sort = sorts.get(i);

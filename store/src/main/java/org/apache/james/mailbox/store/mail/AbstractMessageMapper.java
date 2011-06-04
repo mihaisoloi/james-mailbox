@@ -45,7 +45,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
-import org.apache.james.mailbox.store.search.SearchQueryIterator;
+import org.apache.james.mailbox.store.search.MessageSearches;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 
 /**
@@ -481,9 +481,9 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                 };
                 
                 if (mailboxSession == null) {
-                    return new SearchQueryIterator(it, query);
+                    return new MessageSearches(it, query).iterator();
                 } else {
-                    return new SearchQueryIterator(it, query, mailboxSession.getLog());
+                    return new MessageSearches(it, query, mailboxSession.getLog()).iterator();
                 }
             }
         } else {
