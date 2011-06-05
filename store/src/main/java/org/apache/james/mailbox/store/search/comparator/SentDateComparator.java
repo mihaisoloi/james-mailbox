@@ -21,9 +21,7 @@ package org.apache.james.mailbox.store.search.comparator;
 import java.io.StringReader;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mime4j.field.datetime.DateTime;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
@@ -33,7 +31,7 @@ import org.apache.james.mime4j.field.datetime.parser.ParseException;
  * {@link Comparator} which works like stated in RFC5256 2.2 Sent Date
  *
  */
-public class SentDateComparator implements Comparator<Message<?>>{
+public class SentDateComparator extends AbstractHeaderComparator {
 
 
 
@@ -60,23 +58,15 @@ public class SentDateComparator implements Comparator<Message<?>>{
     }
     
     private Date getSentDate(Message<?> message) {
-        final List<Header> headers = message.getHeaders();
-        for (Header header:headers) {
-            final String name = header.getFieldName();
-            if ("Date".equalsIgnoreCase(name)) {
-                final String value = header.getValue();
-                    final StringReader reader = new StringReader(value);
-                    try {
-                        DateTime dateTime = new DateTimeParser(reader).parseAll();
-                        return dateTime.getDate();
-                    } catch (ParseException e) {
-                        // if we can not parse the date header we should break here and use the internaldate as fallback
-                        break;
-                    }
-                
-            }
+        final String value = getHeaderValue("Date", message);
+        final StringReader reader = new StringReader(value);
+        try {
+            DateTime dateTime = new DateTimeParser(reader).parseAll();
+            return dateTime.getDate();
+        } catch (ParseException e) {
+            // if we can not parse the date header we should use the internaldate as fallback
+            return message.getInternalDate();
         }
-        return message.getInternalDate();
     }
     
     public static Comparator<Message<?>> sentDate(boolean reverse){
