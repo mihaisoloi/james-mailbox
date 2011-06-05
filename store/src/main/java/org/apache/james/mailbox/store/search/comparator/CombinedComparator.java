@@ -73,7 +73,7 @@ public class CombinedComparator implements Comparator<Message<?>>{
                 comparator = SizeComparator.size(reverse);
                 break;
             case Subject:
-                // TODO: fix me
+                comparator = BaseSubjectComparator.baseSubject(reverse);
                 break;
             case To:
                 comparator = HeaderMailboxComparator.to(reverse);
