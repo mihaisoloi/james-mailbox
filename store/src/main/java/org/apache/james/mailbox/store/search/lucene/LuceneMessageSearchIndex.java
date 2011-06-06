@@ -946,9 +946,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             ScoreDoc[] sDocs = docs.scoreDocs;
             for (int i = 0; i < sDocs.length; i++) {
                 Document doc = searcher.doc(sDocs[i].doc);
-                doc.removeFields(FLAGS_FIELD);
-                indexFlags(doc, f);
-                writer.updateDocument(new Term(ID_FIELD, doc.get(ID_FIELD)), doc);
+                
+                if (doc.getField(FLAGS_FIELD) == null) {
+                    doc.removeFields(FLAGS_FIELD);
+                    indexFlags(doc, f);
+                    writer.updateDocument(new Term(ID_FIELD, doc.get(ID_FIELD)), doc);
+            
+                }
             }
         } catch (IOException e) {
             throw new MailboxException("Unable to add messages in index", e);

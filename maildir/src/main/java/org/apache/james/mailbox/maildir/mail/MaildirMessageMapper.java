@@ -477,7 +477,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
-    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Integer> mailbox, final Flags flags, final boolean value, final boolean replace, MessageRange set) throws MailboxException {
+    public Iterator<UpdatedFlags> updateFlags(final Mailbox<Integer> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
@@ -522,6 +522,11 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                         long modSeq;
                         // if the flags don't have change we should not try to move the file
                         if (newMessageFile.equals(messageFile) == false) {
+
+                            if (replace == false && index != null) {
+                                index.update(mailboxSession, mailbox, MessageRange.one(member.getUid()), newFlags);
+                            }
+                            
                             FileUtils.moveFile(messageFile, newMessageFile );
                             modSeq = newMessageFile.lastModified();
 
@@ -539,6 +544,12 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                     }
 
                 }
+                
+                // as it was a replace operation we can just use the given message for update the index
+                if (replace && index != null) {
+                    index.update(mailboxSession, mailbox, set, flags);
+                }
+                
             }
         });
         
