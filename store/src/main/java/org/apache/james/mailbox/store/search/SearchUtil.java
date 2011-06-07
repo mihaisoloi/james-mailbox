@@ -19,6 +19,7 @@
 package org.apache.james.mailbox.store.search;
 
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 import org.apache.james.mime4j.codec.DecoderUtil;
 import org.apache.james.mime4j.util.MimeUtil;
@@ -29,7 +30,7 @@ public class SearchUtil {
     private final static String SUBJ_FWD_HDR = "[fwd:";
     private final static String SUBJ_FWD_TRL = "]";
     private final static String RE = "re";
-    private final static String FWD = "FWD";
+    private final static String FWD = "fwd";
     private final static String FW = "fw";
     private final static char WS = ' ';
     private final static char OPEN_SQUARE_BRACKED = '[';
@@ -133,7 +134,7 @@ public class SearchUtil {
                     //    base, then remove the prefix text.
                     decodedSubjectLength = decodedSubject.length();
                     String subj = removeBlob(decodedSubject);
-                    
+
                     // check if it will leave a non-empty subject
                     if (subj.length() > 0) {
                         decodedSubject = subj;
@@ -150,14 +151,14 @@ public class SearchUtil {
                         break;
                     } 
                 }
+                String lowcaseSubject = decodedSubject.toLowerCase(Locale.US);
                 
-                if (decodedSubject.startsWith(SUBJ_FWD_HDR) && decodedSubject.endsWith(SUBJ_FWD_TRL)) {
+                if (lowcaseSubject.startsWith(SUBJ_FWD_HDR) && lowcaseSubject.endsWith(SUBJ_FWD_TRL)) {
                     //    (6) If the resulting text begins with the subj-fwd-hdr ABNF and
                     //    ends with the subj-fwd-trl ABNF, remove the subj-fwd-hdr and
                     //    subj-fwd-trl and repeat from step (2).
                     decodedSubject = decodedSubject.substring(SUBJ_FWD_HDR.length(), decodedSubject.length() - SUBJ_FWD_TRL.length());
                     decodedSubjectLength = decodedSubject.length();
-
                 } else {
                     break;
                 }
@@ -167,13 +168,26 @@ public class SearchUtil {
             return decodedSubject;
     }
  
+    /**
+     * Remove the subj-blob
+     * 
+     *     subj-blob = "[" *BLOBCHAR "]" *WSP
+     *     subj-refwd = ("re" / ("fw" ["d"])) *WSP [subj-blob] ":"
+     * 
+     *     BLOBCHAR = %x01-5a / %x5c / %x5e-7f
+     *     ; any CHAR except '[' and ']' 
+     *     
+     *     
+     * @param subject
+     * @return sub
+     */
     private static String removeSubjectBlob(String subject) {
         String subj = subject;
         while(subj.charAt(0) == OPEN_SQUARE_BRACKED) {
             int length = subj.length();
             subj = removeBlob(subject);
             int i = 0;
-            if (subj.charAt(i) == CLOSE_SQUARE_BRACKED) {
+            if (subj.length() > 0 && subj.charAt(i) == CLOSE_SQUARE_BRACKED) {
                 i++;
             } else {
                 return subject;
@@ -182,62 +196,86 @@ public class SearchUtil {
                 i++;
             }
             subj = subj.substring(i);
-            System.out.println(subj);
-
             if (length == subj.length()) {
                 return subj;
             }
         }
         return subj;
     }
-    private static String removeSubjLeaders(String subject) {
-        
-        // subj-leader     = (*subj-blob subj-refwd) / WSP
-        // subj-blob       = "[" *BLOBCHAR "]" *WSP
-        // subj-refwd      = ("re" / ("fw" ["d"])) *WSP [subj-blob] ":"
-        //
-        // BLOBCHAR        = %x01-5a / %x5c / %x5e-7f
-        //                ; any CHAR except '[' and ']' */
-        
-        String subj = removeSubjectBlob(subject);
-        
-        
-        int subString = 0;
-        if (subj.startsWith(RE)) {
-            subString = RE.length();
-        } else if (subj.startsWith(FWD)) {
-            subString = FWD.length();
-        } else if (subj.startsWith(FW)) {
-            subString  = FW.length();
-        } else {
-            return subject;
-        } 
-        while(subj.charAt(subString) == WS) {
-            subString++;
-        }
-        subj = removeSubjectBlob(subj.substring(subString));
-        if (subj.endsWith(String.valueOf(CLOSE_SQUARE_BRACKED))) {
-            subString = 1;
-        } else {
-            subString = 0;
-        }
 
-        if (subj.charAt(subString) == COLON) {
+    /**
+     * Remove the subj-leader
+     * 
+     *     subj-leader = (*subj-blob subj-refwd) / WSP
+     *     subj-blob = "[" *BLOBCHAR "]" *WSP
+     *     subj-refwd = ("re" / ("fw" ["d"])) *WSP [subj-blob] ":"
+     * 
+     *     BLOBCHAR = %x01-5a / %x5c / %x5e-7f
+     *     ; any CHAR except '[' and ']' 
+     *     
+     *     
+     * @param subject
+     * @return sub
+     */
+    private static String removeSubjLeaders(String subject) {
+        int subString = 0;
+        while (subject.charAt(subString) == WS) {
             subString++;
-        } else {
-            return subject;
         }
-        
-        return subj.substring(subString);
+        if (subString > 0) {
+            // check if we have matched WSP
+            return subject.substring(subString);
+        } else {
+
+            String subj = removeSubjectBlob(subject);
+
+            String lowCaseSubj = subj.toLowerCase(Locale.US);
+            if (lowCaseSubj.startsWith(RE)) {
+                subString = RE.length();
+            } else if (lowCaseSubj.startsWith(FWD)) {
+                subString = FWD.length();
+            } else if (lowCaseSubj.startsWith(FW)) {
+                subString = FW.length();
+            } else {
+                return subject;
+            }
+            while (subj.charAt(subString) == WS) {
+                subString++;
+            }
+
+            /*
+             * subj = removeSubjectBlob(subj.substring(subString)); if
+             * (subj.endsWith(String.valueOf(CLOSE_SQUARE_BRACKED))) { subString
+             * = 1; } else { subString = 0; }
+             */
+
+            if (subj.charAt(subString) == COLON) {
+                subString++;
+            } else {
+                return subject;
+            }
+
+            while (subj.charAt(subString) == WS) {
+                subString++;
+            }
+            return subj.substring(subString);
+        }
     }
+
     
+    /**
+     * remove the remove_subj_trailers
+     * 
+     *    subj-trailer    = "(fwd)" / WSP
+     *  
+     *  
+     * @param decodedSubject
+     * * @return sub
+     */
     private static String removeSubTrailers(String decodedSubject) {
         int subStringStart = 0;
         int subStringEnd = decodedSubject.length();
-        
-        // remove the remove_subj_trailers
-        //
-        // subj-trailer    = "(fwd)" / WSP
+
         int originalSize = decodedSubject.length();
         int curPos = originalSize -1;
         while(true) {
@@ -255,6 +293,15 @@ public class SearchUtil {
         return decodedSubject;
     }
     
+    /**
+     * Remove all blobchars
+     * 
+     *     BLOBCHAR = %x01-5a / %x5c / %x5e-7f
+     *     ; any CHAR except '[' and ']' 
+     *     
+     * @param subject
+     * @return subj
+     */
     private static String removeBlob(String subject) {
         int i = 0;
         char lastChar = Character.UNASSIGNED;
@@ -270,6 +317,8 @@ public class SearchUtil {
         if (lastChar != CLOSE_SQUARE_BRACKED) {
             return subject;
         } else {
+            // the lastChar was a ] so increase the count before substring
+            i++;
             return subject.substring(i);
         }
 

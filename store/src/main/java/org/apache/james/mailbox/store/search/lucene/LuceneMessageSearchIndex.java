@@ -56,9 +56,11 @@ import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
+import org.apache.james.mailbox.store.search.SearchUtil;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.BodyDescriptor;
 import org.apache.james.mime4j.field.AddressListField;
+import org.apache.james.mime4j.field.DateTimeField;
 import org.apache.james.mime4j.field.address.Address;
 import org.apache.james.mime4j.field.address.AddressList;
 import org.apache.james.mime4j.field.address.Group;
@@ -178,6 +180,8 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     
     public final static String FIRST_FROM_MAILBOX_NAME_FIELD ="firstFromMailboxName";
 
+    public final static String BASE_SUBJECT_FIELD = "baseSubject";
+    
     /**
      * {@link Field} which contain the internalDate of the message with YEAR-Resolution
      */
@@ -252,6 +256,12 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     private final static SortField ARRIVAL_MAILBOX_SORT = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
     private final static SortField ARRIVAL_MAILBOX_SORT_REVERSE = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
 
+    private final static SortField BASE_SUBJECT_SORT = new SortField(BASE_SUBJECT_FIELD, SortField.STRING);
+    private final static SortField BASE_SUBJECT_SORT_REVERSE = new SortField(BASE_SUBJECT_FIELD, SortField.STRING, true);
+    
+    private final static SortField SENT_DATE_SORT = new SortField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
+    private final static SortField SENT_DATE_SORT_REVERSE = new SortField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
+    
     public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
         this(directory, true);
     }
@@ -353,7 +363,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @param membership
      * @return document
      */
-    private Document createMessageDocument(Message<?> membership) throws MailboxException{
+    private Document createMessageDocument(final Message<?> membership) throws MailboxException{
         final Document doc = new Document();
         // TODO: Better handling
         doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
@@ -378,13 +388,16 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
 
             public void headers(Header header) {
                 
+                Date sentDate = null;
+                
                 Iterator<org.apache.james.mime4j.parser.Field> fields = header.iterator();
                 while(fields.hasNext()) {
                     org.apache.james.mime4j.parser.Field f = fields.next();
                     String headerName = f.getName().toLowerCase(Locale.US);
+                    String headerValue = f.getBody().toLowerCase(Locale.US);
                     String fullValue =  f.toString().toLowerCase(Locale.US);
                     doc.add(new Field(HEADERS_FIELD, fullValue, Store.NO, Index.ANALYZED));
-                    doc.add(new Field(PREFIX_HEADER_FIELD + headerName, f.getBody().toLowerCase(Locale.US) ,Store.NO, Index.ANALYZED));
+                    doc.add(new Field(PREFIX_HEADER_FIELD + headerName, headerValue, Store.NO, Index.ANALYZED));
                     
                     // TODO: Handle base subject
                     if (f instanceof AddressListField) {
@@ -437,8 +450,18 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                                 }
                             }
                         }
+                    } else if (headerName.equalsIgnoreCase("Subject")) {
+                        doc.add(new Field(BASE_SUBJECT_FIELD, SearchUtil.getBaseSubject(headerValue), Store.YES, Index.NOT_ANALYZED));
+                    } else if (f instanceof DateTimeField) {
+                        sentDate = ((DateTimeField) f).getDate();
                     }
                 }
+                if (sentDate == null) {
+                    sentDate = membership.getInternalDate();
+                }
+                doc.add(new NumericField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(sentDate,Calendar.MILLISECOND).getTime()));
+
+
            
             }
             /*
@@ -727,6 +750,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     sf = ARRIVAL_MAILBOX_SORT;
                 }
                 break;
+            case SentDate:
+                if (reverse) {
+                    sf = SENT_DATE_SORT_REVERSE;
+                } else {
+                    sf = SENT_DATE_SORT;
+                }
+                break;
             case Cc:
                 if (reverse) {
                     sf = FIRST_CC_MAILBOX_SORT_REVERSE;
@@ -749,7 +779,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 }
                 break;
             case Subject:
-                // TODO: Fix me
+                if (reverse) {
+                    sf = BASE_SUBJECT_SORT_REVERSE;
+                } else {
+                    sf = BASE_SUBJECT_SORT;
+                }
                 break;
             case To:
                 if (reverse) {
@@ -770,7 +804,15 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 break;
             }
             if (sf != null) {
+
                 fields.add(sf);
+                
+                // Add the uid sort as tie-breaker
+                if (sf == SENT_DATE_SORT) {
+                    fields.add(UID_SORT);
+                } else if (sf == SENT_DATE_SORT_REVERSE) {
+                    fields.add(UID_SORT_REVERSE);
+                }
             }
         }
         sort.setSort(fields.toArray(new SortField[0]));

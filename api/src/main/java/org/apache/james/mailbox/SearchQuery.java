@@ -102,6 +102,11 @@ public class SearchQuery {
             To,
             
             /**
+             * 
+             */
+            SentDate,
+            
+            /**
              * Uid of the message. This is the DEFAULT if no other is specified
              */
             Uid

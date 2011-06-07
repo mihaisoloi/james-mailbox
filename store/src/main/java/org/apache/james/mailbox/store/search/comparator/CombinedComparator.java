@@ -81,6 +81,8 @@ public class CombinedComparator implements Comparator<Message<?>>{
             case Uid:
                 comparator = UidComparator.uid(reverse);
                 break;
+            case SentDate: 
+                comparator = SentDateComparator.sentDate(reverse);
             default:
                 break;
             }
