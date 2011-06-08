@@ -63,7 +63,6 @@ public class SearchQuery {
     public static enum AddressType {
         From,
         To,
-        Cc,
         Bcc
     }
     
@@ -72,24 +71,37 @@ public class SearchQuery {
         public static enum SortClause {
             
             /**
-             * Internal date and time of the message
+             * Internal date and time of the message (internaldate)
              */
             Arrival,
             
             /**
-             * addr-mailbox of the first "cc" address.
+             * addr-mailbox of the first "cc" address. 
+             * 
+             * This MUST BE converted to uppercase before doing the sort
              */
-            Cc,
+            MailboxCc,
             
             /**
              * addr-mailbox of the first "from" address.
+             * 
+             * This MUST BE converted to uppercase before doing the sort
              */
-            From,
+            MailboxFrom,
+            
+            /**
+             * addr-mailbox of the first "To" address
+             * 
+             * This MUST BE converted to uppercase before doing the sort
+             */
+            MailboxTo,
             
             /**
              * Base subject text.
+             * 
+             * This MUST BE converted to uppercase before doing the sort
              */
-            Subject,
+            BaseSubject,
             
             /**
              * Size of the message in octets.
@@ -97,14 +109,23 @@ public class SearchQuery {
             Size,
             
             /**
-             * addr-mailbox of the first "To" address
-             */
-            To,
-            
-            /**
              * 
              */
             SentDate,
+            
+            /**
+             * addr-name of the first "From" address
+             * 
+             * This MUST BE converted to uppercase before doing the sort
+             */
+            DisplayFrom,
+            
+            /**
+             * addr-name of the first "To" address
+             * 
+             * This MUST BE converted to uppercase before doing the sort
+             */
+            DisplayTo,
             
             /**
              * Uid of the message. This is the DEFAULT if no other is specified
@@ -350,6 +371,8 @@ public class SearchQuery {
      * Creates a filter matching messages whose header value contains the given
      * value.
      * 
+     * All to-compared Strings MUST BE converted to uppercase before doing so (this also include the search value)
+     *
      * @param headerName
      *            name of the header whose value will be compared, not null
      * @param value
@@ -368,6 +391,8 @@ public class SearchQuery {
     /**
      * Creates a filter matching messages with a header matching the given name.
      * 
+     * All to-compared Strings MUST BE converted to uppercase before doing so (this also include the search value)
+     * 
      * @param headerName
      *            name of the header whose value will be compared, not null
      * @return <code>Criterion</code>, not null
@@ -381,6 +406,8 @@ public class SearchQuery {
      * within the body or in the headers. Implementations may choose to ignore
      * mime parts which cannot be decoded to text.
      * 
+     * All to-compared Strings MUST BE converted to uppercase before doing so (this also include the search value)
+     * 
      * @param value
      *            search value
      * @return <code>Criterion</code>, not null
@@ -393,6 +420,8 @@ public class SearchQuery {
      * Creates a filter matching messages which contains the given text within
      * the body. Implementations may choose to ignore mime parts which cannot be
      * decoded to text.
+     * 
+     * All to-compared Strings MUST BE converted to uppercase before doing so (this also include the search value)
      * 
      * @param value
      *            search value

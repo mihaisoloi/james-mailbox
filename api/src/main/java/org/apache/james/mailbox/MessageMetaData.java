@@ -64,10 +64,6 @@ public interface MessageMetaData {
      * IMAP defines this as the time when the message has arrived to the server
      * (by smtp). Clients are also allowed to set the internalDate on append.
      * </p>
-     * <p>
-     * Is this Mail.getLastUpdates() for James delivery? Should we use
-     * MimeMessage.getReceivedDate()?
-     * </p>
      */
     Date getInternalDate();
 }

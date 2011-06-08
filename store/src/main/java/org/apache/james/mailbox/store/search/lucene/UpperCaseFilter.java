@@ -16,31 +16,37 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.search.comparator;
+package org.apache.james.mailbox.store.search.lucene;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.io.IOException;
 
-import org.apache.james.mailbox.store.mail.model.Header;
-import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.lucene.analysis.TokenFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+
+/**
+ * Normalizes token text to upper case.
+ */
+public final class UpperCaseFilter extends TokenFilter {
+    private CharTermAttribute termAtt;
+
+    public UpperCaseFilter(TokenStream in) {
+        super(in);
+        termAtt = addAttribute(CharTermAttribute.class);
+    }
 
 
-public abstract class AbstractHeaderComparator implements Comparator<Message<?>>{
+    @Override
+    public final boolean incrementToken() throws IOException {
+        if (input.incrementToken()) {
 
-    public final static String FROM ="from";
-    public final static String TO ="to";
-    public final static String CC ="cc";
+            final char[] buffer = termAtt.buffer();
+            final int length = termAtt.length();
+            for (int i = 0; i < length; i++)
+                buffer[i] = Character.toUpperCase(buffer[i]);
 
-    protected String getHeaderValue(String headerName, Message<?> message) {
-        final List<Header> headers = message.getHeaders();
-        for (Header header:headers) {
-            final String name = header.getFieldName();
-            if (headerName.equalsIgnoreCase(name)) {
-                final String value = header.getValue();
-                return value.toUpperCase(Locale.ENGLISH);
-            }
-        }
-        return "";
+            return true;
+        } else
+            return false;
     }
 }

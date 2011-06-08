@@ -158,7 +158,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     public final static String TO_FIELD ="to";
     
     public final static String FIRST_TO_MAILBOX_NAME_FIELD ="firstToMailboxName";
-
+    public final static String FIRST_TO_MAILBOX_DISPLAY_FIELD ="firstToMailboxDisplay";
 
     /**
      * {@link Field} which will contain the CC-Address of the message
@@ -166,11 +166,6 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     public final static String CC_FIELD ="cc";
 
     public final static String FIRST_CC_MAILBOX_NAME_FIELD ="firstCcMailboxName";
-
-    /**
-     * {@link Field} which will contain the BCC-Address of the message
-     */
-    public final static String BCC_FIELD ="bcc";
     
 
     /**
@@ -179,6 +174,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     public final static String FROM_FIELD ="from";
     
     public final static String FIRST_FROM_MAILBOX_NAME_FIELD ="firstFromMailboxName";
+    public final static String FIRST_FROM_MAILBOX_DISPLAY_FIELD ="firstFromMailboxDisplay";
 
     public final static String BASE_SUBJECT_FIELD = "baseSubject";
     
@@ -253,6 +249,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     private final static SortField FIRST_FROM_MAILBOX_SORT = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG);
     private final static SortField FIRST_FROM_MAILBOX_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG, true);
 
+    
     private final static SortField ARRIVAL_MAILBOX_SORT = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
     private final static SortField ARRIVAL_MAILBOX_SORT_REVERSE = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
 
@@ -261,6 +258,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     
     private final static SortField SENT_DATE_SORT = new SortField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
     private final static SortField SENT_DATE_SORT_REVERSE = new SortField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
+    
+    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.LONG);
+    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.LONG, true);
+
+    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.LONG);
+    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.LONG, true);
+
     
     public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
         this(directory, true);
@@ -366,11 +370,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     private Document createMessageDocument(final Message<?> membership) throws MailboxException{
         final Document doc = new Document();
         // TODO: Better handling
-        doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(MAILBOX_ID_FIELD, membership.getMailboxId().toString().toUpperCase(Locale.ENGLISH), Store.YES, Index.NOT_ANALYZED));
         doc.add(new NumericField(UID_FIELD,Store.YES, true).setLongValue(membership.getUid()));
         
         // create an unqiue key for the document which can be used later on updates to find the document
-        doc.add(new Field(ID_FIELD, membership.getMailboxId().toString().toLowerCase(Locale.US) +"-" + Long.toString(membership.getUid()), Store.YES, Index.NOT_ANALYZED));
+        doc.add(new Field(ID_FIELD, membership.getMailboxId().toString().toUpperCase(Locale.ENGLISH) +"-" + Long.toString(membership.getUid()), Store.YES, Index.NOT_ANALYZED));
 
         doc.add(new NumericField(INTERNAL_DATE_FIELD_YEAR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.YEAR).getTime()));
         doc.add(new NumericField(INTERNAL_DATE_FIELD_MONTH_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MONTH).getTime()));
@@ -389,13 +393,18 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             public void headers(Header header) {
                 
                 Date sentDate = null;
+                String firstFromMailbox = "";
+                String firstToMailbox = "";
+                String firstCcMailbox = "";
+                String firstFromDisplay = "";
+                String firstToDisplay = "";
                 
                 Iterator<org.apache.james.mime4j.parser.Field> fields = header.iterator();
                 while(fields.hasNext()) {
                     org.apache.james.mime4j.parser.Field f = fields.next();
-                    String headerName = f.getName().toLowerCase(Locale.US);
-                    String headerValue = f.getBody().toLowerCase(Locale.US);
-                    String fullValue =  f.toString().toLowerCase(Locale.US);
+                    String headerName = f.getName().toUpperCase(Locale.ENGLISH);
+                    String headerValue = f.getBody().toUpperCase(Locale.ENGLISH);
+                    String fullValue =  f.toString().toUpperCase(Locale.ENGLISH);
                     doc.add(new Field(HEADERS_FIELD, fullValue, Store.NO, Index.ANALYZED));
                     doc.add(new Field(PREFIX_HEADER_FIELD + headerName, headerValue, Store.NO, Index.ANALYZED));
                     
@@ -403,19 +412,12 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     if (f instanceof AddressListField) {
                         AddressListField addressField = (AddressListField) f;
                         String field = null;
-                        String firstField = null;
                         if ("To".equalsIgnoreCase(headerName)) {
                             field = TO_FIELD;
-                            firstField = FIRST_TO_MAILBOX_NAME_FIELD;
                         } else if ("From".equalsIgnoreCase(headerName)) {
                             field = FROM_FIELD;
-                            firstField = FIRST_FROM_MAILBOX_NAME_FIELD;
-
-                        } else if ("Bcc".equalsIgnoreCase(headerName)) {
-                            field = BCC_FIELD;
                         } else if ("Cc".equalsIgnoreCase(headerName)) {
                             field = CC_FIELD;
-                            firstField = FIRST_CC_MAILBOX_NAME_FIELD;
                         }
                         
                         // Check if we can index the the addressfield in the right manner
@@ -427,23 +429,47 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                                     Address address = aList.get(i);
                                     if (address instanceof org.apache.james.mime4j.field.address.Mailbox) {
                                         org.apache.james.mime4j.field.address.Mailbox mailbox = (org.apache.james.mime4j.field.address.Mailbox) address;
-                                        String value = mailbox.getEncodedString().toLowerCase(Locale.US);
-                                        String mailboxName = mailbox.getName();
+                                        String value = mailbox.getEncodedString().toUpperCase(Locale.ENGLISH);
                                         
                                         doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
                                         
-                                        if (i == 0 && firstField != null && mailboxName != null) {
-                                            doc.add(new Field(firstField, mailboxName.toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
+                                        if (i == 0) {
+                                            String mailboxAddress = SearchUtil.getMailboxAddress(mailbox);
+                                            String mailboxDisplay = SearchUtil.getDisplayAddress(mailbox);
+
+                                            if ("To".equalsIgnoreCase(headerName)) {
+                                                firstToMailbox = mailboxAddress;
+                                                firstToDisplay = mailboxDisplay;
+                                            } else if ("From".equalsIgnoreCase(headerName)) {
+                                                firstFromMailbox = mailboxAddress;
+                                                firstFromDisplay = mailboxDisplay;
+                                                
+                                            } else if ("Cc".equalsIgnoreCase(headerName)) {
+                                                firstCcMailbox = mailboxAddress;
+                                            }
+                                            
                                         }
                                     } else if (address instanceof Group) {
                                         MailboxList mList = ((Group) address).getMailboxes();
                                         for (int a = 0; a < mList.size(); a++) {
-                                            String value = mList.get(a).getEncodedString().toLowerCase(Locale.US);
+                                            org.apache.james.mime4j.field.address.Mailbox mailbox = mList.get(a);
+                                            String value = mailbox.getEncodedString().toUpperCase(Locale.ENGLISH);
                                             doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
-                                            String mailboxName = mList.get(a).getName();
 
-                                            if (i == 0 && a == 0 && firstField != null && mailboxName != null) {
-                                                doc.add(new Field(firstField, mailboxName.toLowerCase(Locale.US), Store.YES, Index.NOT_ANALYZED));
+                                            if (i == 0 && a == 0) {
+                                                String mailboxAddress = SearchUtil.getMailboxAddress(mailbox);
+                                                String mailboxDisplay = SearchUtil.getDisplayAddress(mailbox);
+
+                                                if ("To".equalsIgnoreCase(headerName)) {
+                                                    firstToMailbox = mailboxAddress;
+                                                    firstToDisplay = mailboxDisplay;
+                                                } else if ("From".equalsIgnoreCase(headerName)) {
+                                                    firstFromMailbox = mailboxAddress;
+                                                    firstFromDisplay = mailboxDisplay;
+
+                                                } else if ("Cc".equalsIgnoreCase(headerName)) {
+                                                    firstCcMailbox = mailboxAddress;
+                                                }
                                             }
                                         }
                                     }
@@ -459,9 +485,13 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 if (sentDate == null) {
                     sentDate = membership.getInternalDate();
                 }
-                doc.add(new NumericField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(sentDate,Calendar.MILLISECOND).getTime()));
+                doc.add(new NumericField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION,Store.YES, true).setLongValue(DateUtils.truncate(sentDate,Calendar.MILLISECOND).getTime()));
 
-
+                doc.add(new Field(FIRST_FROM_MAILBOX_NAME_FIELD, firstFromMailbox, Store.YES, Index.NOT_ANALYZED));
+                doc.add(new Field(FIRST_TO_MAILBOX_NAME_FIELD, firstToMailbox, Store.YES, Index.NOT_ANALYZED));
+                doc.add(new Field(FIRST_CC_MAILBOX_NAME_FIELD, firstCcMailbox, Store.YES, Index.NOT_ANALYZED));
+                doc.add(new Field(FIRST_FROM_MAILBOX_DISPLAY_FIELD, firstFromDisplay, Store.YES, Index.NOT_ANALYZED));
+                doc.add(new Field(FIRST_TO_MAILBOX_DISPLAY_FIELD, firstToDisplay, Store.YES, Index.NOT_ANALYZED));
            
             }
             /*
@@ -487,7 +517,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     BufferedReader bodyReader = new BufferedReader(new InputStreamReader(in, charset));
                     String line = null;
                     while((line = bodyReader.readLine()) != null) {
-                        doc.add(new Field(BODY_FIELD,  line.toLowerCase(Locale.US),Store.NO, Index.ANALYZED));
+                        doc.add(new Field(BODY_FIELD,  line.toUpperCase(Locale.ENGLISH),Store.NO, Index.ANALYZED));
                     }
                     
                 }
@@ -615,14 +645,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      */
     private Query createHeaderQuery(SearchQuery.HeaderCriterion crit) throws UnsupportedSearchException {
         HeaderOperator op = crit.getOperator();
-        String fieldName = PREFIX_HEADER_FIELD + crit.getHeaderName().toLowerCase(Locale.US);
+        String fieldName = PREFIX_HEADER_FIELD + crit.getHeaderName().toUpperCase(Locale.ENGLISH);
         if (op instanceof SearchQuery.ContainsOperator) {
             ContainsOperator cop = (ContainsOperator) op;
-            return createTermQuery(fieldName, cop.getValue().toLowerCase(Locale.US));
+            return createTermQuery(fieldName, cop.getValue().toUpperCase(Locale.ENGLISH));
         } else if (op instanceof SearchQuery.ExistsOperator){
             return new PrefixQuery(new Term(fieldName, ""));
         } else if (op instanceof SearchQuery.AddressOperator) {
-            return createTermQuery(fieldName.toLowerCase(), ((SearchQuery.AddressOperator) op).getAddress().toLowerCase(Locale.US));
+            return createTermQuery(fieldName.toLowerCase(), ((SearchQuery.AddressOperator) op).getAddress().toUpperCase(Locale.ENGLISH));
         } else {
             // Operator not supported
             throw new UnsupportedSearchException();
@@ -757,14 +787,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     sf = SENT_DATE_SORT;
                 }
                 break;
-            case Cc:
+            case MailboxCc:
                 if (reverse) {
                     sf = FIRST_CC_MAILBOX_SORT_REVERSE;
                 } else {
                     sf = FIRST_CC_MAILBOX_SORT;
                 }
                 break;
-            case From:
+            case MailboxFrom:
                 if (reverse) {
                     sf = FIRST_FROM_MAILBOX_SORT_REVERSE;
                 } else {
@@ -778,14 +808,14 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     sf = SIZE_SORT;
                 }
                 break;
-            case Subject:
+            case BaseSubject:
                 if (reverse) {
                     sf = BASE_SUBJECT_SORT_REVERSE;
                 } else {
                     sf = BASE_SUBJECT_SORT;
                 }
                 break;
-            case To:
+            case MailboxTo:
                 if (reverse) {
                     sf = FIRST_TO_MAILBOX_SORT_REVERSE;
                 } else {
@@ -800,6 +830,20 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                     sf = UID_SORT;
                 }
                 break;
+            case DisplayFrom:
+                if (reverse) {
+                    sf = FIRST_FROM_MAILBOX_DISPLAY_SORT_REVERSE;;
+                } else {
+                    sf = FIRST_FROM_MAILBOX_DISPLAY_SORT;
+                }
+                break;
+            case DisplayTo:
+                if (reverse) {
+                    sf = FIRST_TO_MAILBOX_DISPLAY_SORT_REVERSE;
+                } else {
+                    sf = FIRST_TO_MAILBOX_DISPLAY_SORT;
+                }
+                break;   
             default:
                 break;
             }
@@ -851,7 +895,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
      * @throws UnsupportedSearchException
      */
     private Query createTextQuery(SearchQuery.TextCriterion crit) throws UnsupportedSearchException {
-        String value = crit.getOperator().getValue().toLowerCase(Locale.US);
+        String value = crit.getOperator().getValue().toUpperCase(Locale.ENGLISH);
         switch(crit.getType()) {
         case BODY:
             return createTermQuery(BODY_FIELD, value);

@@ -23,34 +23,29 @@ import java.util.Comparator;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.SearchUtil;
 
-public class HeaderMailboxComparator extends AbstractHeaderComparator{
+public class HeaderDisplayComparator extends AbstractHeaderComparator{
 
-    private final String headerName;
 
-    private final static Comparator<Message<?>> FROM_COMPARATOR = new HeaderMailboxComparator(FROM);
+    private final static Comparator<Message<?>> FROM_COMPARATOR = new HeaderDisplayComparator(FROM);
     private final static Comparator<Message<?>> REVERSE_FROM_COMPARATOR = new ReverseComparator(FROM_COMPARATOR);
 
 
-    private final static Comparator<Message<?>> TO_COMPARATOR = new HeaderMailboxComparator(TO);
+    private final static Comparator<Message<?>> TO_COMPARATOR = new HeaderDisplayComparator(TO);
     private final static Comparator<Message<?>> REVERSE_TO_COMPARATOR = new ReverseComparator(TO_COMPARATOR);
 
-
-    private final static Comparator<Message<?>> CC_COMPARATOR = new HeaderMailboxComparator(CC);
-    private final static Comparator<Message<?>> REVERSE_CC_COMPARATOR = new ReverseComparator(CC_COMPARATOR);
-
     
-    public HeaderMailboxComparator(String headerName) {
+    private String headerName;
+
+    public HeaderDisplayComparator(String headerName) {
         this.headerName = headerName;
     }
     
     @Override
     public int compare(Message<?> o1, Message<?> o2) {
-        String mailbox1 = SearchUtil.getMailboxAddress(getHeaderValue(headerName, o1));
-        String mailbox2 = SearchUtil.getMailboxAddress(getHeaderValue(headerName, o2));
-
-        return mailbox1.compareToIgnoreCase(mailbox2);
+        String display1 = SearchUtil.getDisplayAddress(getHeaderValue(headerName, o1));
+        String display2 = SearchUtil.getDisplayAddress(getHeaderValue(headerName, o2));
+        return display1.compareToIgnoreCase(display2);
     }
-    
 
     
     public static Comparator<Message<?>> from(boolean reverse) {
@@ -60,14 +55,7 @@ public class HeaderMailboxComparator extends AbstractHeaderComparator{
             return FROM_COMPARATOR;
         }
     }
-    
-    public static Comparator<Message<?>> cc(boolean reverse) {
-        if (reverse) {
-            return REVERSE_CC_COMPARATOR;
-        } else {
-            return CC_COMPARATOR;
-        }
-    }
+
     
     public static Comparator<Message<?>> to(boolean reverse) {
         if (reverse) {
@@ -77,4 +65,3 @@ public class HeaderMailboxComparator extends AbstractHeaderComparator{
         }
     }
 }
-

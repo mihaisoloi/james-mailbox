@@ -63,19 +63,19 @@ public class CombinedComparator implements Comparator<Message<?>>{
             case Arrival:
                 comparator = InternalDateComparator.internalDate(reverse);
                 break;
-            case Cc:
+            case MailboxCc:
                 comparator = HeaderMailboxComparator.cc(reverse);
                 break;
-            case From:
+            case MailboxFrom:
                 comparator = HeaderMailboxComparator.from(reverse);
                 break;
             case Size:
                 comparator = SizeComparator.size(reverse);
                 break;
-            case Subject:
+            case BaseSubject:
                 comparator = BaseSubjectComparator.baseSubject(reverse);
                 break;
-            case To:
+            case MailboxTo:
                 comparator = HeaderMailboxComparator.to(reverse);
                 break;
             case Uid:
@@ -83,6 +83,12 @@ public class CombinedComparator implements Comparator<Message<?>>{
                 break;
             case SentDate: 
                 comparator = SentDateComparator.sentDate(reverse);
+            case DisplayFrom: 
+                comparator = HeaderDisplayComparator.from(reverse);
+                break;
+            case DisplayTo:
+                comparator = HeaderDisplayComparator.to(reverse);
+                break;
             default:
                 break;
             }

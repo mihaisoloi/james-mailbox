@@ -21,11 +21,9 @@ package org.apache.james.mailbox.store.search.lucene;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.cn.smart.SentenceTokenizer;
 import org.apache.lucene.analysis.ngram.NGramTokenFilter;
-import org.apache.lucene.util.Version;
 
 /**
 *
@@ -55,7 +53,7 @@ public final class StrictImapSearchAnalyzer extends Analyzer {
     * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String, java.io.Reader)
     */
    public TokenStream tokenStream(String fieldName, Reader reader) {
-       return new NGramTokenFilter(new LowerCaseFilter(Version.LUCENE_31, new SentenceTokenizer(reader)), minTokenLength, maxTokenLength);
+       return new NGramTokenFilter(new UpperCaseFilter(new SentenceTokenizer(reader)), minTokenLength, maxTokenLength);
    }
    
 }
