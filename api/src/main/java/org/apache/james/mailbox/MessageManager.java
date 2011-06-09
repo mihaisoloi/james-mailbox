@@ -52,6 +52,15 @@ public interface MessageManager {
      * @return writable
      */
     boolean isWriteable(MailboxSession session);
+    
+    
+    /**
+     * Return true if {@link MessageResult#getModSeq()} is stored in a permanent way.
+     * 
+     * @param session
+     * @return modSeqPermanent
+     */
+    boolean isModSeqPermanent(MailboxSession session);
 
     /**
      * Searches for messages matching the given query. The result must be

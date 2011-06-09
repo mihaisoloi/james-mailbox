@@ -138,6 +138,20 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     }
 
     
+    
+
+    /**
+     * Return true. If an subclass don't want to store mod-sequences in a permanent way just override this
+     * and return false
+     * 
+     * @return true
+     */
+    public boolean isModSeqPermanent(MailboxSession session) {
+        return true;
+    }
+
+
+
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.Mailbox#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
