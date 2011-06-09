@@ -52,7 +52,6 @@ import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 import org.apache.james.mailbox.util.SimpleMailboxMetaData;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This abstract base class of an {@link MailboxManager} implementation provides a high-level api for writing your own
@@ -74,7 +73,6 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     private final Authenticator authenticator;
     private final static Random RANDOM = new Random();
     
-    private Logger log = LoggerFactory.getLogger("org.apache.james.mailbox");
 
     private MailboxPathLocker locker;
 
@@ -105,22 +103,22 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         }
     }
     
-    protected AbstractDelegatingMailboxListener getDelegationListener() {
+    public AbstractDelegatingMailboxListener getDelegationListener() {
         if (delegatingListener == null) {
             delegatingListener = new HashMapDelegatingMailboxListener();
         }
         return delegatingListener;
     }
     
-    protected MessageSearchIndex<Id> getMessageSearchIndex() {
+    public MessageSearchIndex<Id> getMessageSearchIndex() {
         return index;
     }
     
-    protected MailboxEventDispatcher<Id> getEventDispatcher() {
+    public MailboxEventDispatcher<Id> getEventDispatcher() {
         return dispatcher;
     }
     
-    protected MailboxSessionMapperFactory<Id> getMapperFactory() {
+    public MailboxSessionMapperFactory<Id> getMapperFactory() {
         return mailboxSessionMapperFactory;
     }
     
@@ -140,14 +138,6 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     
     public void setMessageSearchIndex(MessageSearchIndex<Id> index) {
         this.index = index;
-    }
-    
-    protected Logger getLog() {
-        return log;
-    }
-
-    public void setLog(Logger log) {
-        this.log = log;
     }
 
     /**
@@ -253,11 +243,11 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         Mailbox<Id> mailboxRow = mapper.findMailboxByPath(mailboxPath);
 
         if (mailboxRow == null) {
-            getLog().info("Mailbox '" + mailboxPath + "' not found.");
+            session.getLog().info("Mailbox '" + mailboxPath + "' not found.");
             throw new MailboxNotFoundException(mailboxPath);
 
         } else {
-            getLog().debug("Loaded mailbox " + mailboxPath);
+            session.getLog().debug("Loaded mailbox " + mailboxPath);
             
             StoreMessageManager<Id>  m = createMessageManager(mailboxRow, session);
             return m;
@@ -272,10 +262,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      */
     public void createMailbox(MailboxPath mailboxPath, final MailboxSession mailboxSession)
     throws MailboxException {
-        getLog().debug("createMailbox " + mailboxPath);
+        mailboxSession.getLog().debug("createMailbox " + mailboxPath);
         final int length = mailboxPath.getName().length();
         if (length == 0) {
-            getLog().warn("Ignoring mailbox with empty name");
+            mailboxSession.getLog().warn("Ignoring mailbox with empty name");
         } else {
             if (mailboxPath.getName().charAt(length - 1) == getDelimiter())
                 mailboxPath.setName(mailboxPath.getName().substring(0, length - 1));
@@ -339,7 +329,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @see org.apache.james.mailbox.MailboxManager#renameMailbox(org.apache.james.imap.api.MailboxPath, org.apache.james.imap.api.MailboxPath, org.apache.james.mailbox.MailboxSession)
      */
     public void renameMailbox(final MailboxPath from, final MailboxPath to, final MailboxSession session) throws MailboxException {
-        final Logger log = getLog();
+        final Logger log = session.getLog();
         if (log.isDebugEnabled())
             log.debug("renameMailbox " + from + " to " + to);
         if (mailboxExists(to, session)) {
