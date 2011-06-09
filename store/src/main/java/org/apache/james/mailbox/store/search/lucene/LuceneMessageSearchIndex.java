@@ -53,9 +53,10 @@ import org.apache.james.mailbox.SearchQuery.HeaderOperator;
 import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
+import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
+import org.apache.james.mailbox.store.search.ListeningMessageSearchIndex;
 import org.apache.james.mailbox.store.search.SearchUtil;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.BodyDescriptor;
@@ -97,13 +98,13 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 /**
- * Lucene based {@link MessageSearchIndex} which offers message searching via a Lucene index
+ * Lucene based {@link ListeningMessageSearchIndex} which offers message searching via a Lucene index
  * 
  * 
 
  * @param <Id>
  */
-public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
+public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id>{
 
     /**
      * Default max query results
@@ -266,17 +267,18 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
     private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.LONG, true);
 
     
-    public LuceneMessageSearchIndex(Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
-        this(directory, true);
+    public LuceneMessageSearchIndex(MessageMapperFactory<Id> factory, Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
+        this(factory, directory, true);
     }
     
     
-    public LuceneMessageSearchIndex(Directory directory, boolean lenient) throws CorruptIndexException, LockObtainFailedException, IOException {
-        this(new IndexWriter(directory,  new IndexWriterConfig(Version.LUCENE_31, createAnalyzer(lenient))));
+    public LuceneMessageSearchIndex(MessageMapperFactory<Id> factory, Directory directory, boolean lenient) throws CorruptIndexException, LockObtainFailedException, IOException {
+        this(factory, new IndexWriter(directory,  new IndexWriterConfig(Version.LUCENE_31, createAnalyzer(lenient))));
     }
     
     
-    public LuceneMessageSearchIndex(IndexWriter writer) {
+    public LuceneMessageSearchIndex(MessageMapperFactory<Id> factory, IndexWriter writer) {
+        super(factory);
         this.writer = writer;
     }
     
@@ -1036,6 +1038,7 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
                 if (doc.getField(FLAGS_FIELD) == null) {
                     doc.removeFields(FLAGS_FIELD);
                     indexFlags(doc, f);
+
                     writer.updateDocument(new Term(ID_FIELD, doc.get(ID_FIELD)), doc);
             
                 }
@@ -1078,6 +1081,11 @@ public class LuceneMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
         String[] userFlags = f.getUserFlags();
         for (int a = 0; a < userFlags.length; a++) {
             doc.add(new Field(FLAGS_FIELD, userFlags[a],Store.NO, Index.NOT_ANALYZED));
+        }
+        
+        // if no flags are there we just use a empty field
+        if (flags.length == 0 && userFlags.length == 0) {
+            doc.add(new Field(FLAGS_FIELD, "",Store.NO, Index.NOT_ANALYZED));
         }
     }
     /*

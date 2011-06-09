@@ -53,12 +53,12 @@ import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
@@ -78,14 +78,17 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
 
     private final Mailbox<Id> mailbox;
     
-    private final MailboxEventDispatcher dispatcher;    
+    private final MailboxEventDispatcher<Id> dispatcher;    
     
-    protected MessageMapperFactory<Id> mapperFactory;
+    protected final MessageMapperFactory<Id> mapperFactory;
+
+    protected final MessageSearchIndex<Id> index;
     
-    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MailboxEventDispatcher dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
+    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
         this.mailbox = mailbox;
         this.dispatcher = dispatcher;
         this.mapperFactory = mapperFactory;
+        this.index = index;
     }
     
     
@@ -95,7 +98,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * 
      * @return dispatcher
      */
-    protected MailboxEventDispatcher getDispatcher() {
+    protected MailboxEventDispatcher<Id> getDispatcher() {
         return dispatcher;
     }
     
@@ -159,7 +162,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     public Iterator<Long> expunge(final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
         Map<Long, MessageMetaData> uids = deleteMarkedInMailbox(set, mailboxSession);
      
-        dispatcher.expunged(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
+        dispatcher.expunged(mailboxSession, uids, getMailboxEntity());
         return uids.keySet().iterator();    
     }
 
@@ -299,7 +302,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                        
             Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
             uids.put(data.getUid(), data);
-            dispatcher.added(mailboxSession, uids, new StoreMailboxPath<Id>(getMailboxEntity()));
+            dispatcher.added(mailboxSession, uids, getMailboxEntity());
             return data.getUid();
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
@@ -462,7 +465,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             uFlags.put(flag.getUid(), flag);
         }
         
-        dispatcher.flagsUpdated(mailboxSession, new ArrayList<Long>(uFlags.keySet()), new StoreMailboxPath<Id>(getMailboxEntity()), new ArrayList<UpdatedFlags>(uFlags.values()));
+        dispatcher.flagsUpdated(mailboxSession, new ArrayList<Long>(uFlags.keySet()), getMailboxEntity(), new ArrayList<UpdatedFlags>(uFlags.values()));
 
         return newFlagsByUid;
     }
@@ -480,7 +483,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
     public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
         try {
             Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
-            dispatcher.added(session, copiedUids, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()));
+            dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
 
             return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
         } catch (MailboxException e) {
@@ -609,9 +612,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @see org.apache.james.mailbox.Mailbox#search(org.apache.james.mailbox.SearchQuery, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> search(SearchQuery query, MailboxSession mailboxSession) throws MailboxException {
-        MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
-        return messageMapper.search(getMailboxEntity(), query);
-        
+        return index.search(mailboxSession, getMailboxEntity(), query);
     }
 
 

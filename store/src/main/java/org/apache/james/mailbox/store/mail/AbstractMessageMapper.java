@@ -18,11 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +31,9 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
-import org.apache.james.mailbox.SearchQuery.Criterion;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
-import org.apache.james.mailbox.SearchQuery.UidCriterion;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.Property;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
-import org.apache.james.mailbox.store.search.MessageSearches;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 
 /**
@@ -59,15 +47,9 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     private final static ConcurrentHashMap<Object, AtomicLong> seqs = new ConcurrentHashMap<Object, AtomicLong>();
     private final static ConcurrentHashMap<Object, AtomicLong> uids = new ConcurrentHashMap<Object, AtomicLong>();
     protected final MailboxSession mailboxSession;
-    protected final MessageSearchIndex<Id> index;
-    
+
     public AbstractMessageMapper(MailboxSession mailboxSession) {
-        this(mailboxSession, null);
-    }
-    
-    public AbstractMessageMapper(MailboxSession mailboxSession, MessageSearchIndex<Id> index) {
         this.mailboxSession = mailboxSession;
-        this.index = index;
     }
     
     
@@ -178,12 +160,6 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
             saveSequences(mailbox, getLastUid(mailbox), nextModSeq(mailbox));
 
         }
-        if (index != null) {
-            Iterator<MessageRange> rangeIt = MessageRange.toRanges(new ArrayList<Long>(data.keySet())).iterator();
-            while(rangeIt.hasNext()) {
-                index.delete(mailboxSession, mailbox, rangeIt.next());
-            }
-        }
         return data;
     }
 
@@ -220,12 +196,6 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                         // increase the mod-seq as we changed the flags
                         member.setModSeq(modSeq);
                         save(mailbox, member);
-
-                        
-
-                        if (replace == false && index != null) {
-                            index.update(mailboxSession, mailbox, MessageRange.one(member.getUid()), newFlags);
-                        }
                     }
 
                     
@@ -235,13 +205,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                     
 
                 }
-                
-
-                // as it was a replace operation we can just use the given message for update the index
-                if (replace && index != null) {
-                    index.update(mailboxSession, mailbox, set, flags);
-                }
-                
+               
             }
         });
 
@@ -256,18 +220,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         message.setUid(nextUid(mailbox));
         message.setModSeq(nextModSeq(mailbox));
         MessageMetaData data = save(mailbox, message);
-        if (index != null) {
-            findInMailbox(mailbox, MessageRange.one(data.getUid()), new MailboxMembershipCallback<Id>() {
-
-                @Override
-                public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
-                    if (!list.isEmpty()) {
-                        index.add(mailboxSession, mailbox, list.get(0));
-                    }
-                }
-            });
-            
-        }
+       
         return data;
         
     }
@@ -281,216 +234,11 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         long uid = nextUid(mailbox);
         long modSeq = nextModSeq(mailbox);
         final MessageMetaData metaData = copy(mailbox, uid, modSeq, original);  
-        if (index != null) {
-            // index the copied message by building a wrapper around the original message and the returned metadata
-            index.add(mailboxSession, mailbox, new Message<Id>() {
-
-                @Override
-                public Flags createFlags() {
-                    return original.createFlags();
-                }
-
-                @Override
-                public InputStream getBodyContent() throws IOException {
-                    return original.getBodyContent();
-                }
-
-                @Override
-                public long getBodyOctets() {
-                    return original.getBodyOctets();
-                }
-
-                @Override
-                public InputStream getFullContent() throws IOException {
-                    return original.getFullContent();
-                }
-
-                @Override
-                public long getFullContentOctets() {
-                    return original.getFullContentOctets();
-                }
-
-                @Override
-                public List<Header> getHeaders() {
-                    return original.getHeaders();
-                }
-
-                @Override
-                public Date getInternalDate() {
-                    return metaData.getInternalDate();
-                }
-
-                @Override
-                public Id getMailboxId() {
-                    return mailbox.getMailboxId();
-                }
-
-                @Override
-                public String getMediaType() {
-                    return original.getMediaType();
-                }
-
-                @Override
-                public long getModSeq() {
-                    return metaData.getModSeq();
-                }
-
-                @Override
-                public List<Property> getProperties() {
-                    return original.getProperties();
-                }
-
-                @Override
-                public String getSubType() {
-                    return original.getSubType();
-                }
-
-                @Override
-                public Long getTextualLineCount() {
-                    return original.getTextualLineCount();
-                }
-
-                @Override
-                public long getUid() {
-                    return metaData.getUid();
-                }
-
-                @Override
-                public boolean isAnswered() {
-                    return original.isAnswered();
-                }
-
-                @Override
-                public boolean isDeleted() {
-                    return original.isDeleted();
-
-                }
-
-                @Override
-                public boolean isDraft() {
-                    return original.isDraft();
-
-                }
-
-                @Override
-                public boolean isFlagged() {
-                    return original.isFlagged();
-                }
-
-                @Override
-                public boolean isRecent() {
-                    return original.isRecent();
-                }
-
-                @Override
-                public boolean isSeen() {
-                    return original.isSeen();
-                }
-
-                @Override
-                public void setFlags(Flags flags) {
-                    throw new UnsupportedOperationException("Read-Only Message");
-                }
-
-                @Override
-                public void setModSeq(long modSeq) {
-                    throw new UnsupportedOperationException("Read-Only Message");
-                }
-
-                @Override
-                public void setUid(long uid) {
-                    throw new UnsupportedOperationException("Read-Only Message");
-                }
-
-                @Override
-                public int compareTo(Message<Id> o) {
-                    return (int) (metaData.getUid() - o.getUid());
-                }
-                
-            
-            });
-        } 
         
         return metaData;
     }
 
-    
-
-    
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#search(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
-     */
-    public Iterator<Long> search(Mailbox<Id> mailbox, SearchQuery query) throws MailboxException {
-        if (index == null) {
-            List<Criterion> crits = query.getCriterias();
-
-            if (crits.size() == 1  && crits.get(0) instanceof UidCriterion) {
-                final List<Long> uids = new ArrayList<Long>();
-                UidCriterion uidCrit = (UidCriterion) crits.get(0);
-                NumericRange[] ranges = uidCrit.getOperator().getRange();
-                for (int i = 0; i < ranges.length; i++) {
-                    NumericRange r = ranges[i];
-                    findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), new MailboxMembershipCallback<Id>() {
-
-                        public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
-                            for (int i = 0; i < list.size(); i++) {
-                                long uid = list.get(i).getUid();
-                                if (uids.contains(uid) == false) {
-                                    uids.add(uid);
-                                }
-                            }
-                        }
-                    });
-                }
-                Collections.sort(uids);
-                return uids.iterator();
-                
-               
-            } else {
-                
-                final List<Message<Id>> hits = new ArrayList<Message<Id>>();
-
-                findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
-
-                    public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
-                        for (int i = 0; i < list.size(); i++) {
-                            Message<Id> m = list.get(i);
-                            if (hits.contains(m) == false) {
-                                hits.add(m);
-                            }
-                        }
-                    }
-                });
-                Collections.sort(hits);
-                
-                Iterator<Message<?>> it = new Iterator<Message<?>>() {
-                    final Iterator<Message<Id>> it = hits.iterator();
-                    public boolean hasNext() {
-                        return it.hasNext();
-                    }
-
-                    public Message<?> next() {
-                        return it.next();
-                    }
-
-                    public void remove() {
-                        it.remove();
-                    }
-                    
-                };
-                
-                if (mailboxSession == null) {
-                    return new MessageSearches(it, query).iterator();
-                } else {
-                    return new MessageSearches(it, query, mailboxSession.getLog()).iterator();
-                }
-            }
-        } else {
-            return index.search(mailboxSession, mailbox, query);
-        }
-
-    }
+   
 
     /**
      * Return the higest mod-seq for the given {@link Mailbox}. This method is called in a lazy fashion. So when the first mod-seq is needed for a {@link Mailbox}

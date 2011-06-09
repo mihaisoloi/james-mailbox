@@ -21,44 +21,22 @@ package org.apache.james.mailbox.store.search;
 
 import java.util.Iterator;
 
-import javax.mail.Flags;
-
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.Message;
+
+
+/**
+ * An index which can be used to search for Message UID's that match a {@link SearchQuery}.
+ * 
+ * A developer should think of building an inverse-index for that.
+ * 
+ *
+ * @param <Id>
+ */
 public interface MessageSearchIndex<Id> {
-
-    /**
-     * Add the {@link MailboxMembership} to the search index
-     * 
-     * @param mailbox
-     * @param message
-     * @throws MailboxException
-     */
-    public void add(MailboxSession session, Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
     
-    /**
-     * Update the Flags in the search index for the given {@link MessageRange} 
-     * 
-     * @param mailbox
-     * @param range
-     * @param flags
-     * @throws MailboxException
-     */
-    public void update(MailboxSession session, Mailbox<Id> mailbox, MessageRange range, Flags flags) throws MailboxException;
-    
-    /**
-     * Delete the data for the given {@link MessageRange} from the search index
-     * 
-     * @param mailbox
-     * @param range
-     * @throws MailboxException
-     */
-    public void delete(MailboxSession session, Mailbox<Id> mailbox, MessageRange range) throws MailboxException;
-
     /**
      * Return all uids of the previous indexed {@link MailboxMembership}'s which match the {@link SearchQuery}
      * 

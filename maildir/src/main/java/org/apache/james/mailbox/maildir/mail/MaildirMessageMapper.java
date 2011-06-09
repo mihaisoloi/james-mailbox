@@ -51,15 +51,14 @@ import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
 
     private final MaildirStore maildirStore;
     private final int BUF_SIZE = 2048;
 
-    public MaildirMessageMapper(MailboxSession session, MessageSearchIndex<Integer> index, MaildirStore  maildirStore) {
-        super(session, index);
+    public MaildirMessageMapper(MailboxSession session,MaildirStore  maildirStore) {
+        super(session);
         this.maildirStore = maildirStore;
     }
     
@@ -522,11 +521,6 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                         long modSeq;
                         // if the flags don't have change we should not try to move the file
                         if (newMessageFile.equals(messageFile) == false) {
-
-                            if (replace == false && index != null) {
-                                index.update(mailboxSession, mailbox, MessageRange.one(member.getUid()), newFlags);
-                            }
-                            
                             FileUtils.moveFile(messageFile, newMessageFile );
                             modSeq = newMessageFile.lastModified();
 
@@ -544,12 +538,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                     }
 
                 }
-                
-                // as it was a replace operation we can just use the given message for update the index
-                if (replace && index != null) {
-                    index.update(mailboxSession, mailbox, set, flags);
-                }
-                
+
             }
         });
         

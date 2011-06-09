@@ -28,7 +28,6 @@ import org.apache.james.mailbox.jpa.user.JPASubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 
 /**
@@ -39,14 +38,9 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     private final EntityManagerFactory entityManagerFactory;
 
-    public JPAMailboxSessionMapperFactory(MessageSearchIndex<Long> index, EntityManagerFactory entityManagerFactory) {
-        super(index);
-        this.entityManagerFactory = entityManagerFactory;
-        createEntityManager().close();
-    }
-    
     public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory) {
-        this(null, entityManagerFactory);
+        this.entityManagerFactory = entityManagerFactory;
+        createEntityManager().close();   
     }
     
     @Override
@@ -56,7 +50,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     @Override
     public MessageMapper<Long> createMessageMapper(MailboxSession session) {
-        return new JPAMessageMapper(session, getSearchIndex(), entityManagerFactory);
+        return new JPAMessageMapper(session, entityManagerFactory);
     }
 
     @Override

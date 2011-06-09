@@ -29,7 +29,6 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 public class MaildirMailboxManager extends StoreMailboxManager<Integer> {
 
@@ -46,9 +45,8 @@ public class MaildirMailboxManager extends StoreMailboxManager<Integer> {
     }
 
     @Override
-    protected StoreMessageManager<Integer> createMessageManager( MailboxEventDispatcher dispatcher,
-            Mailbox<Integer> mailboxEntiy, MailboxSession session) throws MailboxException {
-        return new MaildirMessageManager((MailboxSessionMapperFactory<Integer>)mailboxSessionMapperFactory, dispatcher, mailboxEntiy);
+    protected StoreMessageManager<Integer> createMessageManager(Mailbox<Integer> mailboxEntiy, MailboxSession session) throws MailboxException {
+        return new MaildirMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailboxEntiy);
     }
 
     @Override

@@ -28,19 +28,20 @@ import javax.mail.Flags;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.maildir.mail.model.MaildirHeader;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
+import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 public class MaildirMessageManager extends StoreMessageManager<Integer> {
 
-    public MaildirMessageManager(MessageMapperFactory<Integer> mapperFactory, MailboxEventDispatcher dispatcher, Mailbox<Integer> mailboxEntiy)
+    public MaildirMessageManager(MessageMapperFactory<Integer> mapperFactory, MessageSearchIndex<Integer> index,  MailboxEventDispatcher<Integer> dispatcher, Mailbox<Integer> mailboxEntiy)
     throws MailboxException {
-        super(mapperFactory, dispatcher, mailboxEntiy);
+        super(mapperFactory, index, dispatcher, mailboxEntiy);
     }
 
     @Override

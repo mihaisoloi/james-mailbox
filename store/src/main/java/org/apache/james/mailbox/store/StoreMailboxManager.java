@@ -44,11 +44,12 @@ import org.apache.james.mailbox.MailboxMetaData.Selectability;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
-import org.apache.james.mailbox.store.mail.MailboxMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.search.ListeningMessageSearchIndex;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
+import org.apache.james.mailbox.store.search.SimpleMessageSearchIndex;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
 import org.apache.james.mailbox.util.SimpleMailboxMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +67,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     
     public static final char SQL_WILDCARD_CHAR = '%';
     
-    private final MailboxEventDispatcher dispatcher = new MailboxEventDispatcher();
+    private final MailboxEventDispatcher<Id> dispatcher = new MailboxEventDispatcher<Id>();
     private AbstractDelegatingMailboxListener delegatingListener = null;  
-    protected final MailboxMapperFactory<Id> mailboxSessionMapperFactory;    
+    private final MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory;    
     
     private final Authenticator authenticator;
     private final static Random RANDOM = new Random();
@@ -77,8 +78,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
 
     private MailboxPathLocker locker;
 
+    private MessageSearchIndex<Id> index;
+
     
-    public StoreMailboxManager(MailboxMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
+    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
         this.authenticator = authenticator;
         this.locker = locker;
         this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;       
@@ -89,9 +92,17 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * 
      * @throws MailboxException
      */
+    @SuppressWarnings("rawtypes")
     public void init() throws MailboxException{
         // The dispatcher need to have the delegating listener added
         dispatcher.addMailboxListener(getDelegationListener());
+        
+        if (index == null) {
+            index = new SimpleMessageSearchIndex<Id>(mailboxSessionMapperFactory);
+        }
+        if (index instanceof ListeningMessageSearchIndex) {
+            addGlobalListener((ListeningMessageSearchIndex) index, null);
+        }
     }
     
     protected AbstractDelegatingMailboxListener getDelegationListener() {
@@ -100,6 +111,19 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         }
         return delegatingListener;
     }
+    
+    protected MessageSearchIndex<Id> getMessageSearchIndex() {
+        return index;
+    }
+    
+    protected MailboxEventDispatcher<Id> getEventDispatcher() {
+        return dispatcher;
+    }
+    
+    protected MailboxSessionMapperFactory<Id> getMapperFactory() {
+        return mailboxSessionMapperFactory;
+    }
+    
     
     /**
      * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link HashMapDelegatingMailboxListener} instance will
@@ -114,6 +138,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         dispatcher.addMailboxListener(this.delegatingListener);
     }
     
+    public void setMessageSearchIndex(MessageSearchIndex<Id> index) {
+        this.index = index;
+    }
     
     protected Logger getLog() {
         return log;
@@ -206,7 +233,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
      * @param mailboxRow
      * @return storeMailbox
      */
-    protected abstract StoreMessageManager<Id> createMessageManager(MailboxEventDispatcher dispatcher, Mailbox<Id> mailboxRow, MailboxSession session) throws MailboxException;
+    protected abstract StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailboxRow, MailboxSession session) throws MailboxException;
 
     /**
      * Create a Mailbox for the given namespace
@@ -232,7 +259,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         } else {
             getLog().debug("Loaded mailbox " + mailboxPath);
             
-            StoreMessageManager<Id>  m = createMessageManager(dispatcher, mailboxRow, session);
+            StoreMessageManager<Id>  m = createMessageManager(mailboxRow, session);
             return m;
         }
     }
@@ -274,7 +301,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                             });
                             
                             // notify listeners
-                            dispatcher.mailboxAdded(session, mailbox);
+                            dispatcher.mailboxAdded(session, m);
                         }
                     }
                 });
@@ -290,19 +317,20 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         session.getLog().info("deleteMailbox " + mailboxPath);
         final MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
 
-        mapper.execute(new Mapper.VoidTransaction() {
+        Mailbox<Id> mailbox = mapper.execute(new Mapper.Transaction<Mailbox<Id>>() {
 
-            public void runVoid() throws MailboxException {
+            public Mailbox<Id> run() throws MailboxException {
                 Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
                 if (mailbox == null) {
                     throw new MailboxNotFoundException("Mailbox not found");
                 }
                 mapper.delete(mailbox);
+                return mailbox;
             }
 
         });
 
-        dispatcher.mailboxDeleted(session, mailboxPath);
+        dispatcher.mailboxDeleted(session, mailbox);
 
     }
 
@@ -332,7 +360,7 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                 mailbox.setName(to.getName());
                 mapper.save(mailbox);
 
-                dispatcher.mailboxRenamed(session, from, to);
+                dispatcher.mailboxRenamed(session, from, mailbox);
 
                 // rename submailboxes
                 final MailboxPath children = new MailboxPath(MailboxConstants.USER_NAMESPACE, from.getUser(), from.getName() + getDelimiter() + "%");
@@ -344,11 +372,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                             final String subOriginalName = sub.getName();
                             final String subNewName = to.getName() + subOriginalName.substring(from.getName().length());
                             final MailboxPath fromPath = new MailboxPath(children, subOriginalName);
-                            final MailboxPath toPath = new MailboxPath(children, subNewName);
-
                             sub.setName(subNewName);
                             mapper.save(sub);
-                            dispatcher.mailboxRenamed(session, fromPath, toPath);
+                            dispatcher.mailboxRenamed(session, fromPath, sub);
 
                             if (log.isDebugEnabled())
                                 log.debug("Rename mailbox sub-mailbox " + subOriginalName + " to " + subNewName);

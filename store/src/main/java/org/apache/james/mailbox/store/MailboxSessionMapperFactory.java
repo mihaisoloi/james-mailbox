@@ -26,8 +26,6 @@ import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MailboxMapperFactory;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
-import org.apache.james.mailbox.store.search.LazyMessageSearchIndex;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapperFactory;
@@ -41,22 +39,7 @@ public abstract class MailboxSessionMapperFactory <Id> implements RequestAware, 
     protected final static String MESSAGEMAPPER ="MESSAGEMAPPER";
     protected final static String MAILBOXMAPPER ="MAILBOXMAPPER";
     protected final static String SUBSCRIPTIONMAPPER ="SUBSCRIPTIONMAPPER";
-    private MessageSearchIndex<Id> index;
-
-    public MailboxSessionMapperFactory(MessageSearchIndex<Id> index) {
-        this.index = index;
-        if (index != null && index instanceof LazyMessageSearchIndex<?>) {
-            ((LazyMessageSearchIndex<Id>) index).setMessageMapperFactory(this);
-        }
-    }
-
-    public MailboxSessionMapperFactory() {
-        this(null);
-    }
     
-    protected MessageSearchIndex<Id> getSearchIndex() {
-        return index;
-    }
     
     
     /*

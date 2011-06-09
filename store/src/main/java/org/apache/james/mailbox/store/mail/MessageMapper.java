@@ -171,19 +171,5 @@ public interface MessageMapper<Id> extends Mapper {
      * @throws MailboxException
      */
     public abstract long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
-    
-    
-    /**
-     * Search the Mailbox with the given {@link SearchQuery} and return the uid of the matched messages.
-     * 
-     * The uids are sorted.
-     * 
-     * @param mailbox
-     * @param query
-     * @return result
-     * @throws MailboxException
-     */
-    public Iterator<Long> search(Mailbox<Id> mailbox, SearchQuery query) throws MailboxException;
-
 
 }

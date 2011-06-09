@@ -27,16 +27,17 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.jpa.JPAMailboxSessionMapperFactory;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
+import org.apache.james.mailbox.store.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 /**
  * OpenJPA implementation of Mailbox
@@ -45,14 +46,14 @@ public class OpenJPAMessageManager extends JPAMessageManager {
 
     private final boolean useStreaming;
 
-    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory,
-            MailboxEventDispatcher dispatcher, Mailbox<Long> mailbox) throws MailboxException {
-        this(mapperFactory, dispatcher, mailbox, false);
+    public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index,
+            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox) throws MailboxException {
+        this(mapperFactory, index, dispatcher, mailbox, false);
     }
 
-    public OpenJPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory,
-            MailboxEventDispatcher dispatcher, Mailbox<Long> mailbox, final boolean useStreaming) throws MailboxException {
-        super(mapperFactory,  dispatcher, mailbox);
+    public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, 
+            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox, final boolean useStreaming) throws MailboxException {
+        super(mapperFactory,  index, dispatcher, mailbox);
         this.useStreaming = useStreaming;
     }
 

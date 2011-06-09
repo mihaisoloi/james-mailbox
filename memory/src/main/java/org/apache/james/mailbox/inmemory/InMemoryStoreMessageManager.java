@@ -30,17 +30,18 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleHeader;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
+import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
 
-    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MailboxEventDispatcher dispatcher, InMemoryMailbox mailbox) throws MailboxException {
-        super(mapperFactory, dispatcher,mailbox);
+    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, MailboxEventDispatcher<Long> dispatcher, InMemoryMailbox mailbox) throws MailboxException {
+        super(mapperFactory, index, dispatcher,mailbox);
     }
     
     @Override

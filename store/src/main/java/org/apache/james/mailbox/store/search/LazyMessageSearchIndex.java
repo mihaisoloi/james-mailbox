@@ -28,13 +28,12 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 
 /**
- * {@link MessageSearchIndex} implementation which wraps another {@link MessageSearchIndex} and will forward all calls to it.
+ * {@link ListeningMessageSearchIndex} implementation which wraps another {@link ListeningMessageSearchIndex} and will forward all calls to it.
  * 
  * The only special thing about this is that it will index all the mails in the mailbox on the first call of {@link #search(MailboxSession, Mailbox, SearchQuery)}
  * 
@@ -43,28 +42,17 @@ import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallba
  *
  * @param <Id>
  */
-public class LazyMessageSearchIndex<Id> implements MessageSearchIndex<Id> {
+public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> {
 
-    private MessageSearchIndex<Id> index;
-    private MessageMapperFactory<Id> factory;
+    private ListeningMessageSearchIndex<Id> index;
     private final ConcurrentHashMap<Id, Boolean> indexed = new ConcurrentHashMap<Id, Boolean>();
     
     
-    public LazyMessageSearchIndex(MessageSearchIndex<Id> index) {
+    public LazyMessageSearchIndex(ListeningMessageSearchIndex<Id> index) {
+        super(index.getFactory());
         this.index = index;
     }
     
-    
-    /**
-     * Set the {@link MessageMapperFactory} which will be used to access the {@link Message}'s of the {@link Mailbox} on first {@link #search(MailboxSession, Mailbox, SearchQuery)}
-     * 
-     * This method must be called before the class can be used
-     * 
-     * @param factory
-     */
-    public void setMessageMapperFactory(MessageMapperFactory<Id> factory) {
-        this.factory = factory;
-    }
     
     
     @Override
@@ -95,7 +83,7 @@ public class LazyMessageSearchIndex<Id> implements MessageSearchIndex<Id> {
                 done = oldDone;
             }
             synchronized (done) {
-                factory.getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
+                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
 
                     @Override
                     public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {

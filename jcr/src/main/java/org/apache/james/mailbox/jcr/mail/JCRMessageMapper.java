@@ -51,7 +51,6 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 /**
  * JCR implementation of a {@link MessageMapper}. The implementation store each message as 
@@ -107,14 +106,14 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, final MessageSearchIndex<String> index,  int scaleType) {
-        super(mSession, index);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, int scaleType) {
+        super(mSession);
         this.repository = repository;        
         this.scaleType = scaleType;
     }
     
     public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session) {
-        this(repos, session, null, MESSAGE_SCALE_DAY);
+        this(repos, session, MESSAGE_SCALE_DAY);
     }
 
     

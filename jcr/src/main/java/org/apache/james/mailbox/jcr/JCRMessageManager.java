@@ -30,11 +30,13 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.model.JCRHeader;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
+import org.apache.james.mailbox.store.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.slf4j.Logger;
 
 /**
@@ -45,9 +47,9 @@ public class JCRMessageManager extends StoreMessageManager<String> {
 
     private final Logger log;
 
-    public JCRMessageManager(JCRMailboxSessionMapperFactory mapperFactory, 
-            final MailboxEventDispatcher dispatcher, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
-        super(mapperFactory, dispatcher, mailbox);
+    public JCRMessageManager(MailboxSessionMapperFactory<String> mapperFactory, MessageSearchIndex<String> index, 
+            final MailboxEventDispatcher<String> dispatcher, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
+        super(mapperFactory, index, dispatcher, mailbox);
         this.log = log;
     }
 

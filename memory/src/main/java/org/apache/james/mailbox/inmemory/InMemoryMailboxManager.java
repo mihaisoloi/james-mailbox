@@ -29,7 +29,6 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
 
 public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
 
@@ -38,8 +37,8 @@ public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
     }
 
     @Override
-    protected StoreMessageManager<Long> createMessageManager(MailboxEventDispatcher dispatcher, Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
-        return new InMemoryStoreMessageManager((MailboxSessionMapperFactory<Long>)mailboxSessionMapperFactory, dispatcher, (InMemoryMailbox)mailboxRow);
+    protected StoreMessageManager<Long> createMessageManager(Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
+        return new InMemoryStoreMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), (InMemoryMailbox)mailboxRow);
     }
 
     @Override
@@ -55,7 +54,8 @@ public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
      */
 
     public synchronized void deleteEverything() throws MailboxException {
-        ((InMemoryMailboxSessionMapperFactory) mailboxSessionMapperFactory).deleteAll();
+        ((InMemoryMailboxSessionMapperFactory) getMapperFactory()).deleteAll();
     }
+
 
 }

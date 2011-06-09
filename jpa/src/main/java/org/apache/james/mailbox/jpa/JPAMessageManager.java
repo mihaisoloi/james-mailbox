@@ -30,20 +30,22 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
+import org.apache.james.mailbox.store.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.util.MailboxEventDispatcher;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 /**
  * Abstract base class which should be used from JPA implementations.
  */
 public class JPAMessageManager extends StoreMessageManager<Long> {
     
-    public JPAMessageManager(JPAMailboxSessionMapperFactory mapperFactory, final MailboxEventDispatcher dispatcher,final Mailbox<Long> mailbox) throws MailboxException {
-        super(mapperFactory, dispatcher, mailbox);     
+    public JPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, final MessageSearchIndex<Long> index, final MailboxEventDispatcher<Long> dispatcher,final Mailbox<Long> mailbox) throws MailboxException {
+        super(mapperFactory, index, dispatcher, mailbox);     
     }
     
     @Override

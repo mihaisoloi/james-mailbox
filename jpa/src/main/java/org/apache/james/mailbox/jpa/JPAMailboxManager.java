@@ -51,7 +51,7 @@ public abstract class JPAMailboxManager extends StoreMailboxManager<Long> {
      * @throws MailboxException
      */
     public void deleteEverything(MailboxSession mailboxSession) throws MailboxException {
-        final JPAMailboxMapper mapper = (JPAMailboxMapper) mailboxSessionMapperFactory.getMailboxMapper(mailboxSession);
+        final JPAMailboxMapper mapper = (JPAMailboxMapper) getMapperFactory().getMailboxMapper(mailboxSession);
         mapper.execute(new TransactionalMapper.VoidTransaction() {
             public void runVoid() throws MailboxException {
                 mapper.deleteAllMemberships(); 

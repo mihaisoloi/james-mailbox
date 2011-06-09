@@ -43,7 +43,6 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.openjpa.persistence.ArgumentException;
 
 /**
@@ -53,8 +52,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     protected EntityManagerFactory entityManagerFactory;
     protected EntityManager entityManager;
     
-    public JPAMessageMapper(final MailboxSession session, MessageSearchIndex<Long> index, final EntityManagerFactory entityManagerFactory) {
-        super(session, index);
+    public JPAMessageMapper(final MailboxSession session, final EntityManagerFactory entityManagerFactory) {
+        super(session);
         this.entityManagerFactory = entityManagerFactory;
     }
 

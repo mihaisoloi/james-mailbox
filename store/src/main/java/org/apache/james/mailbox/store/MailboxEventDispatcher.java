@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.util;
+package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,11 +32,12 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.UpdatedFlags;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
  * Helper class to dispatch {@link Event}'s to registerend MailboxListener
  */
-public class MailboxEventDispatcher implements MailboxListener {
+public class MailboxEventDispatcher<Id> implements MailboxListener {
 
     private final Set<MailboxListener> listeners = new CopyOnWriteArraySet<MailboxListener>();
 
@@ -73,9 +74,9 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param sessionId
      * @param path
      */
-    public void added(MailboxSession session, Map<Long, MessageMetaData> uids, MailboxPath path) {
+    public void added(MailboxSession session, Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         pruneClosed();
-        final AddedImpl added = new AddedImpl(session, path, uids);
+        final AddedImpl added = new AddedImpl(session, mailbox, uids);
         event(added);
     }
 
@@ -87,8 +88,8 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param uids
      * @param path
      */
-    public void expunged(final MailboxSession session,  Map<Long, MessageMetaData> uids, MailboxPath path) {
-        final ExpungedImpl expunged = new ExpungedImpl(session, path, uids);
+    public void expunged(final MailboxSession session,  Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
+        final ExpungedImpl expunged = new ExpungedImpl(session, mailbox, uids);
         event(expunged);
     }
 
@@ -102,8 +103,8 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param original
      * @param updated
      */
-    public void flagsUpdated(MailboxSession session, final List<Long> uids, final MailboxPath path, final List<UpdatedFlags> uflags) {
-        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, path, uids, uflags);
+    public void flagsUpdated(MailboxSession session, final List<Long> uids, final Mailbox<Id> mailbox, final List<UpdatedFlags> uflags) {
+        final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, mailbox, uids, uflags);
         event(flags);
     }
 
@@ -145,17 +146,19 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param to
      * @param sessionId
      */
-    public void mailboxRenamed(MailboxSession session, MailboxPath from, MailboxPath to) {
+    public void mailboxRenamed(MailboxSession session, MailboxPath from, Mailbox<Id> to) {
         event(new MailboxRenamedEventImpl(session, from, to));
     }
 
-    private final static class AddedImpl extends MailboxListener.Added {
+    public final class AddedImpl extends MailboxListener.Added {
 
         private Map<Long, MessageMetaData> added;
+        private final Mailbox<Id> mailbox;
 
-        public AddedImpl(final MailboxSession session, final MailboxPath path, final Map<Long, MessageMetaData> added) {
-            super(session, path);
+        public AddedImpl(final MailboxSession session, final Mailbox<Id> mailbox, final Map<Long, MessageMetaData> added) {
+            super(session, new StoreMailboxPath<Id>(mailbox));
             this.added = added;
+            this.mailbox = mailbox;
         }
 
         /*
@@ -173,17 +176,21 @@ public class MailboxEventDispatcher implements MailboxListener {
         public MessageMetaData getMetaData(long uid) {
             return added.get(uid);
         }
-
-
+        
+        public Mailbox<Id> getMailbox() {
+            return mailbox;
+        }
     }
 
-    private final static class ExpungedImpl extends MailboxListener.Expunged {
+    public final class ExpungedImpl extends MailboxListener.Expunged {
 
         private final Map<Long, MessageMetaData> uids;
+        private final Mailbox<Id> mailbox;
 
-        public ExpungedImpl(MailboxSession session, final MailboxPath path, final  Map<Long, MessageMetaData> uids) {
-            super(session, path);
+        public ExpungedImpl(MailboxSession session, final Mailbox<Id> mailbox, final  Map<Long, MessageMetaData> uids) {
+            super(session,  new StoreMailboxPath<Id>(mailbox));
             this.uids = uids;
+            this.mailbox = mailbox;
         }
         /*
          * (non-Javadoc)
@@ -200,20 +207,25 @@ public class MailboxEventDispatcher implements MailboxListener {
         public MessageMetaData getMetaData(long uid) {
             return uids.get(uid);
         }
+        
+        public Mailbox<Id> getMailbox() {
+            return mailbox;
+        }
     }
 
-    private final static class FlagsUpdatedImpl extends MailboxListener.FlagsUpdated {
+    public final class FlagsUpdatedImpl extends MailboxListener.FlagsUpdated {
 
         private final List<Long> uids;
 
+        private final Mailbox<Id> mailbox;
 
         private final List<UpdatedFlags> uFlags;
 
-        public FlagsUpdatedImpl(MailboxSession session, final MailboxPath path, final List<Long> uids, final List<UpdatedFlags> uFlags) {
-            super(session, path);
+        public FlagsUpdatedImpl(MailboxSession session, final Mailbox<Id> mailbox, final List<Long> uids, final List<UpdatedFlags> uFlags) {
+            super(session, new StoreMailboxPath<Id>(mailbox));
             this.uids = uids;
-
             this.uFlags = uFlags;
+            this.mailbox = mailbox;
         }
 
         /*
@@ -231,9 +243,44 @@ public class MailboxEventDispatcher implements MailboxListener {
         public List<UpdatedFlags> getUpdatedFlags() {
             return uFlags;
         }
+        
+        public Mailbox<Id> getMailbox() {
+            return mailbox;
+        }
 
     }
 
+    public final class MailboxDeletionImpl extends MailboxDeletion {
+
+        private final Mailbox<Id> mailbox;
+
+        public MailboxDeletionImpl(MailboxSession session, Mailbox<Id> mailbox) {
+            super(session, new StoreMailboxPath<Id>(mailbox));
+            this.mailbox = mailbox;
+        }
+        
+        
+        public Mailbox<Id> getMailbox() {
+            return mailbox;
+        }
+
+    }
+    
+    public final class MailboxAddedImpl extends MailboxAdded {
+
+        private final Mailbox<Id> mailbox;
+
+        public MailboxAddedImpl(MailboxSession session, Mailbox<Id> mailbox) {
+            super(session,  new StoreMailboxPath<Id>(mailbox));
+            this.mailbox = mailbox;
+        }
+        
+        
+        public Mailbox<Id> getMailbox() {
+            return mailbox;
+        }
+
+    }
     /**
      * Should get called when a Mailbox was deleted. All registered
      * MailboxListener will get triggered then
@@ -241,8 +288,8 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param session
      * @param path
      */
-    public void mailboxDeleted(MailboxSession session, MailboxPath path) {
-        final MailboxDeletion event = new MailboxDeletion(session, path);
+    public void mailboxDeleted(MailboxSession session, Mailbox<Id> mailbox) {
+        final MailboxDeletion event = new MailboxDeletionImpl(session, mailbox);
         event(event);
     }
 
@@ -253,17 +300,19 @@ public class MailboxEventDispatcher implements MailboxListener {
      * @param session
      * @param path
      */
-    public void mailboxAdded(MailboxSession session, MailboxPath path) {
-        final MailboxAdded event = new MailboxAdded(session, path);
+    public void mailboxAdded(MailboxSession session, Mailbox<Id> mailbox) {
+        final MailboxAdded event = new MailboxAddedImpl(session, mailbox);
         event(event);
     }
 
-    private static final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
+    public final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
         private final MailboxPath newPath;
+        private final Mailbox<Id> newMailbox;
 
-        public MailboxRenamedEventImpl(final MailboxSession session, final MailboxPath path, final MailboxPath newPath) {
-            super(session, path);
-            this.newPath = newPath;
+        public MailboxRenamedEventImpl(final MailboxSession session, final MailboxPath oldPath, final Mailbox<Id> newMailbox) {
+            super(session, oldPath);
+            this.newPath = new StoreMailboxPath<Id>(newMailbox);
+            this.newMailbox = newMailbox;
         }
 
         /*
@@ -274,6 +323,10 @@ public class MailboxEventDispatcher implements MailboxListener {
          */
         public MailboxPath getNewPath() {
             return newPath;
+        }
+        
+        public Mailbox<Id> getNewMailbox() {
+            return newMailbox;
         }
     }
 
