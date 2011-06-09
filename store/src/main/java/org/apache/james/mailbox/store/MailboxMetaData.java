@@ -42,9 +42,10 @@ public class MailboxMetaData implements MessageManager.MetaData {
     private final Long firstUnseen;
     private final boolean writeable;
     private final long highestModSeq;
+    private final boolean modSeqPermanent;
     
     public MailboxMetaData(final List<Long> recent, final Flags premanentFlags, final long uidValidity, final long nextUid, final long highestModSeq, 
-            final long messageCount, final long unseenCount, final Long firstUnseen, final boolean writeable) {
+            final long messageCount, final long unseenCount, final Long firstUnseen, final boolean writeable, final boolean modSeqPermanent) {
         super();
         if (recent == null) {
             this.recent = new ArrayList<Long>();
@@ -62,6 +63,7 @@ public class MailboxMetaData implements MessageManager.MetaData {
         this.unseenCount = unseenCount;
         this.firstUnseen = firstUnseen;
         this.writeable = writeable;
+        this.modSeqPermanent = modSeqPermanent;
     }
 
     /**
@@ -135,5 +137,13 @@ public class MailboxMetaData implements MessageManager.MetaData {
      */
     public long getHighestModSeq() {
         return highestModSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MessageManager.MetaData#isModSeqPermanent()
+     */
+    public boolean isModSeqPermanent() {
+        return modSeqPermanent;
     }
 }

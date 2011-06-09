@@ -399,7 +399,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 messageCount = -1;
                 break;
         }
-        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession));
+        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession), isModSeqPermanent(mailboxSession));
     }
 
  

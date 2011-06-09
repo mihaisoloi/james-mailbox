@@ -269,6 +269,13 @@ public interface MessageManager {
          * @return true if read-write, false if read only
          */
         boolean isWriteable();
+        
+        /**
+         * Return true if the mailbox does store the mod-sequences in a permanent way
+         * 
+         * @return permanent
+         */
+        boolean isModSeqPermanent();
 
     }
 }
