@@ -31,6 +31,7 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.AddedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.ExpungedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.FlagsUpdatedImpl;
+import org.apache.james.mailbox.store.MailboxEventDispatcher.MailboxDeletionImpl;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -122,6 +123,9 @@ public abstract class ListeningMessageSearchIndex<Id> implements MessageSearchIn
                         }
                     }
                 }
+            } else if (event instanceof MailboxDeletionImpl) {
+                // delete all indexed messages for the mailbox
+                delete(session, ((MailboxDeletionImpl) event).getMailbox(), MessageRange.all());
             }
         } catch (MailboxException e) {
             session.getLog().debug("Unable to update index", e);

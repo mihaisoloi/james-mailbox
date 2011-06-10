@@ -74,7 +74,7 @@ public class LuceneMessageSearchIndexTest {
     
     @Before
     public void setUp() throws Exception {
-        index = new LuceneMessageSearchIndex<Long>(null, new RAMDirectory(), useLenient());
+        index = new LuceneMessageSearchIndex<Long>(null, new RAMDirectory(), true, useLenient());
         index.setEnableSuffixMatch(true);
         List<org.apache.james.mailbox.store.SimpleHeader> headersSubject = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
         headersSubject.add(new SimpleHeader("Subject", 1, "test"));
