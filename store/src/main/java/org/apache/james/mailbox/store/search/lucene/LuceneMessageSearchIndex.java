@@ -177,6 +177,12 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     public final static String FIRST_FROM_MAILBOX_NAME_FIELD ="firstFromMailboxName";
     public final static String FIRST_FROM_MAILBOX_DISPLAY_FIELD ="firstFromMailboxDisplay";
 
+    /**
+     * {@link Field} which will contain the BCC-Address of the message
+     */
+    public final static String BCC_FIELD ="bcc";
+    
+    
     public final static String BASE_SUBJECT_FIELD = "baseSubject";
     
     /**
@@ -420,6 +426,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                             field = FROM_FIELD;
                         } else if ("Cc".equalsIgnoreCase(headerName)) {
                             field = CC_FIELD;
+                        } else if ("Bcc".equalsIgnoreCase(headerName)) {
+                            field = BCC_FIELD;
                         }
                         
                         // Check if we can index the the addressfield in the right manner

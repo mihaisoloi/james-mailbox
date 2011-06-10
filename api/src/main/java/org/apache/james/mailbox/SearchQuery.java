@@ -63,6 +63,7 @@ public class SearchQuery {
     public static enum AddressType {
         From,
         To,
+        Cc,
         Bcc
     }
     
