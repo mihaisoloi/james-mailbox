@@ -22,7 +22,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,20 +34,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SearchQuery.CustomFlagCriterion;
-import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.AllCriterion;
 import org.apache.james.mailbox.SearchQuery.ContainsOperator;
 import org.apache.james.mailbox.SearchQuery.Criterion;
+import org.apache.james.mailbox.SearchQuery.CustomFlagCriterion;
 import org.apache.james.mailbox.SearchQuery.DateOperator;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.SearchQuery.FlagCriterion;
@@ -53,6 +55,7 @@ import org.apache.james.mailbox.SearchQuery.HeaderOperator;
 import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
+import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -66,16 +69,19 @@ import org.apache.james.mime4j.field.address.Address;
 import org.apache.james.mime4j.field.address.AddressList;
 import org.apache.james.mime4j.field.address.Group;
 import org.apache.james.mime4j.field.address.MailboxList;
+import org.apache.james.mime4j.field.datetime.DateTime;
+import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
 import org.apache.james.mime4j.message.Header;
 import org.apache.james.mime4j.message.SimpleContentHandler;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -92,6 +98,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
@@ -106,7 +113,18 @@ import org.apache.lucene.util.Version;
  * @param <Id>
  */
 public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id>{
-
+    private final static Date MAX_DATE;
+    private final static Date MIN_DATE;
+    
+    static {
+        Calendar cal = Calendar.getInstance();
+        cal.set(9999, 11, 31);
+        MAX_DATE = cal.getTime();
+        
+        cal.set(0000, 0, 1);
+        MIN_DATE = cal.getTime();
+    }
+    
     /**
      * Default max query results
      */
@@ -437,13 +455,13 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         // create an unqiue key for the document which can be used later on updates to find the document
         doc.add(new Field(ID_FIELD, membership.getMailboxId().toString().toUpperCase(Locale.ENGLISH) +"-" + Long.toString(membership.getUid()), Store.YES, Index.NOT_ANALYZED));
 
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_YEAR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.YEAR).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_MONTH_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MONTH).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_DAY_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.DAY_OF_MONTH).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_HOUR_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.HOUR_OF_DAY).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_MINUTE_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MINUTE).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_SECOND_RESOLUTION,Store.YES, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.SECOND).getTime()));
-        doc.add(new NumericField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION,Store.NO, true).setLongValue(DateUtils.truncate(membership.getInternalDate(),Calendar.MILLISECOND).getTime()));
+        doc.add(new Field(INTERNAL_DATE_FIELD_YEAR_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.YEAR), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_MONTH_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.MONTH), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_DAY_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.DAY), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_HOUR_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.HOUR), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_MINUTE_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.MINUTE), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_SECOND_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.SECOND), Store.NO, Index.NOT_ANALYZED));
+        doc.add(new Field(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, DateTools.dateToString(membership.getInternalDate(), DateTools.Resolution.MILLISECOND), Store.NO, Index.NOT_ANALYZED));
 
         doc.add(new NumericField(SIZE_FIELD,Store.YES, true).setLongValue(membership.getFullContentOctets()));
 
@@ -470,7 +488,19 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                     doc.add(new Field(PREFIX_HEADER_FIELD + headerName, headerValue, Store.NO, Index.ANALYZED));
                     
                     if (f instanceof DateTimeField) {
-                        sentDate = ((DateTimeField) f).getDate();
+                        // We need to make sure we convert it to GMT
+                        final StringReader reader = new StringReader(f.getBody());
+                        try {
+                            DateTime dateTime = new DateTimeParser(reader).parseAll();
+                            Calendar cal = getGMT();
+                            cal.set(dateTime.getYear(), dateTime.getMonth() - 1, dateTime.getDay(), dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond());
+                            sentDate =  cal.getTime();
+                            
+                        } catch (org.apache.james.mime4j.field.datetime.parser.ParseException e) {
+                            // This should never happen anyway fallback to the already parsed field
+                            sentDate = ((DateTimeField) f).getDate();
+                        }
+
                     }
                     
                     if (f instanceof AddressListField) {
@@ -550,16 +580,17 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 if (sentDate == null) {
                     sentDate = membership.getInternalDate();
                 } else {
-                    doc.add(new NumericField(SENT_DATE_FIELD_YEAR_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.YEAR).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_MONTH_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.MONTH).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_DAY_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.DAY_OF_MONTH).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_HOUR_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.HOUR_OF_DAY).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_MINUTE_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.MINUTE).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_SECOND_RESOLUTION, Store.YES, true).setLongValue(DateUtils.truncate(sentDate, Calendar.SECOND).getTime()));
-                    doc.add(new NumericField(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, Store.NO, true).setLongValue(DateUtils.truncate(sentDate, Calendar.MILLISECOND).getTime()));
+                    
+                    doc.add(new Field(SENT_DATE_FIELD_YEAR_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.YEAR), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_MONTH_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.MONTH), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_DAY_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.DAY), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_HOUR_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.HOUR), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_MINUTE_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.MINUTE), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_SECOND_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.SECOND), Store.NO, Index.NOT_ANALYZED));
+                    doc.add(new Field(SENT_DATE_FIELD_MILLISECOND_RESOLUTION, DateTools.dateToString(sentDate, DateTools.Resolution.MILLISECOND), Store.NO, Index.NOT_ANALYZED));
                     
                 }
-                doc.add(new NumericField(SENT_DATE_SORT_FIELD_MILLISECOND_RESOLUTION,Store.YES, true).setLongValue(DateUtils.truncate(sentDate,Calendar.MILLISECOND).getTime()));
+                doc.add(new Field(SENT_DATE_SORT_FIELD_MILLISECOND_RESOLUTION,DateTools.dateToString(sentDate, DateTools.Resolution.MILLISECOND), Store.NO, Index.NOT_ANALYZED));
 
                 doc.add(new Field(FIRST_FROM_MAILBOX_NAME_FIELD, firstFromMailbox, Store.YES, Index.NOT_ANALYZED));
                 doc.add(new Field(FIRST_TO_MAILBOX_NAME_FIELD, firstToMailbox, Store.YES, Index.NOT_ANALYZED));
@@ -648,6 +679,12 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         return field;
     }
 
+
+    private static Calendar getGMT() {
+        return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
+    }
+
+    
     private String toInteralDateField(DateResolution res) {
         String field;
         switch (res) {
@@ -755,16 +792,36 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     private Query createQuery(String field, DateOperator dop) throws UnsupportedSearchException {
         Date date = dop.getDate();
         DateResolution res = dop.getDateResultion();
-        long value = DateUtils.truncate(date, SearchQuery.toCalendarType(res)).getTime();        
+        DateTools.Resolution dRes = toResolution(res);
+        String value = DateTools.dateToString(date, dRes);
         switch(dop.getType()) {
         case ON:
-            return NumericRangeQuery.newLongRange(field ,value, value, true, true);
+            return new TermQuery(new Term(field ,value));
         case BEFORE: 
-            return NumericRangeQuery.newLongRange(field ,0L, value, true, false);
+            return new TermRangeQuery(field, DateTools.dateToString(MIN_DATE, dRes), value, true, false);
         case AFTER: 
-            return NumericRangeQuery.newLongRange(field ,value, Long.MAX_VALUE, false, true);
+            return new TermRangeQuery(field, value, DateTools.dateToString(MAX_DATE, dRes), false, true);
         default:
             throw new UnsupportedSearchException();
+        }
+    }
+    
+    private DateTools.Resolution toResolution(DateResolution res) {
+        switch (res) {
+        case Year:
+            return DateTools.Resolution.YEAR;
+        case Month:
+            return DateTools.Resolution.MONTH;
+        case Day:
+            return DateTools.Resolution.DAY;
+        case Hour:
+            return DateTools.Resolution.HOUR;
+        case Minute:
+            return DateTools.Resolution.MINUTE;
+        case Second:
+            return DateTools.Resolution.SECOND;
+        default:
+            return DateTools.Resolution.MILLISECOND;
         }
     }
     
