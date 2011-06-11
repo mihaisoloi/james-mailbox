@@ -120,8 +120,9 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
     void renameMailbox(MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException;
 
     /**
-     * This is done by the MailboxRepository because maybe this operation could
-     * be optimized in the corresponding store.
+     * Copy the given {@link MessageRange} from one Mailbox to the other. 
+     * 
+     * Be aware that the copied Messages MUST get the \RECENT flag set!
      * 
      * @param set
      *            messages to copy
