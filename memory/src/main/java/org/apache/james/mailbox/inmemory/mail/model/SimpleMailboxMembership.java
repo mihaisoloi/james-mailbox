@@ -61,7 +61,9 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
         this.deleted = original.deleted;
         this.draft = original.draft;
         this.flagged = original.flagged;
-        this.recent = original.recent;
+        // A copy of a message is recent 
+        // See MAILBOX-85
+        this.recent = true;
         this.seen = original.seen;
         this.internalDate = original.internalDate;
         this.subType  = original.subType;

@@ -607,7 +607,9 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             node.setProperty(JCRMessage.MAILBOX_UUID_PROPERTY, mailbox.getMailboxId());
             node.setProperty(JCRMessage.UID_PROPERTY, uid);
             node.setProperty(JCRMessage.MODSEQ_PROPERTY, modSeq);
-            
+            // A copy of a message is recent 
+            // See MAILBOX-85
+            node.setProperty(JCRMessage.RECENT_PROPERTY, true);
             return new SimpleMessageMetaData(new JCRMessage(node, mailboxSession.getLog()));
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to copy message " +original + " in mailbox " + mailbox, e);

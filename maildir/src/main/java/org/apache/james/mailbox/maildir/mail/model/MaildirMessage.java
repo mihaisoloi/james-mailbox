@@ -105,7 +105,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.deleted = message.isDeleted();
         this.draft = message.isDraft();
         this.flagged = message.isFlagged();
-        this.recent = message.isRecent();
+
         this.seen = message.isSeen();
         
         try {
@@ -134,6 +134,9 @@ public class MaildirMessage extends AbstractMaildirMessage {
         }
         // this is a copy and thus new
         newMessage = true;
+        // A copy of a message is recent 
+        // See MAILBOX-85
+        this.recent = true;
     }
 
   

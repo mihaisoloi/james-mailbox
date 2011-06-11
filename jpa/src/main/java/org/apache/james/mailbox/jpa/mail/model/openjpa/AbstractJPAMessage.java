@@ -289,9 +289,12 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         this.mailbox = mailbox;
         this.uid = uid;
         this.modSeq = modSeq;
-        userFlags = new ArrayList<JPAUserFlag>();
+        this.userFlags = new ArrayList<JPAUserFlag>();
         setFlags(original.createFlags());
         
+        // A copy of a message is recent 
+        // See MAILBOX-85
+        this.recent = true;
 
         this.contentOctets = original.getFullContentOctets();
         this.bodyStartOctet = (int) (original.getFullContentOctets() - original.getBodyOctets());
