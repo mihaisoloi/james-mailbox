@@ -18,7 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir.mail.model;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -26,9 +28,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.mail.Flags;
 import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -55,7 +59,20 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
         super(mailbox);
         setUid(uid);
         setModSeq(messageName.getFile().lastModified());
-        setFlags(messageName.getFlags());
+        Flags flags = messageName.getFlags();
+        
+        // Set the flags for the message and respect if its RECENT
+        // See MAILBOX-84
+        File file = messageName.getFile();
+        if (!file.exists()) {
+            throw new FileNotFoundException("Unable to read file " + file.getAbsolutePath() + " for the message");
+        } else {
+            // if the message resist in the new folder its RECENT
+            if (file.getParentFile().getName().equals(MaildirFolder.NEW)) {
+                flags.add(Flags.Flag.RECENT);
+            }
+        }
+        setFlags(flags);
         this.messageName = messageName;
     }
 
