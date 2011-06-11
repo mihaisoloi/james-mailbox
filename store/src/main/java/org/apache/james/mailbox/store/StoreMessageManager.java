@@ -528,9 +528,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             }
 
             public Iterator<MessageResult> getIterator() {
-        	if (iterator == null) {
-        	    iterator = new ResultIterator<Id>(null, null);
-        	}
+                if (iterator == null) {
+                    iterator = new ResultIterator<Id>(null, null);
+                }
                 return iterator;
             }
         }

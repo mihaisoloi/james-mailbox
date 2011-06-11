@@ -137,14 +137,14 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             break;       
         }
         
-        if(batchSize > 0) {
-	        int i = 0;
-	        while(i*batchSize < results.size()) {
-	        	callback.onMailboxMembers(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
-	        	i++;
-	        }
+        if (batchSize > 0) {
+            int i = 0;
+            while (i * batchSize < results.size()) {
+                callback.onMailboxMembers(results.subList(i * batchSize, (i + 1) * batchSize < results.size() ? (i + 1) * batchSize : results.size()));
+                i++;
+            }
         } else {
-        	callback.onMailboxMembers(results);
+            callback.onMailboxMembers(results);
         }
     }
 
