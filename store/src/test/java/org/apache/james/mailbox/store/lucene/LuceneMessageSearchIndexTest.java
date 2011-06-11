@@ -34,6 +34,7 @@ import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.store.MessageBuilder;
 import org.apache.james.mailbox.store.SimpleHeader;
@@ -54,7 +55,7 @@ public class LuceneMessageSearchIndexTest {
     private SimpleMailbox mailbox3 = new SimpleMailbox(2);
 
 
-    private static final String FROM_ADDRESS = "Harry <harry@example.org";
+    private static final String FROM_ADDRESS = "Harry <harry@example.org>";
 
     private static final String SUBJECT_PART = "Mixed";
 
@@ -98,14 +99,14 @@ public class LuceneMessageSearchIndexTest {
         cal.set(1980, 2, 10);
         SimpleMailboxMembership m3 = new SimpleMailboxMembership(mailbox.getMailboxId(),2, 0, cal.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody".getBytes(), headersTest);
         index.add(null, mailbox, m3);
-        
+        System.out.println(new Date(Long.MAX_VALUE).toGMTString());
         Calendar cal2 = Calendar.getInstance();
         cal2.set(8000, 2, 10);
         SimpleMailboxMembership m4 = new SimpleMailboxMembership(mailbox.getMailboxId(),3, 0, cal2.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody2".getBytes(), headersTestSubject);
         index.add(null, mailbox, m4);
         
         MessageBuilder builder = new MessageBuilder();
-        builder.header("From", "Alex <alex@example.org");
+        builder.header("From", "test <user-from@domain.org>");
         builder.header("To", FROM_ADDRESS);
         builder.header("Subject", "A " + SUBJECT_PART + " Multipart Mail");
         builder.header("Date", "Thu, 14 Feb 2008 12:00:00 +0000 (GMT)");
@@ -184,6 +185,39 @@ public class LuceneMessageSearchIndexTest {
         assertFalse(result.hasNext());
     }
 
+    @Test
+    public void testSearchAddress() throws Exception {
+        
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.address(AddressType.To,FROM_ADDRESS));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10L, result.next().longValue());
+        assertFalse(result.hasNext());
+        
+        query = new SearchQuery();
+        query.andCriteria(SearchQuery.address(AddressType.To,"Harry"));
+        result = index.search(null, mailbox3, query);
+        assertEquals(10L, result.next().longValue());
+        assertFalse(result.hasNext());
+        
+        query = new SearchQuery();
+        query.andCriteria(SearchQuery.address(AddressType.To,"Harry@example.org"));
+        result = index.search(null, mailbox3, query);
+        assertEquals(10L, result.next().longValue());
+        assertFalse(result.hasNext());
+    }
+    
+    @Test
+    public void testSearchAddressFrom() throws Exception {
+        
+        SearchQuery query = new SearchQuery();
+        query.andCriteria(SearchQuery.address(AddressType.From,"ser-from@domain.or"));
+        Iterator<Long> result = index.search(null, mailbox3, query);
+        assertEquals(10L, result.next().longValue());
+        assertFalse(result.hasNext());
+        
+       
+    }
     @Test
     public void testBodyShouldMatchPhraseOnlyInHeader() throws Exception {
         
