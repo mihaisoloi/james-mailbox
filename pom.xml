@@ -46,6 +46,7 @@
     <module>jcr</module>
     <module>maildir</module>
     <module>tool</module>
+    <module>lucene</module>
   </modules>
   
   <issueManagement>
@@ -451,10 +452,21 @@
       </dependency>
       <dependency>
         <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-mailbox-lucene</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-james-mailbox-lucene</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
         <artifactId>apache-james-mailbox-store</artifactId>
         <version>${project.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.apache.james</groupId>
         <artifactId>apache-james-mailbox-jpa</artifactId>

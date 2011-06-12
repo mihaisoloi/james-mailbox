@@ -25,12 +25,16 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james</groupId>
-  <artifactId>apache-james-mailbox-store</artifactId>
-  <name>Apache James Mailbox Store Framework</name>
+  <artifactId>apache-james-mailbox-lucene</artifactId>
+  <name>Apache James Mailbox Lucene Index</name>
   <dependencies>
     <dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>apache-james-mailbox-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-james-mailbox-store</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
@@ -41,16 +45,20 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
       <groupId>${javax.mail.groupId}</groupId>
       <artifactId>${javax.mail.artifactId}</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-smartcn</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -58,18 +66,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jmock</groupId>
-      <artifactId>jmock</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jmock</groupId>
-      <artifactId>jmock-junit4</artifactId>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-james-mailbox-api</artifactId>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
-      <artifactId>apache-james-mailbox-api</artifactId>
+      <artifactId>apache-james-mailbox-store</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

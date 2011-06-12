@@ -16,44 +16,37 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.search.lucene;
+package org.apache.james.mailbox.lucene.search;
 
-import java.io.Reader;
+import java.io.IOException;
 
-import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.cn.smart.SentenceTokenizer;
-import org.apache.lucene.analysis.ngram.NGramTokenFilter;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
-*
-* {@link Analyzer} which match substrings. This is needed because of RFC 3501.
-* 
-* From RFC:
-* 
-*      In all search keys that use strings, a message matches the key if
-*      the string is a substring of the field.  The matching is
-*      case-insensitive.
-*
-*/
-public final class StrictImapSearchAnalyzer extends Analyzer {
+ * Normalizes token text to upper case.
+ */
+public final class UpperCaseFilter extends TokenFilter {
+    private CharTermAttribute termAtt;
 
-    private final int minTokenLength;
-    private final int maxTokenLength;
-    
-    public StrictImapSearchAnalyzer() {
-        this(3, 40);
+    public UpperCaseFilter(TokenStream in) {
+        super(in);
+        termAtt = addAttribute(CharTermAttribute.class);
     }
-    public StrictImapSearchAnalyzer(int minTokenLength, int maxTokenLength) {
-        this.minTokenLength = minTokenLength;
-        this.maxTokenLength = maxTokenLength;
+
+
+    @Override
+    public final boolean incrementToken() throws IOException {
+        if (input.incrementToken()) {
+
+            final char[] buffer = termAtt.buffer();
+            final int length = termAtt.length();
+            for (int i = 0; i < length; i++)
+                buffer[i] = Character.toUpperCase(buffer[i]);
+
+            return true;
+        } else
+            return false;
     }
-   /*
-    * (non-Javadoc)
-    * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String, java.io.Reader)
-    */
-   public TokenStream tokenStream(String fieldName, Reader reader) {
-       return new NGramTokenFilter(new UpperCaseFilter(new SentenceTokenizer(reader)), minTokenLength, maxTokenLength);
-   }
-   
 }
