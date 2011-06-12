@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -410,7 +411,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             query.add(new PrefixQuery(new Term(FLAGS_FIELD, "")), BooleanClause.Occur.MUST_NOT);
             List<Criterion> crits = searchQuery.getCriterias();
             for (int i = 0; i < crits.size(); i++) {
-                query.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
+                query.add(createQuery(crits.get(i), mailbox, searchQuery.getRecentMessageUids()), BooleanClause.Occur.MUST);
             }
              
             System.err.println(query.toString());
@@ -879,7 +880,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
      * @return query
      * @throws UnsupportedSearchException
      */
-    private Query createFlagQuery(String flag, boolean isSet, Mailbox<?> mailbox) throws MailboxException, UnsupportedSearchException {
+    private Query createFlagQuery(String flag, boolean isSet, Mailbox<?> mailbox, Collection<Long> recentUids) throws MailboxException, UnsupportedSearchException {
         BooleanQuery query = new BooleanQuery();
         
         if (isSet) {   
@@ -898,7 +899,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         IndexSearcher searcher = null;
 
         try {
-            List<Long> uids = new ArrayList<Long>();
+            Set<Long> uids = new HashSet<Long>();
             searcher = new IndexSearcher(IndexReader.open(writer, true));
             
             // query for all the documents sorted by uid
@@ -909,7 +910,16 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 uids.add(uid);
             }
             
-            List<MessageRange> ranges = MessageRange.toRanges(uids);
+            // add or remove recent uids
+            if (flag.equalsIgnoreCase("\\RECENT")){
+                if (isSet) {
+                    uids.addAll(recentUids);
+                } else {
+                    uids.removeAll(recentUids);
+                }
+            }
+            
+            List<MessageRange> ranges = MessageRange.toRanges(new ArrayList<Long>(uids));
             NumericRange[] nRanges = new NumericRange[ranges.size()];
             for (int i = 0; i < ranges.size(); i++) {
                 MessageRange range = ranges.get(i);
@@ -1098,24 +1108,24 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
      * @return query
      * @throws UnsupportedSearchException
      */
-    private Query createConjunctionQuery(SearchQuery.ConjunctionCriterion crit, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
+    private Query createConjunctionQuery(SearchQuery.ConjunctionCriterion crit, Mailbox<?> mailbox, Collection<Long> recentUids) throws UnsupportedSearchException, MailboxException {
         List<Criterion> crits = crit.getCriteria();
         BooleanQuery conQuery = new BooleanQuery();
         switch (crit.getType()) {
         case AND:
             for (int i = 0; i < crits.size(); i++) {
-                conQuery.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.MUST);
+                conQuery.add(createQuery(crits.get(i), mailbox, recentUids), BooleanClause.Occur.MUST);
             }
             return conQuery;
         case OR:
             for (int i = 0; i < crits.size(); i++) {
-                conQuery.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.SHOULD);
+                conQuery.add(createQuery(crits.get(i), mailbox, recentUids), BooleanClause.Occur.SHOULD);
             }
             return conQuery;
         case NOR:
             BooleanQuery nor = new BooleanQuery();
             for (int i = 0; i < crits.size(); i++) {
-                conQuery.add(createQuery(crits.get(i), mailbox), BooleanClause.Occur.SHOULD);
+                conQuery.add(createQuery(crits.get(i), mailbox, recentUids), BooleanClause.Occur.SHOULD);
             }
             nor.add(new TermQuery(new Term(MAILBOX_ID_FIELD, mailbox.getMailboxId().toString())), BooleanClause.Occur.MUST);
 
@@ -1134,7 +1144,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
      * @return query
      * @throws UnsupportedSearchException
      */
-    private Query createQuery(Criterion criterion, Mailbox<?> mailbox) throws UnsupportedSearchException, MailboxException {
+    private Query createQuery(Criterion criterion, Mailbox<?> mailbox, Collection<Long> recentUids) throws UnsupportedSearchException, MailboxException {
         if (criterion instanceof SearchQuery.InternalDateCriterion) {
             SearchQuery.InternalDateCriterion crit = (SearchQuery.InternalDateCriterion) criterion;
             return createInternalDateQuery(crit);
@@ -1149,10 +1159,10 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             return createUidQuery(crit);
         } else if (criterion instanceof SearchQuery.FlagCriterion) {
             FlagCriterion crit = (FlagCriterion) criterion;
-            return createFlagQuery(toString(crit.getFlag()), crit.getOperator().isSet(), mailbox);
+            return createFlagQuery(toString(crit.getFlag()), crit.getOperator().isSet(), mailbox, recentUids);
         } else if (criterion instanceof SearchQuery.CustomFlagCriterion) {
             CustomFlagCriterion crit = (CustomFlagCriterion) criterion;
-            return createFlagQuery(crit.getFlag(), crit.getOperator().isSet(), mailbox);
+            return createFlagQuery(crit.getFlag(), crit.getOperator().isSet(), mailbox, recentUids);
         } else if (criterion instanceof SearchQuery.TextCriterion) {
             SearchQuery.TextCriterion crit = (SearchQuery.TextCriterion) criterion;
             return createTextQuery(crit);
@@ -1160,7 +1170,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             return createAllQuery((AllCriterion) criterion);
         } else if (criterion instanceof SearchQuery.ConjunctionCriterion) {
             SearchQuery.ConjunctionCriterion crit = (SearchQuery.ConjunctionCriterion) criterion;
-            return createConjunctionQuery(crit, mailbox);
+            return createConjunctionQuery(crit, mailbox, recentUids);
         } else if (criterion instanceof SearchQuery.ModSeqCriterion) {
             return createModSeqQuery((SearchQuery.ModSeqCriterion) criterion);
         }
@@ -1243,8 +1253,10 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
      * @param f
      */
     private void indexFlags(Document doc, Flags f) {
+        List<String> fString = new ArrayList<String>();
         Flag[] flags = f.getSystemFlags();
         for (int a = 0; a < flags.length; a++) {
+            fString.add(toString(flags[a]));
             doc.add(new Field(FLAGS_FIELD, toString(flags[a]),Store.NO, Index.NOT_ANALYZED));
         }
         
@@ -1257,6 +1269,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         if (flags.length == 0 && userFlags.length == 0) {
             doc.add(new Field(FLAGS_FIELD, "",Store.NO, Index.NOT_ANALYZED));
         }
+        
+        System.out.println(fString.toString());
     }
     
     private Query createQuery(MessageRange range) {
