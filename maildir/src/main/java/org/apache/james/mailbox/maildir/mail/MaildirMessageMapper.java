@@ -105,7 +105,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
         try {
             folder.delete(message.getUid());
-        } catch (IOException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to delete Message " + message + " in Mailbox " + mailbox, e);
         }
     }
@@ -301,7 +301,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
         try {
             return folder.getLastUid();
-        } catch (IOException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to get last uid for mailbox " + mailbox, e);
         }
     }
@@ -432,7 +432,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             maildirMessage.setUid(uid);
             maildirMessage.setModSeq(newMessageFile.lastModified());
             return new SimpleMessageMetaData(message);
-        } catch (IOException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e);
         }
 

@@ -60,7 +60,7 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
     protected void unlock(MailboxSession session, MailboxPath path) throws MailboxException {
-        ReentrantLock lock = paths.remove(path);
+        ReentrantLock lock = paths.get(path);
         
         if (lock != null) {
             lock.unlock();

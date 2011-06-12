@@ -20,6 +20,7 @@ package org.apache.james.mailbox;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,6 +57,7 @@ public abstract class AbstractStressTest {
         getMailboxManager().endProcessingRequest(session);
         getMailboxManager().logout(session, false);
         final AtomicBoolean fail = new AtomicBoolean(false);
+        final ConcurrentHashMap<Long, Object> uids = new ConcurrentHashMap<Long, Object>();
         
         // fire of 1000 append operations
         for (int i = 0 ; i < APPEND_OPERATIONS; i++) {
@@ -73,8 +75,11 @@ public abstract class AbstractStressTest {
 
                         getMailboxManager().startProcessingRequest(session);
                         MessageManager m = getMailboxManager().getMailbox(path, session);
-                        
-                        System.out.println("Append message with uid=" + m.appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags()));
+                        Long uid =  m.appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
+                        System.out.println("Append message with uid=" + uid);
+                        if (uids.put(uid, new Object()) != null) {
+                            fail.set(true);
+                        }
                         getMailboxManager().endProcessingRequest(session);
                         getMailboxManager().logout(session,false);
                     } catch (MailboxException e) {

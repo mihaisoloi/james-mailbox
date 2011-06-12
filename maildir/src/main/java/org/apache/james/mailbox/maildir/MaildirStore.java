@@ -26,6 +26,7 @@ import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -42,6 +43,7 @@ public class MaildirStore {
     private String maildirLocation;
     
     private File maildirRootFile;
+    private final MailboxPathLocker locker;
     
     /**
      * Construct a MaildirStore with a location. The location String
@@ -52,8 +54,9 @@ public class MaildirStore {
      * variables.
      * @param maildirLocation A String with variables
      */
-    public MaildirStore(String maildirLocation) {
+    public MaildirStore(String maildirLocation, MailboxPathLocker locker) {
         this.maildirLocation = maildirLocation;
+        this.locker = locker;
     }
     
     public String getMaildirLocation() {
@@ -65,7 +68,7 @@ public class MaildirStore {
      * @return The MaildirFolder
      */
     public MaildirFolder createMaildirFolder(Mailbox<Integer> mailbox) {
-        return new MaildirFolder(getFolderName(mailbox));
+        return new MaildirFolder(getFolderName(mailbox), new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), mailbox.getName()), locker);
     }
 
     /**
@@ -91,7 +94,7 @@ public class MaildirStore {
      */
     public Mailbox<Integer> loadMailbox(MailboxPath mailboxPath)
     throws MailboxNotFoundException, MailboxException {
-        MaildirFolder folder = new MaildirFolder(getFolderName(mailboxPath));
+        MaildirFolder folder = new MaildirFolder(getFolderName(mailboxPath), mailboxPath, locker);
 
         if (!folder.exists())
             throw new MailboxNotFoundException(mailboxPath);
@@ -108,7 +111,7 @@ public class MaildirStore {
     private Mailbox<Integer> loadMailbox(File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
         long uidValidity;
         long lastUid;
-        MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath());
+        MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath(), mailboxPath, locker);
         try {
             uidValidity = folder.getUidValidity();
             lastUid = folder.getLastUid();
@@ -230,7 +233,7 @@ public class MaildirStore {
     public long nextUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
         try {
             return createMaildirFolder(mailbox).getLastUid() +1;
-        } catch (IOException e) {
+        } catch (MailboxException e) {
             throw new MailboxException("Unable to generate next uid", e);
         }
     }

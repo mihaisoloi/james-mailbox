@@ -20,12 +20,13 @@ package org.apache.james.mailbox.maildir;
 
 import org.apache.james.mailbox.AbstractSubscriptionManagerTest;
 import org.apache.james.mailbox.SubscriptionManager;
+import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 
 public class MaildirSubscriptionManagerTest extends AbstractSubscriptionManagerTest{
 
     @Override
     public SubscriptionManager createSubscriptionManager() {
-        MaildirStore store = new MaildirStore("target/Maildir/%domain/%user");
+        MaildirStore store = new MaildirStore("target/Maildir/%domain/%user", new JVMMailboxPathLocker());
         MaildirMailboxSessionMapperFactory factory = new MaildirMailboxSessionMapperFactory(store);
         MaildirSubscriptionManager sm = new MaildirSubscriptionManager(factory);
         return sm;
