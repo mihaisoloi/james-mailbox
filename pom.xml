@@ -41,12 +41,12 @@
   <modules>
     <module>api</module>
     <module>store</module>
+    <module>lucene</module>
     <module>memory</module>
     <module>jpa</module>
     <module>jcr</module>
     <module>maildir</module>
     <module>tool</module>
-    <module>lucene</module>
   </modules>
   
   <issueManagement>
@@ -498,17 +498,17 @@
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-core</artifactId>
-        <version>3.1.0</version>
+        <version>${version.lucene}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-analyzers</artifactId>
-        <version>3.1.0</version>
+        <version>${version.lucene}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-smartcn</artifactId>
-        <version>3.1.0</version>
+        <version>${version.lucene}</version>
       </dependency>
 
       <!--
@@ -802,7 +802,9 @@
     <version.javax.mail>1.4.3</version.javax.mail>
     <version.activation>1.1.1</version.activation>
     <version.jmock>2.5.1</version.jmock>
+    <version.lucene>3.1.0</version.lucene>
     <version.jackrabbit>2.2.0</version.jackrabbit>
+    
     <target.jdk>1.6</target.jdk>
   </properties>
 </project>

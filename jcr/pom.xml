@@ -57,16 +57,10 @@
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
     </dependency>
-    <!--  we need to set it to 2.4.1 for jackrabbit -->
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>2.4.1</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
@@ -101,4 +95,9 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+      <!--  we need to set it to 2.4.1 for jackrabbit -->
+  <properties>
+    <version.lucene>2.4.1</version.lucene>
+  </properties>
 </project>
