@@ -414,7 +414,6 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 query.add(createQuery(crits.get(i), mailbox, searchQuery.getRecentMessageUids()), BooleanClause.Occur.MUST);
             }
              
-            System.err.println(query.toString());
             // query for all the documents sorted as specified in the SearchQuery
             TopDocs docs = searcher.search(query, null, maxQueryResults, createSort(searchQuery.getSorts()));
             ScoreDoc[] sDocs = docs.scoreDocs;
@@ -1270,7 +1269,6 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             doc.add(new Field(FLAGS_FIELD, "",Store.NO, Index.NOT_ANALYZED));
         }
         
-        System.out.println(fString.toString());
     }
     
     private Query createQuery(MessageRange range) {
