@@ -369,7 +369,7 @@ public class MessageSearches implements Iterable<Long>{
                     log.debug("Unable to parse address from header " + headerName, e);
                 }
                 // Also try to match against raw header now
-                return value.toLowerCase(Locale.US).contains(text);
+                return value.toUpperCase(Locale.US).contains(text);
             }
         }
         return false;
