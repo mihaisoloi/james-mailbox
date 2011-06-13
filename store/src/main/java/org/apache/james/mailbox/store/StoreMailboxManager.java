@@ -310,12 +310,76 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         Mailbox<Id> mailbox = mapper.execute(new Mapper.Transaction<Mailbox<Id>>() {
 
             public Mailbox<Id> run() throws MailboxException {
-                Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
+                final Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
                 if (mailbox == null) {
                     throw new MailboxNotFoundException("Mailbox not found");
                 }
+                
+                // We need to create a copy of the mailbox as maybe we can not refer to the real
+                // mailbox once we remove it 
+                Mailbox<Id> m = new Mailbox<Id>() {
+                    private Id id = mailbox.getMailboxId();
+                    private String namespace = mailbox.getNamespace();
+                    private String name = mailbox.getName();
+                    private String user = mailbox.getUser();
+                    private long uidVal = mailbox.getUidValidity();
+                    private long lastUid = mailbox.getLastKnownUid();
+                    private long lastSeq = mailbox.getHighestKnownModSeq();
+                    
+                    
+                    public Id getMailboxId() {
+                        return id;
+                    }
+
+                    @Override
+                    public String getNamespace() {
+                        return namespace;
+                    }
+
+                    @Override
+                    public void setNamespace(String namespace) {
+                        this.namespace = namespace;
+                    }
+
+                    @Override
+                    public String getUser() {
+                        return user;
+                    }
+
+                    @Override
+                    public void setUser(String user) {
+                        this.user = user;
+                    }
+
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public void setName(String name) {
+                        this.name = name;
+                        
+                    }
+
+                    @Override
+                    public long getUidValidity() {
+                        return uidVal;
+                    }
+
+                    @Override
+                    public long getLastKnownUid() {
+                        return lastUid;
+                    }
+
+                    @Override
+                    public long getHighestKnownModSeq() {
+                        return lastSeq;
+                    }
+                    
+                };
                 mapper.delete(mailbox);
-                return mailbox;
+                return m;
             }
 
         });
