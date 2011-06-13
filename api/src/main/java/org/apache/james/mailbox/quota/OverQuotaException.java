@@ -19,34 +19,36 @@
 package org.apache.james.mailbox.quota;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
-
 
 /**
- * Allows to get quotas for {@link MailboxSession} which are bound to a user.
+ * {@link MailboxException} which identicate that a user was over-quota
  * 
+ *
  */
-public interface QuotaManager {
+public class OverQuotaException extends MailboxException{
 
     /**
-     * Return the message count {@link Quota} for the given {@link MailboxSession} (which in fact is 
-     * bound to a user)
      * 
-     * @param session
-     * @return quota
-     * @throws MailboxException
      */
-    public Quota getMessageQuota(MailboxSession session) throws MailboxException;
-
+    private static final long serialVersionUID = 532673188582481689L;
     
-    /**
-     * Return the message storage {@link Quota} for the given {@link MailboxSession} (which in fact is 
-     * bound to a user)
-     * 
-     * @param session
-     * @return quota
-     * @throws MailboxException
-     */
-    public Quota getStorageQuota(MailboxSession session) throws MailboxException;
+    private long used;
+    private long max;
+
+    public OverQuotaException(String msg, long max, long used) {
+        super(msg);
+    }
+    public OverQuotaException(long max, long used) {
+        this(null, max, used);
+    }
+    
+    public long getUsed() {
+        return used;
+    }
+    
+    public long getMax() {
+        return max;
+    }
+    
     
 }
