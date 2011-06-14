@@ -104,7 +104,7 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
     }
 
     /**
-     * Gets the namespace for the name.
+     * Gets the local part of the name of the property.
      * @return not null
      */
     public String getLocalName() {
@@ -112,7 +112,7 @@ public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
     }
     
     /**
-     * Gets the local part of the name of the property.
+     * Gets the namespace for the name.
      * @return not null
      */
     public String getNamespace() {
