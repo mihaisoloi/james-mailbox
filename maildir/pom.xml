@@ -27,19 +27,6 @@
   <groupId>org.apache.james</groupId>
   <artifactId>apache-james-mailbox-maildir</artifactId>
   <name>Apache James Maildir Mailbox</name>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.1</version>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.apache.james</groupId>
