@@ -79,7 +79,6 @@ public class MaildirFolder {
      * @param absPath The absolute path of the mailbox folder
      */
     public MaildirFolder(String absPath, MailboxPath path, MailboxPathLocker locker) {
-        log.debug("=====> absPath=" + absPath + " - " + this.hashCode());
         this.rootFolder = new File(absPath);
         this.curFolder = new File(rootFolder, CUR);
         this.newFolder = new File(rootFolder, NEW);
