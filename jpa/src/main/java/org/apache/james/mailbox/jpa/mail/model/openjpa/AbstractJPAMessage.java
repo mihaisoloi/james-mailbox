@@ -38,12 +38,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
 import org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -231,12 +229,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     @Column(name = "MAIL_TEXTUAL_LINE_COUNT", nullable = true)
     private Long textualLineCount;
     
-    /** Headers for this message */
-    @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
-    @OrderBy("lineNumber")
-    @ElementJoinColumns({@ElementJoinColumn(name="MAILBOX_ID", referencedColumnName="MAILBOX_ID"),
-    @ElementJoinColumn(name="MAIL_UID", referencedColumnName="MAIL_UID")})
-    private List<JPAHeader> headers;
 
     /** Meta data for this message */
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
@@ -254,7 +246,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     @Deprecated
     public AbstractJPAMessage() {}
 
-    public AbstractJPAMessage(JPAMailbox mailbox, Date internalDate, Flags flags, final long contentOctets, final int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) {
+    public AbstractJPAMessage(JPAMailbox mailbox, Date internalDate, Flags flags, final long contentOctets, final int bodyStartOctet, final PropertyBuilder propertyBuilder) {
         super();
         this.mailbox = mailbox;
         this.internalDate = internalDate;
@@ -263,7 +255,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         setFlags(flags);        
         this.contentOctets = contentOctets;
         this.bodyStartOctet = bodyStartOctet;
-        this.headers = new ArrayList<JPAHeader>(headers);
         this.textualLineCount = propertyBuilder.getTextualLineCount();
         this.mediaType = propertyBuilder.getMediaType();
         this.subType = propertyBuilder.getSubType();
@@ -298,12 +289,8 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
 
         this.contentOctets = original.getFullContentOctets();
         this.bodyStartOctet = (int) (original.getFullContentOctets() - original.getBodyOctets());
-        this.headers = new ArrayList<JPAHeader>();
         this.internalDate = original.getInternalDate();
-        List<Header> originalHeaders = original.getHeaders();
-        for (int i = 0; i < originalHeaders.size(); i++) {
-            headers.add(new JPAHeader(originalHeaders.get(i)));
-        }
+
 
         PropertyBuilder pBuilder = new PropertyBuilder(original.getProperties());
         this.textualLineCount = original.getTextualLineCount();
@@ -315,14 +302,6 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         for (final Property property:properties) {
             this.properties.add(new JPAProperty(property, order++));
         }
-    }
-
-
-    /**
-     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaders()
-     */
-    public List<Header> getHeaders() {
-        return new ArrayList<Header>(headers);
     }
 
     @Override

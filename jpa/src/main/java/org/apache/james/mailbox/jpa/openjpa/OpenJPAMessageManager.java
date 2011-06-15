@@ -20,20 +20,16 @@
 package org.apache.james.mailbox.jpa.openjpa;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
-import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -58,16 +54,14 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     }
 
     @Override
-    protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
+    protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream header, InputStream body, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException {
         if (useStreaming) {
-            final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
-            for (Header header: headers) {
-                jpaHeaders.add((JPAHeader) header);
-            }
-            return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+            return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, header, body, bodyStartOctet,  propertyBuilder);
         } else {
-            return super.createMessage(internalDate, size, bodyStartOctet, document, flags, headers, propertyBuilder);
+            return super.createMessage(internalDate, size, bodyStartOctet, header, body, flags,  propertyBuilder);
         }
     }
+
+    
 
 }

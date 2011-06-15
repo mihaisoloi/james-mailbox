@@ -28,8 +28,9 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.store.mail.model.Header;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -40,7 +41,6 @@ public class MaildirMessage extends AbstractMaildirMessage {
     // Document
     private int bodyStartOctet;
     private InputStream rawFullContent;
-    private List<MaildirHeader> headers;
     private String mediaType;
     private List<MaildirProperty> properties;
     private String subType;
@@ -64,13 +64,11 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @param propertyBuilder
      */
     public MaildirMessage(Mailbox<Integer> mailbox, Date internalDate,
-            int size, Flags flags, InputStream documentIn, int bodyStartOctet,
-            List<MaildirHeader> maildirHeaders, PropertyBuilder propertyBuilder) {
+            int size, Flags flags, InputStream header, InputStream body, int bodyStartOctet, PropertyBuilder propertyBuilder) {
         super(mailbox);
         // Document
-        this.rawFullContent = documentIn;
+        this.rawFullContent = ResultUtils.toInput(header, body);
         this.bodyStartOctet = bodyStartOctet;
-        this.headers = new ArrayList<MaildirHeader>(maildirHeaders);
         this.textualLineCount = propertyBuilder.getTextualLineCount();
         this.mediaType = propertyBuilder.getMediaType();
         this.subType = propertyBuilder.getSubType();
@@ -109,19 +107,13 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.seen = message.isSeen();
         
         try {
-            this.rawFullContent = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
+            this.rawFullContent = new ByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
         } catch (IOException e) {
             throw new MailboxException("Parsing of message failed",e);
         }
        
         this.bodyStartOctet = (int) (message.getFullContentOctets() - message.getBodyOctets());
-        this.headers = new ArrayList<MaildirHeader>();
-        
-        List<Header> originalHeaders = message.getHeaders();
-        for (int i = 0; i < originalHeaders.size(); i++) {
-            headers.add(new MaildirHeader(originalHeaders.get(i)));
-        }
-
+      
         PropertyBuilder pBuilder = new PropertyBuilder(message.getProperties());
         this.textualLineCount = message.getTextualLineCount();
         this.mediaType = message.getMediaType();
@@ -149,12 +141,13 @@ public class MaildirMessage extends AbstractMaildirMessage {
         return size;
     }
 
-    /* 
+
+    /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Document#getHeaders()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
-    public List<Header> getHeaders() {
-        return new ArrayList<Header>(headers);
+    public InputStream  getHeaderContent() {
+        return new BoundedInputStream(rawFullContent, bodyStartOctet - 2);
     }
 
     /* 
@@ -241,14 +234,6 @@ public class MaildirMessage extends AbstractMaildirMessage {
      */
     public boolean isModified() {
         return modified;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getFullContent()
-     */
-    public InputStream getFullContent() throws IOException {
-        return rawFullContent;
     }
 
     /*

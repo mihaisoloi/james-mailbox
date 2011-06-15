@@ -33,7 +33,6 @@ import java.nio.channels.WritableByteChannel;
 import org.apache.james.mailbox.InputStreamContent;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.store.mail.model.Header;
 
 public final class ResultHeader implements MessageResult.Header, InputStreamContent {
     private final String name;
@@ -42,9 +41,6 @@ public final class ResultHeader implements MessageResult.Header, InputStreamCont
 
     private final long size;
 
-    public ResultHeader(final Header header) {
-        this(header.getFieldName(), header.getValue());
-    }
 
     public ResultHeader(String name, String value) {
         this.name = name;

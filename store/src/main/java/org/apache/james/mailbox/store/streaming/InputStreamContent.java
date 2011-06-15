@@ -27,6 +27,7 @@ import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
@@ -69,7 +70,7 @@ public final class InputStreamContent implements org.apache.james.mailbox.InputS
         // wrap the streams in a BoundedInputStream to make sure it really match with the stored size.
         switch (type) {
         case Full:
-            return new BoundedInputStream(m.getFullContent(), size());
+            return new BoundedInputStream(ResultUtils.toInput(m), size());
         default:
             return new BoundedInputStream(m.getBodyContent(), size());
         }
@@ -86,7 +87,7 @@ public final class InputStreamContent implements org.apache.james.mailbox.InputS
         try {
             switch (type) {
             case Full:
-                in = m.getFullContent();
+                in = ResultUtils.toInput(m);
                 break;
             default:
                 in = m.getBodyContent();

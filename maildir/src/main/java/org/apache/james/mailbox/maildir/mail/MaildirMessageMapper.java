@@ -47,6 +47,7 @@ import org.apache.james.mailbox.maildir.MaildirStore;
 import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -386,7 +387,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         try {
             messageFile.createNewFile();
             fos = new FileOutputStream(messageFile);
-            input = message.getFullContent();
+            input = ResultUtils.toInput(message);
             byte[] b = new byte[BUF_SIZE];
             int len = 0;
             while ((len = input.read(b)) != -1)

@@ -26,11 +26,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 
@@ -49,36 +52,21 @@ public class SimpleMailboxMembership implements Message<Long> {
     public boolean seen = false;
 
     public SimpleMailboxMembership(long mailboxId, long uid, long modSeq, Date internalDate, int size, 
-            Flags flags, byte[] body, final List<SimpleHeader> headers) throws Exception {
+            Flags flags, byte[] body, final Map<String, String> headers) throws Exception {
         super();
         this.mailboxId = mailboxId;
         this.uid = uid;
         this.internalDate = internalDate;
         this.size = size;
         this.body = body;
-        final List<SimpleHeader> originalHeaders = headers;
+        final Map<String,String> originalHeaders = headers;
         if (originalHeaders == null) {
-            this.headers = new ArrayList<SimpleHeader>();
+            this.headers = new HashMap<String,String>();
         } else {
-            this.headers = new ArrayList<SimpleHeader>(originalHeaders.size());
-            for (SimpleHeader header:originalHeaders) {
-                this.headers.add(new SimpleHeader(header));
-            }
+            this.headers = originalHeaders;
         }
         
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final Writer writer = new OutputStreamWriter(baos, "us-ascii");
-        for (SimpleHeader header:headers) {
-            writer.write(header.getFieldName());
-            writer.write(": ");
-            writer.write(header.getValue());
-            writer.write(NEW_LINE);
-        }
-        writer.write(NEW_LINE);
-        writer.flush();
-        baos.write(body);
-        baos.flush();
-        fullContent = baos.toByteArray();
+        this.body =  body;
         setFlags(flags);
     }
 
@@ -240,8 +228,7 @@ public class SimpleMailboxMembership implements Message<Long> {
     public static final char[] NEW_LINE = { 0x0D, 0x0A };
     
     public byte[] body;
-    public byte[] fullContent;
-    public List<SimpleHeader> headers;
+    public Map<String, String> headers;
     public List<SimpleProperty> properties;
     public String subType = null;
     public String mediaType = null;
@@ -260,20 +247,26 @@ public class SimpleMailboxMembership implements Message<Long> {
         return new ByteArrayInputStream(body);
     }
 
-    /**
-     * Gets the full content (including headers) of the document.
-     * @return read only buffer, not null
-     * @throws IOException 
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
-    public InputStream getFullContent() throws IOException {
-        return new ByteArrayInputStream(fullContent);
-    }
-    
-    /**
-     * @see org.apache.james.imap.Message.mail.model.Document#getHeaders()
-     */
-    public List<Header> getHeaders() {
-        return new ArrayList<Header>(headers);
+    public InputStream getHeaderContent() throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final Writer writer = new OutputStreamWriter(baos, "us-ascii");
+
+        Iterator<Entry<String, String>> hIt = headers.entrySet().iterator();
+        while (hIt.hasNext()) {
+            Entry<String, String> header = hIt.next();
+            writer.write(header.getKey());
+            writer.write(": ");
+            writer.write(header.getValue());
+            writer.write(NEW_LINE);
+        }
+        writer.flush();
+        return new ByteArrayInputStream(baos.toByteArray());
+
     }
 
     public long getBodyOctets() {

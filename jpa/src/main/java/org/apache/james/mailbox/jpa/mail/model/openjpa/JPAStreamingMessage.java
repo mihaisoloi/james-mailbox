@@ -21,9 +21,7 @@ package org.apache.james.mailbox.jpa.mail.model.openjpa;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 import javax.persistence.Column;
@@ -33,11 +31,9 @@ import javax.persistence.Table;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 import org.apache.openjpa.persistence.Persistent;
 
 /**
@@ -54,17 +50,22 @@ import org.apache.openjpa.persistence.Persistent;
 @Table(name="JAMES_MAIL")
 public class JPAStreamingMessage extends AbstractJPAMessage {
 
-	@Persistent(optional=false, fetch=FetchType.LAZY)
-	@Column(name = "MAIL_BYTES", length=1048576000, nullable = false)
-	private InputStream content;
-	 
+    @Persistent(optional = false, fetch = FetchType.LAZY)
+    @Column(name = "MAIL_BYTES", length = 1048576000, nullable = false)
+    private InputStream body;
+
+    @Persistent(optional = false, fetch = FetchType.LAZY)
+    @Column(name = "HEADER_BYTES", length = 10485760, nullable = false)
+    private InputStream header;
+
     @Deprecated
     public JPAStreamingMessage() {}
 
-    public JPAStreamingMessage(JPAMailbox mailbox, Date internalDate, int size, Flags flags, 
-            InputStream content, int bodyStartOctet, final List<JPAHeader> headers, final PropertyBuilder propertyBuilder) throws MailboxException {
-        super(mailbox, internalDate, flags, size ,bodyStartOctet,headers,propertyBuilder);
-        this.content = content;
+    public JPAStreamingMessage(JPAMailbox mailbox, Date internalDate, int size, Flags flags, InputStream header, 
+            InputStream body, int bodyStartOctet,final PropertyBuilder propertyBuilder) throws MailboxException {
+        super(mailbox, internalDate, flags, size ,bodyStartOctet, propertyBuilder);
+        this.header = header;
+        this.body = body;
     }
 
     /**
@@ -76,18 +77,28 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     public JPAStreamingMessage(JPAMailbox mailbox, long uid, long modSeq, Message<?> message) throws MailboxException {
         super(mailbox, uid, modSeq, message);
         try {
-            this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
+            this.header = new ByteArrayInputStream(IOUtils.toByteArray(message.getHeaderContent()));
+            this.body = new ByteArrayInputStream(IOUtils.toByteArray(message.getBodyContent()));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
     }
 
-    public InputStream getFullContent() throws IOException {
-        return content;
-    }
     
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
+     */
     public InputStream getBodyContent() throws IOException {
-        return new LazySkippingInputStream(content, getBodyStartOctet());
+        return body;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
+     */
+    public InputStream getHeaderContent() throws IOException {
+        return header;
     }
 
 }

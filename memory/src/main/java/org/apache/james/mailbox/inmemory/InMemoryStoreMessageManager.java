@@ -19,21 +19,19 @@
 
 package org.apache.james.mailbox.inmemory;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
-import org.apache.james.mailbox.inmemory.mail.model.SimpleHeader;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
@@ -43,33 +41,16 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
     public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, MailboxEventDispatcher<Long> dispatcher, InMemoryMailbox mailbox) throws MailboxException {
         super(mapperFactory, index, dispatcher,mailbox);
     }
-    
-    @Override
-    protected Header createHeader(int lineNumber, String name, String value) {
-        return new SimpleHeader(name, lineNumber, value);
-    }
 
     @Override
     protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, 
-            InputStream  document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] byteContent;
-        try {
-            byte[] buf = new byte[1024];
-            int i = 0;
-            while ((i = document.read(buf)) != -1) {
-                out.write(buf, 0, i);
-            }
-            byteContent = out.toByteArray();
-            if (out != null)
-                out.close();
+            InputStream header, InputStream  body, Flags flags,  PropertyBuilder propertyBuilder) throws MailboxException {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            byteContent = new byte[0];
+        try {
+            return new SimpleMailboxMembership(internalDate, size, bodyStartOctet,  IOUtils.toByteArray(header), IOUtils.toByteArray(body), flags, propertyBuilder, ((InMemoryMailbox) getMailboxEntity()).getMailboxId());
+        } catch (IOException e) {
+            throw new MailboxException("Unable to create message", e);
         }
-        InMemoryMailbox mailbox = (InMemoryMailbox) getMailboxEntity();
-        return new SimpleMailboxMembership(internalDate, size, bodyStartOctet, byteContent, flags, headers, propertyBuilder, mailbox.getMailboxId());
     }
     
 }

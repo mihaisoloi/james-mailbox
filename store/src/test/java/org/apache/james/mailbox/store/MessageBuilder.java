@@ -18,13 +18,12 @@
  ****************************************************************/
 package org.apache.james.mailbox.store;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 public class MessageBuilder {
@@ -35,7 +34,7 @@ public class MessageBuilder {
     public int size = 8867;
     public Flags flags = new Flags();
     public byte[] body = {};
-    public final List<SimpleHeader> headers = new ArrayList<SimpleHeader>();
+    public final Map<String, String> headers = new HashMap<String, String>();
     public int lineNumber = 0;
     
     public Message<Long> build() throws Exception {
@@ -43,10 +42,8 @@ public class MessageBuilder {
         return result;
     }
     
-    public Header header(String field, String value) {
-        SimpleHeader header = new SimpleHeader(field, ++lineNumber, value);
-        headers.add(header);
-        return header;
+    public void header(String field, String value) {
+        headers.put(field, value);
     }
 
     public void setKey(int mailboxId, int uid) {

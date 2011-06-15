@@ -73,8 +73,6 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      */
     public abstract long getModSeq();
 
-    
-
     /**
      * Return if it was marked as answered
      * 
@@ -132,16 +130,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * @return new instance, not null
      */
     public abstract Flags createFlags();
-
-    /**
-     * Gets the full content (including headers) of the document. 
-     * 
-     * Be aware that this method need to return a new fresh {@link InputStream}
-     * on every call, which basicly means it need to start at position 0
-     * 
-     * @return fullContent, not null
-     */
-    public abstract InputStream getFullContent() throws IOException;
+    
     
     /**
      * Gets the body content of the document. Headers are excluded.
@@ -188,11 +177,15 @@ public interface Message<Id> extends Comparable<Message<Id>>{
     public Long getTextualLineCount();
     
     /**
-     * Gets a read-only list of headers.
+     * Gets the header as {@link InputStream}. This MUST exclude the CRLF terminator
      * 
-     * @return unmodifiable list of headers, not null
+     * Be aware that this method need to return a new fresh {@link InputStream}
+     * on every call
+     * 
+     * @return header
+     * @throws IOException 
      */
-    public abstract List<Header> getHeaders();
+    public abstract InputStream getHeaderContent() throws IOException;
     
     /**
      * Gets a read-only list of meta-data properties.

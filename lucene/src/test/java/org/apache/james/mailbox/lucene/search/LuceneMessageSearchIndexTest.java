@@ -23,12 +23,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
@@ -36,9 +36,7 @@ import javax.mail.Flags.Flag;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
-import org.apache.james.mailbox.lucene.search.LuceneMessageSearchIndex;
 import org.apache.james.mailbox.store.MessageBuilder;
-import org.apache.james.mailbox.store.SimpleHeader;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -77,15 +75,15 @@ public class LuceneMessageSearchIndexTest {
     public void setUp() throws Exception {
         index = new LuceneMessageSearchIndex<Long>(null, new RAMDirectory(), true, useLenient());
         index.setEnableSuffixMatch(true);
-        List<org.apache.james.mailbox.store.SimpleHeader> headersSubject = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
-        headersSubject.add(new SimpleHeader("Subject", 1, "test"));
+        Map<String, String> headersSubject = new HashMap<String, String>();
+        headersSubject.put("Subject", "test");
        
-        List<org.apache.james.mailbox.store.SimpleHeader> headersTest = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
-        headersSubject.add(new SimpleHeader("Test", 1, "test"));
+        Map<String, String> headersTest = new HashMap<String, String>();
+        headersSubject.put("Test", "test");
         
-        List<org.apache.james.mailbox.store.SimpleHeader> headersTestSubject = new ArrayList<org.apache.james.mailbox.store.SimpleHeader>();
-        headersTestSubject.add(new SimpleHeader("Test", 1, "test"));
-        headersTestSubject.add(new SimpleHeader("Subject", 2, "test2"));
+        Map<String, String> headersTestSubject =  new HashMap<String, String>();
+        headersTestSubject.put("Test", "test");
+        headersTestSubject.put("Subject", "test2");
 
 
         

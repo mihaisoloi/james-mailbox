@@ -43,15 +43,8 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MaildirFolder {
-
-    /**
-     * The logger.
-     */
-    private Logger log = LoggerFactory.getLogger(MaildirFolder.class.getName());
 
     public static final String VALIDITY_FILE = "james-uidvalidity";
     public static final String UIDLIST_FILE = "james-uidlist";
@@ -95,27 +88,7 @@ public class MaildirFolder {
     public File getRootFile() {
         return rootFolder;
     }
-    
-    /**
-     * Locks the uidList file and if it has retrieved the lock, returns it.
-     * Make sure to call unlockUidList() in a finally block afterwards.
-     * @return The locked uidList
-     */
-    /*
-    public File lockUidList() {
-        FileLock.lock(uidFile);
-        return uidFile;
-    }
-    */
-    
-    /**
-     * Unlocks the uidList file if it has been locked before.
-     */
-    /*
-    public void unlockUidList() {
-        FileLock.unlock(uidFile);
-    }
-    */
+
     /**
      * Tests whether the directory belonging to this {@link MaildirFolder} exists 
      * @return true if the directory belonging to this {@link MaildirFolder} exists ; false otherwise 

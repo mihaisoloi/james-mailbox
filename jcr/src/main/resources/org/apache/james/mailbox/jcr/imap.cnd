@@ -23,13 +23,6 @@
     - jamesMailbox:subscriptionMailboxes (STRING) multiple
     + * (nt:unstructured) multiple
     
-
-[jamesMailbox:messageHeader] > mix:created, mix:lockable
-    mixin
-    - jamesMailbox:headerFieldName (STRING) mandatory
-    - jamesMailbox:headerValue(STRING) mandatory
-    - jamesMailbox:headerLineNumber (LONG) mandatory
-
 [jamesMailbox:messageProperty] > mix:created
     mixin
     - jamesMailbox:propertyNamespace (STRING) mandatory
@@ -54,7 +47,6 @@
     - jamesMailbox:messageBodyStartOctet (LONG) mandatory
     - jamesMailbox:messageTextualLineCount (LONG)
     - jamesMailbox:messageSubType (String) mandatory
-    + messageHeader (nt:unstructured)  multiple
     + messageProperty (nt:unstructured) multiple
 
 [jamesMailbox:mailbox] >  mix:referenceable, mix:lockable, mix:created
@@ -66,5 +58,4 @@
     - jamesMailbox:mailboxUser (STRING) 
     - jamesMailbox:mailboxLastKnownUid (LONG) 
     - jamesMailbox:mailboxHighestKnownModSeq (LONG) 
-
     + * (nt:unstructured) multiple

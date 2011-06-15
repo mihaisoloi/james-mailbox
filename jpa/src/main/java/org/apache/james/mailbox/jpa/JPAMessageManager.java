@@ -19,21 +19,17 @@
 package org.apache.james.mailbox.jpa;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jpa.mail.model.JPAHeader;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -49,21 +45,13 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
     }
     
     @Override
-    protected Message<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final InputStream document, 
-            final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
-        final List<JPAHeader> jpaHeaders = new ArrayList<JPAHeader>(headers.size());
-        for (Header header: headers) {
-            jpaHeaders.add((JPAHeader) header);
-        }
-        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, document, bodyStartOctet, jpaHeaders, propertyBuilder);
+    protected Message<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final InputStream header, final InputStream body, 
+            final Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
+       
+        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, header, body,  bodyStartOctet,  propertyBuilder);
         return message;
     }
-    
-    @Override
-    protected Header createHeader(int lineNumber, String name, String value) {
-        final Header header = new JPAHeader(lineNumber, name, value);
-        return header;
-    }
+
 
     /**
      * Support user flags

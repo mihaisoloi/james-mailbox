@@ -19,11 +19,13 @@
 
 package org.apache.james.mailbox.store;
 
-import java.io.FilterInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -34,13 +36,13 @@ import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResult.MimePath;
 import org.apache.james.mailbox.MimeDescriptor;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
 import org.apache.james.mailbox.util.MessageResultImpl;
 import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.parser.Field;
 
 /**
  *
@@ -53,21 +55,16 @@ public class ResultUtils {
 
     static final Charset US_ASCII = Charset.forName("US-ASCII");
 
-    public static List<MessageResult.Header> createHeaders(final Message<?> document) {
-        final List<Header> headers = getSortedHeaders(document);
-
-        final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>(headers.size());
-        for (Header header: headers) {
-            final ResultHeader resultHeader = new ResultHeader(header);
+    public static List<MessageResult.Header> createHeaders(final Message<?> document) throws IOException {
+        org.apache.james.mime4j.message.Header header = new org.apache.james.mime4j.message.Header(document.getHeaderContent());
+        
+        final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>();
+        List<Field> fields = header.getFields();
+        for (Field field: fields) {
+            final ResultHeader resultHeader = new ResultHeader(field.getName(), field.getBody());
             results.add(resultHeader);
         }
         return results;
-    }
-
-    private static List<Header> getSortedHeaders(final Message<?> document) {
-        final List<Header> headers = new ArrayList<Header>(document.getHeaders());
-        Collections.sort(headers);
-        return headers;
     }
 
     /**
@@ -94,6 +91,20 @@ public class ResultUtils {
         return result;
     }
 
+    /**
+     * Return an {@link InputStream} which holds the full content of the message
+     * @param message
+     * @return
+     * @throws IOException
+     */
+    public static InputStream toInput(final Message<?> message) throws IOException{
+        return toInput(message.getHeaderContent(), message.getBodyContent());
+    }
+    
+    public static InputStream toInput(final InputStream header, final InputStream body) {
+        return new SequenceInputStream(Collections.enumeration(Arrays.asList(header, new ByteArrayInputStream(BYTES_NEW_LINE), body)));
+    }
+    
     /**
      * Return the {@link MessageResult} for the given {@link MailboxMembership} and {@link FetchGroup}
      * 
@@ -164,7 +175,7 @@ public class ResultUtils {
     }
 
     private static void addHeaders(final Message<?> message,
-            MessageResultImpl messageResult) {
+            MessageResultImpl messageResult) throws IOException {
         final List<MessageResult.Header> headers = createHeaders(message);
         messageResult.setHeaders(headers);
     }
@@ -223,85 +234,6 @@ public class ResultUtils {
     }
    
 
-    /**
-     * Return an {@link InputStream} which holds the content of the given {@link org.apache.james.mailbox.store.mail.model.Message}
-     * 
-     * @param document
-     * @return stream
-     * @throws IOException 
-     */
-    public static InputStream toInput(final Message<?> document) throws IOException {
-        final List<Header> headers = getSortedHeaders(document);
-        final StringBuffer headersToString = new StringBuffer(headers.size() * 50);
-        for (Header header: headers) {
-            headersToString.append(header.getFieldName());
-            headersToString.append(": ");
-            headersToString.append(header.getValue());
-            headersToString.append("\r\n");
-        }
-        headersToString.append("\r\n");
-        final InputStream bodyContent = document.getBodyContent();
-        final MessageInputStream stream = new MessageInputStream(headersToString, bodyContent);
-        return stream;
-    }
-
-
-    private static final class MessageInputStream extends FilterInputStream {
-        private final StringBuffer headers;
-        private int headerPosition = 0;
-
-        public MessageInputStream(final StringBuffer headers,
-                final InputStream bodyContent) throws IOException{
-            super(bodyContent);
-            
-            this.headers = headers;
-        }
-
-        public int read() throws IOException {
-            final int result;
-            if (headerPosition < headers.length()) {
-                result = headers.charAt(headerPosition++);
-            } else  { 
-                result = super.read();
-            }
-            return result;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            if (headerPosition < headers.length()) {
-                int headersLeft = headers.length() - headerPosition;
-                if (len > headersLeft) {
-                    int i;
-                    for (i = 0; i < headersLeft; i++) {
-                        int a =  read();
-                        if (a == -1) {
-                            return i;
-                        } 
-                        b[off +i] = (byte) a;
-                    }
-                    int bytesLeft = len - headersLeft;
-                    return i + super.read(b, off +i, bytesLeft);
-                } else {
-
-                    for (int i = 0 ; i < len; i++) {
-                        int a =  read();
-                        if (a == -1) {
-                            return -1;
-                        } 
-                        b[off +i] = (byte) a;
-                    }
-                    return len;
-                }
-            }
-            return super.read(b, off, len);
-        }
-
-        @Override
-        public int read(byte[] b) throws IOException {
-            return read(b, 0, b.length);
-        }
-    }
   
     private static final int[] path(MimePath mimePath) {
         final int[] result;

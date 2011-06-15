@@ -28,7 +28,6 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
@@ -47,9 +46,9 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
     private final String subType;
     private List<Property> properties;
     private final String mediaType;
-    private List<Header> headers;
+    private byte[] header;
     private Long lineCount;
-    private byte[] document;
+    private byte[] body;
     private int bodyStartOctet;
     private long modSeq;
     public SimpleMailboxMembership(long mailboxId, long uid, long modSeq, final SimpleMailboxMembership original) {
@@ -69,21 +68,21 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
         this.subType  = original.subType;
         this.mediaType = original.mediaType;
         this.properties = original.properties;
-        this.headers = original.headers;
+        this.header = original.header;
         this.lineCount = original.lineCount;
-        this.document = original.document;
+        this.body = original.body;
         this.bodyStartOctet = original.bodyStartOctet;
     }
     
-    public SimpleMailboxMembership(Date internalDate, int size, int bodyStartOctet, byte[] document, 
-            Flags flags, List<Header> headers, PropertyBuilder propertyBuilder, final long mailboxId) {
-        this.document = document;
+    public SimpleMailboxMembership(Date internalDate, int size, int bodyStartOctet, byte[] header,  byte[] body, 
+            Flags flags, PropertyBuilder propertyBuilder, final long mailboxId) {
+        this.body = body;
         
         this.size = size;
         this.bodyStartOctet = bodyStartOctet;
         setFlags(flags);
         lineCount = propertyBuilder.getTextualLineCount();
-        this.headers = headers;
+        this.header = header;
         this.internalDate = internalDate;
         this.mailboxId = mailboxId;
         this.properties = propertyBuilder.toProperties();
@@ -146,20 +145,14 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
     }
 
     public InputStream getBodyContent() throws IOException {
-        return new ByteArrayInputStream(document,bodyStartOctet, (int) getFullContentOctets());      
+        return new ByteArrayInputStream(body);     
     }
 
-    public InputStream getFullContent() throws IOException {
-        return new ByteArrayInputStream(document);
-    }
 
     public long getFullContentOctets() {
-        return document.length;
+        return size;
     }
 
-    public List<Header> getHeaders() {
-        return headers;
-    }
 
     public String getMediaType() {
         return mediaType;
@@ -250,5 +243,10 @@ public class SimpleMailboxMembership extends AbstractMessage<Long> {
      */
     public void setUid(long uid) {
         this.uid = uid;
+    }
+
+    @Override
+    public InputStream getHeaderContent() throws IOException {
+        return new ByteArrayInputStream(header);
     }
 }

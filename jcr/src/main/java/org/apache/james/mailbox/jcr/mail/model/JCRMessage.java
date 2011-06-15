@@ -33,13 +33,14 @@ import javax.jcr.RepositoryException;
 import javax.mail.Flags;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -55,7 +56,6 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     private Node node;
     private final Logger logger;
     private InputStream content;
-    private List<JCRHeader> headers;
     private String mediaType;
     private Long textualLineCount;
     private String subType;
@@ -103,19 +103,17 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.node = node;
     }
     
-    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, InputStream content,
-            int bodyStartOctet, final List<JCRHeader> headers,
-            final PropertyBuilder propertyBuilder, Logger logger) {
+    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, InputStream header, InputStream body,
+            int bodyStartOctet,  final PropertyBuilder propertyBuilder, Logger logger) {
         super();
         this.mailboxUUID = mailboxUUID;
         this.internalDate = internalDate;
         this.size = size;
         this.logger = logger;
         setFlags(flags);
-        this.content = content;
+        this.content = ResultUtils.toInput(header, body);
        
         this.bodyStartOctet = bodyStartOctet;
-        this.headers = new ArrayList<JCRHeader>(headers);
         this.textualLineCount = propertyBuilder.getTextualLineCount();
         this.mediaType = propertyBuilder.getMediaType();
         this.subType = propertyBuilder.getSubType();
@@ -144,19 +142,13 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.modSeq = modSeq;
         this.logger = logger;
         try {
-            this.content = new ByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
+            this.content = new ByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
        
         this.bodyStartOctet = (int) (message.getFullContentOctets() - message.getBodyOctets());
-        this.headers = new ArrayList<JCRHeader>();
-
-        List<Header> originalHeaders = message.getHeaders();
-        for (int i = 0; i < originalHeaders.size(); i++) {
-            headers.add(new JCRHeader(originalHeaders.get(i),logger));
-        }
-
+        
         PropertyBuilder pBuilder = new PropertyBuilder(message.getProperties());
         this.textualLineCount = message.getTextualLineCount();
         this.mediaType = message.getMediaType();
@@ -184,26 +176,6 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
             return 0;
         }
         return size;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Document#getHeaders()
-     */
-    public List<Header> getHeaders() {
-        if (isPersistent()) {
-            try {
-                List<Header> headers = new ArrayList<Header>();
-                NodeIterator nodeIt = node.getNodes("messageHeader");
-                while (nodeIt.hasNext()) {
-                    headers.add(new JCRHeader(nodeIt.nextNode(), logger));
-                }
-                return headers;
-            } catch (RepositoryException e) {
-                logger.error("Unable to retrieve nodes messageHeader", e);
-            }
-        }
-        return new ArrayList<Header>(headers);
     }
 
     /*
@@ -348,26 +320,6 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
             node.setProperty(SUBTYPE_PROPERTY, getSubType());
             node.setProperty(BODY_START_OCTET_PROPERTY, getBodyStartOctet());
 
-            // copy the headers and store them in memory as pure pojos
-            List<Header> currentHeaders = getHeaders();
-            List<Header> newHeaders = new ArrayList<Header>();
-            for (int i = 0; i < currentHeaders.size(); i++) {
-                newHeaders.add(new JCRHeader(currentHeaders.get(i), logger));
-            }
-
-            NodeIterator iterator = node.getNodes("messageHeader");
-            // remove old headers
-            while (iterator.hasNext()) {
-                iterator.nextNode().remove();
-            }
-
-            // add headers to the message again
-            for (int i = 0; i < newHeaders.size(); i++) {
-                JCRHeader header = (JCRHeader) newHeaders.get(i);
-                Node headerNode = node.addNode("messageHeader", "nt:unstructured");
-                headerNode.addMixin(HEADER_NODE_TYPE);
-                header.merge(headerNode);
-            }
 
             List<Property> currentProperties = getProperties();
             List<Property> newProperites = new ArrayList<Property>();
@@ -376,7 +328,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
                 newProperites.add(new JCRProperty(prop, i, logger));
             }
             // remove old properties, we will add a bunch of new ones
-            iterator = node.getNodes("messageProperty");
+            NodeIterator iterator = node.getNodes("messageProperty");
             while (iterator.hasNext()) {
                 iterator.nextNode().remove();
             }
@@ -727,11 +679,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         return retValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getFullContent()
-     */
-    public InputStream getFullContent() throws IOException {
+
+    protected InputStream getFullContent() throws IOException {
         if (isPersistent()) {
             try {
                 //TODO: Maybe we should cache this somehow...
@@ -799,5 +748,13 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         } else {
             this.uid = uid;
         }          
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
+     */
+    public InputStream getHeaderContent() throws IOException {
+        return new BoundedInputStream(getFullContent(), getBodyStartOctet() - 2);
     }
 }

@@ -18,11 +18,14 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.search.comparator;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.james.mailbox.store.mail.model.Header;
+import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MessageResult.Header;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 
@@ -33,13 +36,22 @@ public abstract class AbstractHeaderComparator implements Comparator<Message<?>>
     public final static String CC ="cc";
 
     protected String getHeaderValue(String headerName, Message<?> message) {
-        final List<Header> headers = message.getHeaders();
-        for (Header header:headers) {
-            final String name = header.getFieldName();
-            if (headerName.equalsIgnoreCase(name)) {
-                final String value = header.getValue();
-                return value.toUpperCase(Locale.ENGLISH);
+        try {
+            final List<Header> headers = ResultUtils.createHeaders(message);
+            for (Header header : headers) {
+                try {
+                    String name = header.getName();
+                    if (headerName.equalsIgnoreCase(name)) {
+                        final String value = header.getValue();
+                        return value.toUpperCase(Locale.ENGLISH);
+                    }
+                } catch (MailboxException e) {
+                    // skip the header line
+                }
+
             }
+        } catch (IOException e) {
+            // skip the header
         }
         return "";
     }

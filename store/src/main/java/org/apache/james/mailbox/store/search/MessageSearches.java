@@ -37,13 +37,13 @@ import java.util.TreeSet;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MessageResult.Header;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.UnsupportedSearchException;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.ResultUtils;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.comparator.CombinedComparator;
 import org.apache.james.mime4j.MimeException;
@@ -138,7 +138,11 @@ public class MessageSearches implements Iterable<Long>{
         } else if (criterion instanceof SearchQuery.SizeCriterion) {
             result = matches((SearchQuery.SizeCriterion) criterion, message);
         } else if (criterion instanceof SearchQuery.HeaderCriterion) {
-            result = matches((SearchQuery.HeaderCriterion) criterion, message, log);
+            try {
+                result = matches((SearchQuery.HeaderCriterion) criterion, message, log);
+            } catch (IOException e) {
+                throw new MailboxException("Unable to search header", e);
+            }
         } else if (criterion instanceof SearchQuery.UidCriterion) {
             result = matches((SearchQuery.UidCriterion) criterion, message);
         } else if (criterion instanceof SearchQuery.FlagCriterion) {
@@ -313,7 +317,7 @@ public class MessageSearches implements Iterable<Long>{
         return result;
     }
 
-    private static boolean matches(SearchQuery.HeaderCriterion criterion, Message<?> message, Logger log) throws UnsupportedSearchException {
+    private static boolean matches(SearchQuery.HeaderCriterion criterion, Message<?> message, Logger log) throws MailboxException, IOException {
         final SearchQuery.HeaderOperator operator = criterion.getOperator();
         final String headerName = criterion.getHeaderName();
         final boolean result;
@@ -338,13 +342,15 @@ public class MessageSearches implements Iterable<Long>{
      * @param headerName
      * @param message
      * @return containsAddress
+     * @throws MailboxException 
+     * @throws IOException 
      */
     private static boolean matchesAddress(final SearchQuery.AddressOperator operator,
-            final String headerName, final Message<?> message, Logger log) {
+            final String headerName, final Message<?> message, Logger log) throws MailboxException, IOException {
         final String text = operator.getAddress().toUpperCase(Locale.ENGLISH);
-        final List<Header> headers = message.getHeaders();
+        final List<Header> headers = ResultUtils.createHeaders(message);
         for (Header header:headers) {
-            final String name = header.getFieldName();
+            final String name = header.getName();
             if (headerName.equalsIgnoreCase(name)) {
                 final String value = header.getValue();
                 try {
@@ -375,11 +381,12 @@ public class MessageSearches implements Iterable<Long>{
         return false;
     }
     
-    private static boolean exists(String headerName, Message<?> message) {
+    private static boolean exists(String headerName, Message<?> message) throws MailboxException, IOException {
         boolean result = false;
-        final List<Header> headers = message.getHeaders();
+        final List<Header> headers = ResultUtils.createHeaders(message);
+
         for (Header header:headers) {
-            final String name = header.getFieldName();
+            final String name = header.getName();
             if (headerName.equalsIgnoreCase(name)) {
                 result = true;
                 break;
@@ -389,12 +396,12 @@ public class MessageSearches implements Iterable<Long>{
     }
 
     private static boolean matches(final SearchQuery.ContainsOperator operator,
-            final String headerName, final Message<?> message) {
+            final String headerName, final Message<?> message) throws MailboxException, IOException {
         final String text = operator.getValue().toUpperCase();
         boolean result = false;
-        final List<Header> headers = message.getHeaders();
+        final List<Header> headers = ResultUtils.createHeaders(message);
         for (Header header:headers) {
-            final String name = header.getFieldName();
+            final String name = header.getName();
             if (headerName.equalsIgnoreCase(name)) {
                 final String value = header.getValue();
                 if (value != null) {
@@ -408,19 +415,19 @@ public class MessageSearches implements Iterable<Long>{
         return result;
     }
 
-    private static boolean matches(final SearchQuery.DateOperator operator,
-            final String headerName, final Message<?> message) throws UnsupportedSearchException {
-       
+    private static boolean matches(final SearchQuery.DateOperator operator, final String headerName, final Message<?> message) throws MailboxException {
+
         final Date date = operator.getDate();
         final DateResolution res = operator.getDateResultion();
-        final String value = headerValue(headerName, message);
-        if (value == null) {
-            return false;
-        } else {
-            try {
-                final Date isoFieldValue = toISODate(value);
-                final SearchQuery.DateComparator type = operator.getType();
-                switch (type) {
+        try {
+            final String value = headerValue(headerName, message);
+            if (value == null) {
+                return false;
+            } else {
+                try {
+                    final Date isoFieldValue = toISODate(value);
+                    final SearchQuery.DateComparator type = operator.getType();
+                    switch (type) {
                     case AFTER:
                         return after(isoFieldValue, date, res);
                     case BEFORE:
@@ -429,18 +436,21 @@ public class MessageSearches implements Iterable<Long>{
                         return on(isoFieldValue, date, res);
                     default:
                         throw new UnsupportedSearchException();
+                    }
+                } catch (ParseException e) {
+                    return false;
                 }
-            } catch (ParseException e) {
-                return false;
             }
+        } catch (IOException e) {
+            return false;
         }
     }
 
-    private static String headerValue(final String headerName, final Message<?> message) {
-        final List<Header> headers = message.getHeaders();
+    private static String headerValue(final String headerName, final Message<?> message) throws MailboxException, IOException {
+        final List<Header> headers = ResultUtils.createHeaders(message);
         String value = null;
         for (Header header:headers) {
-            final String name = header.getFieldName();
+            final String name = header.getName();
             if (headerName.equalsIgnoreCase(name)) {
                 value = header.getValue();
                 break;

@@ -19,19 +19,15 @@
 package org.apache.james.mailbox.maildir;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.maildir.mail.model.MaildirHeader;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -44,22 +40,13 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
         super(mapperFactory, index, dispatcher, mailboxEntiy);
     }
 
-    @Override
-    protected Header createHeader(int lineNumber, String name, String value) {
-        return new MaildirHeader(lineNumber, name, value);
-    }
-
+    
     @Override
     protected Message<Integer> createMessage(Date internalDate,
-            int size, int bodyStartOctet, InputStream documentIn, Flags flags,
-            List<Header> headers, PropertyBuilder propertyBuilder)
+            int size, int bodyStartOctet, InputStream header, InputStream body, Flags flags, PropertyBuilder propertyBuilder)
             throws MailboxException {
-        final List<MaildirHeader> maildirHeaders = new ArrayList<MaildirHeader>(headers.size());
-        for (Header header: headers) {
-            maildirHeaders.add((MaildirHeader) header);
-        }
         final Message<Integer> message = new MaildirMessage(getMailboxEntity(), internalDate, 
-                size, flags, documentIn, bodyStartOctet, maildirHeaders, propertyBuilder);
+                size, flags, header, body, bodyStartOctet, propertyBuilder);
         return message;
     }
 

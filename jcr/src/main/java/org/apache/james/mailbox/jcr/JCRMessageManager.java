@@ -19,21 +19,17 @@
 package org.apache.james.mailbox.jcr;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.jcr.mail.model.JCRHeader;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
@@ -53,19 +49,12 @@ public class JCRMessageManager extends StoreMessageManager<String> {
         this.log = log;
     }
 
-    @Override
-    protected Header createHeader(int lineNumber, String name, String value) {
-        return new JCRHeader(lineNumber, name, value, log);
-    }
 
     @Override
-    protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream document, Flags flags, List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException{
-        final List<JCRHeader> jcrHeaders = new ArrayList<JCRHeader>(headers.size());
-        for (Header header: headers) {
-            jcrHeaders.add((JCRHeader) header);
-        }
+    protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream header, InputStream body, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
+      
         final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), internalDate, 
-                size, flags, document, bodyStartOctet, jcrHeaders, propertyBuilder, log);
+                size, flags, header, body, bodyStartOctet, propertyBuilder, log);
         return message;
     }
 

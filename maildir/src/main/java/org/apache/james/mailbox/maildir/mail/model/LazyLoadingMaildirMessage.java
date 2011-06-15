@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,9 +31,9 @@ import javax.mail.Flags;
 import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -51,7 +50,6 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
     private MaildirMessageName messageName;
     private int bodyStartOctet;
     private final PropertyBuilder propertyBuilder = new PropertyBuilder();
-    private final List<Header> headers = new ArrayList<Header>();
 
     private boolean parsed;
 
@@ -99,19 +97,8 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
             parser.setRecursionMode(MimeTokenStream.M_NO_RECURSE);
             parser.parse(tmpMsgIn.newStream(0, -1));
 
-            int lineNumber = 0;
             int next = parser.next();
             while (next != MimeTokenStream.T_BODY && next != MimeTokenStream.T_END_OF_STREAM && next != MimeTokenStream.T_START_MULTIPART) {
-                if (next == MimeTokenStream.T_FIELD) {
-                    String fieldValue = parser.getField().getBody();
-                    if (fieldValue.endsWith("\r\f")) {
-                        fieldValue = fieldValue.substring(0, fieldValue.length() - 2);
-                    }
-                    if (fieldValue.startsWith(" ")) {
-                        fieldValue = fieldValue.substring(1);
-                    }
-                    headers.add(new MaildirHeader(lineNumber, parser.getField().getName(), fieldValue));
-                }
                 next = parser.next();
             }
             final MaximalBodyDescriptor descriptor = (MaximalBodyDescriptor) parser.getBodyDescriptor();
@@ -265,16 +252,6 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getHeaders()
-     */
-    public List<Header> getHeaders() {
-        parseMessage();
-
-        return headers;
-    }
-
-    /*
-     * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.model.Message#getProperties()
      */
     public List<Property> getProperties() {
@@ -290,11 +267,7 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
         return messageName.getInternalDate();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Message#getFullContent()
-     */
-    public InputStream getFullContent() throws IOException {
+    private InputStream getFullContent() throws IOException {
         return new FileInputStream(messageName.getFile());
     }
 
@@ -315,6 +288,14 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
     protected int getBodyStartOctet() {
         parseMessage();
         return bodyStartOctet;
+    }
+
+    @Override
+    public InputStream getHeaderContent() throws IOException {
+        parseMessage();
+            
+        return new BoundedInputStream(getFullContent(), bodyStartOctet - 2);
+
     }
 
 

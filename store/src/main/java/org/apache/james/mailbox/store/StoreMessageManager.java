@@ -19,6 +19,7 @@
 
 package org.apache.james.mailbox.store;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,7 +50,6 @@ import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
-import org.apache.james.mailbox.store.mail.model.Header;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -61,6 +61,7 @@ import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
+import org.apache.james.mime4j.message.Header;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeTokenStream;
 
@@ -197,25 +198,14 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
            
             parser.setRecursionMode(MimeTokenStream.M_NO_RECURSE);
             parser.parse(bIn);
-            final List<Header> headers = new ArrayList<Header>();
+            final Header header = new Header();
             
-            int lineNumber = 0;
             int next = parser.next();
             while (next != MimeTokenStream.T_BODY
                     && next != MimeTokenStream.T_END_OF_STREAM
                     && next != MimeTokenStream.T_START_MULTIPART) {
                 if (next == MimeTokenStream.T_FIELD) {
-                    String fieldValue = parser.getField().getBody();
-                    if (fieldValue.endsWith("\r\f")) {
-                        fieldValue = fieldValue.substring(0,fieldValue.length() - 2);
-                    }
-                    if (fieldValue.startsWith(" ")) {
-                        fieldValue = fieldValue.substring(1);
-                    }
-                    final Header header 
-                        = createHeader(++lineNumber, parser.getField().getName(), 
-                            fieldValue);
-                    headers.add(header);
+                    header.addField(parser.getField());
                 }
                 next = parser.next();
             }
@@ -294,10 +284,14 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
                 // via the TeeInputStream
             }
             int bodyStartOctet = (int) bIn.getBodyStartOffset();
+            if (bodyStartOctet == -1) {
+                bodyStartOctet = 0;
+            }
             contentIn = new FileInputStream(file);
+            contentIn.skip(bodyStartOctet);
             final int size = (int) file.length();
 
-            final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, contentIn, flags, headers, propertyBuilder);
+            final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, new ByteArrayInputStream(header.toString().getBytes("US-ASCII")), contentIn, flags, propertyBuilder);
             MessageMetaData data = appendMessageToStore(message, mailboxSession);
                        
             Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
@@ -331,25 +325,15 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @param internalDate
      * @param size
      * @param bodyStartOctet
-     * @param documentIn
+     * @param headersContent
+     * @param bodyContent
      * @param flags
-     * @param headers
-     * @param propertyBuilder
      * @return membership
      * @throws MailboxException 
      */
     protected abstract Message<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
-            final InputStream documentIn, final Flags flags, final List<Header> headers, PropertyBuilder propertyBuilder) throws MailboxException;
+            final InputStream headersContent, final InputStream bodyContent, final Flags flags, final PropertyBuilder propertyBuilder) throws MailboxException;
     
-    /**
-     * Create a new {@link Header} for the given data
-     * 
-     * @param lineNumber
-     * @param name
-     * @param value
-     * @return header
-     */
-    protected abstract Header createHeader(int lineNumber, String name, String value);
     
     public void addListener(MailboxListener listener) throws MailboxException {
         dispatcher.addMailboxListener(listener);
