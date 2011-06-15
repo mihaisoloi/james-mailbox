@@ -29,6 +29,7 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
+import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 public class MaildirStore {
@@ -53,11 +54,17 @@ public class MaildirStore {
      * %fulluser
      * variables.
      * @param maildirLocation A String with variables
+     * @param locker
      */
     public MaildirStore(String maildirLocation, MailboxPathLocker locker) {
         this.maildirLocation = maildirLocation;
         this.locker = locker;
     }
+    
+    public MaildirStore(String maildirLocation) {
+        this(maildirLocation, new JVMMailboxPathLocker());
+    }
+    
     
     public String getMaildirLocation() {
         return maildirLocation;
