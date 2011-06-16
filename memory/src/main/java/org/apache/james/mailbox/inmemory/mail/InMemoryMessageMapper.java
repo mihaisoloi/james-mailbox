@@ -90,7 +90,6 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(java.lang.Object, org.apache.james.mailbox.MessageRange)
      */
-    @SuppressWarnings("unchecked")
     public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MailboxMembershipCallback<Long> callback) throws MailboxException {
         final List<Message<Long>> results;
         final int batchSize = set.getBatchSize();
@@ -118,7 +117,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
                 break;
             case ONE:
                 results  = new ArrayList<Message<Long>>(1);
-                final Message member = getMembershipByUidForMailbox(mailbox).get(set.getUidFrom());
+                final Message<Long> member = getMembershipByUidForMailbox(mailbox).get(set.getUidFrom());
                 if (member != null) {
                     results.add(member);
                 }
