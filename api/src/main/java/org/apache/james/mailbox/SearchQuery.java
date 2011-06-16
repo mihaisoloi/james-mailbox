@@ -21,7 +21,6 @@ package org.apache.james.mailbox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.mail.Flags.Flag;
+
 
 /**
  * <p>
@@ -67,8 +67,17 @@ public class SearchQuery {
         Bcc
     }
     
+    /**
+     * Allow to sort a {@link SearchQuery} response in different ways. 
+     * 
+     *
+     */
     public static final class Sort {
         
+        /**
+         * Specify on what to sort
+         *
+         */
         public static enum SortClause {
             
             /**
@@ -110,7 +119,20 @@ public class SearchQuery {
             Size,
             
             /**
-             * 
+             * <p>
+             *  As used in this document, the term "sent date" refers to the date and
+             *  time from the Date: header, adjusted by time zone to normalize to
+             *  UTC.  For example, "31 Dec 2000 16:01:33 -0800" is equivalent to the
+             *  UTC date and time of "1 Jan 2001 00:01:33 +0000".
+             *  If the time zone is invalid, the date and time SHOULD be treated as
+             *  UTC.  If the time is also invalid, the time SHOULD be treated as
+             *  00:00:00.  If there is no valid date or time, the date and time
+             *  SHOULD be treated as 00:00:00 on the earliest possible date.
+             *  
+             *  If the sent date cannot be determined (a Date: header is missing or
+             *  cannot be parsed), the INTERNALDATE for that message is used as the
+             *  sent date.
+             *  </p>
              */
             SentDate,
             
@@ -142,43 +164,34 @@ public class SearchQuery {
             this.sortClause = sortClause;
         }
         
+        /**
+         * Create a new {@link Sort} which is NOT {@link #reverse}
+         * 
+         * @param sortClause
+         */
+        public Sort(SortClause sortClause) {
+            this(sortClause, false);
+        }
+        
+        /**
+         * Return true if the sort should be in reverse order
+         * 
+         * @return reverse
+         */
         public boolean isReverse() {
             return reverse;
         }
         
+        /**
+         * Return the {@link SortClause} 
+         * 
+         * @return clause
+         */
         public SortClause getSortClause() {
             return sortClause;
         }
     }
 
-    public static int toCalendarType(DateResolution res) {
-        int type;
-        switch (res) {
-        case Year:
-            type = Calendar.YEAR;
-            break;
-        case Month:
-            type = Calendar.MONTH;
-            break;
-        case Day:
-            type = Calendar.DAY_OF_MONTH;
-            break;
-        case Hour:
-            type = Calendar.HOUR_OF_DAY;
-            break;
-        case Minute:
-            type = Calendar.MINUTE;
-            break;
-        case Second:
-            type = Calendar.SECOND;
-            break;
-        default:
-            type = Calendar.MILLISECOND;
-            break;
-        }
-        return type;
-    }
-    
     /**
      * Creates a filter for message size less than the given value
      * 
@@ -610,10 +623,24 @@ public class SearchQuery {
         return criterias;
     }
     
+    /**
+     * Set the {@link Sort}'s to use
+     * 
+     * @param sorts
+     */
     public void setSorts(List<Sort> sorts) {
+        if (sorts == null || sorts.isEmpty()) throw new IllegalArgumentException("There must be at least one Sort");
         this.sorts = sorts;
     }
 
+    /**
+     * Return the {@link Sort}'s which should get used for sorting the result. They get "executed" in a chain, if the first does not
+     * give an result the second will get executed etc.
+     * 
+     * If not set via {@link #setSorts(List)} it will sort via {@link Sort.SortClause#Uid}
+     * 
+     * @return sorts
+     */
     public List<Sort> getSorts() {
         return sorts;
     }

@@ -82,7 +82,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
         /**
          * Contents to be fetched. Composed bitwise.
          * 
-         * @return bitwise descripion
+         * @return bitwise description
          * @see #MINIMAL
          * @see #MIME_MESSAGE
          * @see #KEY

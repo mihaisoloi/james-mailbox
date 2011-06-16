@@ -19,8 +19,16 @@
 
 package org.apache.james.mailbox;
 
+/**
+ * Constants which are used within the mailbox api and implementations
+ * 
+ *
+ */
 public interface MailboxConstants {
 
+    /**
+     * The char which is used to prefix a namespace
+     */
     public static final char NAMESPACE_PREFIX_CHAR = '#';
 
     /** The namespace used for store user inboxes */
