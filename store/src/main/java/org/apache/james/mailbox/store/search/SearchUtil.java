@@ -83,7 +83,7 @@ public class SearchUtil {
      * @return display
      */
     public static String getDisplayAddress(Mailbox mailbox) {
-        String display = mailbox.getDisplayString();
+        String display = mailbox.getName();
         if (display == null || display.length() < 1) {
             String localPart = mailbox.getLocalPart();
             String domainPart = mailbox.getDomain();

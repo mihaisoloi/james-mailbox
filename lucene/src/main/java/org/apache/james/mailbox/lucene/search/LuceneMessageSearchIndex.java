@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -304,14 +305,14 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     private final static SortField SIZE_SORT = new SortField(SIZE_FIELD, SortField.LONG);
     private final static SortField SIZE_SORT_REVERSE = new SortField(SIZE_FIELD, SortField.LONG, true);
 
-    private final static SortField FIRST_CC_MAILBOX_SORT = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.LONG);
-    private final static SortField FIRST_CC_MAILBOX_SORT_REVERSE = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.LONG, true);
+    private final static SortField FIRST_CC_MAILBOX_SORT = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.STRING);
+    private final static SortField FIRST_CC_MAILBOX_SORT_REVERSE = new SortField(FIRST_CC_MAILBOX_NAME_FIELD, SortField.STRING, true);
 
-    private final static SortField FIRST_TO_MAILBOX_SORT = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.LONG);
-    private final static SortField FIRST_TO_MAILBOX_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.LONG, true);
+    private final static SortField FIRST_TO_MAILBOX_SORT = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.STRING);
+    private final static SortField FIRST_TO_MAILBOX_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_NAME_FIELD, SortField.STRING, true);
 
-    private final static SortField FIRST_FROM_MAILBOX_SORT = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG);
-    private final static SortField FIRST_FROM_MAILBOX_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.LONG, true);
+    private final static SortField FIRST_FROM_MAILBOX_SORT = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.STRING);
+    private final static SortField FIRST_FROM_MAILBOX_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_NAME_FIELD, SortField.STRING, true);
 
     
     private final static SortField ARRIVAL_MAILBOX_SORT = new SortField(INTERNAL_DATE_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
@@ -323,11 +324,11 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     private final static SortField SENT_DATE_SORT = new SortField(SENT_DATE_SORT_FIELD_MILLISECOND_RESOLUTION, SortField.LONG);
     private final static SortField SENT_DATE_SORT_REVERSE = new SortField(SENT_DATE_SORT_FIELD_MILLISECOND_RESOLUTION, SortField.LONG, true);
     
-    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.LONG);
-    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.LONG, true);
+    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.STRING);
+    private final static SortField FIRST_TO_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_TO_MAILBOX_DISPLAY_FIELD, SortField.STRING, true);
 
-    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.LONG);
-    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.LONG, true);
+    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.STRING);
+    private final static SortField FIRST_FROM_MAILBOX_DISPLAY_SORT_REVERSE = new SortField(FIRST_FROM_MAILBOX_DISPLAY_FIELD, SortField.STRING, true);
 
     
     public LuceneMessageSearchIndex(MessageMapperFactory<Id> factory, Directory directory) throws CorruptIndexException, LockObtainFailedException, IOException {
@@ -401,7 +402,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
      * @see org.apache.james.mailbox.store.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
      */
     public Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
-        Set<Long> uids = new HashSet<Long>();
+        Set<Long> uids = new LinkedHashSet<Long>();
         IndexSearcher searcher = null;
 
         try {
@@ -1035,6 +1036,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 }
             }
         }
+        // add the uid sorting as last so if no other sorting was able todo the job it will get sorted by the uid
+        fields.add(UID_SORT);
         sort.setSort(fields.toArray(new SortField[0]));
         return sort;
     }

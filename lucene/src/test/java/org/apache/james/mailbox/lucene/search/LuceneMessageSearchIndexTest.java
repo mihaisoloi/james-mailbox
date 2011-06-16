@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import javax.mail.Flags.Flag;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
+import org.apache.james.mailbox.SearchQuery.Sort.SortClause;
 import org.apache.james.mailbox.store.MessageBuilder;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -76,16 +78,22 @@ public class LuceneMessageSearchIndexTest {
         index = new LuceneMessageSearchIndex<Long>(null, new RAMDirectory(), true, useLenient());
         index.setEnableSuffixMatch(true);
         Map<String, String> headersSubject = new HashMap<String, String>();
-        headersSubject.put("Subject", "test");
-       
+        headersSubject.put("Subject", "test (fwd)");
+        headersSubject.put("From", "test99 <test99@localhost>");
+        headersSubject.put("To", "test2 <test2@localhost>, test3 <test3@localhost>");
+
         Map<String, String> headersTest = new HashMap<String, String>();
-        headersSubject.put("Test", "test");
-        
+        headersTest.put("Test", "test");
+        headersTest.put("From", "test1 <test1@localhost>");
+        headersTest.put("To", "test3 <test3@localhost>, test4 <test4@localhost>");
+        headersTest.put("Cc", "test21 <test21@localhost>, test6 <test6@foobar>");
+
         Map<String, String> headersTestSubject =  new HashMap<String, String>();
         headersTestSubject.put("Test", "test");
         headersTestSubject.put("Subject", "test2");
-
-
+        headersTestSubject.put("Date", "Thu, 14 Feb 1990 12:00:00 +0000 (GMT)");
+        headersTestSubject.put("From", "test12 <test12@localhost>");
+        headersTestSubject.put("Cc", "test211 <test21@localhost>, test6 <test6@foobar>");
         
         SimpleMailboxMembership m2 = new SimpleMailboxMembership(mailbox2.getMailboxId(),1, 0, new Date(), 20, new Flags(Flag.ANSWERED), "My Body".getBytes(), headersSubject);
         index.add(null, mailbox2, m2);
@@ -97,7 +105,6 @@ public class LuceneMessageSearchIndexTest {
         cal.set(1980, 2, 10);
         SimpleMailboxMembership m3 = new SimpleMailboxMembership(mailbox.getMailboxId(),2, 0, cal.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody".getBytes(), headersTest);
         index.add(null, mailbox, m3);
-        System.out.println(new Date(Long.MAX_VALUE).toGMTString());
         Calendar cal2 = Calendar.getInstance();
         cal2.set(8000, 2, 10);
         SimpleMailboxMembership m4 = new SimpleMailboxMembership(mailbox.getMailboxId(),3, 0, cal2.getTime(), 20, new Flags(Flag.DELETED), "My Otherbody2".getBytes(), headersTestSubject);
@@ -407,6 +414,281 @@ public class LuceneMessageSearchIndexTest {
         assertEquals(2L, it4.next().longValue());
         assertEquals(3L, it4.next().longValue());
 
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortUid() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortUidReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.Uid, true)));
+        q2.andCriteria(SearchQuery.all());
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortSentDate() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.SentDate, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortSentDateReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.SentDate, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    @Test
+    public void testSortBaseSubject() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.BaseSubject, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortBaseSubjectReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.BaseSubject, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortMailboxFrom() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxFrom, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void  testSortMailboxFromReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxFrom, true)));
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    
+    @Test
+    public void testSortMailboxCc() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxCc, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void  testSortMailboxCcReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxCc, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertEquals(1L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortMailboxTo() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxTo, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void  testSortMailboxToReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.MailboxTo, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortDisplayTo() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.DisplayTo, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void  testSortDisplayToReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.DisplayTo, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    
+    @Test
+    public void testSortDisplayFrom() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.DisplayFrom, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void  testSortDisplayFromReverse() throws Exception {
+       
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.DisplayFrom, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortArrival() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.Arrival, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortArrivalReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.Arrival, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertFalse(it4.hasNext());
+    }
+    @Test
+    public void testSortSize() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.Size, false)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
+        assertEquals(1L, it4.next().longValue());
+
+        assertFalse(it4.hasNext());
+    }
+    
+    @Test
+    public void testSortSizeReverse() throws Exception {
+        SearchQuery q2 = new SearchQuery();
+        q2.andCriteria(SearchQuery.all());
+        q2.setSorts(Arrays.asList(new SearchQuery.Sort(SortClause.Size, true)));
+
+        Iterator<Long> it4 = index.search(null, mailbox, q2);
+        assertEquals(1L, it4.next().longValue());
+        assertEquals(2L, it4.next().longValue());
+        assertEquals(3L, it4.next().longValue());
         assertFalse(it4.hasNext());
     }
     
