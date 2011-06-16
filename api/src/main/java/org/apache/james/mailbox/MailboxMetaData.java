@@ -59,12 +59,12 @@ public interface MailboxMetaData {
      * 
      * @return not null
      */
-    public Children inferiors();
+    Children inferiors();
 
     /**
      * Gets the RFC3501 Selectability flag.
      */
-    public Selectability getSelectability();
+    Selectability getSelectability();
 
     /**
      * Return the delimiter

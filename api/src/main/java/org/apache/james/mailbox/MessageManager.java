@@ -196,14 +196,14 @@ public interface MessageManager {
          * 
          * @return the uids flagged RECENT in this mailbox,
          */
-        public List<Long> getRecent();
+        List<Long> getRecent();
 
         /**
          * Gets the number of recent messages.
          * 
          * @return the number of messages flagged RECENT in this mailbox
          */
-        public long countRecent();
+        long countRecent();
 
         /**
          * Gets the flags which can be stored by this mailbox.

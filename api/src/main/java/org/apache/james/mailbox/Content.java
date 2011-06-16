@@ -41,7 +41,7 @@ public interface Content {
      * @throws IOException
      *             when channel IO fails
      */
-    public void writeTo(WritableByteChannel channel) throws IOException;
+    void writeTo(WritableByteChannel channel) throws IOException;
 
     /**
      * Size (in octets) of the content.
@@ -49,5 +49,5 @@ public interface Content {
      * @return number of octets to be written
      * @throws MessagingException
      */
-    public long size();
+    long size();
 }

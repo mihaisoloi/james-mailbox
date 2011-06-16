@@ -176,7 +176,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      * @throws MailboxException
      *             when the creation fails for other reasons
      */
-    public MailboxSession createSystemSession(String userName, Logger log) throws BadCredentialsException, MailboxException;
+    MailboxSession createSystemSession(String userName, Logger log) throws BadCredentialsException, MailboxException;
 
     /**
      * Autenticates the given user against the given password.<br>
@@ -230,6 +230,6 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      * @return pathList
      * @throws MailboxException
      */
-    public List<MailboxPath> list(MailboxSession session) throws MailboxException;
+    List<MailboxPath> list(MailboxSession session) throws MailboxException;
 
 }

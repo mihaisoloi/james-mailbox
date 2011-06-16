@@ -32,5 +32,5 @@ public interface InputStreamContent extends Content {
      * @return content
      * @throws IOException
      */
-    public InputStream getInputStream() throws IOException;
+    InputStream getInputStream() throws IOException;
 }

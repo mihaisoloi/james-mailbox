@@ -49,40 +49,40 @@ public interface MailboxSession {
      * 
      * @return type
      */
-    public SessionType getType();
+    SessionType getType();
     
     /**
      * Gets the session ID.
      * 
      * @return session id
      */
-    public long getSessionId();
+    long getSessionId();
 
     /**
      * Is this session open?
      * 
      * @return true if the session is open, false otherwise
      */
-    public boolean isOpen();
+    boolean isOpen();
 
     /**
      * Closes this session.
      */
-    public void close();
+    void close();
 
     /**
      * Gets the logger for this session context.
      * 
      * @return not null
      */
-    public Logger getLog();
+    Logger getLog();
 
     /**
      * Gets the user executing this session.
      * 
      * @return not null
      */
-    public User getUser();
+    User getUser();
 
     /**
      * A mailbox user. Useful for specialist mailbox implementation.
@@ -93,14 +93,14 @@ public interface MailboxSession {
          * 
          * @return not null
          */
-        public String getUserName();
+        String getUserName();
 
         /**
          * Return the Password for the logged in user
          * 
          * @return password
          */
-        public String getPassword();
+        String getPassword();
 
         /**
          * Gets acceptable localisation for this user in preference order.<br>
@@ -109,7 +109,7 @@ public interface MailboxSession {
          * 
          * @return not null, when empty the default local should be used
          */
-        public List<Locale> getLocalePreferences();
+        List<Locale> getLocalePreferences();
     }
 
     /**
@@ -121,7 +121,7 @@ public interface MailboxSession {
      * 
      * @return Personal Namespace, not null
      */
-    public String getPersonalSpace();
+    String getPersonalSpace();
 
     /**
      * Gets the <a href='http://www.isi.edu/in-notes/rfc2342.txt' rel='tag'>RFC
@@ -132,7 +132,7 @@ public interface MailboxSession {
      * 
      * @return Other Users Namespace or null when there is non available
      */
-    public String getOtherUsersSpace();
+    String getOtherUsersSpace();
 
     /**
      * Iterates the <a href='http://www.isi.edu/in-notes/rfc2342.txt'
@@ -141,19 +141,19 @@ public interface MailboxSession {
      * 
      * @return not null though possibly empty
      */
-    public Collection<String> getSharedSpaces();
+    Collection<String> getSharedSpaces();
 
     /**
      * Return the stored attributes for this {@link MailboxSession}.
      * 
      * @return attributes
      */
-    public Map<Object, Object> getAttributes();
+    Map<Object, Object> getAttributes();
 
     /**
      * Return server side, folder path separator
      * 
      * @return path separator
      */
-    public char getPathDelimiter();
+    char getPathDelimiter();
 }

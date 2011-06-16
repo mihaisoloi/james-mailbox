@@ -91,7 +91,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * @see #BODY_CONTENT
          * @see #MIME_CONTENT
          */
-        public int content();
+        int content();
 
         /**
          * Gets contents to be fetched for contained parts. For each part to be
@@ -100,7 +100,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * @return <code>Set</code> of {@link PartContentDescriptor}, or null if
          *         there is no part content to be fetched
          */
-        public Set<PartContentDescriptor> getPartContentDescriptors();
+        Set<PartContentDescriptor> getPartContentDescriptors();
 
         /**
          * Describes the contents to be fetched for a mail part. All
@@ -119,14 +119,14 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
              * @see #FULL_CONTENT
              * @see #BODY_CONTENT
              */
-            public int content();
+            int content();
 
             /**
              * Path describing the part to be fetched.
              * 
              * @return path describing the part, not null
              */
-            public MimePath path();
+            MimePath path();
         }
     }
 
@@ -167,7 +167,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * @return name of this header
          * @throws MessagingException
          */
-        public String getName() throws MailboxException;
+        String getName() throws MailboxException;
 
         /**
          * Gets the (unparsed) value of this header.
@@ -175,7 +175,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * @return value of this header
          * @throws MessagingException
          */
-        public String getValue() throws MailboxException;
+        String getValue() throws MailboxException;
     }
 
     /**
@@ -246,6 +246,6 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * 
          * @return part positions describing the path
          */
-        public int[] getPositions();
+        int[] getPositions();
     }
 }

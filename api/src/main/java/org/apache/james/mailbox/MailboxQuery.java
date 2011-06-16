@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Expresses select criteria for mailboxes.
  */
-public class MailboxQuery {
+public final class MailboxQuery {
 
     private final MailboxPath base;
 

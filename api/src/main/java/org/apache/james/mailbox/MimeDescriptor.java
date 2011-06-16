@@ -32,49 +32,49 @@ public interface MimeDescriptor extends Headers {
      * 
      * @return top level MIME content media type, or null if default
      */
-    public String getMimeType();
+    String getMimeType();
 
     /**
      * Gets the MIME content subtype.
      * 
      * @return the MIME content subtype, or null if default
      */
-    public String getMimeSubType();
+    String getMimeSubType();
 
     /**
      * Gets the MIME <code>Content-ID</code> header value.
      * 
      * @return MIME <code>Content-ID</code>, possibly null
      */
-    public String getContentID();
+    String getContentID();
 
     /**
      * Gets MIME <code>Content-Description</code> header value.
      * 
      * @return MIME <code>Content-Description</code>, possibly null
      */
-    public String getContentDescription();
+    String getContentDescription();
 
     /**
      * Gets MIME <code>Content-Location</code> header value.
      * 
      * @return parsed MIME <code>Content-Location</code>, possibly null
      */
-    public String getContentLocation();
+    String getContentLocation();
 
     /**
      * Gets MIME <code>Content-MD5</code> header value.
      * 
      * @return parsed MIME <code>Content-MD5</code>, possibly null
      */
-    public String getContentMD5();
+    String getContentMD5();
 
     /**
      * Gets the MIME content transfer encoding.
      * 
      * @return MIME <code>Content-Transfer-Encoding</code>, possibly null
      */
-    public String getTransferContentEncoding();
+    String getTransferContentEncoding();
 
     /**
      * Gets the languages, From the MIME <code>Content-Language</code> header
@@ -82,7 +82,7 @@ public interface MimeDescriptor extends Headers {
      * 
      * @return <code>List</code> of <code>String</code> names
      */
-    public List<String> getLanguages();
+    List<String> getLanguages();
 
     /**
      * Gets MIME <code>Content-Disposition</code>.
@@ -90,14 +90,14 @@ public interface MimeDescriptor extends Headers {
      * @return <code>Content-Disposition</code>, or null if no disposition
      *         header exists
      */
-    public String getDisposition();
+    String getDisposition();
 
     /**
      * Gets MIME <code>Content-Disposition</code> parameters.
      * 
      * @return <code>Content-Disposition</code> values indexed by names
      */
-    public Map<String, String> getDispositionParams();
+    Map<String, String> getDispositionParams();
 
     /**
      * Gets the number of lines of text in a part of type <code>TEXT</code> when
@@ -106,14 +106,14 @@ public interface MimeDescriptor extends Headers {
      * @return <code>CRLF</code> count when a <code>TEXT</code> type, otherwise
      *         -1
      */
-    public long getLines();
+    long getLines();
 
     /**
      * The number of octets contained in the body of this part.
      * 
      * @return number of octets
      */
-    public long getBodyOctets();
+    long getBodyOctets();
 
     /**
      * Gets parts.
@@ -121,7 +121,7 @@ public interface MimeDescriptor extends Headers {
      * @return <code>MimeDescriptor</code> <code>Iterator</code> when a
      *         composite top level MIME media type, null otherwise
      */
-    public Iterator<MimeDescriptor> parts();
+    Iterator<MimeDescriptor> parts();
 
     /**
      * Gets embedded message.
@@ -129,12 +129,12 @@ public interface MimeDescriptor extends Headers {
      * @return <code>MimeDescriptor</code> when top level MIME type is
      *         <code>message</code>, null otherwise
      */
-    public MimeDescriptor embeddedMessage();
+    MimeDescriptor embeddedMessage();
 
     /**
      * Gets MIME body parameters parsed from <code>Content-Type</code>.
      * 
      * @return <code>Header</code> <code>Iterator</code>, not null
      */
-    public Map<String, String> contentTypeParameters();
+    Map<String, String> contentTypeParameters();
 }
