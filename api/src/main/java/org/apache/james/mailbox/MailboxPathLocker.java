@@ -35,12 +35,12 @@ public interface MailboxPathLocker {
      * @param execution
      * @throws MailboxException
      */
-    public void executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution execution) throws MailboxException;
+    public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException;
 
     /**
      * Execute code while holding a lock
      */
-    public interface LockAwareExecution {
+    public interface LockAwareExecution<T> {
 
         /**
          * Execute code block
@@ -49,7 +49,7 @@ public interface MailboxPathLocker {
          * @param path
          * @throws MailboxException
          */
-        public void execute(MailboxSession session, MailboxPath path) throws MailboxException;
+        public T execute() throws MailboxException;
     }
 
 }

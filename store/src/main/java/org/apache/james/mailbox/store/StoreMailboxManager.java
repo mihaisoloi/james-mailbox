@@ -276,12 +276,12 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
             // TODO: transaction
             for (final MailboxPath mailbox : mailboxPath.getHierarchyLevels(getDelimiter()))
 
-                locker.executeWithLock(mailboxSession, mailbox, new LockAwareExecution() {
+                locker.executeWithLock(mailboxSession, mailbox, new LockAwareExecution<Void>() {
 
-                    public void execute(MailboxSession session, MailboxPath mailbox) throws MailboxException {
-                        if (!mailboxExists(mailbox, session)) {
-                            final org.apache.james.mailbox.store.mail.model.Mailbox<Id> m = doCreateMailbox(mailbox, session);
-                            final MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
+                    public Void execute() throws MailboxException {
+                        if (!mailboxExists(mailbox, mailboxSession)) {
+                            final org.apache.james.mailbox.store.mail.model.Mailbox<Id> m = doCreateMailbox(mailbox, mailboxSession);
+                            final MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(mailboxSession);
                             mapper.execute(new TransactionalMapper.VoidTransaction() {
 
                                 public void runVoid() throws MailboxException {
@@ -291,8 +291,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                             });
                             
                             // notify listeners
-                            dispatcher.mailboxAdded(session, m);
+                            dispatcher.mailboxAdded(mailboxSession, m);
                         }
+                        return null;
+
                     }
                 });
 
@@ -418,9 +420,9 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
 
                 // rename submailboxes
                 final MailboxPath children = new MailboxPath(MailboxConstants.USER_NAMESPACE, from.getUser(), from.getName() + getDelimiter() + "%");
-                locker.executeWithLock(session, children, new LockAwareExecution() {
+                locker.executeWithLock(session, children, new LockAwareExecution<Void>() {
                     
-                    public void execute(MailboxSession session, MailboxPath children) throws MailboxException {
+                    public Void execute() throws MailboxException {
                         final List<Mailbox<Id>> subMailboxes = mapper.findMailboxWithPathLike(children);
                         for (Mailbox<Id> sub : subMailboxes) {
                             final String subOriginalName = sub.getName();
@@ -433,6 +435,8 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
                             if (log.isDebugEnabled())
                                 log.debug("Rename mailbox sub-mailbox " + subOriginalName + " to " + subNewName);
                         }
+                        return null;
+
                     }
                 });
     

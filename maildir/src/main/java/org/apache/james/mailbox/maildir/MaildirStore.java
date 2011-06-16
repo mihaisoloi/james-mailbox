@@ -87,9 +87,9 @@ public class MaildirStore {
      * @return The Mailbox object populated with data from the file system
      * @throws MailboxException If the mailbox folder doesn't exist or can't be read
      */
-    public Mailbox<Integer> loadMailbox(File root, String namespace, String user, String folderName) throws MailboxException {
+    public Mailbox<Integer> loadMailbox(MailboxSession session, File root, String namespace, String user, String folderName) throws MailboxException {
         String mailboxName = getMailboxNameFromFolderName(folderName);
-        return loadMailbox(new File(root, folderName), new MailboxPath(namespace, user, mailboxName));
+        return loadMailbox(session, new File(root, folderName), new MailboxPath(namespace, user, mailboxName));
     }
 
     /**
@@ -99,13 +99,13 @@ public class MaildirStore {
      * @throws MailboxNotFoundException If the mailbox folder doesn't exist
      * @throws MailboxException If the mailbox folder can't be read
      */
-    public Mailbox<Integer> loadMailbox(MailboxPath mailboxPath)
+    public Mailbox<Integer> loadMailbox(MailboxSession session, MailboxPath mailboxPath)
     throws MailboxNotFoundException, MailboxException {
         MaildirFolder folder = new MaildirFolder(getFolderName(mailboxPath), mailboxPath, locker);
 
         if (!folder.exists())
             throw new MailboxNotFoundException(mailboxPath);
-        return loadMailbox(folder.getRootFile(), mailboxPath);
+        return loadMailbox(session, folder.getRootFile(), mailboxPath);
     }
 
     /**
@@ -115,13 +115,13 @@ public class MaildirStore {
      * @return The Mailbox object populated with data from the file system
      * @throws MailboxException If the mailbox folder doesn't exist or can't be read
      */
-    private Mailbox<Integer> loadMailbox(File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
+    private Mailbox<Integer> loadMailbox(MailboxSession session, File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
         long uidValidity;
         long lastUid;
         MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath(), mailboxPath, locker);
         try {
             uidValidity = folder.getUidValidity();
-            lastUid = folder.getLastUid();
+            lastUid = folder.getLastUid(session);
             return new MaildirMailbox(mailboxPath, uidValidity, lastUid, folder.getHighestModSeq());
 
         } catch (IOException e) {
@@ -239,7 +239,7 @@ public class MaildirStore {
      */
     public long nextUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
         try {
-            return createMaildirFolder(mailbox).getLastUid() +1;
+            return createMaildirFolder(mailbox).getLastUid(session) +1;
         } catch (MailboxException e) {
             throw new MailboxException("Unable to generate next uid", e);
         }

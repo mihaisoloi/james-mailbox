@@ -20,6 +20,7 @@
 package org.apache.james.mailbox.store;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.james.mailbox.MailboxException;
@@ -36,7 +37,7 @@ import org.apache.james.mailbox.MailboxSession;
  */
 public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
 
-    private final ConcurrentHashMap<MailboxPath, ReentrantLock> paths = new ConcurrentHashMap<MailboxPath, ReentrantLock>();
+    private final ConcurrentHashMap<MailboxPath, Lock> paths = new ConcurrentHashMap<MailboxPath, Lock>();
 
 
     /*
@@ -44,10 +45,10 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#lock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
     protected void lock(MailboxSession session, MailboxPath path) throws MailboxException {
-        ReentrantLock lock = paths.get(path);
+        Lock lock = paths.get(path);
         if (lock == null) {
             lock = new ReentrantLock();
-            ReentrantLock storedLock = paths.putIfAbsent(path, lock);
+            Lock storedLock = paths.putIfAbsent(path, lock);
             if (storedLock != null) {
                 lock = storedLock;
             }
@@ -60,7 +61,7 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
     protected void unlock(MailboxSession session, MailboxPath path) throws MailboxException {
-        ReentrantLock lock = paths.get(path);
+        Lock lock = paths.get(path);
         
         if (lock != null) {
             lock.unlock();
