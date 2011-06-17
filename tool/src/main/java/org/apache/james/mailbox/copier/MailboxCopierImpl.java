@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.mail.Flags.Flag;
 
@@ -33,8 +34,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
-import org.apache.james.mailbox.util.FetchGroupImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,20 @@ import org.slf4j.LoggerFactory;
  */
 public class MailboxCopierImpl implements MailboxCopier {
 
+    private final static FetchGroup GROUP = new FetchGroup() {
+
+        @Override
+        public int content() {
+            return FULL_CONTENT;
+        }
+
+        @Override
+        public Set<PartContentDescriptor> getPartContentDescriptors() {
+            return null;
+        }
+        
+    };
+    
     /**
      * The logger.
      */
@@ -105,7 +120,7 @@ public class MailboxCopierImpl implements MailboxCopier {
                 dstMailboxManager.endProcessingRequest(dstMailboxSession);
 
                 int j=0;
-                Iterator<MessageResult> messageResultIterator = srcMessageManager.getMessages(MessageRange.all(), FetchGroupImpl.FULL_CONTENT, srcMailboxSession);
+                Iterator<MessageResult> messageResultIterator = srcMessageManager.getMessages(MessageRange.all(), GROUP, srcMailboxSession);
                 
                 while (messageResultIterator.hasNext()) {
 
