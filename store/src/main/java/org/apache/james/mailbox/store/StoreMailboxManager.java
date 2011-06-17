@@ -50,7 +50,6 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.search.SimpleMessageSearchIndex;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.transaction.TransactionalMapper;
-import org.apache.james.mailbox.util.SimpleMailboxMetaData;
 import org.slf4j.Logger;
 
 /**

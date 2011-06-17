@@ -40,7 +40,6 @@ import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
-import org.apache.james.mailbox.util.MessageResultImpl;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.Field;
 

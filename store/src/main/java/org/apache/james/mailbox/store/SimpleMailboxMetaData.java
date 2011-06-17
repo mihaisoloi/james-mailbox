@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.util;
+package org.apache.james.mailbox.store;
 
 import org.apache.james.mailbox.MailboxMetaData;
 import org.apache.james.mailbox.MailboxPath;

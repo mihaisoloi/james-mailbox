@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.util;
+package org.apache.james.mailbox.store;
 
 import java.util.Date;
 import java.util.HashMap;
