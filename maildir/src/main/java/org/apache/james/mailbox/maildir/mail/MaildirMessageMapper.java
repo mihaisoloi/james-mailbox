@@ -115,7 +115,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
-    public void findInMailbox(Mailbox<Integer> mailbox, MessageRange set, MailboxMembershipCallback<Integer> callback)
+    public void findInMailbox(Mailbox<Integer> mailbox, MessageRange set, MessageCallback<Integer> callback)
     throws MailboxException {
         final List<Message<Integer>> results;
         final long from = set.getUidFrom();
@@ -141,11 +141,11 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         if (batchSize > 0) {
             int i = 0;
             while (i * batchSize < results.size()) {
-                callback.onMailboxMembers(results.subList(i * batchSize, (i + 1) * batchSize < results.size() ? (i + 1) * batchSize : results.size()));
+                callback.onMessages(results.subList(i * batchSize, (i + 1) * batchSize < results.size() ? (i + 1) * batchSize : results.size()));
                 i++;
             }
         } else {
-            callback.onMailboxMembers(results);
+            callback.onMessages(results);
         }
     }
 
@@ -474,9 +474,9 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
-        findInMailbox(mailbox, set, new MailboxMembershipCallback<Integer>() {
+        findInMailbox(mailbox, set, new MessageCallback<Integer>() {
 
-            public void onMailboxMembers(List<Message<Integer>> members) throws MailboxException {
+            public void onMessages(List<Message<Integer>> members) throws MailboxException {
                 for (final Message<Integer> member : members) {
                     Flags originalFlags = member.createFlags();
                     if (replace) {

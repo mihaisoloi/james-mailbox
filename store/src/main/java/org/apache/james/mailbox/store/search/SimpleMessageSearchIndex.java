@@ -31,10 +31,10 @@ import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 
 /**
  * {@link MessageSearchIndex} which just fetch {@link Message}'s from the {@link MessageMapper} and use {@link MessageSearcher}
@@ -64,9 +64,9 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             NumericRange[] ranges = uidCrit.getOperator().getRange();
             for (int i = 0; i < ranges.length; i++) {
                 NumericRange r = ranges[i];
-                mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), new MailboxMembershipCallback<Id>() {
+                mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), new MessageCallback<Id>() {
 
-                    public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
+                    public void onMessages(List<Message<Id>> list) throws MailboxException {
                         for (int i = 0; i < list.size(); i++) {
                             long uid = list.get(i).getUid();
                             if (uids.contains(uid) == false) {
@@ -84,9 +84,9 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             
             final List<Message<Id>> hits = new ArrayList<Message<Id>>();
 
-            mapper.findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
+            mapper.findInMailbox(mailbox, MessageRange.all(), new MessageCallback<Id>() {
 
-                public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
+                public void onMessages(List<Message<Id>> list) throws MailboxException {
                     for (int i = 0; i < list.size(); i++) {
                         Message<Id> m = list.get(i);
                         if (hits.contains(m) == false) {

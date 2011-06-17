@@ -58,7 +58,6 @@ import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
-import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
 import org.apache.james.mime4j.message.Header;
@@ -535,8 +534,8 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      */
     public void getMessages(MessageRange set, final FetchGroup fetchGroup, MailboxSession mailboxSession, final MessageCallback messageCallback) throws MailboxException {
 
-        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
-            public void onMailboxMembers(List<Message<Id>> rows) throws MailboxException {
+        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
+            public void onMessages(List<Message<Id>> rows) throws MailboxException {
                 messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
             }
         });
@@ -630,9 +629,9 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
             final Map<Long, MessageMetaData> copiedMessages = new HashMap<Long, MessageMetaData>();
-            messageMapper.findInMailbox(getMailboxEntity(), set, new MailboxMembershipCallback<Id>() {
+            messageMapper.findInMailbox(getMailboxEntity(), set, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
 
-                public void onMailboxMembers(List<Message<Id>> originalRows) throws MailboxException {
+                public void onMessages(List<Message<Id>> originalRows) throws MailboxException {
                     Iterator<MessageMetaData> ids = to.copy(originalRows, session);
                     while (ids.hasNext()) {
                         MessageMetaData data = ids.next();

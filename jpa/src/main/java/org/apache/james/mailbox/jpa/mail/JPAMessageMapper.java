@@ -118,7 +118,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.MessageRange)
      */
-    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MailboxMembershipCallback<Long> callback) throws MailboxException {
+    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MessageCallback<Long> callback) throws MailboxException {
         try {
             List<Message<Long>> results;
             long from = set.getUidFrom();
@@ -146,7 +146,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
                 }
 
                 if (results.size() > 0) {
-                    callback.onMailboxMembers(results);
+                    callback.onMessages(results);
 
                     // move the start UID behind the last fetched message UID
                     from = results.get(results.size() - 1).getUid() + 1;

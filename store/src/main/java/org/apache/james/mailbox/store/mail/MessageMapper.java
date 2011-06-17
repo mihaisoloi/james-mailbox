@@ -47,9 +47,9 @@ public interface MessageMapper<Id> extends Mapper {
      * @param callback callback object 
      * @throws MailboxException
      */
-    public abstract void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MailboxMembershipCallback<Id> callback)
+    public abstract void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MessageCallback<Id> callback)
             throws MailboxException;
-    
+
     /**
      * Return a {@link Iterator} which holds the uids for all deleted Messages for the given {@link MessageRange} which are marked for deletion
      * The list must be ordered
@@ -170,5 +170,17 @@ public interface MessageMapper<Id> extends Mapper {
      * @throws MailboxException
      */
     public abstract long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
+    
+
+    public interface MessageCallback<Id> {
+        
+        /**
+         * Callback which get executed for a {@link List} of {@link Message}'s
+         * 
+         * @param list
+         * @throws MailboxException
+         */
+        void onMessages(List<Message<Id>> list) throws MailboxException;
+    }
 
 }

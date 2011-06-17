@@ -34,7 +34,7 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
+import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 
 /**
  * {@link QuotaManager} which will keep track of quota by listing for {@link Event}'s.
@@ -98,11 +98,11 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
                 final AtomicLong mSizes = new AtomicLong(0);
                 List<Mailbox> mailboxes = factory.getMailboxMapper(session).findMailboxWithPathLike(new MailboxPath(session.getPersonalSpace(), id, "%"));
                 for (int i = 0; i < mailboxes.size(); i++) {
-                    factory.getMessageMapper(session).findInMailbox(mailboxes.get(i), MessageRange.all(), new MailboxMembershipCallback<Object>() {
+                    factory.getMessageMapper(session).findInMailbox(mailboxes.get(i), MessageRange.all(), new MessageCallback<Object>() {
                         long messageSizes = 0;
 
                         @Override
-                        public void onMailboxMembers(List<Message<Object>> list) throws MailboxException {
+                        public void onMessages(List<Message<Object>> list) throws MailboxException {
                             for (int i = 0; i < list.size(); i++) {
                                 messageSizes += list.get(i).getFullContentOctets();
                             }

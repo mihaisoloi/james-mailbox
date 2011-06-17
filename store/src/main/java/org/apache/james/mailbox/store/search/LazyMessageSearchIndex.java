@@ -28,9 +28,9 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 
 /**
  * {@link ListeningMessageSearchIndex} implementation which wraps another {@link ListeningMessageSearchIndex} and will forward all calls to it.
@@ -83,10 +83,10 @@ public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> 
                 done = oldDone;
             }
             synchronized (done) {
-                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), new MailboxMembershipCallback<Id>() {
+                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), new MessageCallback<Id>() {
 
                     @Override
-                    public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
+                    public void onMessages(List<Message<Id>> list) throws MailboxException {
                         for (int i = 0; i < list.size(); i++) {
                             final Message<Id> message = list.get(i);
 

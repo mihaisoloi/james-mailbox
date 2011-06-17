@@ -32,10 +32,10 @@ import org.apache.james.mailbox.store.MailboxEventDispatcher.AddedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.ExpungedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.FlagsUpdatedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.MailboxDeletionImpl;
+import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.transaction.Mapper.MailboxMembershipCallback;
 
 /**
  * {@link MessageSearchIndex} which needs to get registered as global {@link MailboxListener} and so get
@@ -80,10 +80,10 @@ public abstract class ListeningMessageSearchIndex<Id> implements MessageSearchIn
 
                     while (uids.hasNext()) {
                         long next = uids.next();
-                        factory.getMessageMapper(session).findInMailbox(mailbox, MessageRange.one(next), new MailboxMembershipCallback<Id>() {
+                        factory.getMessageMapper(session).findInMailbox(mailbox, MessageRange.one(next), new MessageCallback<Id>() {
 
                             @Override
-                            public void onMailboxMembers(List<Message<Id>> list) throws MailboxException {
+                            public void onMessages(List<Message<Id>> list) throws MailboxException {
                                 for (int i = 0; i < list.size(); i++) {
                                     Message<Id> message = list.get(i);
                                     try {

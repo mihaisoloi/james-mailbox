@@ -260,7 +260,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * .james.imap.mailbox.MessageRange)
      */
     public void findInMailbox(Mailbox<String> mailbox, MessageRange set,
-    		MailboxMembershipCallback<String> callback) throws MailboxException {
+    		MessageCallback<String> callback) throws MailboxException {
         try {
         	List<Message<String>> results;
             long from = set.getUidFrom();
@@ -286,7 +286,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 	            }
             
 	            if(results.size() > 0) {
-					callback.onMailboxMembers(results);
+					callback.onMessages(results);
 										
 					// move the start UID behind the last fetched message UID					
 					from = results.get(results.size()-1).getUid()+1;

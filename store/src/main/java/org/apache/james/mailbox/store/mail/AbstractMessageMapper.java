@@ -170,9 +170,9 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      */
     public Iterator<UpdatedFlags> updateFlags(final Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
-        findInMailbox(mailbox, set, new MailboxMembershipCallback<Id>() {
+        findInMailbox(mailbox, set, new MessageCallback<Id>() {
 
-            public void onMailboxMembers(List<Message<Id>> members) throws MailboxException {
+            public void onMessages(List<Message<Id>> members) throws MailboxException {
                 
                 long modSeq = -1;
                 if (members.isEmpty() == false) {

@@ -90,7 +90,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(java.lang.Object, org.apache.james.mailbox.MessageRange)
      */
-    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MailboxMembershipCallback<Long> callback) throws MailboxException {
+    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MessageCallback<Long> callback) throws MailboxException {
         final List<Message<Long>> results;
         final int batchSize = set.getBatchSize();
         final MessageRange.Type type = set.getType();
@@ -131,11 +131,11 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         if(batchSize > 0) {
 	        int i = 0;
 	        while(i*batchSize < results.size()) {
-	        	callback.onMailboxMembers(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
+	        	callback.onMessages(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
 	        	i++;
 	        }
         } else {
-        	callback.onMailboxMembers(results);
+        	callback.onMessages(results);
         }
     }
     
@@ -147,9 +147,9 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     public Map<Long, MessageMetaData> expungeMarkedForDeletion(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
         final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
 
-        findInMailbox(mailbox, set, new MailboxMembershipCallback<Long>() {
+        findInMailbox(mailbox, set, new MessageCallback<Long>() {
 
-            public void onMailboxMembers(List<Message<Long>> results) throws MailboxException {
+            public void onMessages(List<Message<Long>> results) throws MailboxException {
                 for (final Iterator<Message<Long>> it = results.iterator(); it.hasNext();) {
                     Message<Long> member = it.next();
                     if (member.isDeleted()) {
