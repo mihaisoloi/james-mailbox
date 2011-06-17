@@ -54,7 +54,7 @@ import org.apache.openjpa.persistence.jdbc.Index;
  */
 @IdClass(AbstractJPAMessage.MailboxIdUidKey.class)
 @NamedQueries({
-    @NamedQuery(name="findRecentMessageUidssInMailbox",
+    @NamedQuery(name="findRecentMessageUidsInMailbox",
             query="SELECT message.uid FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.recent = TRUE"),
     @NamedQuery(name="findUnseenMessagesInMailboxOrderByUid",
             query="SELECT message FROM Message message WHERE message.mailbox.mailboxId = :idParam AND message.seen = FALSE ORDER BY message.uid ASC"),
