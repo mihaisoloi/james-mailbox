@@ -259,40 +259,39 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache
      * .james.imap.mailbox.MessageRange)
      */
-    public void findInMailbox(Mailbox<String> mailbox, MessageRange set,
-    		MessageCallback<String> callback) throws MailboxException {
+    public void findInMailbox(Mailbox<String> mailbox, MessageRange set, MessageCallback<String> callback) throws MailboxException {
         try {
-        	List<Message<String>> results;
+            List<Message<String>> results;
             long from = set.getUidFrom();
             final long to = set.getUidTo();
             final int batchSize = set.getBatchSize();
             final Type type = set.getType();
-            
+
             do {
-	            switch (type) {
-	                default:
-	                case ALL:
-	                    results = findMessagesInMailbox(mailbox, batchSize);
-	                    break;
-	                case FROM:
-	                	results = findMessagesInMailboxAfterUID(mailbox, from, batchSize);
-	                    break;
-	                case ONE:
-	                	results = findMessageInMailboxWithUID(mailbox, from);
-	                    break;
-	                case RANGE:
-	                	results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, batchSize);
-	                    break;       
-	            }
-            
-	            if(results.size() > 0) {
-					callback.onMessages(results);
-										
-					// move the start UID behind the last fetched message UID					
-					from = results.get(results.size()-1).getUid()+1;
-				}
-	            
-	        } while(results.size() > 0 && batchSize > 0);
+                switch (type) {
+                default:
+                case ALL:
+                    results = findMessagesInMailbox(mailbox, batchSize);
+                    break;
+                case FROM:
+                    results = findMessagesInMailboxAfterUID(mailbox, from, batchSize);
+                    break;
+                case ONE:
+                    results = findMessageInMailboxWithUID(mailbox, from);
+                    break;
+                case RANGE:
+                    results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, batchSize);
+                    break;
+                }
+
+                if (results.size() > 0) {
+                    callback.onMessages(results);
+
+                    // move the start UID behind the last fetched message UID
+                    from = results.get(results.size() - 1).getUid() + 1;
+                }
+
+            } while (results.size() > 0 && batchSize > 0);
         } catch (RepositoryException e) {
             throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
         }
