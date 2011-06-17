@@ -225,19 +225,12 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
-    public List<Message<Integer>> findRecentMessagesInMailbox(Mailbox<Integer> mailbox)
+    public List<Long> findRecentMessageUidsInMailbox(Mailbox<Integer> mailbox)
     throws MailboxException {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
-        try {
-            SortedMap<Long, MaildirMessageName> recentMessageNames = folder.getRecentMessages(mailboxSession);
-            
-            List<Message<Integer>> recentMessages = new ArrayList<Message<Integer>>(recentMessageNames.size());
-            for (Entry<Long, MaildirMessageName> entry : recentMessageNames.entrySet())
-                recentMessages.add(new LazyLoadingMaildirMessage(mailbox, entry.getKey(), entry.getValue()));
-            return recentMessages;
-        } catch (IOException e) {
-            throw new MailboxException("Failure while search recent messages in Mailbox " + mailbox, e );
-        }
+        SortedMap<Long, MaildirMessageName> recentMessageNames = folder.getRecentMessages(mailboxSession);
+        return new ArrayList<Long>(recentMessageNames.keySet());
+       
         
     }
 

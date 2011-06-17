@@ -110,7 +110,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return recentList
      * @throws StorageException
      */
-    public abstract List<Message<Id>> findRecentMessagesInMailbox(Mailbox<Id> mailbox) throws MailboxException;
+    public abstract List<Long> findRecentMessageUidsInMailbox(Mailbox<Id> mailbox) throws MailboxException;
 
 
     /**

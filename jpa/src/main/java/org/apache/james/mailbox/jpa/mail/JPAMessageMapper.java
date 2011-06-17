@@ -352,14 +352,15 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
             throw new MailboxException("Search of first unseen message failed in mailbox " + mailbox, e);
         }
     }
-
-    /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     @SuppressWarnings("unchecked")
-    public List<Message<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
+    public List<Long> findRecentMessageUidsInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         try {
-            Query query = getEntityManager().createNamedQuery("findRecentMessagesInMailbox").setParameter("idParam", mailbox.getMailboxId());
+            Query query = getEntityManager().createNamedQuery("findRecentMessageUidsInMailbox").setParameter("idParam", mailbox.getMailboxId());
             return query.getResultList();
         } catch (PersistenceException e) {
             throw new MailboxException("Search of recent messages failed in mailbox " + mailbox, e);

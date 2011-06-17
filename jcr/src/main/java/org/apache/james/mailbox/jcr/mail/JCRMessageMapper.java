@@ -472,14 +472,14 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * (non-Javadoc)
      * 
      * @see
-     * org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox
+     * org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox
      * ()
      */
-    public List<Message<String>> findRecentMessagesInMailbox(Mailbox<String> mailbox) throws MailboxException {
+    public List<Long> findRecentMessageUidsInMailbox(Mailbox<String> mailbox) throws MailboxException {
         
         try {
  
-            List<Message<String>> list = new ArrayList<Message<String>>();
+            List<Long> list = new ArrayList<Long>();
             String queryString = "/jcr:root" + getMailboxPath(mailbox) + "//element(*,jamesMailbox:message)[@" + JCRMessage.RECENT_PROPERTY +"='true'] order by @" + JCRMessage.UID_PROPERTY;
             
             QueryManager manager = getSession().getWorkspace().getQueryManager();
@@ -488,7 +488,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             
             NodeIterator iterator = result.getNodes();
             while(iterator.hasNext()) {
-                list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()));
+                list.add(new JCRMessage(iterator.nextNode(), mailboxSession.getLog()).getUid());
             }
             return list;
 

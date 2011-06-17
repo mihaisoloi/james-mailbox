@@ -557,18 +557,17 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         return messageMapper.execute(new Mapper.Transaction<List<Long>>() {
 
             public List<Long> run() throws MailboxException {
-                final List<Message<Id>> members = messageMapper.findRecentMessagesInMailbox(getMailboxEntity());
-                final List<Long> results = new ArrayList<Long>();
+                final List<Long> members = messageMapper.findRecentMessageUidsInMailbox(getMailboxEntity());
 
-                for (Message<Id> member:members) {
-                    results.add(member.getUid());
+                // Conver to MessageRanges so we may be able to optimize the flag update
+                List<MessageRange> ranges = MessageRange.toRanges(members);
+                for (MessageRange range:ranges) {
                     if (reset) {
-                        
                         // only call save if we need to
-                        messageMapper.updateFlags(getMailboxEntity(), new Flags(Flag.RECENT), false, false, MessageRange.one(member.getUid()));
+                        messageMapper.updateFlags(getMailboxEntity(), new Flags(Flag.RECENT), false, false, range);
                     }
                 }
-                return results;
+                return members;
             }
             
         });

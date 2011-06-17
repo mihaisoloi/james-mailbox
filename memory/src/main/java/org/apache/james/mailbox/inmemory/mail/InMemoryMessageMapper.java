@@ -168,11 +168,11 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
      */
-    public List<Message<Long>> findRecentMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
-        final List<Message<Long>> results = new ArrayList<Message<Long>>();
+    public List<Long> findRecentMessageUidsInMailbox(Mailbox<Long> mailbox) throws MailboxException {
+        final List<Long> results = new ArrayList<Long>();
         for(Message<Long> member:getMembershipByUidForMailbox(mailbox).values()) {
             if (member.isRecent()) {
-                results.add(member);
+                results.add(member.getUid());
             }
         }
         Collections.sort(results);
