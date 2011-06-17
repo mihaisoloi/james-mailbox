@@ -45,5 +45,5 @@ public interface MessageSearchIndex<Id> {
      * @return
      * @throws MailboxException
      */
-    public Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException;
+    Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException;
 }

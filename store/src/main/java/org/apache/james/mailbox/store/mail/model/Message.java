@@ -32,21 +32,21 @@ import javax.mail.Flags;
  */
 public interface Message<Id> extends Comparable<Message<Id>>{
 
-    public abstract Date getInternalDate();
+    Date getInternalDate();
 
     /**
      * Return the mailbox id of the linked mailbox
      * 
      * @return mailboxId
      */
-    public abstract Id getMailboxId();
+    Id getMailboxId();
 
     /**
      * Return the uid
      * 
      * @return uid
      */
-    public abstract long getUid();
+    long getUid();
     
     /**
      * Set the uid for the message. This must be called before the message is added to the store
@@ -54,7 +54,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * 
      * @param uid
      */
-    public abstract void setUid(long uid);
+    void setUid(long uid);
 
     
     
@@ -64,56 +64,56 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * 
      * @param uid
      */
-    public abstract void setModSeq(long modSeq);
+    void setModSeq(long modSeq);
     
     /**
      * Return the mod-sequence for the message
      * 
      * @return message
      */
-    public abstract long getModSeq();
+    long getModSeq();
 
     /**
      * Return if it was marked as answered
      * 
      * @return answered
      */
-    public abstract boolean isAnswered();
+    boolean isAnswered();
 
     /**
      * Return if it was mark as deleted
      * 
      * @return deleted
      */
-    public abstract boolean isDeleted();
+    boolean isDeleted();
 
     /**
      * Return if it was mark as draft
      * 
      * @return draft
      */
-    public abstract boolean isDraft();
+    boolean isDraft();
 
     /**
      * Return if it was flagged
      * 
      * @return flagged
      */
-    public abstract boolean isFlagged();
+    boolean isFlagged();
 
     /**
      * Return if it was marked as recent
      * 
      * @return recent
      */
-    public abstract boolean isRecent();
+    boolean isRecent();
 
     /**
      * Return if it was marked as seen
      * 
      * @return seen
      */
-    public abstract boolean isSeen();
+    boolean isSeen();
 
 
     /**
@@ -121,7 +121,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * 
      * @param flags
      */
-    public abstract void setFlags(Flags flags);
+    void setFlags(Flags flags);
 
     /**
      * Creates a new flags instance populated
@@ -129,7 +129,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * 
      * @return new instance, not null
      */
-    public abstract Flags createFlags();
+    Flags createFlags();
     
     
     /**
@@ -139,35 +139,35 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * on every call, which basicly means it need to start at position 0
      * @return body, not null
      */
-    public abstract InputStream getBodyContent() throws IOException;
+    InputStream getBodyContent() throws IOException;
 
     /**
      * Gets the top level MIME content media type.
      * 
      * @return top level MIME content media type, or null if default
      */
-    public abstract String getMediaType();
+    String getMediaType();
 
     /**
      * Gets the MIME content subtype.
      * 
      * @return the MIME content subtype, or null if default
      */
-    public abstract String getSubType();
+    String getSubType();
     
     /**
      * The number of octets contained in the body of this document.
      * 
      * @return number of octets
      */
-    public abstract long getBodyOctets();
+    long getBodyOctets();
     
     /**
      * The number of octets contained in the full content of this document.
      * 
      * @return number of octets
      */
-    public abstract long getFullContentOctets();
+    long getFullContentOctets();
     
     /**
      * Gets the number of CRLF in a textual document.
@@ -185,7 +185,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * @return header
      * @throws IOException 
      */
-    public abstract InputStream getHeaderContent() throws IOException;
+    InputStream getHeaderContent() throws IOException;
     
     /**
      * Gets a read-only list of meta-data properties.
@@ -194,5 +194,5 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * 
      * @return unmodifiable list of meta-data, not null
      */
-    public abstract List<Property> getProperties();
+    List<Property> getProperties();
 }

@@ -43,19 +43,19 @@ public interface Property {
      * Gets the namespace for the name.
      * @return not null
      */
-    public String getNamespace();
+    String getNamespace();
     
     /**
      * Gets the local part of the name of the property.
      * @return not null
      */
-    public String getLocalName();
+    String getLocalName();
     
     /**
      * Gets the value for this property.
      * @return not null
      */
-    public String getValue();
+    String getValue();
 
 
 }

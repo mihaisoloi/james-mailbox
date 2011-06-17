@@ -33,13 +33,13 @@ public interface Subscription {
      * 
      * @return not null
      */
-    public abstract String getMailbox();
+    String getMailbox();
 
     /**
      * Gets the name of the subscribed user.
      * 
      * @return not null
      */
-    public abstract String getUser();
+    String getUser();
 
 }

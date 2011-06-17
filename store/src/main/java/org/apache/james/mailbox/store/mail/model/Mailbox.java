@@ -27,49 +27,49 @@ public interface Mailbox<Id> {
      * Gets the unique mailbox ID.
      * @return mailbox id
      */
-    public abstract Id getMailboxId();
+    Id getMailboxId();
 
     /**
      * Gets the current namespace for this mailbox.
      * @return not null
      */
-    public abstract String getNamespace();
+    String getNamespace();
     
     /**
      * Sets the current namespace for this mailbox.
      * @param name not null
      */
-    public abstract void setNamespace(String namespace);
+    void setNamespace(String namespace);
 
     /**
      * Gets the current user for this mailbox.
      * @return not null
      */
-    public abstract String getUser();
+    String getUser();
     
     /**
      * Sets the current user for this mailbox.
      * @param name not null
      */
-    public abstract void setUser(String user);
+    void setUser(String user);
 
     /**
      * Gets the current name for this mailbox.
      * @return not null
      */
-    public abstract String getName();
+    String getName();
     
     /**
      * Sets the current name for this mailbox.
      * @param name not null
      */
-    public abstract void setName(String name);
+    void setName(String name);
 
     /**
      * Gets the current UID VALIDITY for this mailbox.
      * @return uid validity
      */
-    public abstract long getUidValidity();
+    long getUidValidity();
     
     /**
      * Return the last known uid for this mailbox which 
@@ -78,7 +78,7 @@ public interface Mailbox<Id> {
      * 
      * @return lastKnownUid
      */
-    public abstract long getLastKnownUid();
+    long getLastKnownUid();
     
     /**
      * Return the highest known mod-seq for this mailbox which 
@@ -87,5 +87,5 @@ public interface Mailbox<Id> {
      * 
      * @return highestKnownModSeq
      */
-    public abstract long getHighestKnownModSeq();
+    long getHighestKnownModSeq();
 }

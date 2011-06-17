@@ -47,7 +47,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @param callback callback object 
      * @throws MailboxException
      */
-    public abstract void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MessageCallback<Id> callback)
+    void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MessageCallback<Id> callback)
             throws MailboxException;
 
     /**
@@ -58,7 +58,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uids
      * @throws MailboxException
      */
-    public abstract Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(
+    Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(
             Mailbox<Id> mailbox, final MessageRange set)
             throws MailboxException;
 
@@ -69,7 +69,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return count
      * @throws MailboxException
      */
-    public abstract long countMessagesInMailbox(Mailbox<Id> mailbox)
+    long countMessagesInMailbox(Mailbox<Id> mailbox)
             throws MailboxException;
 
     /**
@@ -79,7 +79,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return unseenCount
      * @throws StorageException
      */
-    public abstract long countUnseenMessagesInMailbox(Mailbox<Id> mailbox)
+    long countUnseenMessagesInMailbox(Mailbox<Id> mailbox)
             throws MailboxException;
 
 
@@ -90,7 +90,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @param message
      * @throws StorageException
      */
-    public abstract void delete(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
+    void delete(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
 
     /**
      * Return the uid of the first unseen message. If non can be found null will get returned
@@ -100,7 +100,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uid or null
      * @throws StorageException
      */
-    public abstract Long findFirstUnseenMessageUid(Mailbox<Id> mailbox) throws MailboxException;
+    Long findFirstUnseenMessageUid(Mailbox<Id> mailbox) throws MailboxException;
 
     /**
      * Return a List of {@link MailboxMembership} which are recent.
@@ -110,7 +110,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return recentList
      * @throws StorageException
      */
-    public abstract List<Long> findRecentMessageUidsInMailbox(Mailbox<Id> mailbox) throws MailboxException;
+    List<Long> findRecentMessageUidsInMailbox(Mailbox<Id> mailbox) throws MailboxException;
 
 
     /**
@@ -123,7 +123,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return uid
      * @throws StorageException
      */
-    public abstract MessageMetaData add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
+    MessageMetaData add(Mailbox<Id> mailbox, Message<Id> message) throws MailboxException;
     
     /**
      * Update flags for the given {@link MessageRange}. Only the flags may be modified after a message was saved to a mailbox.
@@ -136,7 +136,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return updatedFlags
      * @throws MailboxException
      */
-    public abstract Iterator<UpdatedFlags> updateFlags(Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace,
+    Iterator<UpdatedFlags> updateFlags(Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace,
             final MessageRange set) throws MailboxException;
     
     /**
@@ -148,7 +148,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @param original the original to copy
      * @throws StorageException
      */
-    public abstract MessageMetaData copy(Mailbox<Id> mailbox,Message<Id> original) throws MailboxException;
+    MessageMetaData copy(Mailbox<Id> mailbox,Message<Id> original) throws MailboxException;
     
     
     /**
@@ -158,7 +158,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return lastUid
      * @throws MailboxException
      */
-    public abstract long getLastUid(Mailbox<Id> mailbox) throws MailboxException;;
+    long getLastUid(Mailbox<Id> mailbox) throws MailboxException;;
     
     
     /**
@@ -169,7 +169,7 @@ public interface MessageMapper<Id> extends Mapper {
      * @return lastUid
      * @throws MailboxException
      */
-    public abstract long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
+    long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
     
 
     public interface MessageCallback<Id> {

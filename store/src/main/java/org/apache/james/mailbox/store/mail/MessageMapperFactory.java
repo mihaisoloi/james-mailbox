@@ -30,6 +30,6 @@ public interface MessageMapperFactory<Id> {
      * @param mailboxId
      * @return mapper
      */
-    public MessageMapper<Id> getMessageMapper(MailboxSession session) throws MailboxException;
+    MessageMapper<Id> getMessageMapper(MailboxSession session) throws MailboxException;
         
 }

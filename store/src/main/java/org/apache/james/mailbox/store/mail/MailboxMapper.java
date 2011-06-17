@@ -39,7 +39,7 @@ public interface MailboxMapper<Id> extends Mapper {
      * @param mailbox
      * @throws MailboxException
      */
-    public abstract void save(Mailbox<Id> mailbox) throws MailboxException;
+    void save(Mailbox<Id> mailbox) throws MailboxException;
     
     /**
      * Delete the given {@link Mailbox} from the underlying storage
@@ -47,7 +47,7 @@ public interface MailboxMapper<Id> extends Mapper {
      * @param mailbox
      * @throws MailboxException
      */
-    public abstract void delete(Mailbox<Id> mailbox) throws MailboxException;
+    void delete(Mailbox<Id> mailbox) throws MailboxException;
 
   
     /**
@@ -58,7 +58,7 @@ public interface MailboxMapper<Id> extends Mapper {
      * @throws MailboxException
      * @throws MailboxNotFoundException
      */
-    public abstract Mailbox<Id> findMailboxByPath(MailboxPath mailboxName)
+    Mailbox<Id> findMailboxByPath(MailboxPath mailboxName)
             throws MailboxException, MailboxNotFoundException;
 
     /**
@@ -68,7 +68,7 @@ public interface MailboxMapper<Id> extends Mapper {
      * @return mailboxList
      * @throws MailboxException
      */
-    public abstract List<Mailbox<Id>> findMailboxWithPathLike(MailboxPath mailboxPath)
+    List<Mailbox<Id>> findMailboxWithPathLike(MailboxPath mailboxPath)
             throws MailboxException;
 
     /**
@@ -80,7 +80,7 @@ public interface MailboxMapper<Id> extends Mapper {
      * @throws MailboxException
      * @throws MailboxNotFoundException
      */
-    public abstract boolean hasChildren(Mailbox<Id> mailbox, char delimiter)
+    boolean hasChildren(Mailbox<Id> mailbox, char delimiter)
             throws MailboxException, MailboxNotFoundException;
     
     /**
@@ -89,5 +89,5 @@ public interface MailboxMapper<Id> extends Mapper {
      * @return mailboxList
      * @throws MailboxException 
      */
-    public abstract List<Mailbox<Id>> list() throws MailboxException;
+    List<Mailbox<Id>> list() throws MailboxException;
 }

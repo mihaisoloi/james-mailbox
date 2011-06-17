@@ -29,5 +29,5 @@ public interface MailboxMapperFactory<Id> {
      * @param session
      * @return mapper
      */
-    public MailboxMapper<Id> getMailboxMapper(MailboxSession session) throws MailboxException;
+    MailboxMapper<Id> getMailboxMapper(MailboxSession session) throws MailboxException;
 }

@@ -32,5 +32,5 @@ public interface Authenticator {
      * @return true when the user is authentic,
      * false otherwise
      */
-    public boolean isAuthentic(String userid, CharSequence passwd);
+    boolean isAuthentic(String userid, CharSequence passwd);
 }
