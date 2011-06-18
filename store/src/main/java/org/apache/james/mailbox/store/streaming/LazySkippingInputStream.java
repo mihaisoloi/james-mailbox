@@ -23,6 +23,8 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * {@link FilterInputStream} implementation which skip the given bytes as late as possible.
  * 
@@ -71,7 +73,7 @@ public class LazySkippingInputStream extends FilterInputStream{
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
+    public  void mark(int readlimit) {
         // not supported
     }
 
@@ -93,7 +95,7 @@ public class LazySkippingInputStream extends FilterInputStream{
      */
     private void skipIfNeeded() throws IOException {
         if (skipped == false) {
-            super.skip(skipBytes);
+            IOUtils.skipFully(in, skipBytes);
             skipped = true;
         }
     }
