@@ -20,6 +20,7 @@
 package org.apache.james.mailbox;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -215,14 +216,14 @@ public class MessageRange {
     }
     
     /**
-     * Converts the given {@link List} of uids to a {@link List} of {@link MessageRange} instances
+     * Converts the given {@link Collection} of uids to a {@link List} of {@link MessageRange} instances
      * 
      * @param uids
      * @return ranges
      */
-    public static List<MessageRange> toRanges(List<Long> uids) {
+    public static List<MessageRange> toRanges(Collection<Long> uidsCol) {
         List<MessageRange> ranges = new ArrayList<MessageRange>();
-        
+        List<Long> uids = new ArrayList<Long>(uidsCol);
         Collections.sort(uids);
         
         long firstUid = 0;
