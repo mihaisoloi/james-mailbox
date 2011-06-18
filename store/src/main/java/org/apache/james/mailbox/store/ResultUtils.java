@@ -60,7 +60,15 @@ public class ResultUtils {
         final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>();
         List<Field> fields = header.getFields();
         for (Field field: fields) {
-            final ResultHeader resultHeader = new ResultHeader(field.getName(), field.getBody());
+            String fieldValue = field.getBody();
+            if (fieldValue.endsWith("\r\f")) {
+                fieldValue = fieldValue.substring(0,fieldValue.length() - 2);
+            }
+            if (fieldValue.startsWith(" ")) {
+                fieldValue = fieldValue.substring(1);
+            }
+            
+            final ResultHeader resultHeader = new ResultHeader(field.getName(), fieldValue);
             results.add(resultHeader);
         }
         return results;

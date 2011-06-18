@@ -28,19 +28,15 @@ import java.util.List;
 import javax.mail.Flags;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 
 public class MaildirMessage extends AbstractMaildirMessage {
 
     // Document
     private int bodyStartOctet;
-    private InputStream rawFullContent;
     private String mediaType;
     private List<MaildirProperty> properties;
     private String subType;
@@ -51,6 +47,8 @@ public class MaildirMessage extends AbstractMaildirMessage {
     private long size;
     
     private boolean modified = false;
+    private InputStream header;
+    private InputStream body;
     
     /**
      * This constructor is called when appending a new message.
@@ -67,7 +65,8 @@ public class MaildirMessage extends AbstractMaildirMessage {
             int size, Flags flags, InputStream header, InputStream body, int bodyStartOctet, PropertyBuilder propertyBuilder) {
         super(mailbox);
         // Document
-        this.rawFullContent = ResultUtils.toInput(header, body);
+        this.body = body;
+        this.header = header;
         this.bodyStartOctet = bodyStartOctet;
         this.textualLineCount = propertyBuilder.getTextualLineCount();
         this.mediaType = propertyBuilder.getMediaType();
@@ -107,7 +106,9 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.seen = message.isSeen();
         
         try {
-            this.rawFullContent = new ByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
+            this.body = new ByteArrayInputStream(IOUtils.toByteArray(message.getBodyContent()));
+            this.header = new ByteArrayInputStream(IOUtils.toByteArray(message.getHeaderContent()));
+
         } catch (IOException e) {
             throw new MailboxException("Parsing of message failed",e);
         }
@@ -147,7 +148,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream  getHeaderContent() {
-        return new BoundedInputStream(rawFullContent, bodyStartOctet - 2);
+        return header;
     }
 
     /* 
@@ -241,7 +242,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
-        return new LazySkippingInputStream(rawFullContent, bodyStartOctet);
+        return body;
     }
 
     /*
