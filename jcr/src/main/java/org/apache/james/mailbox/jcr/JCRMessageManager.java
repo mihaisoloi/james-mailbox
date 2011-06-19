@@ -18,10 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr;
 
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
@@ -51,10 +51,13 @@ public class JCRMessageManager extends StoreMessageManager<String> {
 
 
     @Override
-    protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, InputStream header, InputStream body, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
-      
+    protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, SharedInputStream content, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
+        int headerEnd = bodyStartOctet -2;
+        if (headerEnd < 0) {
+            headerEnd = 0;
+        }
         final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), internalDate, 
-                size, flags, header, body, bodyStartOctet, propertyBuilder, log);
+                size, flags, content, bodyStartOctet, propertyBuilder, log);
         return message;
     }
 

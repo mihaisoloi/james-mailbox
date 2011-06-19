@@ -19,9 +19,7 @@
 
 package org.apache.james.mailbox.store;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +34,8 @@ import java.util.TreeMap;
 
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
@@ -177,7 +177,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
         TeeInputStream tmpMsgIn = null;
         BodyOffsetInputStream bIn = null;
         FileOutputStream out = null;
-        FileInputStream contentIn = null;
+        SharedFileInputStream contentIn = null;
         
         try {
             // Create a temporary file and copy the message to it. We will work with the file as
@@ -286,11 +286,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
             if (bodyStartOctet == -1) {
                 bodyStartOctet = 0;
             }
-            contentIn = new FileInputStream(file);
-            contentIn.skip(bodyStartOctet);
+            contentIn = new SharedFileInputStream(file);
             final int size = (int) file.length();
 
-            final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, new ByteArrayInputStream(header.toString().getBytes("US-ASCII")), contentIn, flags, propertyBuilder);
+            final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, contentIn, flags, propertyBuilder);
             MessageMetaData data = appendMessageToStore(message, mailboxSession);
                        
             Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
@@ -324,14 +323,13 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @param internalDate
      * @param size
      * @param bodyStartOctet
-     * @param headersContent
-     * @param bodyContent
+     * @param content
      * @param flags
      * @return membership
      * @throws MailboxException 
      */
     protected abstract Message<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
-            final InputStream headersContent, final InputStream bodyContent, final Flags flags, final PropertyBuilder propertyBuilder) throws MailboxException;
+            final SharedInputStream content, final Flags flags, final PropertyBuilder propertyBuilder) throws MailboxException;
     
     
     public void addListener(MailboxListener listener) throws MailboxException {

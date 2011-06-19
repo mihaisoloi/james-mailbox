@@ -20,10 +20,10 @@
 package org.apache.james.mailbox.inmemory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
@@ -44,10 +44,14 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
 
     @Override
     protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, 
-            InputStream header, InputStream  body, Flags flags,  PropertyBuilder propertyBuilder) throws MailboxException {
+            SharedInputStream content, Flags flags,  PropertyBuilder propertyBuilder) throws MailboxException {
 
+        int headerEnd = bodyStartOctet -2;
+        if (headerEnd < 0) {
+            headerEnd = 0;
+        }
         try {
-            return new SimpleMailboxMembership(internalDate, size, bodyStartOctet,  IOUtils.toByteArray(header), IOUtils.toByteArray(body), flags, propertyBuilder, ((InMemoryMailbox) getMailboxEntity()).getMailboxId());
+            return new SimpleMailboxMembership(internalDate, size, bodyStartOctet,  IOUtils.toByteArray(content.newStream(0, headerEnd)), IOUtils.toByteArray(content.newStream(bodyStartOctet, -1)), flags, propertyBuilder, ((InMemoryMailbox) getMailboxEntity()).getMailboxId());
         } catch (IOException e) {
             throw new MailboxException("Unable to create message", e);
         }

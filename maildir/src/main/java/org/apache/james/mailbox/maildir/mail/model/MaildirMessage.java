@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir.mail.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,9 +25,12 @@ import java.util.Date;
 import java.util.List;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedByteArrayInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -47,8 +49,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
     private long size;
     
     private boolean modified = false;
-    private InputStream header;
-    private InputStream body;
+    private SharedInputStream content;
     
     /**
      * This constructor is called when appending a new message.
@@ -62,11 +63,10 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @param propertyBuilder
      */
     public MaildirMessage(Mailbox<Integer> mailbox, Date internalDate,
-            int size, Flags flags, InputStream header, InputStream body, int bodyStartOctet, PropertyBuilder propertyBuilder) {
+            int size, Flags flags, SharedInputStream content, int bodyStartOctet, PropertyBuilder propertyBuilder) {
         super(mailbox);
         // Document
-        this.body = body;
-        this.header = header;
+        this.content = content;
         this.bodyStartOctet = bodyStartOctet;
         this.textualLineCount = propertyBuilder.getTextualLineCount();
         this.mediaType = propertyBuilder.getMediaType();
@@ -106,8 +106,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
         this.seen = message.isSeen();
         
         try {
-            this.body = new ByteArrayInputStream(IOUtils.toByteArray(message.getBodyContent()));
-            this.header = new ByteArrayInputStream(IOUtils.toByteArray(message.getHeaderContent()));
+            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
 
         } catch (IOException e) {
             throw new MailboxException("Parsing of message failed",e);
@@ -148,7 +147,11 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream  getHeaderContent() {
-        return header;
+        int headerEnd = bodyStartOctet -2;
+        if (headerEnd < 0) {
+            headerEnd = 0;
+        }
+        return content.newStream(0, headerEnd);
     }
 
     /* 
@@ -242,7 +245,7 @@ public class MaildirMessage extends AbstractMaildirMessage {
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
-        return body;
+        return content.newStream(getBodyStartOctet(), -1);
     }
 
     /*

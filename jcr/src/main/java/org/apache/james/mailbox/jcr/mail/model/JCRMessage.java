@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr.mail.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,6 +30,8 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedByteArrayInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
@@ -55,7 +56,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
 
     private Node node;
     private final Logger logger;
-    private InputStream content;
+    private SharedInputStream content;
     private String mediaType;
     private Long textualLineCount;
     private String subType;
@@ -103,7 +104,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.node = node;
     }
     
-    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, InputStream header, InputStream body,
+    public JCRMessage(String mailboxUUID, Date internalDate, int size, Flags flags, SharedInputStream content,
             int bodyStartOctet,  final PropertyBuilder propertyBuilder, Logger logger) {
         super();
         this.mailboxUUID = mailboxUUID;
@@ -111,7 +112,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.size = size;
         this.logger = logger;
         setFlags(flags);
-        this.content = ResultUtils.toInput(header, body);
+        this.content = content;
        
         this.bodyStartOctet = bodyStartOctet;
         this.textualLineCount = propertyBuilder.getTextualLineCount();
@@ -142,7 +143,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.modSeq = modSeq;
         this.logger = logger;
         try {
-            this.content = new ByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
+            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
@@ -690,7 +691,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
                 throw new IOException("Unable to retrieve property " + JcrConstants.JCR_CONTENT, e);
             }
         }
-        return content;
+        return content.newStream(0, -1);
     }
 
     /*

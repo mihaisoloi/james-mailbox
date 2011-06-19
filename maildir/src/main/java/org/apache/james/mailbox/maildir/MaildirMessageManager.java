@@ -18,10 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir;
 
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
@@ -43,10 +43,14 @@ public class MaildirMessageManager extends StoreMessageManager<Integer> {
     
     @Override
     protected Message<Integer> createMessage(Date internalDate,
-            int size, int bodyStartOctet, InputStream header, InputStream body, Flags flags, PropertyBuilder propertyBuilder)
+            int size, int bodyStartOctet, SharedInputStream content, Flags flags, PropertyBuilder propertyBuilder)
             throws MailboxException {
+        int headerEnd = bodyStartOctet -2;
+        if (headerEnd < 0) {
+            headerEnd = 0;
+        }
         final Message<Integer> message = new MaildirMessage(getMailboxEntity(), internalDate, 
-                size, flags, header, body, bodyStartOctet, propertyBuilder);
+                size, flags, content, bodyStartOctet, propertyBuilder);
         return message;
     }
 

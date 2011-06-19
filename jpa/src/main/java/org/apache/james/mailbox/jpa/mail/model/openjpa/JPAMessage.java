@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,12 +58,15 @@ public class JPAMessage extends AbstractJPAMessage {
     @Deprecated
     public JPAMessage() {}
 
-    public JPAMessage(JPAMailbox mailbox,Date internalDate, int size, Flags flags, InputStream header,
-            InputStream body, int bodyStartOctet, final PropertyBuilder propertyBuilder) throws MailboxException {
+    public JPAMessage(JPAMailbox mailbox,Date internalDate, int size, Flags flags, SharedInputStream content, int bodyStartOctet, final PropertyBuilder propertyBuilder) throws MailboxException {
         super(mailbox, internalDate, flags, size ,bodyStartOctet, propertyBuilder);
         try {
-            this.body = IOUtils.toByteArray(body);
-            this.header = IOUtils.toByteArray(header);
+            int headerEnd = bodyStartOctet -2;
+            if (headerEnd < 0) {
+                headerEnd = 0;
+            }
+            this.header = IOUtils.toByteArray(content.newStream(0, headerEnd));
+            this.body = IOUtils.toByteArray(content.newStream(getBodyStartOctet(), -1));
 
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);

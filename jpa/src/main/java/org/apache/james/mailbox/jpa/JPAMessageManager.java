@@ -18,10 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.jpa;
 
-import java.io.InputStream;
 import java.util.Date;
 
 import javax.mail.Flags;
+import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
@@ -45,10 +45,10 @@ public class JPAMessageManager extends StoreMessageManager<Long> {
     }
     
     @Override
-    protected Message<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final InputStream header, final InputStream body, 
+    protected Message<Long> createMessage(Date internalDate, final int size, int bodyStartOctet, final SharedInputStream content, 
             final Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
-       
-        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, header, body,  bodyStartOctet,  propertyBuilder);
+
+        final Message<Long> message = new JPAMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, content,  bodyStartOctet,  propertyBuilder);
         return message;
     }
 
