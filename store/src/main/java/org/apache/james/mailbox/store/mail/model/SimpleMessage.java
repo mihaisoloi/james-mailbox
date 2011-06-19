@@ -72,7 +72,7 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
     }
 
 
-    public SimpleMessage(Mailbox<Id> mailbox, Message<Integer> original) throws MailboxException {
+    public SimpleMessage(Mailbox<Id> mailbox, Message<Id> original) throws MailboxException {
         this.internalDate = original.getInternalDate();
         this.size = original.getFullContentOctets();
         this.mailboxId = mailbox.getMailboxId();

@@ -31,11 +31,11 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.SimpleMessage;
 
 public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 
@@ -214,7 +214,10 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
-        return save(mailbox, new SimpleMailboxMembership(mailbox.getMailboxId(), uid, modSeq, (SimpleMailboxMembership)original));
+        SimpleMessage<Long> message = new SimpleMessage<Long>(mailbox, original);
+        message.setUid(uid);
+        message.setModSeq(modSeq);
+        return save(mailbox, message);
     }
 
     /*
