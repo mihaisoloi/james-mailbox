@@ -23,9 +23,9 @@
        xmlns:camel="http://camel.apache.org/schema/spring"
        xmlns:amq="http://activemq.apache.org/schema/core" 
        xsi:schemaLocation="
-          http://www.springframework.org/schema/beans META-INF/XSD/spring-beans-3.0.xsd
-          http://camel.apache.org/schema/spring META-INF/XSD/camel-spring-2.5.0.xsd
-          http://activemq.apache.org/schema/core META-INF/XSD/activemq-core-5.4.2.xsd">
+          http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-3.0.xsd
+          http://camel.apache.org/schema/spring classpath:camel-spring.xsd
+          http://activemq.apache.org/schema/core classpath:activemq.xsd">
 
     <!-- 
       Mailbox Managers
