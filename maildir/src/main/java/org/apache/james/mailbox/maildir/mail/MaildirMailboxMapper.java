@@ -36,9 +36,9 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 
 public class MaildirMailboxMapper extends NonTransactionalMapper implements MailboxMapper<Integer> {
@@ -226,9 +226,9 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      * @return The id of the cached mailbox
      */
     private Mailbox<Integer> cacheMailbox(Mailbox<Integer> mailbox) {
-        mailboxCache.add(new MaildirMailbox(mailbox));
+        mailboxCache.add(new SimpleMailbox<Integer>(mailbox));
         int id = mailboxCache.size() - 1;
-        ((MaildirMailbox) mailbox).setMailboxId(id);
+        ((SimpleMailbox<Integer>) mailbox).setMailboxId(id);
         return mailbox;
     }
     

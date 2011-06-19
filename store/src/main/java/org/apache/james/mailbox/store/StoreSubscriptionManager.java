@@ -30,12 +30,13 @@ import org.apache.james.mailbox.SubscriptionManager;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapperFactory;
+import org.apache.james.mailbox.store.user.model.SimpleSubscription;
 import org.apache.james.mailbox.store.user.model.Subscription;
 
 /**
  * Manages subscriptions.
  */
-public abstract class StoreSubscriptionManager implements SubscriptionManager {
+public class StoreSubscriptionManager implements SubscriptionManager {
 
     private static final int INITIAL_SIZE = 32;
     
@@ -75,7 +76,9 @@ public abstract class StoreSubscriptionManager implements SubscriptionManager {
      * @param mailbox
      * @return subscription 
      */
-    protected abstract Subscription createSubscription(final MailboxSession session, final String mailbox);
+    protected Subscription createSubscription(final MailboxSession session, final String mailbox) {
+        return new SimpleSubscription(session.getUser().getUserName(), mailbox);
+    }
 
 
     /*

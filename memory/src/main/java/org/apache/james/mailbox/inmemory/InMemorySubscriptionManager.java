@@ -18,13 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.inmemory;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.inmemory.user.model.InMemorySubscription;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreSubscriptionManager;
-import org.apache.james.mailbox.store.transaction.Mapper.Transaction;
-import org.apache.james.mailbox.store.user.model.Subscription;
 
 /**
  * Stores subscriptions in memory.
@@ -33,27 +28,5 @@ public class InMemorySubscriptionManager extends StoreSubscriptionManager {
     
     public InMemorySubscriptionManager(MailboxSessionMapperFactory<Long> mapperFactory) {
         super(mapperFactory);
-    }
-
-    @Override
-    protected Subscription createSubscription(MailboxSession session, String mailbox) {
-        return new InMemorySubscription(mailbox, session.getUser());
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#execute(org.apache.james.mailbox.store.transaction.TransactionalMapper.Transaction)
-     */
-    @SuppressWarnings("unchecked")
-    public void execute(Transaction transaction) throws MailboxException {
-        transaction.run();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#dispose()
-     */
-    public void dispose() {
-        // do nothing
     }
 }

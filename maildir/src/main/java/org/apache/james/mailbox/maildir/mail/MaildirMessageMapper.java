@@ -44,14 +44,13 @@ import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.apache.james.mailbox.maildir.mail.model.AbstractMaildirMessage;
 import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
-import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.SimpleMessage;
 
 public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
 
@@ -306,7 +305,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData copy(Mailbox<Integer> mailbox, long uid, long modSeq, Message<Integer> original) throws MailboxException {
-        MaildirMessage theCopy = new MaildirMessage(mailbox, (AbstractMaildirMessage) original);
+        SimpleMessage<Integer> theCopy = new SimpleMessage<Integer>(mailbox, original);
         return save(mailbox, theCopy);        
     }
 
@@ -356,7 +355,6 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
      * org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData save(Mailbox<Integer> mailbox, Message<Integer> message) throws MailboxException {
-        AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) message;
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
         long uid = 0;
         // a new message
@@ -401,7 +399,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         }
         File newMessageFile = null;
         // delivered via SMTP, goes to ./new without flags
-        if (maildirMessage.isRecent()) {
+        if (message.isRecent()) {
             messageName.setFlags(message.createFlags());
             newMessageFile = new File(folder.getNewFolder(), messageName.getFullName());
             // System.out.println("save new recent " + message + " as " +
@@ -423,8 +421,8 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         }
         try {
             uid = folder.appendMessage(mailboxSession, newMessageFile.getName());
-            maildirMessage.setUid(uid);
-            maildirMessage.setModSeq(newMessageFile.lastModified());
+            message.setUid(uid);
+            message.setModSeq(newMessageFile.lastModified());
             return new SimpleMessageMetaData(message);
         } catch (MailboxException e) {
             throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e);
@@ -493,12 +491,11 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                     Flags newFlags = member.createFlags();
 
                     try {
-                        AbstractMaildirMessage maildirMessage = (AbstractMaildirMessage) member;
-                        MaildirMessageName messageName = folder.getMessageNameByUid(mailboxSession, maildirMessage.getUid());
+                        MaildirMessageName messageName = folder.getMessageNameByUid(mailboxSession, member.getUid());
                         File messageFile = messageName.getFile();
                         // System.out.println("save existing " + message +
                         // " as " + messageFile.getName());
-                        messageName.setFlags(maildirMessage.createFlags());
+                        messageName.setFlags(member.createFlags());
                         // this automatically moves messages from new to cur if
                         // needed
                         String newMessageName = messageName.getFullName();
@@ -521,11 +518,11 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
                         } else {
                             modSeq = messageFile.lastModified();
                         } 
-                        maildirMessage.setModSeq(modSeq);
+                        member.setModSeq(modSeq);
                         
                         updatedFlags.add(new UpdatedFlags(member.getUid(), modSeq, originalFlags, newFlags));
 
-                        long uid = maildirMessage.getUid();
+                        long uid = member.getUid();
                         folder.update(mailboxSession, uid, newMessageName);
                     } catch (IOException e) {
                         throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e);

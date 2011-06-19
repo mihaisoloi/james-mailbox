@@ -53,6 +53,7 @@ import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
+import org.apache.james.mailbox.store.mail.model.SimpleMessage;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
@@ -73,8 +74,17 @@ import com.sun.mail.imap.protocol.MessageSet;
  * own implementation and don't want to depend on {@link MessageMapper}.
  *
  */
-public abstract class StoreMessageManager<Id> implements org.apache.james.mailbox.MessageManager{
+public class StoreMessageManager<Id> implements org.apache.james.mailbox.MessageManager{
 
+    protected final static Flags MINIMAL_PERMANET_FLAGS;
+    static {
+        MINIMAL_PERMANET_FLAGS = new Flags();
+        MINIMAL_PERMANET_FLAGS.add(Flags.Flag.ANSWERED);
+        MINIMAL_PERMANET_FLAGS.add(Flags.Flag.DELETED);
+        MINIMAL_PERMANET_FLAGS.add(Flags.Flag.DRAFT);
+        MINIMAL_PERMANET_FLAGS.add(Flags.Flag.FLAGGED);
+        MINIMAL_PERMANET_FLAGS.add(Flags.Flag.SEEN);
+    }
 
     private final Mailbox<Id> mailbox;
     
@@ -130,14 +140,7 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @return flags
      */
     protected Flags getPermanentFlags(MailboxSession session) {
-        Flags permanentFlags = new Flags();
-        permanentFlags.add(Flags.Flag.ANSWERED);
-        permanentFlags.add(Flags.Flag.DELETED);
-        permanentFlags.add(Flags.Flag.DRAFT);
-        permanentFlags.add(Flags.Flag.FLAGGED);
-        permanentFlags.add(Flags.Flag.SEEN);
-       
-        return permanentFlags;
+        return MINIMAL_PERMANET_FLAGS;
     }
 
     
@@ -328,9 +331,10 @@ public abstract class StoreMessageManager<Id> implements org.apache.james.mailbo
      * @return membership
      * @throws MailboxException 
      */
-    protected abstract Message<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
-            final SharedInputStream content, final Flags flags, final PropertyBuilder propertyBuilder) throws MailboxException;
-    
+    protected Message<Id> createMessage(Date internalDate, final int size, int bodyStartOctet, 
+            final SharedInputStream content, final Flags flags, final PropertyBuilder propertyBuilder) throws MailboxException {
+        return new SimpleMessage<Id>(internalDate, size, bodyStartOctet, content, flags, propertyBuilder, getMailboxEntity().getMailboxId());
+    }
     
     public void addListener(MailboxListener listener) throws MailboxException {
         dispatcher.addMailboxListener(listener);

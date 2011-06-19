@@ -27,18 +27,18 @@ import javax.mail.internet.SharedInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.inmemory.mail.model.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
 
-    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, MailboxEventDispatcher<Long> dispatcher, InMemoryMailbox mailbox) throws MailboxException {
+    public InMemoryStoreMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox) throws MailboxException {
         super(mapperFactory, index, dispatcher,mailbox);
     }
 
@@ -51,7 +51,7 @@ public class InMemoryStoreMessageManager extends StoreMessageManager<Long> {
             headerEnd = 0;
         }
         try {
-            return new SimpleMailboxMembership(internalDate, size, bodyStartOctet,  IOUtils.toByteArray(content.newStream(0, headerEnd)), IOUtils.toByteArray(content.newStream(bodyStartOctet, -1)), flags, propertyBuilder, ((InMemoryMailbox) getMailboxEntity()).getMailboxId());
+            return new SimpleMailboxMembership(internalDate, size, bodyStartOctet,  IOUtils.toByteArray(content.newStream(0, headerEnd)), IOUtils.toByteArray(content.newStream(bodyStartOctet, -1)), flags, propertyBuilder, getMailboxEntity().getMailboxId());
         } catch (IOException e) {
             throw new MailboxException("Unable to create message", e);
         }

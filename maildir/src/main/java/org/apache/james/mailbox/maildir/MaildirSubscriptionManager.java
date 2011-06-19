@@ -18,23 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir;
 
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.maildir.user.model.MaildirSubscription;
 import org.apache.james.mailbox.store.StoreSubscriptionManager;
-import org.apache.james.mailbox.store.user.model.Subscription;
 
 public class MaildirSubscriptionManager extends StoreSubscriptionManager {
 
     public MaildirSubscriptionManager(MaildirMailboxSessionMapperFactory mf) {
         super(mf);
     }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.StoreSubscriptionManager#createSubscription(org.apache.james.mailbox.MailboxSession, java.lang.String)
-     */
-    protected Subscription createSubscription(MailboxSession session, String mailbox) {
-        return new MaildirSubscription(session.getUser().getUserName(), mailbox);
-    }
-
 }

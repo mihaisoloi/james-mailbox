@@ -34,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
+import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
@@ -45,16 +46,25 @@ import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeTokenStream;
 
-public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
+public class LazyLoadingMaildirMessage extends AbstractMessage<Integer> {
 
     private MaildirMessageName messageName;
     private int bodyStartOctet;
     private final PropertyBuilder propertyBuilder = new PropertyBuilder();
-
     private boolean parsed;
-
+    private boolean answered;
+    private boolean deleted;
+    private boolean draft;
+    private boolean flagged;
+    private boolean recent;
+    private boolean seen;
+    private Mailbox<Integer> mailbox;
+    private long uid;
+    protected boolean newMessage;
+    private long modSeq;
+    
     public LazyLoadingMaildirMessage(Mailbox<Integer> mailbox, long uid, MaildirMessageName messageName) throws IOException {
-        super(mailbox);
+        this.mailbox = mailbox;
         setUid(uid);
         setModSeq(messageName.getFile().lastModified());
         Flags flags = messageName.getFlags();
@@ -74,6 +84,153 @@ public class LazyLoadingMaildirMessage extends AbstractMaildirMessage {
         this.messageName = messageName;
     }
 
+    
+    public Integer getMailboxId() {
+        return mailbox.getMailboxId();
+    }
+
+    public long getUid() {
+        return uid;
+    }
+
+    public void setUid(long uid) {
+        this.uid = uid;
+    }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(
+     * javax.mail.Flags)
+     */
+    public void setFlags(Flags flags) {
+        if (flags != null) {
+            answered = flags.contains(Flags.Flag.ANSWERED);
+            deleted = flags.contains(Flags.Flag.DELETED);
+            draft = flags.contains(Flags.Flag.DRAFT);
+            flagged = flags.contains(Flags.Flag.FLAGGED);
+            recent = flags.contains(Flags.Flag.RECENT);
+            seen = flags.contains(Flags.Flag.SEEN);
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isAnswered()
+     */
+    public boolean isAnswered() {
+        return answered;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isDeleted()
+     */
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isDraft()
+     */
+    public boolean isDraft() {
+        return draft;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isFlagged()
+     */
+    public boolean isFlagged() {
+        return flagged;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isRecent()
+     */
+    public boolean isRecent() {
+        return recent;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isSeen()
+     */
+    public boolean isSeen() {
+        return seen;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.james.mailbox.store.mail.model.MailboxMembership#unsetRecent()
+     */
+    public void unsetRecent() {
+        recent = false;
+    }
+
+    
+    
+    /**
+     * Indicates whether this MaildirMessage reflects a new message or one that already
+     * exists in the file system.
+     * @return true if it is new, false if it already exists
+     */
+    public boolean isNew() {
+        return newMessage;
+    }
+    
+    
+    @Override
+    public String toString() {
+        StringBuffer theString = new StringBuffer("MaildirMessage ");
+        theString.append(getUid());
+        theString.append(" {");
+        Flags flags = createFlags();
+        if (flags.contains(Flags.Flag.DRAFT))
+            theString.append(MaildirMessageName.FLAG_DRAFT);
+        if (flags.contains(Flags.Flag.FLAGGED))
+            theString.append(MaildirMessageName.FLAG_FLAGGED);
+        if (flags.contains(Flags.Flag.ANSWERED))
+            theString.append(MaildirMessageName.FLAG_ANSWERD);
+        if (flags.contains(Flags.Flag.SEEN))
+            theString.append(MaildirMessageName.FLAG_SEEN);
+        if (flags.contains(Flags.Flag.DELETED))
+            theString.append(MaildirMessageName.FLAG_DELETED);
+        theString.append("} ");
+        theString.append(getInternalDate());
+        return theString.toString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
+     */
+    public long getModSeq() {
+        return modSeq;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
+     */
+    public void setModSeq(long modSeq) {
+        this.modSeq = modSeq;
+    }
     /**
      * Parse message if needed
      */

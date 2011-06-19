@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.maildir.user.model;
+package org.apache.james.mailbox.store.user.model;
 
 import org.apache.james.mailbox.store.user.model.Subscription;
 
-public class MaildirSubscription implements Subscription {
+public class SimpleSubscription implements Subscription {
 
     private final String user;
     private final String mailbox;
     
-    public MaildirSubscription(String user, String mailbox) {
+    public SimpleSubscription(String user, String mailbox) {
         this.user = user;
         this.mailbox = mailbox;
     }

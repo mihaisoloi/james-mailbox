@@ -16,23 +16,22 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.maildir.mail.model;
+package org.apache.james.mailbox.store.mail.model;
 
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
-public class MaildirMailbox implements Mailbox<Integer> {
+public class SimpleMailbox<Id> implements Mailbox<Id> {
 
-    private Integer id = null;
+    private Id id = null;
     private String namespace;
     private String user;
     private String name;
-    private long lastUid;
     private long uidValidity;
     private long lastKnownUid;
     private long highestKnownModSeq;
 
-    public MaildirMailbox(MailboxPath path, long uidValidity, long lastKnownUid, long highestKnownModSeq) {
+    public SimpleMailbox(MailboxPath path, long uidValidity, long lastKnownUid, long highestKnownModSeq) {
         this.namespace = path.getNamespace();
         this.user = path.getUser();
         this.name = path.getName();
@@ -41,7 +40,7 @@ public class MaildirMailbox implements Mailbox<Integer> {
         this.highestKnownModSeq = highestKnownModSeq;
     }
     
-    public MaildirMailbox(Mailbox<Integer> mailbox) {
+    public SimpleMailbox(Mailbox<Id> mailbox) {
         this.id = mailbox.getMailboxId();
         this.namespace = mailbox.getNamespace();
         this.user = mailbox.getUser();
@@ -52,22 +51,9 @@ public class MaildirMailbox implements Mailbox<Integer> {
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#consumeUid()
-     */
-    public void consumeUid() {
-        lastUid++;
-    }
-
-    public void setMailboxId(Integer id) {
-        this.id = id;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getMailboxId()
      */
-    public Integer getMailboxId() {
+    public Id getMailboxId() {
         return id;
     }
 
@@ -135,16 +121,17 @@ public class MaildirMailbox implements Mailbox<Integer> {
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof MaildirMailbox) {
+        if (obj instanceof SimpleMailbox) {
             if (id != null) {
-                if (id.equals(((MaildirMailbox) obj).getMailboxId()))
+                if (id.equals(((SimpleMailbox<Id>) obj).getMailboxId()))
                     return true;
             } else {
-                if (((MaildirMailbox) obj).getMailboxId() == null)
+                if (((SimpleMailbox<Id>) obj).getMailboxId() == null)
                     return true;
             }
         }
@@ -190,6 +177,10 @@ public class MaildirMailbox implements Mailbox<Integer> {
      */
     public long getHighestKnownModSeq() {
         return highestKnownModSeq;
+    }
+
+    public void setMailboxId(Id id) {
+        this.id = id;
     }
 
 }

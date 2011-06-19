@@ -19,10 +19,8 @@
 package org.apache.james.mailbox.maildir;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.store.Authenticator;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
@@ -48,11 +46,4 @@ public class MaildirMailboxManager extends StoreMailboxManager<Integer> {
     protected StoreMessageManager<Integer> createMessageManager(Mailbox<Integer> mailboxEntiy, MailboxSession session) throws MailboxException {
         return new MaildirMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailboxEntiy);
     }
-
-    @Override
-    protected Mailbox<Integer> doCreateMailbox(MailboxPath mailboxPath, MailboxSession session)
-            throws MailboxException {
-        return new MaildirMailbox(mailboxPath, randomUidValidity(), 0, 0);
-    }
-
 }

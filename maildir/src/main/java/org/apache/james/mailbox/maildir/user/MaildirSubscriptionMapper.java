@@ -32,9 +32,9 @@ import java.util.Set;
 
 import org.apache.james.mailbox.SubscriptionException;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.apache.james.mailbox.maildir.user.model.MaildirSubscription;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
+import org.apache.james.mailbox.store.user.model.SimpleSubscription;
 import org.apache.james.mailbox.store.user.model.Subscription;
 
 public class MaildirSubscriptionMapper extends NonTransactionalMapper implements SubscriptionMapper {
@@ -71,7 +71,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         Set<String> subscriptionNames = readSubscriptionsForUser(user);
         ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
         for (String subscription : subscriptionNames) {
-            subscriptions.add(new MaildirSubscription(user, subscription));
+            subscriptions.add(new SimpleSubscription(user, subscription));
         }
         return subscriptions;
     }
@@ -89,7 +89,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
             throw new SubscriptionException(e);
         }
         if (subscriptionNames.contains(mailbox))
-            return new MaildirSubscription(user, mailbox);
+            return new SimpleSubscription(user, mailbox);
         return null;
     }
 

@@ -22,21 +22,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.inmemory.mail.model.InMemoryMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
 
 public class InMemoryMailboxMapper implements MailboxMapper<Long> {
     
     private static final int INITIAL_SIZE = 128;
-    private final Map<Long, InMemoryMailbox> mailboxesById;
+    private final Map<Long, Mailbox<Long>> mailboxesById;
+    private final static AtomicLong IDS = new AtomicLong();
 
     public InMemoryMailboxMapper() {
-        mailboxesById = new ConcurrentHashMap<Long, InMemoryMailbox>(INITIAL_SIZE);
+        mailboxesById = new ConcurrentHashMap<Long, Mailbox<Long>>(INITIAL_SIZE);
     }
 
     /*
@@ -57,7 +59,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
      */
     public synchronized Mailbox<Long> findMailboxByPath(MailboxPath path) throws MailboxException, MailboxNotFoundException {
         Mailbox<Long> result = null;
-        for (final InMemoryMailbox mailbox:mailboxesById.values()) {
+        for (final Mailbox<Long> mailbox:mailboxesById.values()) {
             MailboxPath mp = new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), mailbox.getName());
             if (mp.equals(path)) {
                 result = mailbox;
@@ -78,7 +80,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
     public List<Mailbox<Long>> findMailboxWithPathLike(MailboxPath path) throws MailboxException {
         final String regex = path.getName().replace("%", ".*");
         List<Mailbox<Long>> results = new ArrayList<Mailbox<Long>>();
-        for (final InMemoryMailbox mailbox:mailboxesById.values()) {
+        for (final Mailbox<Long> mailbox:mailboxesById.values()) {
             if (mailbox.getName().matches(regex)) {
                 results.add(mailbox);
             }
@@ -91,7 +93,12 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void save(Mailbox<Long> mailbox) throws MailboxException {
-        mailboxesById.put(mailbox.getMailboxId(), (InMemoryMailbox) mailbox);
+        Long id = mailbox.getMailboxId();
+        if (id == null) {
+            id = IDS.incrementAndGet();
+            ((SimpleMailbox<Long>) mailbox).setMailboxId(id);
+        }
+        mailboxesById.put(id, mailbox);
     }
 
     /**
@@ -108,7 +115,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
     public boolean hasChildren(Mailbox<Long> mailbox, char delimiter) throws MailboxException,
             MailboxNotFoundException {
         String mailboxName = mailbox.getName() + delimiter;
-        for (final InMemoryMailbox box:mailboxesById.values()) {
+        for (final Mailbox<Long> box:mailboxesById.values()) {
             if (box.getName().startsWith(mailboxName)) {
                 return true;
             }

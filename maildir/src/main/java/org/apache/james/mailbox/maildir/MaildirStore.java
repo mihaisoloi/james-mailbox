@@ -28,9 +28,9 @@ import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
 
 public class MaildirStore {
 
@@ -122,7 +122,7 @@ public class MaildirStore {
         try {
             uidValidity = folder.getUidValidity();
             lastUid = folder.getLastUid(session);
-            return new MaildirMailbox(mailboxPath, uidValidity, lastUid, folder.getHighestModSeq());
+            return new SimpleMailbox<Integer>(mailboxPath, uidValidity, lastUid, folder.getHighestModSeq());
 
         } catch (IOException e) {
             throw new MailboxException("Unable to load Mailbox " + mailboxPath, e);
