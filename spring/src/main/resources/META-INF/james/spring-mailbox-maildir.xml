@@ -25,12 +25,13 @@
 
     <!-- 
       Mailbox Maildir
+      WARNING: Maildir does only work on UNIX like operation systems
      -->
-    <!-- WARNING: Maildir does only work on UNIX like operation systems -->
 
     <bean id="maildir-mailboxmanager" class="org.apache.james.mailbox.maildir.MaildirMailboxManager" init-method="init">
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
+<!--         <property name="messageSearchIndex" ref="lazyIndex"/> -->
     </bean>
     <bean id ="maildir-subscriptionManager" class="org.apache.james.mailbox.maildir.MaildirSubscriptionManager">
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
