@@ -33,8 +33,12 @@
      
     <bean id="locker" class="org.apache.james.mailbox.store.JVMMailboxPathLocker"/>
     <bean id="authenticator" class="org.apache.james.mailbox.spring.AnonymousAuthenticator"/>
+    <import resource="classpath:META-INF/james/spring-mailbox-lucene.xml" />
     <import resource="classpath:META-INF/james/spring-mailbox-jpa.xml" />
+<!-- 
+    JCR temporary desactivated because jackrabbit still uses lucene 2
     <import resource="classpath:META-INF/james/spring-mailbox-jcr.xml" />
+-->
     <import resource="classpath:META-INF/james/spring-mailbox-maildir.xml" />
     <import resource="classpath:META-INF/james/spring-mailbox-memory.xml" />
 
