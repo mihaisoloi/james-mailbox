@@ -23,6 +23,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.MockAuthenticator;
+import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class InMemoryMailboxManagerTest extends MailboxManagerTest {
     protected void createMailboxManager() throws MailboxException {
         
         InMemoryMailboxSessionMapperFactory factory = new InMemoryMailboxSessionMapperFactory();
-        InMemoryMailboxManager mailboxManager = new InMemoryMailboxManager(factory, new MockAuthenticator());
+        StoreMailboxManager<Long> mailboxManager = new StoreMailboxManager<Long>(factory, new MockAuthenticator());
         mailboxManager.init();
         
         setMailboxManager(mailboxManager);

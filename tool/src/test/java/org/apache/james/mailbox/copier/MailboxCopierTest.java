@@ -29,10 +29,10 @@ import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
-import org.apache.james.mailbox.inmemory.InMemoryMailboxManager;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.apache.james.mailbox.store.Authenticator;
+import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -141,7 +141,7 @@ public class MailboxCopierTest {
      */
     private MailboxManager newInMemoryMailboxManager() {
     
-        return new InMemoryMailboxManager(
+        return new StoreMailboxManager<Long>(
             new InMemoryMailboxSessionMapperFactory(), 
             new Authenticator() {
                 public boolean isAuthentic(String userid, CharSequence passwd) {

@@ -52,10 +52,6 @@ public class JCRMessageManager extends StoreMessageManager<String> {
 
     @Override
     protected Message<String> createMessage(Date internalDate, int size, int bodyStartOctet, SharedInputStream content, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException{
-        int headerEnd = bodyStartOctet -2;
-        if (headerEnd < 0) {
-            headerEnd = 0;
-        }
         final Message<String> message = new JCRMessage(getMailboxEntity().getMailboxId(), internalDate, 
                 size, flags, content, bodyStartOctet, propertyBuilder, log);
         return message;
