@@ -25,12 +25,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.james.mailbox.store.mail.model.AbstractComparableProperty;
 import org.apache.james.mailbox.store.mail.model.Property;
 
 @Entity(name="Property")
 @Table(name="JAMES_MAIL_PROPERTY")
-public class JPAProperty extends AbstractComparableProperty<JPAProperty> {
+public class JPAProperty implements Property {
 
     /** The system unique key */
     @Id

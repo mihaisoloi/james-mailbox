@@ -56,17 +56,14 @@ public class PropertyBuilder {
     
     private static final int INITIAL_CAPACITY = 32;
 
-    private int order = 0;
-    
     private Long textualLineCount;
     private final List<SimpleProperty> properties;
 
     public PropertyBuilder(final List<Property> props) {
         textualLineCount = null;
         properties = new ArrayList<SimpleProperty>(props.size());
-        int i = 0;
         for (final Property property:props) {
-            properties.add(new SimpleProperty(property, i++));
+            properties.add(new SimpleProperty(property));
         }
     }
     
@@ -144,7 +141,7 @@ public class PropertyBuilder {
         }
         
         if (value != null) {
-            properties.add(new SimpleProperty(namespace, localName, value, order++));
+            properties.add(new SimpleProperty(namespace, localName, value));
         }
     }
     
@@ -164,7 +161,7 @@ public class PropertyBuilder {
         }
         if (values !=null) {
             for(final String value:values) {
-                properties.add(new SimpleProperty(namespace, localName, value, order++));
+                properties.add(new SimpleProperty(namespace, localName, value));
             }
         }
     }
@@ -200,7 +197,7 @@ public class PropertyBuilder {
             }
         }
         for (final Map.Entry<String, String> valueByLocalName:valuesByLocalName.entrySet()) {
-            properties.add(new SimpleProperty(namespace, valueByLocalName.getKey().toLowerCase(), valueByLocalName.getValue(), order++));
+            properties.add(new SimpleProperty(namespace, valueByLocalName.getKey().toLowerCase(), valueByLocalName.getValue()));
         }
     }
     

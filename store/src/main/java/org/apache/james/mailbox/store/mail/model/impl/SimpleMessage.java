@@ -92,9 +92,8 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         this.subType = original.getSubType();
         final List<Property> properties = pBuilder.toProperties();
         this.properties = new ArrayList<Property>(properties.size());
-        int order = 0;
         for (final Property property:properties) {
-            this.properties.add(new SimpleProperty(property, order++));
+            this.properties.add(new SimpleProperty(property));
         }
     }
 

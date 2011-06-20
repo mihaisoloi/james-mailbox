@@ -18,14 +18,12 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail.model.impl;
 
-import org.apache.james.mailbox.store.mail.model.AbstractComparableProperty;
 import org.apache.james.mailbox.store.mail.model.Property;
 
-public final class SimpleProperty extends AbstractComparableProperty<SimpleProperty> {
+public final class SimpleProperty implements Property {
     private String namespace;
     private String localName;
     private String value;
-    private int order;
     
     /**
      * Construct a property.
@@ -33,24 +31,37 @@ public final class SimpleProperty extends AbstractComparableProperty<SimplePrope
      * @param localName not null
      * @param value not null
      */
-    public SimpleProperty(String namespace, String localName, String value, int order) {
+    public SimpleProperty(String namespace, String localName, String value) {
         super();
         this.namespace = namespace;
         this.localName = localName;
         this.value = value;
-        this.order = order;
     }
     
-    public SimpleProperty(Property property, int order) {
-        this(property.getNamespace(), property.getLocalName(), property.getValue(), order);
+    public SimpleProperty(Property property) {
+        this(property.getNamespace(), property.getLocalName(), property.getValue());
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Property#getLocalName()
+     */
     public String getLocalName() {
         return localName;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Property#getNamespace()
+     */
     public String getNamespace() {
         return namespace;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Property#getValue()
+     */
     public String getValue() {
         return value;
     }
@@ -90,10 +101,5 @@ public final class SimpleProperty extends AbstractComparableProperty<SimplePrope
         + "' localName='" + this.localName  
         + "' value='" + this.value 
         + "')";
-    }
-
-    @Override
-    public int getOrder() {
-        return order;
     }
 }

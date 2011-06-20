@@ -120,9 +120,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.subType = propertyBuilder.getSubType();
         final List<Property> properties = propertyBuilder.toProperties();
         this.properties = new ArrayList<JCRProperty>(properties.size());
-        int order = 0;
         for (final Property property:properties) {
-            this.properties.add(new JCRProperty(property, order++, logger));
+            this.properties.add(new JCRProperty(property,logger));
         }
         
     }
@@ -156,9 +155,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.subType = message.getSubType();
         final List<Property> properties = pBuilder.toProperties();
         this.properties = new ArrayList<JCRProperty>(properties.size());
-        int order = 0;
         for (final Property property:properties) {
-            this.properties.add(new JCRProperty(property, order++, logger));
+            this.properties.add(new JCRProperty(property,  logger));
         }
     }
     
@@ -326,7 +324,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
             List<Property> newProperites = new ArrayList<Property>();
             for (int i = 0; i < currentProperties.size(); i++) {
                 Property prop = currentProperties.get(i);
-                newProperites.add(new JCRProperty(prop, i, logger));
+                newProperites.add(new JCRProperty(prop, logger));
             }
             // remove old properties, we will add a bunch of new ones
             NodeIterator iterator = node.getNodes("messageProperty");
