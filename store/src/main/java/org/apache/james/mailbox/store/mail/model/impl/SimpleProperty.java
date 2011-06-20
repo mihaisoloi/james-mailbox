@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail.model.impl;
+
+import org.apache.james.mailbox.store.mail.model.AbstractComparableProperty;
+import org.apache.james.mailbox.store.mail.model.Property;
 
 public final class SimpleProperty extends AbstractComparableProperty<SimpleProperty> {
     private String namespace;

@@ -16,13 +16,35 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.maildir;
+package org.apache.james.mailbox.store.user.model.impl;
 
-import org.apache.james.mailbox.store.StoreSubscriptionManager;
+import org.apache.james.mailbox.store.user.model.Subscription;
 
-public class MaildirSubscriptionManager extends StoreSubscriptionManager {
+public class SimpleSubscription implements Subscription {
 
-    public MaildirSubscriptionManager(MaildirMailboxSessionMapperFactory mf) {
-        super(mf);
+    private final String user;
+    private final String mailbox;
+    
+    public SimpleSubscription(String user, String mailbox) {
+        this.user = user;
+        this.mailbox = mailbox;
     }
+    
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.user.model.Subscription#getMailbox()
+     */
+    public String getMailbox() {
+        return mailbox;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.user.model.Subscription#getUser()
+     */
+    public String getUser() {
+        return user;
+    }
+
 }

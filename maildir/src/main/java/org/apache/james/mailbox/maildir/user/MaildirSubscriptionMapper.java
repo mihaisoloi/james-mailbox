@@ -34,8 +34,8 @@ import org.apache.james.mailbox.SubscriptionException;
 import org.apache.james.mailbox.maildir.MaildirStore;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
-import org.apache.james.mailbox.store.user.model.SimpleSubscription;
 import org.apache.james.mailbox.store.user.model.Subscription;
+import org.apache.james.mailbox.store.user.model.impl.SimpleSubscription;
 
 public class MaildirSubscriptionMapper extends NonTransactionalMapper implements SubscriptionMapper {
 

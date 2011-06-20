@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail.model.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +33,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
-import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
 
 public class SimpleMessage<Id> extends AbstractMessage<Id> {
 

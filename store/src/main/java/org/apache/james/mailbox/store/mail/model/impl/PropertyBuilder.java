@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail.model.impl;
 
 import static org.apache.james.mailbox.store.mail.model.StandardNames.MIME_CONTENT_DESCRIPTION_NAME;
 import static org.apache.james.mailbox.store.mail.model.StandardNames.MIME_CONTENT_DESCRIPTION_SPACE;
@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.apache.james.mailbox.store.mail.model.Property;
 
 /**
  * Builds properties

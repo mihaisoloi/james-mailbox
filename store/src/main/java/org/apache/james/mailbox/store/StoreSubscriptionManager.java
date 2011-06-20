@@ -30,8 +30,8 @@ import org.apache.james.mailbox.SubscriptionManager;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapperFactory;
-import org.apache.james.mailbox.store.user.model.SimpleSubscription;
 import org.apache.james.mailbox.store.user.model.Subscription;
+import org.apache.james.mailbox.store.user.model.impl.SimpleSubscription;
 
 /**
  * Manages subscriptions.

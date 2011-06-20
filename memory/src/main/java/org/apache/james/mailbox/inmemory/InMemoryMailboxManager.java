@@ -20,13 +20,11 @@
 package org.apache.james.mailbox.inmemory;
 
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.Authenticator;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
-import org.apache.james.mailbox.store.StoreMessageManager;
-import org.apache.james.mailbox.store.mail.model.Mailbox;
+
 
 public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
 
@@ -34,10 +32,6 @@ public class InMemoryMailboxManager extends StoreMailboxManager<Long> {
         super(mapperFactory, authenticator, new JVMMailboxPathLocker());
     }
 
-    @Override
-    protected StoreMessageManager<Long> createMessageManager(Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
-        return new InMemoryStoreMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailboxRow);
-    }
 
     /**
      * Delete every Mailbox which exists

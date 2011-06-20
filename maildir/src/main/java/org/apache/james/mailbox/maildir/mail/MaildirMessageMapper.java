@@ -44,13 +44,13 @@ import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
-import org.apache.james.mailbox.maildir.mail.model.LazyLoadingMaildirMessage;
+import org.apache.james.mailbox.maildir.mail.model.MaildirMessage;
 import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.SimpleMessage;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
 
 public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
 
@@ -156,7 +156,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         
              ArrayList<Message<Integer>> messages = new ArrayList<Message<Integer>>();
              if (messageName != null) {
-                 messages.add(new LazyLoadingMaildirMessage(mailbox, uid, messageName));
+                 messages.add(new MaildirMessage(mailbox, uid, messageName));
              }
              return messages;
 
@@ -177,7 +177,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             
             ArrayList<Message<Integer>> messages = new ArrayList<Message<Integer>>();
             for (Entry<Long, MaildirMessageName> entry : uidMap.entrySet()) {
-                messages.add(new LazyLoadingMaildirMessage(mailbox, entry.getKey(), entry.getValue()));
+                messages.add(new MaildirMessage(mailbox, entry.getKey(), entry.getValue()));
             }
             return messages;
         } catch (IOException e) {
@@ -195,7 +195,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             
             ArrayList<Message<Integer>> filtered = new ArrayList<Message<Integer>>(uidMap.size());
             for (Entry<Long, MaildirMessageName> entry : uidMap.entrySet())
-                filtered.add(new LazyLoadingMaildirMessage(mailbox, entry.getKey(), entry.getValue()));
+                filtered.add(new MaildirMessage(mailbox, entry.getKey(), entry.getValue()));
             return filtered;
         } catch (IOException e) {
             throw new MailboxException("Failure while search for Messages in Mailbox " + mailbox, e );
@@ -210,7 +210,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             MaildirMessageName messageName = folder.getMessageNameByUid(mailboxSession, uid);
              ArrayList<Message<Integer>> messages = new ArrayList<Message<Integer>>();
              if (MaildirMessageName.FILTER_DELETED_MESSAGES.accept(null, messageName.getFullName())) {
-                 messages.add(new LazyLoadingMaildirMessage(mailbox, uid, messageName));
+                 messages.add(new MaildirMessage(mailbox, uid, messageName));
              }
              return messages;
 

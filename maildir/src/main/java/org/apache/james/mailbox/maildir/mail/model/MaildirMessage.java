@@ -37,7 +37,7 @@ import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
-import org.apache.james.mailbox.store.mail.model.PropertyBuilder;
+import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
@@ -46,7 +46,7 @@ import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
 import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeTokenStream;
 
-public class LazyLoadingMaildirMessage extends AbstractMessage<Integer> {
+public class MaildirMessage extends AbstractMessage<Integer> {
 
     private MaildirMessageName messageName;
     private int bodyStartOctet;
@@ -63,7 +63,7 @@ public class LazyLoadingMaildirMessage extends AbstractMessage<Integer> {
     protected boolean newMessage;
     private long modSeq;
     
-    public LazyLoadingMaildirMessage(Mailbox<Integer> mailbox, long uid, MaildirMessageName messageName) throws IOException {
+    public MaildirMessage(Mailbox<Integer> mailbox, long uid, MaildirMessageName messageName) throws IOException {
         this.mailbox = mailbox;
         setUid(uid);
         setModSeq(messageName.getFile().lastModified());

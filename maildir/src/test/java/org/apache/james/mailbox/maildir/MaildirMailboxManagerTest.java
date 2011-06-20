@@ -36,6 +36,7 @@ import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
+import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -112,7 +113,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
 
             MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user", new JVMMailboxPathLocker());
             MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-            MaildirMailboxManager manager = new MaildirMailboxManager(mf, null);
+            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
     
             manager.init();
     
@@ -139,7 +140,7 @@ public class MaildirMailboxManagerTest extends MailboxManagerTest {
     private void doTestListWithMaildirStoreConfiguration(String maildirStoreConfiguration) throws MailboxException, UnsupportedEncodingException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + maildirStoreConfiguration, new JVMMailboxPathLocker());
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        MaildirMailboxManager manager = new MaildirMailboxManager(mf, null);
+        StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
         manager.init();
         setMailboxManager(manager);
         try {

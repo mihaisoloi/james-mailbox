@@ -29,7 +29,7 @@ import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 
 public class InMemoryMailboxMapper implements MailboxMapper<Long> {
     

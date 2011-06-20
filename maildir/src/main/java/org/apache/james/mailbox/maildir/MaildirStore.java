@@ -30,7 +30,7 @@ import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 
 public class MaildirStore {
 

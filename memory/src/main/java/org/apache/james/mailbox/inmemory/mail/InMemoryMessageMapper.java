@@ -35,7 +35,7 @@ import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.SimpleMessage;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
 
 public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 

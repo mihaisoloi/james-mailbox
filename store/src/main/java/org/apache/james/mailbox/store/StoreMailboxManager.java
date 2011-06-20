@@ -45,7 +45,7 @@ import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.mail.model.SimpleMailbox;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 import org.apache.james.mailbox.store.search.ListeningMessageSearchIndex;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.search.SimpleMessageSearchIndex;
@@ -62,7 +62,7 @@ import org.slf4j.Logger;
  *
  * @param <Id>
  */
-public abstract class StoreMailboxManager<Id> implements MailboxManager {
+public class StoreMailboxManager<Id> implements MailboxManager {
     
     public static final char SQL_WILDCARD_CHAR = '%';
     
@@ -83,6 +83,10 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
         this.authenticator = authenticator;
         this.locker = locker;
         this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;       
+    }
+    
+    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator) {
+        this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker());
     }
    
     /**
@@ -218,12 +222,16 @@ public abstract class StoreMailboxManager<Id> implements MailboxManager {
     }
   
     /**
-     * Create a {@link MapperStoreMessageManager} for the given Mailbox
+     * Create a {@link MapperStoreMessageManager} for the given Mailbox. By default this will return a {@link StoreMessageManager}. If
+     * your implementation needs something different, just override this method
      * 
-     * @param mailboxRow
+     * @param mailbox
+     * @param session
      * @return storeMailbox
      */
-    protected abstract StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailboxRow, MailboxSession session) throws MailboxException;
+    protected StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailbox, MailboxSession session) throws MailboxException {
+        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailbox);
+    }
 
     /**
      * Create a Mailbox for the given namespace

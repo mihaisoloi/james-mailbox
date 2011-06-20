@@ -26,6 +26,7 @@ import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
+import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
 import org.junit.Before;
 
@@ -33,14 +34,14 @@ public class MaildirStressTest extends AbstractStressTest {
 
     private static final String MAILDIR_HOME = "target/Maildir";
 
-    private MaildirMailboxManager mailboxManager;
+    private StoreMailboxManager<Integer> mailboxManager;
     
     @Before
     public void setUp() throws MailboxException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%user", new JVMMailboxPathLocker());
 
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        mailboxManager = new MaildirMailboxManager(mf, null);
+        mailboxManager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
         mailboxManager.init();
 
     }
