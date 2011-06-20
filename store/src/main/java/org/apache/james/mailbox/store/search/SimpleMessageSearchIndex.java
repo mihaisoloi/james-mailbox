@@ -31,6 +31,7 @@ import org.apache.james.mailbox.SearchQuery.Criterion;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -64,7 +65,7 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             NumericRange[] ranges = uidCrit.getOperator().getRange();
             for (int i = 0; i < ranges.length; i++) {
                 NumericRange r = ranges[i];
-                mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), new MessageCallback<Id>() {
+                mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), FetchType.Metadata, new MessageCallback<Id>() {
 
                     public void onMessages(List<Message<Id>> list) throws MailboxException {
                         for (int i = 0; i < list.size(); i++) {
@@ -84,7 +85,7 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             
             final List<Message<Id>> hits = new ArrayList<Message<Id>>();
 
-            mapper.findInMailbox(mailbox, MessageRange.all(), new MessageCallback<Id>() {
+            mapper.findInMailbox(mailbox, MessageRange.all(), FetchType.Full, new MessageCallback<Id>() {
 
                 public void onMessages(List<Message<Id>> list) throws MailboxException {
                     for (int i = 0; i < list.size(); i++) {

@@ -115,10 +115,12 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
             entityManager = null;
         }
     }
-    /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.MessageRange)
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback)
      */
-    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, MessageCallback<Long> callback) throws MailboxException {
+    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType fType, MessageCallback<Long> callback) throws MailboxException {
         try {
             List<Message<Long>> results;
             long from = set.getUidFrom();

@@ -252,14 +252,12 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
         }
     }
 
+
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache
-     * .james.imap.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback)
      */
-    public void findInMailbox(Mailbox<String> mailbox, MessageRange set, MessageCallback<String> callback) throws MailboxException {
+    public void findInMailbox(Mailbox<String> mailbox, MessageRange set, FetchType fType, MessageCallback<String> callback) throws MailboxException {
         try {
             List<Message<String>> results;
             long from = set.getUidFrom();

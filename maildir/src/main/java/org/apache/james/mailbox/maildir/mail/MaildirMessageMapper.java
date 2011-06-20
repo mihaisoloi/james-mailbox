@@ -110,11 +110,11 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         }
     }
 
-    /* 
+    /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback)
      */
-    public void findInMailbox(Mailbox<Integer> mailbox, MessageRange set, MessageCallback<Integer> callback)
+    public void findInMailbox(Mailbox<Integer> mailbox, MessageRange set, FetchType fType, MessageCallback<Integer> callback)
     throws MailboxException {
         final List<Message<Integer>> results;
         final long from = set.getUidFrom();
@@ -472,7 +472,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
         final MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
 
-        findInMailbox(mailbox, set, new MessageCallback<Integer>() {
+        findInMailbox(mailbox, set, FetchType.Metadata, new MessageCallback<Integer>() {
 
             public void onMessages(List<Message<Integer>> members) throws MailboxException {
                 for (final Message<Integer> member : members) {

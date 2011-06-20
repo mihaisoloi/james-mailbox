@@ -30,6 +30,7 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.transaction.Mapper;
 
 /**
@@ -44,10 +45,11 @@ public interface MessageMapper<Id> extends Mapper {
      * 
      * @param mailbox The mailbox to search
      * @param set message range for batch processing
+     * @param type
      * @param callback callback object 
      * @throws MailboxException
      */
-    void findInMailbox(Mailbox<Id> mailbox, MessageRange set, MessageCallback<Id> callback)
+    void findInMailbox(Mailbox<Id> mailbox, MessageRange set, FetchType type, MessageCallback<Id> callback)
             throws MailboxException;
 
     /**
@@ -181,6 +183,54 @@ public interface MessageMapper<Id> extends Mapper {
          * @throws MailboxException
          */
         void onMessages(List<Message<Id>> list) throws MailboxException;
+    }
+    
+    /**
+     * Specify what data needs to get filled in a {@link Message} before returning it
+     * 
+     *
+     */
+    public static enum FetchType {
+
+        /**
+         * Fetch only the meta data of the {@link Message} which includes:
+         * <p>
+         *  {@link Message#getUid()}
+         *  {@link Message#getModSeq()}
+         *  {@link Message#getBodyOctets()}
+         *  {@link Message#getFullContentOctets()}
+         *  {@link Message#getInternalDate()}
+         *  {@link Message#getMailboxId()}
+         *  {@link Message#getMediaType()}
+         *  {@link Message#getModSeq()}
+         *  {@link Message#getSubType()}
+         *  {@link Message#getTextualLineCount()}
+         * </p>
+         */
+        Metadata,
+        /**
+         * Fetch the {@link #Metadata}, {@link Property}'s and the {@link Header}'s for the {@link Message}. This includes:
+         * 
+         * <p>
+         * {@link Message#getProperties()}
+         * {@link Message#getHeaders()}
+         * </p>
+         */
+        Headers,
+        /**
+         * Fetch the {@link #Metadata} and the Body for the {@link Message}. This includes:
+         * 
+         * <p>
+         *  {@link Message#getBodyContent()}
+         * </p>
+         */
+        Body,
+        
+        /**
+         * Fetch the complete {@link Message}
+         * 
+         */
+        Full
     }
 
 }

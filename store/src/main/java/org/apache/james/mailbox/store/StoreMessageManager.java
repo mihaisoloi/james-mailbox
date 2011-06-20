@@ -50,6 +50,7 @@ import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -548,11 +549,54 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      */
     public void getMessages(MessageRange set, final FetchGroup fetchGroup, MailboxSession mailboxSession, final MessageCallback messageCallback) throws MailboxException {
 
-        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
+        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, getFetchType(fetchGroup), new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
             public void onMessages(List<Message<Id>> rows) throws MailboxException {
                 messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
             }
         });
+    }
+    
+    /**
+     * Use the passed {@link FetchGroup} and calculate the right {@link FetchType} for it
+     * 
+     * @param group
+     * @return fetchType
+     */
+    protected static final FetchType getFetchType(FetchGroup group) {
+        int content = group.content();
+        boolean headers = false;
+        boolean body = false;
+        boolean full = false;
+
+        if ((content & FetchGroup.HEADERS) > 0) {
+            headers = true;
+            content -= FetchGroup.HEADERS;
+        }
+        if ((content & FetchGroup.BODY_CONTENT) > 0) {
+            body = true;
+            content -= FetchGroup.BODY_CONTENT;
+        }
+
+        if ((content & FetchGroup.FULL_CONTENT) > 0) {
+            full = true;
+            content -= FetchGroup.FULL_CONTENT;
+        }
+
+        if ((content & FetchGroup.MIME_DESCRIPTOR) > 0) {
+            // If we need the mimedescriptor we MAY need the full content later too. 
+            // This gives us no other choice then request it
+            full = true;
+            content -= FetchGroup.MIME_DESCRIPTOR;
+        }
+        if (full || (body && headers)) {
+            return FetchType.Full;
+        } else if (body) {
+            return FetchType.Body;
+        } else if (headers) {
+            return FetchType.Headers;
+        } else {
+            return FetchType.Metadata;
+        }
     }
 
     /**
@@ -643,7 +687,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
             final Map<Long, MessageMetaData> copiedMessages = new HashMap<Long, MessageMetaData>();
-            messageMapper.findInMailbox(getMailboxEntity(), set, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
+            messageMapper.findInMailbox(getMailboxEntity(), set, FetchType.Full, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
 
                 public void onMessages(List<Message<Id>> originalRows) throws MailboxException {
                     Iterator<MessageMetaData> ids = to.copy(originalRows, session);

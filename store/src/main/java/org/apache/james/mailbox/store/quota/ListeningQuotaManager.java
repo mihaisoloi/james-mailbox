@@ -34,6 +34,7 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 
 /**
@@ -98,7 +99,7 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
                 final AtomicLong mSizes = new AtomicLong(0);
                 List<Mailbox> mailboxes = factory.getMailboxMapper(session).findMailboxWithPathLike(new MailboxPath(session.getPersonalSpace(), id, "%"));
                 for (int i = 0; i < mailboxes.size(); i++) {
-                    factory.getMessageMapper(session).findInMailbox(mailboxes.get(i), MessageRange.all(), new MessageCallback<Object>() {
+                    factory.getMessageMapper(session).findInMailbox(mailboxes.get(i), MessageRange.all(), FetchType.Metadata, new MessageCallback<Object>() {
                         long messageSizes = 0;
 
                         @Override

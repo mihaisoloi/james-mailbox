@@ -28,6 +28,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -83,7 +84,7 @@ public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> 
                 done = oldDone;
             }
             synchronized (done) {
-                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), new MessageCallback<Id>() {
+                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), FetchType.Full, new MessageCallback<Id>() {
 
                     @Override
                     public void onMessages(List<Message<Id>> list) throws MailboxException {
