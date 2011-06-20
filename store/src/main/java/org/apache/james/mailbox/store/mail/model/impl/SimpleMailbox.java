@@ -46,6 +46,8 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         this.user = mailbox.getUser();
         this.name = mailbox.getName();
         this.uidValidity = mailbox.getUidValidity();
+        this.lastKnownUid = mailbox.getLastKnownUid();
+        this.highestKnownModSeq = mailbox.getHighestKnownModSeq();
     }
 
     /*

@@ -20,24 +20,98 @@ package org.apache.james.mailbox.jcr;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.store.transaction.TransactionalMapper;
+import org.slf4j.Logger;
 
 /**
- * Abstract base class for Mapper's which support scaling 
+ * Abstract base class for Mapper's which support scaling. This supports Level 1 Implementations of JCR. So no real transaction management is used. 
+ * 
+ * The Session.save() will get called on commit() method,  session.refresh(false) on rollback, and session.refresh(true) on begin()
  *
  */
-public abstract class AbstractJCRScalingMapper extends AbstractJCRMapper{
+public abstract class AbstractJCRScalingMapper extends TransactionalMapper implements JCRImapConstants {
+    public final static String MAILBOXES_PATH =  "mailboxes";
 
+    private final MailboxSessionJCRRepository repository;
     private final int scaling;
+
+    private MailboxSession mSession;
     private final static char PAD ='_';
     
     public AbstractJCRScalingMapper(MailboxSessionJCRRepository repository, MailboxSession mSession, int scaling) {
-        super(repository, mSession);
         this.scaling = scaling;
+        
+        this.mSession = mSession;
+        this.repository = repository;
     }
 
+    /**
+     * Return the logger
+     * 
+     * @return logger
+     */
+    protected Logger getLogger() {
+        return mSession.getLog();
+    }
+    
+    /**
+     * Return the JCR Session
+     * 
+     * @return session
+     */
+    protected Session getSession() throws RepositoryException{
+        return repository.login(mSession);
+    }
+
+    /**
+     * Begin is not supported by level 1 JCR implementations, however we refresh the session
+     */
+    protected void begin() throws MailboxException {  
+        try {
+            getSession().refresh(true);
+        } catch (RepositoryException e) {
+            // do nothin on refresh
+        }
+        // Do nothing
+    }
+
+    /**
+     * Just call save on the underlying JCR Session, because level 1 JCR implementation does not offer Transactions
+     */
+    protected void commit() throws MailboxException {
+        try {
+            if (getSession().hasPendingChanges()) {
+                getSession().save();
+            }
+        } catch (RepositoryException e) {
+            throw new MailboxException("Unable to commit", e);
+        }
+    }
+
+    /**
+     * Rollback is not supported by level 1 JCR implementations, so just do nothing
+     */
+    protected void rollback() throws MailboxException {
+        try {
+            // just refresh session and discard all pending changes
+            getSession().refresh(false);
+        } catch (RepositoryException e) {
+            // just catch on rollback by now
+        }
+    }
+
+    /**
+     * Logout from open JCR Session
+     */
+    public void endRequest() {
+       repository.logout(mSession);
+    }
+    
     /**
      * Construct the user node path part, using the specified scaling factor.
      * If the username is not long enough it will fill it with {@link #PAD}

@@ -34,7 +34,7 @@ import org.apache.james.mailbox.store.user.model.Subscription;
 import org.apache.james.mailbox.store.user.model.impl.SimpleSubscription;
 
 /**
- * Manages subscriptions.
+ * Manages subscriptions for Users and Mailboxes.
  */
 public class StoreSubscriptionManager implements SubscriptionManager {
 
@@ -70,7 +70,9 @@ public class StoreSubscriptionManager implements SubscriptionManager {
     }
 
     /**
-     * Create Subscription for the given user and mailbox
+     * Create Subscription for the given user and mailbox. By default a {@link SimpleSubscription} will get returned.
+     * 
+     * If you need something more special just override this method
      * 
      * @param session
      * @param mailbox

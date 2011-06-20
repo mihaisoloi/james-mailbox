@@ -107,6 +107,11 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         }
     }
     
+    /**
+     * Return the {@link AbstractDelegatingMailboxListener} which is used by this {@link MailboxManager}
+     * 
+     * @return delegatingListener
+     */
     public AbstractDelegatingMailboxListener getDelegationListener() {
         if (delegatingListener == null) {
             delegatingListener = new HashMapDelegatingMailboxListener();
@@ -114,14 +119,31 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         return delegatingListener;
     }
     
+    
+    /**
+     * Return the {@link MessageSearchIndex} used by this {@link MailboxManager}
+     * 
+     * @return index
+     */
     public MessageSearchIndex<Id> getMessageSearchIndex() {
         return index;
     }
     
+    
+    /**
+     * Return the {@link MailboxEventDispatcher} used by thei {@link MailboxManager}
+     * 
+     * @return dispatcher
+     */
     public MailboxEventDispatcher<Id> getEventDispatcher() {
         return dispatcher;
     }
     
+    /**
+     * Return the {@link MailboxSessionMapperFactory} used by this {@link MailboxManager}
+     * 
+     * @return mailboxSessionMapperFactory
+     */
     public MailboxSessionMapperFactory<Id> getMapperFactory() {
         return mailboxSessionMapperFactory;
     }
@@ -134,12 +156,18 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @param delegatingListener
      */
     public void setDelegatingMailboxListener(AbstractDelegatingMailboxListener delegatingListener) {
-    	if(this.delegatingListener != null)
-    		this.delegatingListener.close();
+        if (this.delegatingListener != null)
+            this.delegatingListener.close();
         this.delegatingListener = delegatingListener;
         dispatcher.addMailboxListener(this.delegatingListener);
     }
     
+    /**
+     * Set the {@link MessageSearchIndex} which should be used by this {@link MailboxManager}. If none is given this implementation will use a {@link SimpleMessageSearchIndex}
+     * by default
+     * 
+     * @param index
+     */
     public void setMessageSearchIndex(MessageSearchIndex<Id> index) {
         this.index = index;
     }
@@ -234,7 +262,9 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     }
 
     /**
-     * Create a Mailbox for the given namespace
+     * Create a Mailbox for the given namespace. This will by default return a {@link SimpleMailbox}.
+     * 
+     * If you need to return something more special just override this method
      * 
      * @param namespaceName
      * @throws MailboxException
@@ -329,67 +359,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
                 
                 // We need to create a copy of the mailbox as maybe we can not refer to the real
                 // mailbox once we remove it 
-                Mailbox<Id> m = new Mailbox<Id>() {
-                    private Id id = mailbox.getMailboxId();
-                    private String namespace = mailbox.getNamespace();
-                    private String name = mailbox.getName();
-                    private String user = mailbox.getUser();
-                    private long uidVal = mailbox.getUidValidity();
-                    private long lastUid = mailbox.getLastKnownUid();
-                    private long lastSeq = mailbox.getHighestKnownModSeq();
-                    
-                    
-                    public Id getMailboxId() {
-                        return id;
-                    }
-
-                    @Override
-                    public String getNamespace() {
-                        return namespace;
-                    }
-
-                    @Override
-                    public void setNamespace(String namespace) {
-                        this.namespace = namespace;
-                    }
-
-                    @Override
-                    public String getUser() {
-                        return user;
-                    }
-
-                    @Override
-                    public void setUser(String user) {
-                        this.user = user;
-                    }
-
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
-
-                    @Override
-                    public void setName(String name) {
-                        this.name = name;
-                        
-                    }
-
-                    @Override
-                    public long getUidValidity() {
-                        return uidVal;
-                    }
-
-                    @Override
-                    public long getLastKnownUid() {
-                        return lastUid;
-                    }
-
-                    @Override
-                    public long getHighestKnownModSeq() {
-                        return lastSeq;
-                    }
-                    
-                };
+                SimpleMailbox<Id> m = new SimpleMailbox<Id>(mailbox);
                 mapper.delete(mailbox);
                 return m;
             }
@@ -576,7 +546,4 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     public void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
         delegatingListener.addGlobalListener(listener, session);
     }
-    
-    
-
 }

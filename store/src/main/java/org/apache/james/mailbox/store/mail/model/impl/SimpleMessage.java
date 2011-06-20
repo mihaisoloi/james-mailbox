@@ -143,10 +143,6 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         seen = flags.contains(Flags.Flag.SEEN);
     }
 
-    public void unsetRecent() {
-        recent = false;
-    }
-
     public InputStream getBodyContent() throws IOException {
         return content.newStream(getBodyStartOctet(), -1);    
     }

@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.mail.Flags;
+import javax.mail.Flags.Flag;
+
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
-import org.apache.james.mailbox.store.mail.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
@@ -217,6 +220,11 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         SimpleMessage<Long> message = new SimpleMessage<Long>(mailbox, original);
         message.setUid(uid);
         message.setModSeq(modSeq);
+        Flags flags = original.createFlags();
+        
+        // Mark message as recent as it is a copy
+        flags.add(Flag.RECENT);
+        message.setFlags(flags);
         return save(mailbox, message);
     }
 
@@ -242,7 +250,11 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
-        getMembershipByUidForMailbox(mailbox).put(message.getUid(), message);
+        SimpleMessage<Long> copy = new SimpleMessage<Long>(mailbox, message);
+        copy.setUid(message.getUid());
+        copy.setModSeq(message.getModSeq());
+        getMembershipByUidForMailbox(mailbox).put(message.getUid(), copy);
+        
         return new SimpleMessageMetaData(message);
     }
 

@@ -117,7 +117,6 @@ public class MailboxCopierImpl implements MailboxCopier {
 
                 dstMailboxManager.startProcessingRequest(dstMailboxSession);
                 MessageManager dstMessageManager = dstMailboxManager.getMailbox(mailboxPath, dstMailboxSession);
-                dstMailboxManager.endProcessingRequest(dstMailboxSession);
 
                 int j=0;
                 Iterator<MessageResult> messageResultIterator = srcMessageManager.getMessages(MessageRange.all(), GROUP, srcMailboxSession);
@@ -134,6 +133,7 @@ public class MailboxCopierImpl implements MailboxCopier {
                     j++;
 
                 }
+                dstMailboxManager.endProcessingRequest(dstMailboxSession);
 
             }
             

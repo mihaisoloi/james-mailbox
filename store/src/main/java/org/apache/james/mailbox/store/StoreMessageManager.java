@@ -42,6 +42,7 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
@@ -68,14 +69,19 @@ import org.apache.james.mime4j.parser.MimeTokenStream;
 import com.sun.mail.imap.protocol.MessageSet;
 
 /**
- * Abstract base class for {@link org.apache.james.mailbox.MessageManager} implementations. This abstract
- * class take care of dispatching events to the registered {@link MailboxListener} and so help
- * with handling concurrent {@link MailboxSession}'s. So this is a perfect starting point when writing your 
- * own implementation and don't want to depend on {@link MessageMapper}.
+ * Base class for {@link org.apache.james.mailbox.MessageManager} implementations. 
+ * 
+ * This base class take care of dispatching events to the registered {@link MailboxListener} and so help
+ * with handling concurrent {@link MailboxSession}'s.
+ * 
+ * 
  *
  */
 public class StoreMessageManager<Id> implements org.apache.james.mailbox.MessageManager{
 
+    /**
+     * The minimal Permanent flags the {@link MessageManager} must support
+     */
     protected final static Flags MINIMAL_PERMANET_FLAGS;
     static {
         MINIMAL_PERMANET_FLAGS = new Flags();
@@ -90,9 +96,9 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     
     private final MailboxEventDispatcher<Id> dispatcher;    
     
-    protected final MessageMapperFactory<Id> mapperFactory;
+    private final MessageMapperFactory<Id> mapperFactory;
 
-    protected final MessageSearchIndex<Id> index;
+    private final MessageSearchIndex<Id> index;
     
     public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
         this.mailbox = mailbox;
@@ -336,6 +342,12 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return new SimpleMessage<Id>(internalDate, size, bodyStartOctet, content, flags, propertyBuilder, getMailboxEntity().getMailboxId());
     }
     
+    /**
+     * Add the {@link MailboxListener}
+     * 
+     * @param listener
+     * @throws MailboxException
+     */
     public void addListener(MailboxListener listener) throws MailboxException {
         dispatcher.addMailboxListener(listener);
     }
