@@ -16,58 +16,40 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail;
+
+import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
- * Models long term mailbox data.
+ * Take care of provide uids for a given {@link Mailbox}. Be aware that implementations
+ * need to be thread-safe!
+ * 
+ *
+ * @param <Id>
  */
-public interface Mailbox<Id> {
+public interface UidProvider<Id> {
 
     /**
-     * Gets the unique mailbox ID.
-     * @return mailbox id
+     * Return the next uid which can be used while append a Message to the {@link Mailbox}.
+     * Its important that the returned uid is higher then the last used and that the next call of this method does return a higher
+     * one
+     * 
+     * @param session
+     * @param mailbox
+     * @return nextUid
+     * @throws MailboxException
      */
-    Id getMailboxId();
-
-    /**
-     * Gets the current namespace for this mailbox.
-     * @return not null
-     */
-    String getNamespace();
+    public long nextUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
     
     /**
-     * Sets the current namespace for this mailbox.
-     * @param name not null
+     * Return the last uid which were used for storing a Message in the {@link Mailbox}
+     * 
+     * @param session
+     * @param mailbox
+     * @return lastUid
+     * @throws MailboxException
      */
-    void setNamespace(String namespace);
-
-    /**
-     * Gets the current user for this mailbox.
-     * @return not null
-     */
-    String getUser();
-    
-    /**
-     * Sets the current user for this mailbox.
-     * @param name not null
-     */
-    void setUser(String user);
-
-    /**
-     * Gets the current name for this mailbox.
-     * @return not null
-     */
-    String getName();
-    
-    /**
-     * Sets the current name for this mailbox.
-     * @param name not null
-     */
-    void setName(String name);
-
-    /**
-     * Gets the current UID VALIDITY for this mailbox.
-     * @return uid validity
-     */
-    long getUidValidity();
+    public long lastUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
 }

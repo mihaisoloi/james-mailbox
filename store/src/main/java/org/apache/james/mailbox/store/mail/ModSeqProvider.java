@@ -16,58 +16,40 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail;
+
+import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
- * Models long term mailbox data.
+ * Take care of provide mod-seqences for a given {@link Mailbox}. Be aware that implementations
+ * need to be thread-safe!
+ * 
+ *
+ * @param <Id>
  */
-public interface Mailbox<Id> {
+public interface ModSeqProvider<Id> {
 
     /**
-     * Gets the unique mailbox ID.
-     * @return mailbox id
+     * Return the next mod-sequence which can be used for the {@link Mailbox}.
+     * Its important that the returned mod-sequence is higher then the last used and that the next call of this method does return a higher
+     * one
+     * 
+     * @param session
+     * @param mailbox
+     * @return modSeq
+     * @throws MailboxException
      */
-    Id getMailboxId();
-
-    /**
-     * Gets the current namespace for this mailbox.
-     * @return not null
-     */
-    String getNamespace();
+    public long nextModSeq(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
     
     /**
-     * Sets the current namespace for this mailbox.
-     * @param name not null
+     * Return the highest mod-sequence which were used for the {@link Mailbox}
+     * 
+     * @param session
+     * @param mailbox
+     * @return highest
+     * @throws MailboxException
      */
-    void setNamespace(String namespace);
-
-    /**
-     * Gets the current user for this mailbox.
-     * @return not null
-     */
-    String getUser();
-    
-    /**
-     * Sets the current user for this mailbox.
-     * @param name not null
-     */
-    void setUser(String user);
-
-    /**
-     * Gets the current name for this mailbox.
-     * @return not null
-     */
-    String getName();
-    
-    /**
-     * Sets the current name for this mailbox.
-     * @param name not null
-     */
-    void setName(String name);
-
-    /**
-     * Gets the current UID VALIDITY for this mailbox.
-     * @return uid validity
-     */
-    long getUidValidity();
+    public long highestModSeq(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
 }

@@ -742,16 +742,5 @@ public class LuceneMessageSearchIndexTest {
             return 0;
         }
 
-        @Override
-        public long getLastKnownUid() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public long getHighestKnownModSeq() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
     }
 }

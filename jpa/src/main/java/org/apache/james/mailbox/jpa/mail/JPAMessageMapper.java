@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -41,6 +40,8 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.ModSeqProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.openjpa.persistence.ArgumentException;
@@ -52,8 +53,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     protected EntityManagerFactory entityManagerFactory;
     protected EntityManager entityManager;
     
-    public JPAMessageMapper(final MailboxSession session, final EntityManagerFactory entityManagerFactory) {
-        super(session);
+    public JPAMessageMapper(final MailboxSession session, final UidProvider<Long> uidProvider, ModSeqProvider<Long> modSeqProvider, final EntityManagerFactory entityManagerFactory) {
+        super(session, uidProvider, modSeqProvider);
         this.entityManagerFactory = entityManagerFactory;
     }
 
@@ -199,46 +200,6 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#expungeMarkedForDeletion(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
-     */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<Long> mailbox, final MessageRange set) throws MailboxException {
-        try {
-            final Map<Long, MessageMetaData> data;
-            final List<Message<Long>> results;
-            final long from = set.getUidFrom();
-            final long to = set.getUidTo();
-            
-            switch (set.getType()) {
-                case ONE:
-                    results = findDeletedMessagesInMailboxWithUID(mailbox, from);
-                    data = createMetaData(results);
-                    deleteDeletedMessagesInMailboxWithUID(mailbox, from);
-                    break;
-                case RANGE:
-                    results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
-                    data = createMetaData(results);
-                    deleteDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
-                    break;
-                case FROM:
-                    results = findDeletedMessagesInMailboxAfterUID(mailbox, from);
-                    data = createMetaData(results);
-                    deleteDeletedMessagesInMailboxAfterUID(mailbox, from);
-                    break;
-                default:
-                case ALL:
-                    results = findDeletedMessagesInMailbox(mailbox);
-                    data = createMetaData(results);
-                    deleteDeletedMessagesInMailbox(mailbox);
-                    break;
-            }
-            
-            return data;
-        } catch (PersistenceException e) {
-            throw new MailboxException("Search of MessageRange " + set + " failed in mailbox " + mailbox, e);
-        }
-    }
     
     private Map<Long, MessageMetaData> createMetaData(List<Message<Long>> uids) {
         final Map<Long, MessageMetaData> data = new HashMap<Long, MessageMetaData>();
@@ -373,38 +334,6 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateHigestModSeq(Mailbox<Long> mailbox) throws MailboxException {
-        try {
-            final long modSeq = (Long) entityManager.createNamedQuery("findHighestModSeqInMailbox").setParameter("idParam", mailbox.getMailboxId()).setMaxResults(1).getSingleResult();
-            return modSeq;
-        } catch (NoResultException e) {
-            return 0;
-        } catch (PersistenceException e) {
-            throw new MailboxException("Unable to retrieve higehst mod-sequence for mailbox " + mailbox);
-        }
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateLastUid(Mailbox<Long> mailbox) throws MailboxException {
-        try {
-            final long uid = (Long) entityManager.createNamedQuery("findLastUidInMailbox").setParameter("idParam", mailbox.getMailboxId()).setMaxResults(1).getSingleResult();
-            return uid;
-        } catch (NoResultException e) {
-            return 0;
-        } catch (PersistenceException e) {
-            throw new MailboxException("Unable to retrieve last uid for mailbox " + mailbox);
-        }
-    }
-
-
-    /*
-     * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
@@ -440,18 +369,41 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#saveSequences(org.apache.james.mailbox.store.mail.model.Mailbox, long, long)
-     */
-    protected void saveSequences(Mailbox<Long> mailbox, long lastUid, long highestModSeq) throws MailboxException {
+    @Override
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
         try {
-            getEntityManager().createNamedQuery("updateSequences")
-            .setParameter("idParam", mailbox.getMailboxId())
-            .setParameter("lastKnownUidParam", lastUid)
-            .setParameter("lastKnownHighestModSeqParam", highestModSeq).executeUpdate();      
+            final Map<Long, MessageMetaData> data;
+            final List<Message<Long>> results;
+            final long from = set.getUidFrom();
+            final long to = set.getUidTo();
+            
+            switch (set.getType()) {
+                case ONE:
+                    results = findDeletedMessagesInMailboxWithUID(mailbox, from);
+                    data = createMetaData(results);
+                    deleteDeletedMessagesInMailboxWithUID(mailbox, from);
+                    break;
+                case RANGE:
+                    results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
+                    data = createMetaData(results);
+                    deleteDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
+                    break;
+                case FROM:
+                    results = findDeletedMessagesInMailboxAfterUID(mailbox, from);
+                    data = createMetaData(results);
+                    deleteDeletedMessagesInMailboxAfterUID(mailbox, from);
+                    break;
+                default:
+                case ALL:
+                    results = findDeletedMessagesInMailbox(mailbox);
+                    data = createMetaData(results);
+                    deleteDeletedMessagesInMailbox(mailbox);
+                    break;
+            }
+            
+            return data;
         } catch (PersistenceException e) {
-            throw new MailboxException("Save of sequences for mailbox " + mailbox + " failed", e);
+            throw new MailboxException("Search of MessageRange " + set + " failed in mailbox " + mailbox, e);
         }
     }
 }

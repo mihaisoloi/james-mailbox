@@ -44,11 +44,12 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
-import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.ModSeqProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 
@@ -106,14 +107,14 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
      * @param session {@link MailboxSession} to which the mapper is bound
      * @param logger Log
      */
-    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, int scaleType) {
-        super(mSession);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, UidProvider<String> uidProvider, ModSeqProvider<String> modSeqProvider, int scaleType) {
+        super(mSession, uidProvider, modSeqProvider);
         this.repository = repository;        
         this.scaleType = scaleType;
     }
     
-    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session) {
-        this(repos, session, MESSAGE_SCALE_DAY);
+    public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, UidProvider<String> uidProvider, ModSeqProvider<String> modSeqProvider) {
+        this(repos, session, uidProvider, modSeqProvider, MESSAGE_SCALE_DAY);
     }
 
     
@@ -425,44 +426,6 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
 
 
     /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
-     */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
-        try {
-            final List<Message<String>> results;
-            final long from = set.getUidFrom();
-            final long to = set.getUidTo();
-            final Type type = set.getType();
-            switch (type) {
-                default:
-                case ALL:
-                    results = findDeletedMessagesInMailbox(mailbox);
-                    break;
-                case FROM:
-                    results = findDeletedMessagesInMailboxAfterUID(mailbox, from);
-                    break;
-                case ONE:
-                    results = findDeletedMessageInMailboxWithUID(mailbox, from);
-                    break;
-                case RANGE:
-                    results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
-                    break;       
-            }
-            Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
-            for (int i = 0; i < results.size(); i++) {
-                Message<String> m = results.get(i);
-                long uid = m.getUid();
-                uids.put(uid, new SimpleMessageMetaData(m));
-                delete(mailbox, m);
-            }
-            return uids;
-        } catch (RepositoryException e) {
-            throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
-        }
-    }
-
-    /*
      * 
      * TODO: Maybe we should better use an ItemVisitor and just traverse through the child nodes. This could be a way faster
      * 
@@ -548,53 +511,7 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
        repository.logout(mailboxSession);
     }
     
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateHigestModSeq(Mailbox<String> mailbox) throws MailboxException {
-        try {
-            Session s = getSession();
-            // we use order by because without it count will always be 0 in jackrabbit
-            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.MODSEQ_PROPERTY + " descending";
-            QueryManager manager = s.getWorkspace().getQueryManager();
-            Query q = manager.createQuery(queryString, Query.XPATH);
-            q.setLimit(1);
-            QueryResult result = q.execute();
-            NodeIterator nodes = result.getNodes();
-            if (nodes.hasNext()) {
-                return nodes.nextNode().getProperty(JCRMessage.UID_PROPERTY).getLong();
-            }
-            return 0;
-        } catch (RepositoryException e) {
-            throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateLastUid(Mailbox<String> mailbox) throws MailboxException {
-        try {
-            Session s = getSession();
-            // we use order by because without it count will always be 0 in jackrabbit
-            String queryString = "/jcr:root/" + ISO9075.encodePath(s.getNodeByIdentifier(mailbox.getMailboxId()).getPath()) + "//element(*,jamesMailbox:message) order by @" + JCRMessage.UID_PROPERTY + " descending";
-            QueryManager manager = s.getWorkspace().getQueryManager();
-            Query q = manager.createQuery(queryString, Query.XPATH);
-            q.setLimit(1);
-            QueryResult result = q.execute();
-            NodeIterator nodes = result.getNodes();
-            if (nodes.hasNext()) {
-                return nodes.nextNode().getProperty(JCRMessage.UID_PROPERTY).getLong();
-            }
-            return 0;
-        } catch (RepositoryException e) {
-            throw new MailboxException("Unable to count unseen messages in mailbox " + mailbox, e);
-        }
-    }
-
+    
     @Override
     protected MessageMetaData copy(Mailbox<String> mailbox, long uid, long modSeq, Message<String> original) throws MailboxException {
         try {
@@ -689,19 +606,39 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
             throw new MailboxException("Unable to save message " + message + " in mailbox " + mailbox, e);
         }        
     }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#saveSequences(org.apache.james.mailbox.store.mail.model.Mailbox, long, long)
-     */
-    protected void saveSequences(Mailbox<String> mailbox, long lastUid, long highestModSeq) throws MailboxException {
+    
+    @Override
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<String> mailbox, MessageRange set) throws MailboxException {
         try {
-            Node mailboxNode = getSession().getNodeByIdentifier(mailbox.getMailboxId());
-            mailboxNode.setProperty(JCRMailbox.HIGHESTKNOWNMODSEQ_PROPERTY, highestModSeq);
-            mailboxNode.setProperty(JCRMailbox.LASTKNOWNUID_PROPERTY, lastUid);
-           
+            final List<Message<String>> results;
+            final long from = set.getUidFrom();
+            final long to = set.getUidTo();
+            final Type type = set.getType();
+            switch (type) {
+                default:
+                case ALL:
+                    results = findDeletedMessagesInMailbox(mailbox);
+                    break;
+                case FROM:
+                    results = findDeletedMessagesInMailboxAfterUID(mailbox, from);
+                    break;
+                case ONE:
+                    results = findDeletedMessageInMailboxWithUID(mailbox, from);
+                    break;
+                case RANGE:
+                    results = findDeletedMessagesInMailboxBetweenUIDs(mailbox, from, to);
+                    break;       
+            }
+            Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
+            for (int i = 0; i < results.size(); i++) {
+                Message<String> m = results.get(i);
+                long uid = m.getUid();
+                uids.put(uid, new SimpleMessageMetaData(m));
+                delete(mailbox, m);
+            }
+            return uids;
         } catch (RepositoryException e) {
-            throw new MailboxException("Unable to save sequences", e);
+            throw new MailboxException("Unable to search MessageRange " + set + " in mailbox " + mailbox, e);
         }
     }
 

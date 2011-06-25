@@ -23,6 +23,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.SubscriptionException;
 import org.apache.james.mailbox.inmemory.mail.InMemoryMailboxMapper;
 import org.apache.james.mailbox.inmemory.mail.InMemoryMessageMapper;
+import org.apache.james.mailbox.inmemory.mail.InMemoryModSeqProvider;
+import org.apache.james.mailbox.inmemory.mail.InMemoryUidProvider;
 import org.apache.james.mailbox.inmemory.user.InMemorySubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
@@ -37,7 +39,7 @@ public class InMemoryMailboxSessionMapperFactory extends MailboxSessionMapperFac
     
     public InMemoryMailboxSessionMapperFactory() {
         mailboxMapper = new InMemoryMailboxMapper();
-        messageMapper = new InMemoryMessageMapper(null);
+        messageMapper = new InMemoryMessageMapper(null, new InMemoryUidProvider(), new InMemoryModSeqProvider());
         subscriptionMapper = new InMemorySubscriptionMapper();
     }
     

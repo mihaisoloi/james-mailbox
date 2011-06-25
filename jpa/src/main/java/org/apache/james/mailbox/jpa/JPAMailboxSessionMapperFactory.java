@@ -28,6 +28,8 @@ import org.apache.james.mailbox.jpa.user.JPASubscriptionMapper;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
+import org.apache.james.mailbox.store.mail.ModSeqProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
 
 /**
@@ -37,9 +39,13 @@ import org.apache.james.mailbox.store.user.SubscriptionMapper;
 public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<Long> {
 
     private final EntityManagerFactory entityManagerFactory;
+    private final UidProvider<Long> uidProvider;
+    private final ModSeqProvider<Long> modSeqProvider;
 
-    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory) {
+    public JPAMailboxSessionMapperFactory(EntityManagerFactory entityManagerFactory, UidProvider<Long> uidProvider, ModSeqProvider<Long> modSeqProvider) {
         this.entityManagerFactory = entityManagerFactory;
+        this.uidProvider = uidProvider;
+        this.modSeqProvider = modSeqProvider;
         createEntityManager().close();   
     }
     
@@ -50,7 +56,7 @@ public class JPAMailboxSessionMapperFactory extends MailboxSessionMapperFactory<
 
     @Override
     public MessageMapper<Long> createMessageMapper(MailboxSession session) {
-        return new JPAMessageMapper(session, entityManagerFactory);
+        return new JPAMessageMapper(session, uidProvider, modSeqProvider, entityManagerFactory);
     }
 
     @Override

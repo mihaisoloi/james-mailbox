@@ -42,8 +42,8 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
     public final static String NAMESPACE_PROPERTY = "jamesMailbox:mailboxNamespace";
     public final static String NAME_PROPERTY = "jamesMailbox:mailboxName";
     public final static String UIDVALIDITY_PROPERTY = "jamesMailbox:mailboxUidValidity";
-    public final static String LASTKNOWNUID_PROPERTY = "jamesMailbox:mailboxLastKnownUid";
-    public final static String HIGHESTKNOWNMODSEQ_PROPERTY = "jamesMailbox:mailboxHighestKnownModSeq";
+    public final static String LASTUID_PROPERTY = "jamesMailbox:mailboxLastUid";
+    public final static String HIGHESTMODSEQ_PROPERTY = "jamesMailbox:mailboxHighestModSeq";
 
     private String name;
     private long uidValidity;
@@ -154,8 +154,8 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         }
         node.setProperty(USER_PROPERTY, user);
         node.setProperty(NAMESPACE_PROPERTY, getNamespace());
-        node.setProperty(HIGHESTKNOWNMODSEQ_PROPERTY, getHighestKnownModSeq());
-        node.setProperty(LASTKNOWNUID_PROPERTY, getLastKnownUid());
+        node.setProperty(HIGHESTMODSEQ_PROPERTY, getHighestModSeq());
+        node.setProperty(LASTUID_PROPERTY, getLastUid());
         this.node = node;
     }
     
@@ -282,33 +282,23 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         }        
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
-     */
-    public long getLastKnownUid() {
+    private long getLastUid() {
         if (isPersistent()) {
             try {
-                return node.getProperty(LASTKNOWNUID_PROPERTY).getLong();
+                return node.getProperty(LASTUID_PROPERTY).getLong();
             } catch (RepositoryException e) {
-                logger.error("Unable to access property " + LASTKNOWNUID_PROPERTY, e);
+                logger.error("Unable to access property " + LASTUID_PROPERTY, e);
             }
         }
         return lastKnownUid;
     }
 
-    
-    
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
-     */
-    public long getHighestKnownModSeq() {
+    private long getHighestModSeq() {
         if (isPersistent()) {
             try {
-                return node.getProperty(HIGHESTKNOWNMODSEQ_PROPERTY).getLong();
+                return node.getProperty(HIGHESTMODSEQ_PROPERTY).getLong();
             } catch (RepositoryException e) {
-                logger.error("Unable to access property " + HIGHESTKNOWNMODSEQ_PROPERTY, e);
+                logger.error("Unable to access property " + HIGHESTMODSEQ_PROPERTY, e);
             }
         }
         return highestKnownModSeq;

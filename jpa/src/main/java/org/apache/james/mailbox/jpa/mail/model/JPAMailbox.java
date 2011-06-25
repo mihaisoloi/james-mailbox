@@ -51,9 +51,10 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
         query="SELECT COUNT(mailbox) FROM Mailbox mailbox WHERE mailbox.name LIKE :nameParam and mailbox.user is NULL and mailbox.namespace= :namespaceParam"),
     @NamedQuery(name="listMailboxes",
         query="SELECT mailbox FROM Mailbox mailbox"),
-    @NamedQuery(name="updateSequences", 
-        query= "UPDATE Mailbox mailbox SET mailbox.lastKnownUid = :lastKnownUidParam, mailbox.highestKnownModSeq = :lastKnownHighestModSeqParam  WHERE mailbox.mailboxId = :idParam")
-    
+    @NamedQuery(name="findHighestModSeq",
+        query="SELECT mailbox.highestModSeq FROM Mailbox mailbox WHERE mailbox.mailbox.mailboxId = :idParam"),
+    @NamedQuery(name="findLastUid",
+        query="SELECT mailbox.lastUid FROM Mailbox mailbox WHERE mailbox.mailbox.mailboxId = :idParam")
 })
 public class JPAMailbox implements Mailbox<Long> {
     
@@ -84,12 +85,12 @@ public class JPAMailbox implements Mailbox<Long> {
     private String namespace;
 
     @Basic(optional = false)
-    @Column(name = "MAILBOX_LAST_KNOWN_UID", nullable = false)
-    private long lastKnownUid;
+    @Column(name = "MAILBOX_LAST_UID", nullable = false)
+    private long lastUid;
     
     @Basic(optional = false)
-    @Column(name = "MAILBOX_HIGHEST_KNOWN_MODSEQ", nullable = false)
-    private long highestKnownModSeq;
+    @Column(name = "MAILBOX_HIGHEST_MODSEQ", nullable = false)
+    private long highestModSeq;
     
     /**
      * JPA only
@@ -200,21 +201,20 @@ public class JPAMailbox implements Mailbox<Long> {
     }
 
     
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
-     */
-    public long getLastKnownUid() {
-        return lastKnownUid;
+    public long getLastUid() {
+        return lastUid;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
-     */
-    public long getHighestKnownModSeq() {
-        return highestKnownModSeq;
+    public long getHighestModSeq() {
+        return highestModSeq;
+    }
+    
+    public long consumeUid() {
+        return ++lastUid;
+    }
+    
+    public long consumeModSeq() {
+        return ++highestModSeq;
     }
     
 }

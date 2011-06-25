@@ -26,6 +26,8 @@ import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.jpa.mail.JPAModSeqProvider;
+import org.apache.james.mailbox.jpa.mail.JPAUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.JPAProperty;
 import org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;
@@ -33,6 +35,7 @@ import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.openjpa.OpenJPAMailboxManager;
 import org.apache.james.mailbox.jpa.user.model.JPASubscription;
+import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.junit.After;
 import org.junit.Before;
@@ -93,7 +96,8 @@ public class JPAMailboxManagerTest extends MailboxManagerTest {
                 JPASubscription.class.getName() + ")");
        
         entityManagerFactory = OpenJPAPersistence.getEntityManagerFactory(properties);
-        JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory);
+        JVMMailboxPathLocker locker = new JVMMailboxPathLocker();
+        JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory, new JPAUidProvider(locker, entityManagerFactory), new JPAModSeqProvider(locker, entityManagerFactory));
 
         JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null);
         mailboxManager.init();

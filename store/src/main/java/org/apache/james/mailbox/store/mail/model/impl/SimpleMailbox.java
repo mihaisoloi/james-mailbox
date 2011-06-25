@@ -28,16 +28,12 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
     private String user;
     private String name;
     private long uidValidity;
-    private long lastKnownUid;
-    private long highestKnownModSeq;
 
-    public SimpleMailbox(MailboxPath path, long uidValidity, long lastKnownUid, long highestKnownModSeq) {
+    public SimpleMailbox(MailboxPath path, long uidValidity) {
         this.namespace = path.getNamespace();
         this.user = path.getUser();
         this.name = path.getName();
         this.uidValidity = uidValidity;
-        this.lastKnownUid = lastKnownUid;
-        this.highestKnownModSeq = highestKnownModSeq;
     }
     
     public SimpleMailbox(Mailbox<Id> mailbox) {
@@ -46,8 +42,6 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         this.user = mailbox.getUser();
         this.name = mailbox.getName();
         this.uidValidity = mailbox.getUidValidity();
-        this.lastKnownUid = mailbox.getLastKnownUid();
-        this.highestKnownModSeq = mailbox.getHighestKnownModSeq();
     }
 
     /*
@@ -165,21 +159,6 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         return namespace + ":" + user + ":" + name;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getLastKnownUid()
-     */
-    public long getLastKnownUid() {
-        return lastKnownUid;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getHighestKnownModSeq()
-     */
-    public long getHighestKnownModSeq() {
-        return highestKnownModSeq;
-    }
 
     public void setMailboxId(Id id) {
         this.id = id;

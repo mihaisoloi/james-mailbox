@@ -31,6 +31,9 @@ import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.jcr.mail.JCRModSeqProvider;
+import org.apache.james.mailbox.jcr.mail.JCRUidProvider;
+import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
@@ -94,9 +97,11 @@ public class JCRMailboxManagerTest extends MailboxManagerTest {
         // Register imap cnd file
         JCRUtils.registerCnd(repository, workspace, user, pass);
         MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
-
-        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        JCRMailboxManager manager = new JCRMailboxManager(mf, null);
+        JVMMailboxPathLocker locker = new JVMMailboxPathLocker();
+        JCRUidProvider uidProvider = new JCRUidProvider(locker, sessionRepos);
+        JCRModSeqProvider modSeqProvider= new JCRModSeqProvider(locker, sessionRepos);
+        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider, modSeqProvider);
+        JCRMailboxManager manager = new JCRMailboxManager(mf, null, locker);
         manager.init();
         setMailboxManager(manager);
     }

@@ -36,6 +36,8 @@ import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
+import org.apache.james.mailbox.store.mail.ModSeqProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
@@ -45,8 +47,8 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     private Map<Long, Map<Long, Message<Long>>> mailboxByUid;
     private static final int INITIAL_SIZE = 256;
     
-    public InMemoryMessageMapper(MailboxSession session) {
-        super(session);
+    public InMemoryMessageMapper(MailboxSession session, UidProvider<Long> uidProvider, ModSeqProvider<Long> modSeqProvider) {
+        super(session, uidProvider, modSeqProvider);
         this.mailboxByUid = new ConcurrentHashMap<Long, Map<Long, Message<Long>>>(INITIAL_SIZE);
     }
     
@@ -145,30 +147,6 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
-     */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletion(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
-        final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
-
-        findInMailbox(mailbox, set, FetchType.Metadata, new MessageCallback<Long>() {
-
-            public void onMessages(List<Message<Long>> results) throws MailboxException {
-                for (final Iterator<Message<Long>> it = results.iterator(); it.hasNext();) {
-                    Message<Long> member = it.next();
-                    if (member.isDeleted()) {
-                        filteredResult.put(member.getUid(), new SimpleMessageMetaData(member));
-
-                        delete(mailbox, member);
-                    }
-                }
-            }
-        });
-
-        return filteredResult;
-    }
-
-    /*
-     * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
      */
     public List<Long> findRecentMessageUidsInMailbox(Mailbox<Long> mailbox) throws MailboxException {
@@ -230,23 +208,6 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateHigestModSeq(Mailbox<Long> mailbox) throws MailboxException {
-        return 0;
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateLastUid(Mailbox<Long> mailbox) throws MailboxException {
-        return 0;
-    }
-
-    /*
-     * (non-Javadoc)
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
@@ -279,11 +240,26 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     protected void rollback() throws MailboxException {        
     }
 
-    /**
-     * Do nothing
-     */
-    protected void saveSequences(Mailbox<Long> mailbox, long lastUid, long highestModSeq) throws MailboxException {
-        // Nothing todo as its a in memory implementation
-        
+
+
+    @Override
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
+        final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
+
+        findInMailbox(mailbox, set, FetchType.Metadata, new MessageCallback<Long>() {
+
+            public void onMessages(List<Message<Long>> results) throws MailboxException {
+                for (final Iterator<Message<Long>> it = results.iterator(); it.hasNext();) {
+                    Message<Long> member = it.next();
+                    if (member.isDeleted()) {
+                        filteredResult.put(member.getUid(), new SimpleMessageMetaData(member));
+
+                        delete(mailbox, member);
+                    }
+                }
+            }
+        });
+
+        return filteredResult;
     }
 }

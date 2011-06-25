@@ -21,9 +21,6 @@ package org.apache.james.mailbox.store.mail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.mail.Flags;
 
@@ -43,13 +40,15 @@ import org.apache.james.mailbox.store.transaction.TransactionalMapper;
  * @param <Id>
  */
 public abstract class AbstractMessageMapper<Id> extends TransactionalMapper implements MessageMapper<Id>{
-    
-    private final static ConcurrentHashMap<Object, AtomicLong> seqs = new ConcurrentHashMap<Object, AtomicLong>();
-    private final static ConcurrentHashMap<Object, AtomicLong> uids = new ConcurrentHashMap<Object, AtomicLong>();
+   
     protected final MailboxSession mailboxSession;
+    private final UidProvider<Id> uidProvider;
+    private final ModSeqProvider<Id> modSeqProvider;
 
-    public AbstractMessageMapper(MailboxSession mailboxSession) {
+    public AbstractMessageMapper(MailboxSession mailboxSession, UidProvider<Id> uidProvider, ModSeqProvider<Id> modSeqProvider) {
         this.mailboxSession = mailboxSession;
+        this.uidProvider = uidProvider;
+        this.modSeqProvider = modSeqProvider;
     }
     
     
@@ -58,7 +57,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @see org.apache.james.mailbox.store.mail.MessageMapper#getHighestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException {
-        return retrieveLastUsedModSeq(mailbox).get();
+        return modSeqProvider.highestModSeq(mailboxSession, mailbox);
     }
 
     /*
@@ -66,102 +65,10 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @see org.apache.james.mailbox.store.mail.MessageMapper#getLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long getLastUid(Mailbox<Id> mailbox) throws MailboxException {
-        return retrieveLastUid(mailbox).get();
-    }
-
-    
-    private long nextUid(Mailbox<Id> mailbox) throws MailboxException {       
-        return retrieveLastUid(mailbox).incrementAndGet();
+        return uidProvider.lastUid(mailboxSession, mailbox);
     }
     
-    
-    /**
-     * Return the next mod-seq which can be used while append a Message to the {@link Mailbox}.
-     * Its important that the returned mod-seq is higher then the last used and that the next call of this method does not return the same mod-swq. 
-     * 
-     * @param mailbox
-     * @return nextUid
-     * @throws MailboxException
-     */
-    private long nextModSeq(Mailbox<Id> mailbox) throws MailboxException {
-        return retrieveLastUsedModSeq(mailbox).incrementAndGet();
-    }
 
-
-    /**
-     * Retrieve the last used mod-seq for the {@link Mailbox} from cache or via lazy lookup.
-     * 
-     * @param session
-     * @param mailbox
-     * @return lastModSeq
-     * @throws MailboxException
-     */
-    protected AtomicLong retrieveLastUsedModSeq(Mailbox<Id> mailbox) throws MailboxException {
-        AtomicLong seq = seqs.get(mailbox.getMailboxId());
-
-        if (seq == null) {
-            seq = new AtomicLong(higestModSeq(mailbox));
-            AtomicLong cachedSeq = seqs.putIfAbsent(mailbox.getMailboxId(), seq);
-            if (cachedSeq != null) {
-                seq = cachedSeq;
-            }
-        }
-
-        return seq;
-    }
-    
-    private long higestModSeq(Mailbox<Id> mailbox) throws MailboxException {
-        long modSeq = calculateHigestModSeq(mailbox);
-        if (modSeq < 1) {
-            modSeq = mailbox.getHighestKnownModSeq();
-        }
-        return modSeq;
-    }
-    
-    /**
-     * Retrieve the last uid for the {@link Mailbox} from cache or via lazy lookup.
-     * 
-     * @param mailbox
-     * @return lastUid
-     * @throws MailboxException
-     */
-    protected AtomicLong retrieveLastUid(Mailbox<Id> mailbox) throws MailboxException {
-        AtomicLong uid = uids.get(mailbox.getMailboxId());
-
-        if (uid == null) {
-            uid = new AtomicLong(lastUid(mailbox));
-            AtomicLong cachedUid = uids.putIfAbsent(mailbox.getMailboxId(), uid);
-            if (cachedUid != null) {
-                uid = cachedUid;
-            }
-        }
-
-        return uid;
-    }
-    
-    private long lastUid(Mailbox<Id> mailbox) throws MailboxException {
-        long uid = calculateLastUid(mailbox);
-        if (uid < 1) {
-            uid = mailbox.getLastKnownUid();
-        }
-        return uid;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#expungeMarkedForDeletionInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
-     */
-    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<Id> mailbox, MessageRange set) throws MailboxException {
-        Map<Long, MessageMetaData> data = expungeMarkedForDeletion(mailbox, set);
-        if (data.isEmpty() == false) {
-
-            // Increase the mod-sequence and save it with the uid for this mailbox in a permanent way
-            // See MAILBOX-75 
-            saveSequences(mailbox, getLastUid(mailbox), nextModSeq(mailbox));
-
-        }
-        return data;
-    }
 
     
     /*
@@ -176,7 +83,10 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
                 
                 long modSeq = -1;
                 if (members.isEmpty() == false) {
-                    modSeq = nextModSeq(mailbox);
+                    // if a mailbox does not support mod-sequences the provider may be null
+                    if (modSeqProvider != null) {
+                        modSeq = modSeqProvider.nextModSeq(mailboxSession, mailbox);
+                    }
                 }
                 for (final Message<Id> member : members) {
                     Flags originalFlags = member.createFlags();
@@ -217,8 +127,12 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public MessageMetaData add(final Mailbox<Id> mailbox, Message<Id> message) throws MailboxException {
-        message.setUid(nextUid(mailbox));
-        message.setModSeq(nextModSeq(mailbox));
+        message.setUid(uidProvider.nextUid(mailboxSession, mailbox));
+        
+        // if a mailbox does not support mod-sequences the provider may be null
+        if (modSeqProvider != null) {
+            message.setModSeq(modSeqProvider.nextModSeq(mailboxSession, mailbox));
+        }
         MessageMetaData data = save(mailbox, message);
        
         return data;
@@ -231,35 +145,17 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public MessageMetaData copy(final Mailbox<Id> mailbox, final Message<Id> original) throws MailboxException {
-        long uid = nextUid(mailbox);
-        long modSeq = nextModSeq(mailbox);
+        long uid = uidProvider.nextUid(mailboxSession, mailbox);
+        long modSeq = -1;
+        if (modSeqProvider != null) {
+            modSeq = modSeqProvider.nextModSeq(mailboxSession, mailbox);
+        }
         final MessageMetaData metaData = copy(mailbox, uid, modSeq, original);  
         
         return metaData;
     }
 
    
-
-    /**
-     * Return the higest mod-seq for the given {@link Mailbox}. This method is called in a lazy fashion. So when the first mod-seq is needed for a {@link Mailbox}
-     * it will get called to get the higest used. After that it will stored in memory and just increment there on each {@link #nextModSeq(MailboxSession, Mailbox)} call.
-     * 
-     * @param mailbox
-     * @return lastUid
-     * @throws MailboxException
-     */
-    protected abstract long calculateHigestModSeq(Mailbox<Id> mailbox) throws MailboxException;
-    
-    /**
-     * Return the last used uid for the given {@link Mailbox}. This method is called in a lazy fashion. So when the first uid is needed for a {@link Mailbox}
-     * it will get called to get the last used. After that it will stored in memory and just increment there on each {@link #nextUid(MailboxSession, Mailbox)} call.
-     * 
-     * @param session
-     * @param mailbox
-     * @return lastUid
-     * @throws MailboxException
-     */
-    protected abstract long calculateLastUid(Mailbox<Id> mailbox) throws MailboxException;
     
     
     /**
@@ -284,26 +180,5 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      * @throws MailboxException
      */
     protected abstract MessageMetaData copy(Mailbox<Id> mailbox, long uid, long modSeq, Message<Id> original) throws MailboxException;
-    
-    
-    /**
-     * Expunge all Messages which are marked for deletion
-     * 
-     * @param mailbox
-     * @param set
-     * @return
-     * @throws MailboxException
-     */
-    protected abstract Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<Id> mailbox, MessageRange set) throws MailboxException;
-
-    /**
-     * Save the sequence meta-data for the mailbox in a permanent way
-     * 
-     * @param mailbox
-     * @param lastUid
-     * @param highestModSeq
-     * @throws MailboxException
-     */
-    protected abstract void saveSequences(Mailbox<Id> mailbox, long lastUid, long highestModSeq) throws MailboxException;
     
 }

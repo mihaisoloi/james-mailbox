@@ -102,16 +102,6 @@ public class MailboxEventDispatcherFlagsTest {
         public long getUidValidity() {
             return 0;
         }
-
-        @Override
-        public long getLastKnownUid() {
-            return 0;
-        }
-
-        @Override
-        public long getHighestKnownModSeq() {
-            return 0;
-        }
     };
     
     @Before

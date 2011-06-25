@@ -16,58 +16,34 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.mail.model;
+package org.apache.james.mailbox.store.mail;
 
-/**
- * Models long term mailbox data.
- */
-public interface Mailbox<Id> {
+import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxPathLocker;
+import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
+import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.store.StoreMailboxPath;
+import org.apache.james.mailbox.store.mail.model.Mailbox;
 
-    /**
-     * Gets the unique mailbox ID.
-     * @return mailbox id
-     */
-    Id getMailboxId();
+public abstract class AbstractLockingModSeqProvider<Id> implements ModSeqProvider<Id>{
 
-    /**
-     * Gets the current namespace for this mailbox.
-     * @return not null
-     */
-    String getNamespace();
+    private final MailboxPathLocker locker;
+
+    public AbstractLockingModSeqProvider(MailboxPathLocker locker) {
+        this.locker = locker;
+    }
     
-    /**
-     * Sets the current namespace for this mailbox.
-     * @param name not null
-     */
-    void setNamespace(String namespace);
+    @Override
+    public long nextModSeq(final MailboxSession session, final Mailbox<Id> mailbox) throws MailboxException {
+        return locker.executeWithLock(session, new StoreMailboxPath<Id>(mailbox), new LockAwareExecution<Long>() {
 
-    /**
-     * Gets the current user for this mailbox.
-     * @return not null
-     */
-    String getUser();
+            @Override
+            public Long execute() throws MailboxException {
+                return lockedNextModSeq(session, mailbox);
+            }
+        });
+    }
     
-    /**
-     * Sets the current user for this mailbox.
-     * @param name not null
-     */
-    void setUser(String user);
+    protected abstract long lockedNextModSeq(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
 
-    /**
-     * Gets the current name for this mailbox.
-     * @return not null
-     */
-    String getName();
-    
-    /**
-     * Sets the current name for this mailbox.
-     * @param name not null
-     */
-    void setName(String name);
-
-    /**
-     * Gets the current UID VALIDITY for this mailbox.
-     * @return uid validity
-     */
-    long getUidValidity();
 }

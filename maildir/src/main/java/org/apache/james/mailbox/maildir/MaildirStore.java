@@ -29,10 +29,12 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
+import org.apache.james.mailbox.store.mail.ModSeqProvider;
+import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 
-public class MaildirStore {
+public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Integer>{
 
     public static final String PATH_USER = "%user";
     public static final String PATH_DOMAIN = "%domain";
@@ -122,7 +124,7 @@ public class MaildirStore {
         try {
             uidValidity = folder.getUidValidity();
             lastUid = folder.getLastUid(session);
-            return new SimpleMailbox<Integer>(mailboxPath, uidValidity, lastUid, folder.getHighestModSeq());
+            return new SimpleMailbox<Integer>(mailboxPath, uidValidity);
 
         } catch (IOException e) {
             throw new MailboxException("Unable to load Mailbox " + mailboxPath, e);
@@ -243,5 +245,24 @@ public class MaildirStore {
         } catch (MailboxException e) {
             throw new MailboxException("Unable to generate next uid", e);
         }
+    }
+
+    @Override
+    public long nextModSeq(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
+        return System.currentTimeMillis();
+    }
+
+    @Override
+    public long highestModSeq(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
+        try {
+            return createMaildirFolder(mailbox).getHighestModSeq();
+        } catch (IOException e) {
+            throw new MailboxException("Unable to get highest mod-sequence for mailbox", e);
+        }
+    }
+
+    @Override
+    public long lastUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
+       return createMaildirFolder(mailbox).getLastUid(session);
     }
 }

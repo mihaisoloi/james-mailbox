@@ -270,7 +270,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @throws MailboxException
      */
     protected org.apache.james.mailbox.store.mail.model.Mailbox<Id> doCreateMailbox(MailboxPath mailboxPath, final MailboxSession session) throws MailboxException {
-        return new SimpleMailbox<Id>(mailboxPath, randomUidValidity(), 0, 0);
+        return new SimpleMailbox<Id>(mailboxPath, randomUidValidity());
     }
     
     /*

@@ -28,6 +28,9 @@ import org.apache.james.mailbox.AbstractStressTest;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.jcr.mail.JCRModSeqProvider;
+import org.apache.james.mailbox.jcr.mail.JCRUidProvider;
+import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
@@ -53,9 +56,11 @@ public class JCRStressTest extends AbstractStressTest {
         // Register imap cnd file
         JCRUtils.registerCnd(repository, workspace, user, pass);
         MailboxSessionJCRRepository sessionRepos = new GlobalMailboxSessionJCRRepository(repository, workspace, user, pass);
-
-        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos);
-        mailboxManager = new JCRMailboxManager(mf, null);
+        JVMMailboxPathLocker locker = new JVMMailboxPathLocker();
+        JCRUidProvider uidProvider = new JCRUidProvider(locker, sessionRepos);
+        JCRModSeqProvider modSeqProvider= new JCRModSeqProvider(locker, sessionRepos);
+        JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider, modSeqProvider);
+        mailboxManager = new JCRMailboxManager(mf, null, locker);
         mailboxManager.init();
 
     }

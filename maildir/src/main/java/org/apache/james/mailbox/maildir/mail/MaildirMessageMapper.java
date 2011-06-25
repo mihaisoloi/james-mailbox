@@ -57,8 +57,8 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     private final MaildirStore maildirStore;
     private final int BUF_SIZE = 2048;
 
-    public MaildirMessageMapper(MailboxSession session,MaildirStore  maildirStore) {
-        super(session);
+    public MaildirMessageMapper(MailboxSession session, MaildirStore  maildirStore) {
+        super(session, maildirStore, maildirStore);
         this.maildirStore = maildirStore;
     }
     
@@ -257,48 +257,6 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         
     }
 
-    /**
-     * Call {@link #calculateHigestModSeq(Mailbox)} as we do no caching here
-     */
-    public long getHighestModSeq(Mailbox<Integer> mailbox) throws MailboxException {
-        return calculateHigestModSeq(mailbox);
-    }
-
-    /**
-     * Call {@link #calculateLastUid(Mailbox)} as we do no caching here
-     */
-    public long getLastUid(Mailbox<Integer> mailbox) throws MailboxException {
-        return calculateLastUid(mailbox);
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateHigestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateHigestModSeq(Mailbox<Integer> mailbox) throws MailboxException {
-        MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
-        try {
-            return folder.getHighestModSeq();
-        } catch (IOException e) {
-            throw new MailboxException("Unable to get highest mod-seq for mailbox " + mailbox, e);
-        }
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#calculateLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
-     */
-    protected long calculateLastUid(Mailbox<Integer> mailbox) throws MailboxException {
-        MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
-        try {
-            return folder.getLastUid(mailboxSession);
-        } catch (MailboxException e) {
-            throw new MailboxException("Unable to get last uid for mailbox " + mailbox, e);
-        }
-    }
-
 
     /*
      * (non-Javadoc)
@@ -308,43 +266,6 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         SimpleMessage<Integer> theCopy = new SimpleMessage<Integer>(mailbox, original);
         return save(mailbox, theCopy);        
     }
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#expungeMarkedForDeletion(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
-     */
-    protected Map<Long, MessageMetaData> expungeMarkedForDeletion(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
-        List<Message<Integer>> results = new ArrayList<Message<Integer>>();
-        final long from = set.getUidFrom();
-        final long to = set.getUidTo();
-        final Type type = set.getType();
-        switch (type) {
-        default:
-        case ALL:
-            results = findMessagesInMailbox(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, -1);
-            break;
-        case FROM:
-            results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, -1);
-            break;
-        case ONE:
-            results = findDeletedMessageInMailboxWithUID(mailbox, from);
-            break;
-        case RANGE:
-            results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, to);
-            break;       
-        }
-        Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
-        for (int i = 0; i < results.size(); i++) {
-            Message<Integer> m = results.get(i);
-            long uid = m.getUid();
-            uids.put(uid, new SimpleMessageMetaData(m));
-            delete(mailbox, m);
-        }
-        
-        return uids;
-    }
-
 
     /*
      * (non-Javadoc)
@@ -428,14 +349,6 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             throw new MailboxException("Failure while save Message " + message + " in Mailbox " + mailbox, e);
         }
 
-    }
-
-    /**
-     * Do nothing as maildir store the uid and modseq everytime by it own
-     */
-    protected void saveSequences(Mailbox<Integer> mailbox, long lastUid, long highestModSeq) throws MailboxException {
-        // Nothing todo as maildir does its own sequence-keeping
-        
     }
 
 
@@ -535,6 +448,39 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         
         return updatedFlags.iterator();       
         
+    }
+
+
+    @Override
+    public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(Mailbox<Integer> mailbox, MessageRange set) throws MailboxException {
+        List<Message<Integer>> results = new ArrayList<Message<Integer>>();
+        final long from = set.getUidFrom();
+        final long to = set.getUidTo();
+        final Type type = set.getType();
+        switch (type) {
+        default:
+        case ALL:
+            results = findMessagesInMailbox(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, -1);
+            break;
+        case FROM:
+            results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, -1);
+            break;
+        case ONE:
+            results = findDeletedMessageInMailboxWithUID(mailbox, from);
+            break;
+        case RANGE:
+            results = findMessagesInMailboxBetweenUIDs(mailbox, MaildirMessageName.FILTER_DELETED_MESSAGES, from, to);
+            break;       
+        }
+        Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
+        for (int i = 0; i < results.size(); i++) {
+            Message<Integer> m = results.get(i);
+            long uid = m.getUid();
+            uids.put(uid, new SimpleMessageMetaData(m));
+            delete(mailbox, m);
+        }
+        
+        return uids;
     }
 
 }
