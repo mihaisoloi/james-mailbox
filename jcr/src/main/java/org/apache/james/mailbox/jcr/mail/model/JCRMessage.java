@@ -754,6 +754,10 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream getHeaderContent() throws IOException {
-        return new BoundedInputStream(getFullContent(), getBodyStartOctet() - 2);
+        long limit = getBodyStartOctet() -2;
+        if (limit < 0) {
+            limit = 0;
+        }
+        return new BoundedInputStream(getFullContent(), limit);
     }
 }

@@ -450,8 +450,11 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     @Override
     public InputStream getHeaderContent() throws IOException {
         parseMessage();
-            
-        return new BoundedInputStream(getFullContent(), bodyStartOctet - 2);
+        long limit = getBodyStartOctet() -2;
+        if (limit < 0) {
+            limit = 0;
+        }
+        return new BoundedInputStream(getFullContent(), limit);
 
     }
 
