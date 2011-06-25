@@ -52,9 +52,9 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
     @NamedQuery(name="listMailboxes",
         query="SELECT mailbox FROM Mailbox mailbox"),
     @NamedQuery(name="findHighestModSeq",
-        query="SELECT mailbox.highestModSeq FROM Mailbox mailbox WHERE mailbox.mailbox.mailboxId = :idParam"),
+        query="SELECT mailbox.highestModSeq FROM Mailbox mailbox WHERE mailbox.mailboxId = :idParam"),
     @NamedQuery(name="findLastUid",
-        query="SELECT mailbox.lastUid FROM Mailbox mailbox WHERE mailbox.mailbox.mailboxId = :idParam")
+        query="SELECT mailbox.lastUid FROM Mailbox mailbox WHERE mailbox.mailboxId = :idParam")
 })
 public class JPAMailbox implements Mailbox<Long> {
     
