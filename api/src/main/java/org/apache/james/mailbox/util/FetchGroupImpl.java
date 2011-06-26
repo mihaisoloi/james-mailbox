@@ -29,6 +29,7 @@ import org.apache.james.mailbox.MessageResult.MimePath;
 /**
  * Specifies a fetch group.
  */
+@Deprecated
 public class FetchGroupImpl implements MessageResult.FetchGroup {
 
     public static final MessageResult.FetchGroup MINIMAL = new FetchGroupImpl(MessageResult.FetchGroup.MINIMAL);

@@ -22,6 +22,7 @@ package org.apache.james.mailbox.util;
 import org.apache.james.mailbox.MessageResult.MimePath;
 import org.apache.james.mailbox.MessageResult.FetchGroup.PartContentDescriptor;
 
+@Deprecated
 public class PartContentDescriptorImpl implements PartContentDescriptor {
 
     private int content = 0;

@@ -23,6 +23,7 @@ import org.apache.james.mailbox.MailboxMetaData;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
 
+@Deprecated
 public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<MailboxMetaData> {
 
     public static MailboxMetaData createNoSelect(MailboxPath path, char delimiter) {
