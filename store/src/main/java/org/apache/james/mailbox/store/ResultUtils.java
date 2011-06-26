@@ -81,6 +81,11 @@ public class ResultUtils {
                 results.add(resultHeader);
             }
         });
+        try {
+            parser.parse(toInput(document));
+        } catch (MimeException e) {
+            throw new IOException("Unable to parse headers of message " + document, e);
+        }
         return results;
     }
 
