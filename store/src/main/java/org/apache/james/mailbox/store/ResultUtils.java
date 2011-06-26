@@ -41,7 +41,10 @@ import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
 import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.parser.AbstractContentHandler;
 import org.apache.james.mime4j.parser.Field;
+import org.apache.james.mime4j.parser.MimeEntityConfig;
+import org.apache.james.mime4j.parser.MimeStreamParser;
 
 /**
  *
@@ -55,22 +58,29 @@ public class ResultUtils {
     static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     public static List<MessageResult.Header> createHeaders(final Message<?> document) throws IOException {
-        org.apache.james.mime4j.message.Header header = new org.apache.james.mime4j.message.Header(document.getHeaderContent());
-        
         final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>();
-        List<Field> fields = header.getFields();
-        for (Field field: fields) {
-            String fieldValue = field.getBody();
-            if (fieldValue.endsWith("\r\f")) {
-                fieldValue = fieldValue.substring(0,fieldValue.length() - 2);
+        MimeEntityConfig config = new MimeEntityConfig();
+        config.setMaxLineLen(-1);
+        final MimeStreamParser parser = new MimeStreamParser(config);
+        parser.setContentHandler(new AbstractContentHandler() {
+            @Override
+            public void endHeader() {
+                parser.stop();
             }
-            if (fieldValue.startsWith(" ")) {
-                fieldValue = fieldValue.substring(1);
+            @Override
+            public void field(Field field) throws MimeException {
+                String fieldValue = field.getBody();
+                if (fieldValue.endsWith("\r\f")) {
+                    fieldValue = fieldValue.substring(0,fieldValue.length() - 2);
+                }
+                if (fieldValue.startsWith(" ")) {
+                    fieldValue = fieldValue.substring(1);
+                }
+                
+                final ResultHeader resultHeader = new ResultHeader(field.getName(), fieldValue);
+                results.add(resultHeader);
             }
-            
-            final ResultHeader resultHeader = new ResultHeader(field.getName(), fieldValue);
-            results.add(resultHeader);
-        }
+        });
         return results;
     }
 
