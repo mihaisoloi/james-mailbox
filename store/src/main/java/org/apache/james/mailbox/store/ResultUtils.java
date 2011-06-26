@@ -82,7 +82,8 @@ public class ResultUtils {
             }
         });
         try {
-            parser.parse(toInput(document));
+            // add the header seperator to the stream to mime4j don't log a warning
+            parser.parse(new SequenceInputStream(document.getHeaderContent(), new ByteArrayInputStream(BYTES_NEW_LINE)));
         } catch (MimeException e) {
             throw new IOException("Unable to parse headers of message " + document, e);
         }
