@@ -257,4 +257,15 @@ public class MessageRange {
         }
         return ranges;
     }
+    
+    /**
+     * @deprecated use {@link #toRanges(Collection)}
+     * 
+     * @param uidsCol
+     * @return
+     */
+    @Deprecated
+    public static List<MessageRange> toRanges(List<Long> uidsCol) {
+        return toRanges((Collection<Long>)uidsCol);
+    }
 }
