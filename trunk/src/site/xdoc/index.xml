@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.    
+-->
+
+<document>
+
+ <properties>
+  <title>Introduction</title>
+  <author email="server-dev@james.apache.org">Apache James Mailbox</author>
+ </properties>
+
+<body>
+
+  <section name="What Is Apache James Mailbox?">
+    <p>The Apache James Mailbox is a library providing a flexible Mailbox storage accessible by mail 
+       protocols (IMAP4, POP3, SMTP,...) and other protocols.</p>
+    <p>It can also be embedded into your application to implement for example 
+       the <a href="http://www.mindspring.com/~mgrand/pattern_synopses3.htm#Mailbox">Mailbox Pattern</a>.</p>
+    <p>The mailbox library supports different persistence 
+       mechanisms: MailDir, SQL Database via Apache OpenJPA and JCR (Java Content Repository) via Apache JackRabbit.</p>
+    <p>We are also planning to implement distributed persistence such as Hadoop 
+       and NoSQL storage systems 
+       (see <a href="https://issues.apache.org/jira/browse/MAILBOX-44">MAILBOX-44</a> and
+       <a href="https://issues.apache.org/jira/browse/MAILBOX-45">MAILBOX-45</a>).</p>
+    <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 
+       0.2-M2 milestone. The <a href="apidocs/">API</a> as the Database schema are susceptible to evolve 
+       (see for example <a href="https://issues.apache.org/jira/browse/MAILBOX-46">MAILBOX-46</a>).</p>
+  </section>
+
+  <section name="Apache James Mailbox in Server and other librairies">
+    <p><a href="http://james.apache.org/server/3">Apache James Server 3</a> uses this library to implement its user mailboxes.
+       A backport to <a href="http://james.apache.org/server/2">Apache James Server 2.3.2</a> would require
+       a volunteer.</p>
+    <p>The Mailbox is tested and fully compatible with other Apache James libraries
+       such as the <a href="http://james.apache.org/imap">Apache James IMAP</a> (see <a href="https://svn.apache.org/repos/asf/james/mailbox-integration-tester/trunk/">this link</a> for the Mailbox/IMAP tests source code) </p>
+  </section>
+
+  <section name="Develop on Apache James Mailbox">
+    <p>Go to the <a href="source-code.html">source code</a> page to get more information on how to 
+       develop on Apache James Mailbox.</p>
+    <p>You can also read more on the <a href="mailbox-api.html">Mailbox API</a>, 
+    the base and utility classes (<a href="mailbox-store.html">Mailbox Store</a>) 
+    and the different implementation we propose (<a href="mailbox-memory.html">Memory</a>, 
+    <a href="mailbox-maildir.html">Maildir</a>, 
+    <a href="mailbox-jpa.html">JPA</a>, 
+    <a href="mailbox-jcr.html">JCR)</a>.</p>
+    <img src="images/uml/org-apache-james-mailbox-package.png"/>
+  </section>
+
+</body>
+
+</document>
