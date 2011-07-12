@@ -27,6 +27,7 @@ import javax.mail.internet.SharedInputStream;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
@@ -40,30 +41,40 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
  */
 public class OpenJPAMessageManager extends JPAMessageManager {
 
-    private final boolean useStreaming;
+    private final AdvancedFeature feature;
 
+    public static enum AdvancedFeature {
+        None,
+        Streaming,
+        Encryption
+    }
+    
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index,
             MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox) throws MailboxException {
-        this(mapperFactory, index, dispatcher, mailbox, false);
+        this(mapperFactory, index, dispatcher, mailbox, AdvancedFeature.None);
     }
 
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, 
-            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox, final boolean useStreaming) throws MailboxException {
+            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox, final AdvancedFeature f) throws MailboxException {
         super(mapperFactory,  index, dispatcher, mailbox);
-        this.useStreaming = useStreaming;
+        this.feature = f;
     }
 
     @Override
     protected Message<Long> createMessage(Date internalDate, int size, int bodyStartOctet, SharedInputStream content, Flags flags, PropertyBuilder propertyBuilder) throws MailboxException {
-        if (useStreaming) {
-            int headerEnd = bodyStartOctet -2;
-            if (headerEnd < 0) {
-                headerEnd = 0;
-            }
+        int headerEnd = bodyStartOctet -2;
+        if (headerEnd < 0) {
+            headerEnd = 0;
+        }
+        switch (feature) {
+        case Streaming:
             return new JPAStreamingMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, content, bodyStartOctet, propertyBuilder);
-        } else {
+        case Encryption:
+            return new JPAEncryptedMessage((JPAMailbox) getMailboxEntity(), internalDate, size, flags, content, bodyStartOctet, propertyBuilder);
+        default:
             return super.createMessage(internalDate, size, bodyStartOctet, content, flags,  propertyBuilder);
         }
+       
     }
 
     

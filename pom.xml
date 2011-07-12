@@ -715,6 +715,11 @@
         <artifactId>geronimo-jpa_2.0_spec</artifactId>
         <version>1.1</version>
       </dependency>
+      <dependency>
+        <groupId>org.jasypt</groupId>
+        <artifactId>jasypt</artifactId>
+        <version>1.7.1</version>
+      </dependency>
       
       <!-- 
         END OpenJPA

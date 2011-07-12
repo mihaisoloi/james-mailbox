@@ -25,6 +25,8 @@ import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.JPAMailboxManager;
 import org.apache.james.mailbox.jpa.JPAMailboxSessionMapperFactory;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.EncryptDecryptHelper;
+import org.apache.james.mailbox.jpa.openjpa.OpenJPAMessageManager.AdvancedFeature;
 import org.apache.james.mailbox.store.Authenticator;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.StoreMessageManager;
@@ -36,20 +38,34 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
  */
 public class OpenJPAMailboxManager extends JPAMailboxManager {
 
-    private boolean useStreaming;
+    private AdvancedFeature feature;
 
     public OpenJPAMailboxManager(JPAMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, MailboxPathLocker locker, boolean useStreaming) {
         super(mapperFactory, authenticator,  locker);
-        this.useStreaming = useStreaming;
+        if (useStreaming) {
+            feature = AdvancedFeature.Streaming;
+        } else {
+            feature = AdvancedFeature.None;
+        }
     }
 
+    public OpenJPAMailboxManager(JPAMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, MailboxPathLocker locker,  String encryptPass) {
+        super(mapperFactory, authenticator,  locker);
+        if (encryptPass != null) {
+            EncryptDecryptHelper.init(encryptPass);
+            feature = AdvancedFeature.Encryption;
+        } else {
+            feature = AdvancedFeature.None;
+        }
+    }
+    
     public OpenJPAMailboxManager(JPAMailboxSessionMapperFactory mapperFactory, Authenticator authenticator) {
         this(mapperFactory, authenticator, new JVMMailboxPathLocker(), false);
     }
 
     @Override
     protected StoreMessageManager<Long> createMessageManager(Mailbox<Long> mailboxRow, MailboxSession session) throws MailboxException {
-        StoreMessageManager<Long> result =  new OpenJPAMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailboxRow, useStreaming);
+        StoreMessageManager<Long> result =  new OpenJPAMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailboxRow, feature);
         return result;
     }
 }

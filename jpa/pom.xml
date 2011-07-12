@@ -48,7 +48,10 @@
       <groupId>${javax.mail.groupId}</groupId>
       <artifactId>${javax.mail.artifactId}</artifactId>
     </dependency>
-    
+    <dependency>
+      <groupId>org.jasypt</groupId>
+      <artifactId>jasypt</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit-dep</artifactId>
@@ -100,7 +103,7 @@
             </property>   
             <property>
               <name>metaDataFactory</name>
-              <value>jpa(Types=org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;org.apache.james.mailbox.jpa.mail.model.JPAHeader;org.apache.james.mailbox.jpa.mail.model.JPAMailbox;org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;org.apache.james.mailbox.jpa.mail.model.JPAProperty;org.apache.james.mailbox.jpa.user.model.JPASubscription)</value>
+              <value>jpa(Types=org.apache.james.mailbox.jpa.mail.model.JPAUserFlag;org.apache.james.mailbox.jpa.mail.model.JPAMailbox;org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;org.apache.james.mailbox.jpa.mail.model.JPAProperty;org.apache.james.mailbox.jpa.user.model.JPASubscription)</value>
             </property>           
           </toolProperties>
         </configuration>
