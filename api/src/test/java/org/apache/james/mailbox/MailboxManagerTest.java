@@ -37,12 +37,57 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class MailboxManagerTest {
     
+    private final static String USER1 = "USER1";
+
     /**
      * The mailboxManager that needs to get instanciated
      * by the mailbox implementations.
      */
     protected MailboxManager mailboxManager;
     
+    @Test
+    public void testBasicOperations() throws BadCredentialsException, MailboxException, UnsupportedEncodingException {
+
+        setMailboxManager(new MockMailboxManager(getMailboxManager()).getMockMailboxManager());
+        
+        MailboxSession session = getMailboxManager().createSystemSession(USER1, LoggerFactory.getLogger("Mock"));
+        Assert.assertEquals(USER1, session.getUser().getUserName());
+        
+        getMailboxManager().startProcessingRequest(session);
+        
+        MailboxPath inbox = MailboxPath.inbox(session);
+        Assert.assertFalse(getMailboxManager().mailboxExists(inbox, session));
+        
+        getMailboxManager().createMailbox(inbox, session);
+        Assert.assertTrue(getMailboxManager().mailboxExists(inbox, session));
+        
+        try {
+            getMailboxManager().createMailbox(inbox, session);
+            Assert.fail();
+        } catch (MailboxException e) {
+            // mailbox already exists!
+        }
+        
+        MailboxPath inboxSubMailbox = new MailboxPath(inbox, "INBOX.Test");
+        Assert.assertFalse(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+        
+        getMailboxManager().createMailbox(inboxSubMailbox, session);
+        Assert.assertTrue(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+        
+        getMailboxManager().deleteMailbox(inbox, session);
+        Assert.assertFalse(getMailboxManager().mailboxExists(inbox, session));
+        Assert.assertTrue(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+        
+        getMailboxManager().deleteMailbox(inboxSubMailbox, session);
+        Assert.assertFalse(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+
+        getMailboxManager().logout(session, false);
+        getMailboxManager().endProcessingRequest(session);
+
+        Assert.assertFalse(session.isOpen());
+
+    }
+
     /**
      * Create some INBOXes and their sub mailboxes and assert list() method.
      * 
