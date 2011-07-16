@@ -29,6 +29,7 @@ import java.util.Date;
 import javax.mail.Flags;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
@@ -78,9 +79,10 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxManagerTest#testList()
+     * @see org.apache.james.mailbox.AbastractMailboxManagerTest#testList()
      */
     @Test
+    @Override
     public void testList() throws MailboxException, UnsupportedEncodingException {
         
         if (OsDetector.isWindows()) {
@@ -103,6 +105,37 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
             
     }
     
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.AbastractMailboxManagerTest#testBasicOperations()
+     */
+    @Test
+    @Override
+    public void testBasicOperations() throws BadCredentialsException, MailboxException, UnsupportedEncodingException {
+        
+        if (OsDetector.isWindows()) {
+            System.out.println("Maildir tests work only on non-windows systems. So skip the test");
+        } else {
+
+            MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user", new JVMMailboxPathLocker());
+            MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
+            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
+            manager.init();
+            setMailboxManager(manager);
+            try {
+                super.testBasicOperations();
+            } finally {
+                try {
+                    deleteMaildirTestDirectory();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+       
+        }
+
+    }
+
     // See MAILBOX-31
     @Test
     public void testCreateSubFolder() throws MailboxException {
