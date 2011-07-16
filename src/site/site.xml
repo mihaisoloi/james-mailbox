@@ -49,6 +49,7 @@
       <item name="Mailbox Maildir" href="/mailbox-maildir.html" />
       <item name="Mailbox JPA" href="/mailbox-jpa.html" />
       <item name="Mailbox JCR" href="/mailbox-jcr.html" />
+      <item name="Mailbox HBase" href="/mailbox-hbase.html" />
       <item name="Mailbox Tool" href="/mailbox-tool.html" />
     </menu>  
      

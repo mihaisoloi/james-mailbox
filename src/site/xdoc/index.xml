@@ -33,22 +33,22 @@
     <p>It can also be embedded into your application to implement for example 
        the <a href="http://www.mindspring.com/~mgrand/pattern_synopses3.htm#Mailbox">Mailbox Pattern</a>.</p>
     <p>The mailbox library supports different persistence 
-       mechanisms: MailDir, SQL Database via Apache OpenJPA and JCR (Java Content Repository) via Apache JackRabbit.</p>
+       mechanisms: MailDir, SQL Database via Apache OpenJPA and JCR (Java Content Repository based on Apache Jackrabbit.</p>
     <p>We are also planning to implement distributed persistence such as Hadoop 
        and NoSQL storage systems 
        (see <a href="https://issues.apache.org/jira/browse/MAILBOX-44">MAILBOX-44</a> and
        <a href="https://issues.apache.org/jira/browse/MAILBOX-45">MAILBOX-45</a>).</p>
-    <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 
-       0.2-M2 milestone. The <a href="apidocs/">API</a> as the Database schema are susceptible to evolve 
+    <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 0.3 release. 
+       The <a href="apidocs/">API</a> as the Database schema are susceptible to evolve 
        (see for example <a href="https://issues.apache.org/jira/browse/MAILBOX-46">MAILBOX-46</a>).</p>
   </section>
 
   <section name="Apache James Mailbox in Server and other librairies">
-    <p><a href="http://james.apache.org/server/3">Apache James Server 3</a> uses this library to implement its user mailboxes.
-       A backport to <a href="http://james.apache.org/server/2">Apache James Server 2.3.2</a> would require
-       a volunteer.</p>
-    <p>The Mailbox is tested and fully compatible with other Apache James libraries
-       such as the <a href="http://james.apache.org/imap">Apache James IMAP</a> (see <a href="https://svn.apache.org/repos/asf/james/mailbox-integration-tester/trunk/">this link</a> for the Mailbox/IMAP tests source code) </p>
+    <p><a href="http://james.apache.org/server/3">Apache James Server 3</a> uses this library to implement its user mailboxes.</p>
+    <p>Apache James Mailbox is tested and fully compatible with other Apache James libraries
+       such as the <a href="http://james.apache.org/imap">Apache James IMAP</a> 
+       (see <a href="https://svn.apache.org/repos/asf/james/mailbox-integration-tester/trunk/">this link</a> 
+       for the Mailbox/IMAP integration tests source code) </p>
   </section>
 
   <section name="Develop on Apache James Mailbox">
@@ -59,7 +59,8 @@
     and the different implementation we propose (<a href="mailbox-memory.html">Memory</a>, 
     <a href="mailbox-maildir.html">Maildir</a>, 
     <a href="mailbox-jpa.html">JPA</a>, 
-    <a href="mailbox-jcr.html">JCR)</a>.</p>
+    <a href="mailbox-jcr.html">JCR</a> and
+    <a href="mailbox-hbase.html">HBase</a>).</p>
     <img src="images/uml/org-apache-james-mailbox-package.png"/>
   </section>
 
