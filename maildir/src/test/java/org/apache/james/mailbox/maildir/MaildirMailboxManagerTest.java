@@ -32,7 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
-import org.apache.james.mailbox.MailboxManagerTest;
+import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * MaildirMailboxManagerTest that extends the StoreMailboxManagerTest.
  */
-public class MaildirMailboxManagerTest extends MailboxManagerTest {
+public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
     
     private static final String MAILDIR_HOME = "target/Maildir";
 

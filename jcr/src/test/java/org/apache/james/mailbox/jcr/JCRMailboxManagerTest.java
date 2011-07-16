@@ -29,7 +29,7 @@ import org.apache.jackrabbit.core.config.ConfigurationException;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManagerTest;
+import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.JCRModSeqProvider;
 import org.apache.james.mailbox.jcr.mail.JCRUidProvider;
@@ -42,7 +42,7 @@ import org.xml.sax.InputSource;
 /**
  * JCRMailboxManagerTest that extends the StoreMailboxManagerTest.
  */
-public class JCRMailboxManagerTest extends MailboxManagerTest {
+public class JCRMailboxManagerTest extends AbstractMailboxManagerTest {
     
     private static final String JACKRABBIT_HOME = "target/jackrabbit";
     

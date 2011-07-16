@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * implement the test methods.
  * 
  */
-public abstract class MailboxManagerTest {
+public abstract class AbstractMailboxManagerTest {
     
     private final static String USER1 = "USER1";
 

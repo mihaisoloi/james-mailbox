@@ -24,7 +24,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.apache.james.mailbox.BadCredentialsException;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxManagerTest;
+import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.JPAModSeqProvider;
 import org.apache.james.mailbox.jpa.mail.JPAUidProvider;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JPAMailboxManagerTest that extends the StoreMailboxManagerTest.
  */
-public class JPAMailboxManagerTest extends MailboxManagerTest {
+public class JPAMailboxManagerTest extends AbstractMailboxManagerTest {
     
     /**
      * The entity manager factory.
