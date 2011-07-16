@@ -25,6 +25,20 @@
 
 <body>
 
+  <section name="Source Code Organization">
+    <p>The available modules are the <a href="mailbox-api.html">Mailbox API</a>, 
+      <a href="mailbox-store.html">Mailbox Store</a>(the base and utility classes) 
+      and the different implementations we propose (<a href="mailbox-memory.html">Memory</a>, 
+      <a href="mailbox-maildir.html">Maildir</a>, 
+      <a href="mailbox-jpa.html">JPA</a>, 
+      <a href="mailbox-jcr.html">JCR</a> and
+      <a href="mailbox-hbase.html">HBase</a>).
+    </p>
+    <p>A module for <a href="mailbox-tool.html">tooling</a> is also available.
+    </p>
+    <p><img src="images/uml/org-apache-james-mailbox-package.png"/></p>
+  </section>
+
   <section name="Get Source Code">
 
     <subsection name="Anonymous Access">
@@ -43,12 +57,6 @@
     <p>You can read a tutorial on how to build Apache James Server on <a href="http://james.apache.org/server/3/dev-build.html">http://james.apache.org/server/3/dev-build.html</a>.</p>
     <p>The SVN URLs and the project names must be adapted, but the requirements and process are the same and you can inspire
        from the build the Apache James Mailbox libraries.</p>
-  </section>
-
-  <section name="Source Code Organization">
-    <div style="float:left; margin=4px;">
-      <img src="images/uml/org-apache-james-mailbox-package.png"/>
-    </div>
   </section>
 
 </body>
