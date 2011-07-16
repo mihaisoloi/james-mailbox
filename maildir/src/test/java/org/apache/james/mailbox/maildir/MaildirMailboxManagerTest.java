@@ -79,7 +79,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.james.mailbox.AbastractMailboxManagerTest#testList()
+     * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testList()
      */
     @Test
     @Override
@@ -106,7 +106,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
     }
     
     /* (non-Javadoc)
-     * @see org.apache.james.mailbox.AbastractMailboxManagerTest#testBasicOperations()
+     * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testBasicOperations()
      */
     @Test
     @Override
