@@ -46,6 +46,7 @@ import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.ReadOnlyException;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
@@ -170,6 +171,9 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @see org.apache.james.mailbox.Mailbox#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> expunge(final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
+        if (!isWriteable(mailboxSession)) {
+            throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),mailboxSession.getPathDelimiter());
+        }
         Map<Long, MessageMetaData> uids = deleteMarkedInMailbox(set, mailboxSession);
      
         dispatcher.expunged(mailboxSession, uids, getMailboxEntity());
@@ -188,6 +192,10 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         BodyOffsetInputStream bIn = null;
         FileOutputStream out = null;
         SharedFileInputStream contentIn = null;
+        
+        if (!isWriteable(mailboxSession)) {
+            throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),mailboxSession.getPathDelimiter());
+        }
         
         try {
             // Create a temporary file and copy the message to it. We will work with the file as
@@ -442,6 +450,9 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     public Map<Long, Flags> setFlags(final Flags flags, final boolean value, final boolean replace,
             final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
        
+        if (!isWriteable(mailboxSession)) {
+            throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),mailboxSession.getPathDelimiter());
+        }
         final SortedMap<Long, Flags> newFlagsByUid = new TreeMap<Long, Flags>();
 
         trimFlags(flags, mailboxSession);
@@ -479,6 +490,10 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @throws MailboxException
      */
     public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
+        if (!toMailbox.isWriteable(session)) {
+            throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),session.getPathDelimiter());
+        }
+        
         try {
             Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
             dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
@@ -609,6 +624,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @throws MailboxException
      */
     protected List<Long> recent(final boolean reset, MailboxSession mailboxSession) throws MailboxException {
+        if (reset) {
+            if (!isWriteable(mailboxSession)) {
+                throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),mailboxSession.getPathDelimiter());
+            }
+        }
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
         
         return messageMapper.execute(new Mapper.Transaction<List<Long>>() {
@@ -616,7 +636,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             public List<Long> run() throws MailboxException {
                 final List<Long> members = messageMapper.findRecentMessageUidsInMailbox(getMailboxEntity());
 
-                // Conver to MessageRanges so we may be able to optimize the flag update
+                // Convert to MessageRanges so we may be able to optimize the flag update
                 List<MessageRange> ranges = MessageRange.toRanges(members);
                 for (MessageRange range:ranges) {
                     if (reset) {
@@ -633,6 +653,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
     
     protected Map<Long, MessageMetaData> deleteMarkedInMailbox(final MessageRange range, final MailboxSession session) throws MailboxException {
+
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
         return messageMapper.execute(new Mapper.Transaction<Map<Long, MessageMetaData>>() {
