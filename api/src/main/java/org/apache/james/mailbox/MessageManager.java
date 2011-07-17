@@ -42,7 +42,9 @@ public interface MessageManager {
      * @param mailboxSession
      * @return count
      * @throws MailboxException
+     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
+    @Deprecated
     long getMessageCount(MailboxSession mailboxSession) throws MailboxException;
 
     /**
@@ -50,7 +52,9 @@ public interface MessageManager {
      * 
      * @param session
      * @return writable
+     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
+    @Deprecated
     boolean isWriteable(MailboxSession session);
     
     
@@ -59,6 +63,7 @@ public interface MessageManager {
      * 
      * @param session
      * @return modSeqPermanent
+     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
     boolean isModSeqPermanent(MailboxSession session);
 
