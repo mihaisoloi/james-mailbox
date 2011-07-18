@@ -375,7 +375,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      */
     public MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, 
             org.apache.james.mailbox.MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException {
-        final List<Long> recent = recent(resetRecent, mailboxSession);
+        final List<Long> recent;
         final Flags permanentFlags = getPermanentFlags(mailboxSession);
         final long uidValidity = getMailboxEntity().getUidValidity();
         final long uidNext = mapperFactory.getMessageMapper(mailboxSession).getLastUid(mailbox) +1;
@@ -388,21 +388,32 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
                 unseenCount = countUnseenMessagesInMailbox(mailboxSession);
                 messageCount = getMessageCount(mailboxSession);
                 firstUnseen = null;
+                recent = recent(resetRecent, mailboxSession);
+
                 break;
             case FIRST_UNSEEN:
                 firstUnseen = findFirstUnseenMessageUid(mailboxSession);
                 messageCount = getMessageCount(mailboxSession); 
                 unseenCount = 0;
+                recent = recent(resetRecent, mailboxSession);
+
                 break;
             case NO_UNSEEN:
                 firstUnseen = null;
                 unseenCount = 0;
                 messageCount = getMessageCount(mailboxSession);
+                recent = recent(resetRecent, mailboxSession);
+
                 break;
             default:
                 firstUnseen = null;
                 unseenCount = 0;
                 messageCount = -1;
+                // just reset the recent but not include them in the metadata
+                if (resetRecent) {
+                    recent(resetRecent, mailboxSession);
+                }
+                recent = new ArrayList<Long>();
                 break;
         }
         return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession), isModSeqPermanent(mailboxSession));

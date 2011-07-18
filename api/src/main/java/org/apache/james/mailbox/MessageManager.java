@@ -190,14 +190,41 @@ public interface MessageManager {
     public interface MetaData {
 
         /**
-         * Describes the optional data types.
+         * Describes the optional data types which will get set in the {@link MetaData}.
+         * 
+         * These are always set:
+         *     - HIGHESTMODSEQ
+         *     - PERMANENTFLAGS
+         *     - UIDNEXT
+         *     - UIDVALIDITY
+         *     - MODSEQPERMANET
+         *     - WRITABLE
          */
         public enum FetchGroup {
-            NO_UNSEEN, UNSEEN_COUNT, FIRST_UNSEEN, NO_COUNT
+            
+            /**
+             * Only include the message and recent count
+             */
+            NO_UNSEEN, 
+            
+            /**
+             * Only include the unseen message and recent count
+             */
+            UNSEEN_COUNT, 
+            
+            /**
+             * Only include the first unseen and the recent count
+             */
+            FIRST_UNSEEN, 
+            
+            /**
+             * Only return the "always set" metadata as documented above
+             */
+            NO_COUNT
         };
 
         /**
-         * Gets the UIDs of recent messages.
+         * Gets the UIDs of recent messages if requested or an empty {@link List} otherwise.
          * 
          * @return the uids flagged RECENT in this mailbox,
          */
@@ -242,9 +269,12 @@ public interface MessageManager {
         long getHighestModSeq();
 
         /**
-         * Gets the number of messages that this mailbox contains.
+         * Gets the number of messages that this mailbox contains. This is an
+         * optional property.<br>
          * 
-         * @return number of messages contained
+         * @return number of messages contained or -1 when this 
+         *         optional data has not be requested
+         *         
          */
         long getMessageCount();
 
