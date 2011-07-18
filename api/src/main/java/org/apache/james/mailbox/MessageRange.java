@@ -22,13 +22,15 @@ package org.apache.james.mailbox;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Used to define a range of messages by uid.<br>
  * The type of the set should be defined by using an appropriate constructor.
  */
-public class MessageRange {
+public class MessageRange implements Iterable<Long>{
 
     public enum Type {
         /** All messages */
@@ -267,5 +269,59 @@ public class MessageRange {
     @Deprecated
     public static List<MessageRange> toRanges(List<Long> uidsCol) {
         return toRanges((Collection<Long>)uidsCol);
+    }
+
+    
+    /**
+     * Return a read-only {@link Iterator} which contains all uid which fail in the specified range.
+     * 
+     * @return rangeIt
+     */
+    @Override
+    public Iterator<Long> iterator() {
+        long from = getUidFrom();
+        if (from == NOT_A_UID) {
+            from = 1;
+        }
+        long to = getUidTo();
+        if (to == NOT_A_UID) {
+            to = Long.MAX_VALUE;
+        }
+        return new RangeIterator(from, to);
+    }
+    
+    /**
+     * {@link Iterator} of a range of msn/uid
+     *
+     */
+    private final class RangeIterator implements Iterator<Long> {
+
+        private long to;
+        private long current;
+        
+        public RangeIterator(long from, long to) {
+            this.to = to;
+            this.current = from;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return current <= to;
+        }
+
+        @Override
+        public Long next() {
+            if (hasNext()) {
+                return current++;
+            } else {
+                throw new NoSuchElementException("Max uid of " + to + " was reached before");
+            }
+        }
+
+        @Override
+        public void remove() {
+            throw new java.lang.UnsupportedOperationException("Read-Only");
+        }
+        
     }
 }
