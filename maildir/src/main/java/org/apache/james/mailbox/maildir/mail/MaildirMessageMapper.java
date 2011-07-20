@@ -155,7 +155,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
             MaildirMessageName messageName = folder.getMessageNameByUid(mailboxSession, uid);
         
              ArrayList<Message<Integer>> messages = new ArrayList<Message<Integer>>();
-             if (messageName != null) {
+             if (messageName != null && messageName.getFile().exists()) {
                  messages.add(new MaildirMessage(mailbox, uid, messageName));
              }
              return messages;
@@ -408,38 +408,40 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
 
                     try {
                         MaildirMessageName messageName = folder.getMessageNameByUid(mailboxSession, member.getUid());
-                        File messageFile = messageName.getFile();
-                        // System.out.println("save existing " + message +
-                        // " as " + messageFile.getName());
-                        messageName.setFlags(member.createFlags());
-                        // this automatically moves messages from new to cur if
-                        // needed
-                        String newMessageName = messageName.getFullName();
+                        if (messageName != null) {
+                            File messageFile = messageName.getFile();
+                            // System.out.println("save existing " + message +
+                            // " as " + messageFile.getName());
+                            messageName.setFlags(member.createFlags());
+                            // this automatically moves messages from new to cur if
+                            // needed
+                            String newMessageName = messageName.getFullName();
 
-                        File newMessageFile;
+                            File newMessageFile;
                         
-                        // See MAILBOX-57
-                        if (newFlags.contains(Flag.RECENT)) {
-                            // message is recent so save it in the new folder
-                            newMessageFile = new File(folder.getNewFolder(), newMessageName);
-                        } else {
-                            newMessageFile = new File(folder.getCurFolder(), newMessageName);
+                            // See MAILBOX-57
+                            if (newFlags.contains(Flag.RECENT)) {
+                                // message is recent so save it in the new folder
+                                newMessageFile = new File(folder.getNewFolder(), newMessageName);
+                            } else {
+                                newMessageFile = new File(folder.getCurFolder(), newMessageName);
+                            }
+                            long modSeq;
+                            // if the flags don't have change we should not try to move the file
+                            if (newMessageFile.equals(messageFile) == false) {
+                                FileUtils.moveFile(messageFile, newMessageFile );
+                                modSeq = newMessageFile.lastModified();
+
+                            } else {
+                                modSeq = messageFile.lastModified();
+                            } 
+                            member.setModSeq(modSeq);
+                        
+                            updatedFlags.add(new UpdatedFlags(member.getUid(), modSeq, originalFlags, newFlags));
+
+                            long uid = member.getUid();
+                            folder.update(mailboxSession, uid, newMessageName);
                         }
-                        long modSeq;
-                        // if the flags don't have change we should not try to move the file
-                        if (newMessageFile.equals(messageFile) == false) {
-                            FileUtils.moveFile(messageFile, newMessageFile );
-                            modSeq = newMessageFile.lastModified();
-
-                        } else {
-                            modSeq = messageFile.lastModified();
-                        } 
-                        member.setModSeq(modSeq);
-                        
-                        updatedFlags.add(new UpdatedFlags(member.getUid(), modSeq, originalFlags, newFlags));
-
-                        long uid = member.getUid();
-                        folder.update(mailboxSession, uid, newMessageName);
                     } catch (IOException e) {
                         throw new MailboxException("Failure while save Message " + member + " in Mailbox " + mailbox, e);
                     }
