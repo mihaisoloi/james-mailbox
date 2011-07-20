@@ -711,7 +711,7 @@ public class MaildirFolder {
                         // the first line in the file contains the next uid and message count
                         if (line != null)
                             readUidListHeader(line);
-                        ArrayList<String> lines = new ArrayList<String>(messageCount);
+                        ArrayList<String> lines = new ArrayList<String>();
                         while ((line = reader.readLine()) != null)
                             lines.add(line);
                         uid = getNextUid();
@@ -728,7 +728,7 @@ public class MaildirFolder {
                         String[] curFiles = curFolder.list();
                         String[] newFiles = newFolder.list();
                         messageCount = curFiles.length + newFiles.length;
-                        ArrayList<String> lines = new ArrayList<String>(messageCount);
+                        ArrayList<String> lines = new ArrayList<String>();
                         String[] allFiles = (String[]) ArrayUtils.addAll(curFiles, newFiles);
                         for (String file : allFiles) {
                             long theUid = getNextUid();
@@ -780,7 +780,7 @@ public class MaildirFolder {
                     reader = new BufferedReader(fileReader);
                     String line = reader.readLine();
                     readUidListHeader(line);
-                    ArrayList<String> lines = new ArrayList<String>(messageCount);
+                    ArrayList<String> lines = new ArrayList<String>();
                     while ((line = reader.readLine()) != null) {
                         if (uid == Long.valueOf(line.substring(0, line.indexOf(" "))))
                             line = String.valueOf(uid) + " " + messageName;
@@ -824,7 +824,9 @@ public class MaildirFolder {
                     fileReader = new FileReader(uidList);
                     reader = new BufferedReader(fileReader);
                     readUidListHeader(reader.readLine());
-                    ArrayList<String> lines = new ArrayList<String>(messageCount-1);
+                    
+                    // It may be possible that message count is 0 so we should better not try to calculate the size of the ArrayList
+                    ArrayList<String> lines = new ArrayList<String>();
                     String line;
                     int lineNumber = 1;
                     while ((line = reader.readLine()) != null) {
