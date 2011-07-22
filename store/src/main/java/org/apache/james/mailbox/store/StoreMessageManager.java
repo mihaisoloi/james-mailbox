@@ -148,7 +148,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @return flags
      */
     protected Flags getPermanentFlags(MailboxSession session) {
-        return MINIMAL_PERMANET_FLAGS;
+    	
+    	// Return a new flags instance to make sure the static declared flags instance will not get modified later.
+    	//
+    	// See MAILBOX-109
+        return new Flags(MINIMAL_PERMANET_FLAGS);
     }
 
     
