@@ -82,7 +82,9 @@ import com.sun.mail.imap.protocol.MessageSet;
 public class StoreMessageManager<Id> implements org.apache.james.mailbox.MessageManager{
 
     /**
-     * The minimal Permanent flags the {@link MessageManager} must support
+     * The minimal Permanent flags the {@link MessageManager} must support. <br>
+     * 
+     * <strong>Be sure this static instance will never get modifed later!</strong>
      */
     protected final static Flags MINIMAL_PERMANET_FLAGS;
     static {
