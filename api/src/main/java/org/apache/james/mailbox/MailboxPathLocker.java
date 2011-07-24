@@ -27,15 +27,24 @@ package org.apache.james.mailbox;
 public interface MailboxPathLocker {
 
     /**
+     * @deprecated use {@link #executeWithLock(MailboxSession, MailboxPath, LockAwareExecution, boolean)} with argument <code>true</code>
+     */
+    @Deprecated
+    public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException;
+
+    
+    /**
      * Execute the {@link LockAwareExecution} while holding a lock on the
-     * {@link MailboxPath}
+     * {@link MailboxPath}. 
      * 
      * @param session
      * @param path
      * @param execution
+     * @param writeLokc
+     * 
      * @throws MailboxException
      */
-    public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException;
+    public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution, boolean writeLock) throws MailboxException;
 
     /**
      * Execute code while holding a lock

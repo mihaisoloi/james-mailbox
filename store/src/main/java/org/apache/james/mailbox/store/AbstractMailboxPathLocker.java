@@ -31,13 +31,19 @@ public abstract class AbstractMailboxPathLocker implements MailboxPathLocker{
      * @see org.apache.james.mailbox.MailboxPathLocker#executeWithLock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution)
      */
     public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException {
+        return executeWithLock(session, path, execution, true);
+    }
+    
+    @Override
+    public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution, boolean writeLock) throws MailboxException {
         try {
-            lock(session, path);
+            lock(session, path, writeLock);
             return execution.execute();
         } finally {
-            unlock(session, path);
+            unlock(session, path, writeLock);
         }
     }
+
     
     /**
      * Perform lock
@@ -46,7 +52,7 @@ public abstract class AbstractMailboxPathLocker implements MailboxPathLocker{
      * @param path
      * @throws MailboxException
      */
-    protected abstract void lock(MailboxSession session, MailboxPath path) throws MailboxException;
+    protected abstract void lock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException;
 
     /**
      * Release lock
@@ -55,6 +61,6 @@ public abstract class AbstractMailboxPathLocker implements MailboxPathLocker{
      * @param path
      * @throws MailboxException
      */
-    protected abstract void unlock(MailboxSession session, MailboxPath path) throws MailboxException;
+    protected abstract void unlock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException;
 
 }

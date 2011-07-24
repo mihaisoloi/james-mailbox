@@ -21,7 +21,8 @@ package org.apache.james.mailbox.store;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
@@ -31,40 +32,50 @@ import org.apache.james.mailbox.MailboxSession;
 /**
  * 
  * {@link MailboxPathLocker} implementation which helps to synchronize the access the 
- * same MailboxPath. This is done using one {@link ReentrantLock}
+ * same MailboxPath. This is done using one {@link ReentrantReadWriteLock}
  * per {@link MailboxPath} so its only usable in a single JVM.
  *
  */
 public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
 
-    private final ConcurrentHashMap<MailboxPath, Lock> paths = new ConcurrentHashMap<MailboxPath, Lock>();
+    private final ConcurrentHashMap<MailboxPath, ReadWriteLock> paths = new ConcurrentHashMap<MailboxPath, ReadWriteLock>();
 
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#lock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
+     * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#lock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath, boolean)
      */
-    protected void lock(MailboxSession session, MailboxPath path) throws MailboxException {
-        Lock lock = paths.get(path);
+    protected void lock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException {
+        ReadWriteLock lock = paths.get(path);
         if (lock == null) {
-            lock = new ReentrantLock();
-            Lock storedLock = paths.putIfAbsent(path, lock);
+            lock = new ReentrantReadWriteLock();
+            ReadWriteLock storedLock = paths.putIfAbsent(path, lock);
             if (storedLock != null) {
                 lock = storedLock;
             }
         }
-        lock.lock();        
+        getLock(lock, writeLock).lock();
     }
 
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
      */
-    protected void unlock(MailboxSession session, MailboxPath path) throws MailboxException {
-        Lock lock = paths.get(path);
+    protected void unlock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException {
+        ReadWriteLock lock = paths.get(path);
         
         if (lock != null) {
-            lock.unlock();
+            getLock(lock, writeLock).unlock();
         }        
+    }
+    
+    private Lock getLock(ReadWriteLock lock, boolean writeLock) {
+        Lock l;
+        if (writeLock) {
+            l = lock.writeLock();
+        } else {
+            l = lock.readLock();
+        }
+        return l;
     }
 }
