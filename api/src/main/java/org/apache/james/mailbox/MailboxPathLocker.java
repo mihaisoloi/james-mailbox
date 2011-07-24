@@ -40,7 +40,7 @@ public interface MailboxPathLocker {
      * @param session
      * @param path
      * @param execution
-     * @param writeLokc
+     * @param writeLock
      * 
      * @throws MailboxException
      */
