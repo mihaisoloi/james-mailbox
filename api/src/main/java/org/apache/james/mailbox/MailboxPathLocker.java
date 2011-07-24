@@ -19,10 +19,13 @@
 
 package org.apache.james.mailbox;
 
+import java.util.concurrent.locks.ReadWriteLock;
+
 /**
  * The {@link MailboxPathLocker} is responsible to help to synchronize the
- * access to a {@link MailboxPath} and execute an given
- * {@link LockAwareExecution}
+ * access to a {@link MailboxPath} and execute an given {@link LockAwareExecution}
+ * 
+ * Implementations that are not able to handle read / write locks in a different way are needed to handle all locks as write lock.
  */
 public interface MailboxPathLocker {
 
@@ -35,7 +38,8 @@ public interface MailboxPathLocker {
     
     /**
      * Execute the {@link LockAwareExecution} while holding a lock on the
-     * {@link MailboxPath}. 
+     * {@link MailboxPath}. If writeLock is true the implementation need to make sure that no other threads can read and write while the lock
+     * is hold. The contract is the same as documented in {@link ReadWriteLock}. 
      * 
      * @param session
      * @param path
