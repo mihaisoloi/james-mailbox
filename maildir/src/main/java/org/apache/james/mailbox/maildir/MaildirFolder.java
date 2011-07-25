@@ -285,7 +285,7 @@ public class MaildirFolder {
      * @return The {@link MaildirMessageName} that belongs to the uid
      * @throws IOException If the uidlist file cannot be found or read
      */
-    public MaildirMessageName getMessageNameByUid(MailboxSession session, final Long uid) throws MailboxException {
+    public MaildirMessageName getMessageNameByUid(final MailboxSession session, final Long uid) throws MailboxException {
        
         return locker.executeWithLock(session, path, new LockAwareExecution<MaildirMessageName>() {
             
@@ -305,7 +305,8 @@ public class MaildirFolder {
                             int gap = line.indexOf(" ");
                             if (gap == -1) {
                                 // there must be some issues in the file if no gap can be found
-                                throw new MailboxException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                            	session.getLog().info("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                                continue;
                             }
                             
                             if (line.substring(0, gap).equals(uidString)) {
@@ -336,7 +337,7 @@ public class MaildirFolder {
      * @return a {@link Map} whith all uids in the given range and associated {@link MaildirMessageName}s
      * @throws MailboxException if there is a problem with the uid list file
      */
-    public SortedMap<Long, MaildirMessageName> getUidMap(MailboxSession session, final long from, final long to)
+    public SortedMap<Long, MaildirMessageName> getUidMap(final MailboxSession session, final long from, final long to)
     throws MailboxException {
         return locker.executeWithLock(session, path, new LockAwareExecution<SortedMap<Long, MaildirMessageName>>() {
             
@@ -358,7 +359,7 @@ public class MaildirFolder {
                         }
                     } else {
                         // the uidList is up to date
-                        uidMap.putAll(readUidFile(from, to));
+                        uidMap.putAll(readUidFile(session, from, to));
                     }
                 } else {
                     // the uidList does not exist
@@ -417,7 +418,7 @@ public class MaildirFolder {
      * @return A {@link Map} with all uids and associated {@link MaildirMessageName}s of recent messages
      * @throws MailboxException If there is a problem with the uid list file
      */
-    public SortedMap<Long, MaildirMessageName> getRecentMessages(MailboxSession session) throws MailboxException {
+    public SortedMap<Long, MaildirMessageName> getRecentMessages(final MailboxSession session) throws MailboxException {
         final String[] recentFiles = getNewFolder().list();
         final LinkedList<String> lines = new LinkedList<String>();
         final int theLimit = recentFiles.length;
@@ -475,7 +476,9 @@ public class MaildirFolder {
                             int gap = line.indexOf(" ");
                             if (gap == -1) {
                                 // there must be some issues in the file if no gap can be found
-                                throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lines.size());
+                                // there must be some issues in the file if no gap can be found
+                            	session.getLog().info("Corrupted entry in uid-file " + uidList + " line " + lines.size());
+                                continue;
                             }
                             
                             Long uid = Long.valueOf(line.substring(0, gap));
@@ -582,7 +585,7 @@ public class MaildirFolder {
         return uidMap;
     }
 
-    private Map<Long, MaildirMessageName> readUidFile(final long from, final long to) throws MailboxException {
+    private Map<Long, MaildirMessageName> readUidFile(MailboxSession session, final long from, final long to) throws MailboxException {
         final Map<Long, MaildirMessageName> uidMap = new HashMap<Long, MaildirMessageName>();
 
         File uidList = uidFile;
@@ -602,9 +605,9 @@ public class MaildirFolder {
                     int gap = line.indexOf(" ");
 
                     if (gap == -1) {
-                        // there must be some issues in the file if no gap can
-                        // be found
-                        throw new MailboxException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                        // there must be some issues in the file if no gap can be found
+                    	session.getLog().info("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                        continue;
                     }
 
                     Long uid = Long.valueOf(line.substring(0, gap));
@@ -833,7 +836,8 @@ public class MaildirFolder {
                         int gap = line.indexOf(" ");
                         if (gap == -1) {
                             // there must be some issues in the file if no gap can be found
-                            throw new IOException("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                        	session.getLog().info("Corrupted entry in uid-file " + uidList + " line " + lineNumber++);
+                            continue;
                         }
                         
                         if (uid == Long.valueOf(line.substring(0, line.indexOf(" ")))) {
