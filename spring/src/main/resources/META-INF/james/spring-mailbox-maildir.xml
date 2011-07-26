@@ -28,12 +28,13 @@
       WARNING: Maildir does only work on UNIX like operation systems
      -->
 
-    <bean id="maildir-mailboxmanager" class="org.apache.james.mailbox.maildir.MaildirMailboxManager" init-method="init">
+    <bean id="maildir-mailboxmanager" class="org.apache.james.mailbox.store.StoreMailboxManager" init-method="init">
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
+        <constructor-arg index="2" ref="maildir-locker"/>
 <!--         <property name="messageSearchIndex" ref="lazyIndex"/> -->
     </bean>
-    <bean id ="maildir-subscriptionManager" class="org.apache.james.mailbox.maildir.MaildirSubscriptionManager">
+    <bean id ="maildir-subscriptionManager" class="org.apache.james.mailbox.store.StoreSubscriptionManager">
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
     </bean>
     <bean id="maildir-sessionMapperFactory" class="org.apache.james.mailbox.maildir.MaildirMailboxSessionMapperFactory">
@@ -42,5 +43,6 @@
     <bean id="maildirStore" class="org.apache.james.mailbox.maildir.MaildirStore">
         <constructor-arg index="0" value="file://var/store/maildir/"/>
     </bean>
+    <alias name="jvm-locker" alias="maildir-locker"/>
 
 </beans>

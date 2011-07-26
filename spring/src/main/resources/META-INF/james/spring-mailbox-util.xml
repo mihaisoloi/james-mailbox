@@ -24,21 +24,10 @@
           http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-3.0.xsd">
 
     <!-- 
-      Mailbox Memory
+      Mailbox Util
      -->
-    <!-- WARNING: Memory does not persist the mailbox. -->
-    <!--          Information will be lost after jvm restart. -->
 
-    <bean id="memory-mailboxmanager" class="org.apache.james.mailbox.store.StoreMailboxManager" init-method="init">
-        <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
-        <constructor-arg index="1" ref="authenticator"/>
-        <constructor-arg index="2" ref="memory-locker"/>
-<!--         <property name="messageSearchIndex" ref="lazyIndex"/> -->
-    </bean>
-    <bean id ="memory-subscriptionManager" class="org.apache.james.mailbox.store.StoreSubscriptionManager">
-        <constructor-arg index="0" ref="memory-sessionMapperFactory"/>
-    </bean>
-    <bean id="memory-sessionMapperFactory" class="org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory" />
-    <alias name="jvm-locker" alias="memory-locker"/>
+    <bean id="jvm-locker" class="org.apache.james.mailbox.store.JVMMailboxPathLocker"/>
+    <bean id="authenticator" class="org.apache.james.mailbox.spring.AnonymousAuthenticator"/>
 
 </beans>

@@ -30,19 +30,29 @@
     <bean id="jcr-mailboxmanager" class="org.apache.james.mailbox.jcr.JCRMailboxManager" init-method="init">
         <constructor-arg index="0" ref="jcr-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
-        <constructor-arg index="2" ref="locker"/>
+        <constructor-arg index="2" ref="jcr-locker"/>
     </bean>
     <bean id ="jcr-subscriptionManager" class="org.apache.james.mailbox.jcr.JCRSubscriptionManager">
         <constructor-arg index="0" ref="jcr-sessionMapperFactory"/>
     </bean>
     <bean id="jcr-sessionMapperFactory" class="org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory">
         <constructor-arg index="0" ref="jcr-sessionJcrRepository"/>
+        <constructor-arg index="1" ref="jpa-uidProvider"/>
+        <constructor-arg index="2" ref="jpa-modSeqProvider"/>
     </bean>
     <bean id ="jcr-sessionJcrRepository" class="org.apache.james.mailbox.jcr.GlobalMailboxSessionJCRRepository" depends-on="imapCndLoader">
         <constructor-arg index="0" ref="jcrRepository"/>
         <constructor-arg index="1" value="james"/>
         <constructor-arg index="2" value="james"/>
         <constructor-arg index="3" value="james"/>
+    </bean>
+    <bean id="jcr-uidProvider" class="org.apache.james.mailbox.jcr.mail.JCRUidProvider">
+        <constructor-arg index="0" ref="jcr-locker"/>
+        <constructor-arg index="1" ref="jcr-sessionJcrRepository"/>
+    </bean>
+    <bean id="jcr-modSeqProvider" class="org.apache.james.mailbox.jcr.mail.JCRModSeqProvider">
+        <constructor-arg index="0" ref="jcr-locker"/>
+        <constructor-arg index="1" ref="jcr-sessionJcrRepository"/>
     </bean>
     <bean id="jcrRepository" class="org.apache.jackrabbit.core.RepositoryImpl" destroy-method="shutdown">
         <constructor-arg index="0" ref="config" />
@@ -64,5 +74,6 @@
         <constructor-arg index="0" value="classpath:META-INF/james/jcr-repository.xml" type="java.io.InputStream"/>
         <constructor-arg index="1" value="var/store/jackrabbit" />
     </bean>
+    <alias name="jvm-locker" alias="jcr-locker"/>
 
 </beans>
