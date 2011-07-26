@@ -18,7 +18,11 @@
  ****************************************************************/
 package org.apache.james.mailbox;
 
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+
+import javax.mail.Flags;
 
 import junit.framework.Assert;
 
@@ -37,7 +41,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractMailboxManagerTest {
     
-    private final static String USER1 = "USER1";
+    private final static String USER_1 = "USER_1";
+    private final static String USER_2 = "USER_2";
 
     /**
      * The mailboxManager that needs to get instanciated
@@ -50,8 +55,8 @@ public abstract class AbstractMailboxManagerTest {
 
         setMailboxManager(new MockMailboxManager(getMailboxManager()).getMockMailboxManager());
         
-        MailboxSession session = getMailboxManager().createSystemSession(USER1, LoggerFactory.getLogger("Mock"));
-        Assert.assertEquals(USER1, session.getUser().getUserName());
+        MailboxSession session = getMailboxManager().createSystemSession(USER_1, LoggerFactory.getLogger("Mock"));
+        Assert.assertEquals(USER_1, session.getUser().getUserName());
         
         getMailboxManager().startProcessingRequest(session);
         
@@ -77,12 +82,10 @@ public abstract class AbstractMailboxManagerTest {
         getMailboxManager().deleteMailbox(inbox, session);
         Assert.assertFalse(getMailboxManager().mailboxExists(inbox, session));
         
-        // TODO Temporary commented to avoid maildir test failure
-
-//        Assert.assertTrue(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+        Assert.assertTrue(getMailboxManager().mailboxExists(inboxSubMailbox, session));
         
-//        getMailboxManager().deleteMailbox(inboxSubMailbox, session);
-//        Assert.assertFalse(getMailboxManager().mailboxExists(inboxSubMailbox, session));
+        getMailboxManager().deleteMailbox(inboxSubMailbox, session);
+        Assert.assertFalse(getMailboxManager().mailboxExists(inboxSubMailbox, session));
 
         getMailboxManager().logout(session, false);
         getMailboxManager().endProcessingRequest(session);
@@ -108,6 +111,18 @@ public abstract class AbstractMailboxManagerTest {
 
     }
     
+    
+    @Test
+    public void testCreateSubFolderDirectly() throws BadCredentialsException, MailboxException { 
+
+        MailboxSession session = getMailboxManager().createSystemSession(USER_2, LoggerFactory.getLogger("Test"));
+        getMailboxManager().createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, USER_2, "Trash"), session);
+        getMailboxManager().createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, USER_2, "INBOX.testfolder"), session);
+        
+        getMailboxManager().getMailbox(MailboxPath.inbox(session), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
+
+    }
+
     /**
      * Implement this method to create the mailboxManager.
      * 

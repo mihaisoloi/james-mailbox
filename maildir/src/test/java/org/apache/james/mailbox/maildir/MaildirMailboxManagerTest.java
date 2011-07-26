@@ -18,30 +18,22 @@
  ****************************************************************/
 package org.apache.james.mailbox.maildir;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-
-import javax.mail.Flags;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.BadCredentialsException;
-import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
-import org.apache.james.mailbox.AbstractMailboxManagerTest;
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 /**
  * MaildirMailboxManagerTest that extends the StoreMailboxManagerTest.
@@ -127,7 +119,6 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
                 try {
                     deleteMaildirTestDirectory();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -136,9 +127,12 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
 
     }
 
-    // See MAILBOX-31
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testCreateSubFolderDirectly()
+     */
     @Test
-    public void testCreateSubFolder() throws MailboxException {
+    @Override
+    public void testCreateSubFolderDirectly() throws BadCredentialsException, MailboxException { 
 
         if (OsDetector.isWindows()) {
             System.out.println("Maildir tests work only on non-windows systems. So skip the test");
@@ -147,17 +141,19 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
             MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user", new JVMMailboxPathLocker());
             MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
             StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
-    
             manager.init();
+            setMailboxManager(manager);
+            try {
+                super.testCreateSubFolderDirectly();
+            } finally {
+                try {
+                    deleteMaildirTestDirectory();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+       
     
-            String user = "test@localhost";
-            MailboxSession session = manager.createSystemSession(user, LoggerFactory.getLogger("Test"));
-            manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "Trash"), session);
-            manager.createMailbox(new MailboxPath(MailboxConstants.USER_NAMESPACE, user, "INBOX.testfolder"), session);
-            
-            // this threw NPE
-            manager.getMailbox(MailboxPath.inbox(session), session).appendMessage(new ByteArrayInputStream("Subject: test\r\n\r\ntestmail".getBytes()), new Date(), session, false, new Flags());
-
         }
 
     }
@@ -182,7 +178,6 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
             try {
                 deleteMaildirTestDirectory();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
