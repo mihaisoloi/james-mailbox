@@ -32,7 +32,6 @@ import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
-import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -65,17 +64,14 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             NumericRange[] ranges = uidCrit.getOperator().getRange();
             for (int i = 0; i < ranges.length; i++) {
                 NumericRange r = ranges[i];
-                mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), FetchType.Metadata, new MessageCallback<Id>() {
-
-                    public void onMessages(List<Message<Id>> list) throws MailboxException {
-                        for (int i = 0; i < list.size(); i++) {
-                            long uid = list.get(i).getUid();
-                            if (uids.contains(uid) == false) {
-                                uids.add(uid);
-                            }
-                        }
+                Iterator<Message<Id>> messages = mapper.findInMailbox(mailbox, MessageRange.range(r.getLowValue(), r.getHighValue()), FetchType.Metadata, -1);
+                
+                while(messages.hasNext()) {
+                    long uid = messages.next().getUid();
+                    if (uids.contains(uid) == false) {
+                        uids.add(uid);
                     }
-                });
+                }
             }
             Collections.sort(uids);
             return uids.iterator();
@@ -85,17 +81,13 @@ public class SimpleMessageSearchIndex<Id> implements MessageSearchIndex<Id>{
             
             final List<Message<Id>> hits = new ArrayList<Message<Id>>();
 
-            mapper.findInMailbox(mailbox, MessageRange.all(), FetchType.Full, new MessageCallback<Id>() {
-
-                public void onMessages(List<Message<Id>> list) throws MailboxException {
-                    for (int i = 0; i < list.size(); i++) {
-                        Message<Id> m = list.get(i);
-                        if (hits.contains(m) == false) {
-                            hits.add(m);
-                        }
-                    }
+            Iterator<Message<Id>> messages = mapper.findInMailbox(mailbox, MessageRange.all(), FetchType.Full, -1);
+            while(messages.hasNext()) {
+            	Message<Id> m = messages.next();
+                if (hits.contains(m) == false) {
+                    hits.add(m);
                 }
-            });
+            }
             Collections.sort(hits);
             
             Iterator<Message<?>> it = new Iterator<Message<?>>() {

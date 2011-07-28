@@ -45,7 +45,7 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.MessageResultIterator;
 import org.apache.james.mailbox.ReadOnlyException;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.UpdatedFlags;
@@ -544,92 +544,17 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
 
 
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, int, org.apache.james.mailbox.MailboxSession)
      */
-    public Iterator<MessageResult> getMessages(final MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException {
-
-        class InterceptingCallback implements MessageCallback {
-            Iterator<MessageResult> iterator;
-
-            public void onMessages(Iterator<MessageResult> it) throws MailboxException {
-                iterator = it;
-            }
-
-            public Iterator<MessageResult> getIterator() {
-                if (iterator == null) {
-                    iterator = new ResultIterator<Id>(null, null);
-                }
-                return iterator;
-            }
-        }
-
-        // if we are intercepting callback - let's make it effective
-        MessageRange nonBatchedSet = set.getUnlimitedRange();
-
-        // intercepting callback
-        InterceptingCallback callback = new InterceptingCallback();
-        this.getMessages(nonBatchedSet, fetchGroup, mailboxSession, callback);
-
-        return callback.getIterator();
+    public MessageResultIterator getMessages(final MessageRange set, FetchGroup fetchGroup, int batchSize, MailboxSession mailboxSession) throws MailboxException {
+        final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
+        return new StoreMessageResultIterator<Id>(messageMapper, mailbox, set, batchSize, fetchGroup);
     }
-   
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession, int, org.apache.james.mailbox.MessageManager.MessageCallback)
-     */
-    public void getMessages(MessageRange set, final FetchGroup fetchGroup, MailboxSession mailboxSession, final MessageCallback messageCallback) throws MailboxException {
 
-        mapperFactory.getMessageMapper(mailboxSession).findInMailbox(getMailboxEntity(), set, getFetchType(fetchGroup), new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
-            public void onMessages(List<Message<Id>> rows) throws MailboxException {
-                messageCallback.onMessages(new ResultIterator<Id>(rows.iterator(), fetchGroup));
-            }
-        });
-    }
-    
-    /**
-     * Use the passed {@link FetchGroup} and calculate the right {@link FetchType} for it
-     * 
-     * @param group
-     * @return fetchType
-     */
-    protected static final FetchType getFetchType(FetchGroup group) {
-        int content = group.content();
-        boolean headers = false;
-        boolean body = false;
-        boolean full = false;
-
-        if ((content & FetchGroup.HEADERS) > 0) {
-            headers = true;
-            content -= FetchGroup.HEADERS;
-        }
-        if ((content & FetchGroup.BODY_CONTENT) > 0) {
-            body = true;
-            content -= FetchGroup.BODY_CONTENT;
-        }
-
-        if ((content & FetchGroup.FULL_CONTENT) > 0) {
-            full = true;
-            content -= FetchGroup.FULL_CONTENT;
-        }
-
-        if ((content & FetchGroup.MIME_DESCRIPTOR) > 0) {
-            // If we need the mimedescriptor we MAY need the full content later too. 
-            // This gives us no other choice then request it
-            full = true;
-            content -= FetchGroup.MIME_DESCRIPTOR;
-        }
-        if (full || (body && headers)) {
-            return FetchType.Full;
-        } else if (body) {
-            return FetchType.Body;
-        } else if (headers) {
-            return FetchType.Headers;
-        } else {
-            return FetchType.Metadata;
-        }
-    }
+ 
 
     /**
      * Return a List which holds all uids of recent messages and optional reset
@@ -694,21 +619,21 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
 
-    private Iterator<MessageMetaData> copy(final List<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
+    private Iterator<MessageMetaData> copy(final Iterator<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
         try {
             final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
             final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            for (final Message<Id> originalMessage:originalRows) {
-               MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
+            while(originalRows.hasNext()) {
+				final Message<Id> originalMessage = originalRows.next();
+				MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
+					public MessageMetaData run() throws MailboxException {
+					    return messageMapper.copy(getMailboxEntity(), originalMessage);
 
-                    public MessageMetaData run() throws MailboxException {
-                        return messageMapper.copy(getMailboxEntity(), originalMessage);
-                        
-                    }
-                    
-                });
-               copiedRows.add(data);
+					}
+
+				});
+				copiedRows.add(data);
             }
             return copiedRows.iterator();
         } catch (MailboxException e) {
@@ -725,16 +650,13 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
             final Map<Long, MessageMetaData> copiedMessages = new HashMap<Long, MessageMetaData>();
-            messageMapper.findInMailbox(getMailboxEntity(), set, FetchType.Full, new org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback<Id>() {
-
-                public void onMessages(List<Message<Id>> originalRows) throws MailboxException {
-                    Iterator<MessageMetaData> ids = to.copy(originalRows, session);
-                    while (ids.hasNext()) {
-                        MessageMetaData data = ids.next();
-                        copiedMessages.put(data.getUid(), data);
-                    }
-                }
-            });
+            Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
+            Iterator<MessageMetaData> ids = to.copy(originalRows, session);
+            while (ids.hasNext()) {
+                MessageMetaData data = ids.next();
+                copiedMessages.put(data.getUid(), data);
+            }
+            
             return copiedMessages;
 
         } catch (MailboxException e) {

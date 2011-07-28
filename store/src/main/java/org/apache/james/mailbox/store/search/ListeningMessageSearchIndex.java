@@ -33,7 +33,6 @@ import org.apache.james.mailbox.store.MailboxEventDispatcher.ExpungedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.FlagsUpdatedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.MailboxDeletionImpl;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
-import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -81,20 +80,15 @@ public abstract class ListeningMessageSearchIndex<Id> implements MessageSearchIn
 
                     while (uids.hasNext()) {
                         long next = uids.next();
-                        factory.getMessageMapper(session).findInMailbox(mailbox, MessageRange.one(next), FetchType.Full, new MessageCallback<Id>() {
-
-                            @Override
-                            public void onMessages(List<Message<Id>> list) throws MailboxException {
-                                for (int i = 0; i < list.size(); i++) {
-                                    Message<Id> message = list.get(i);
-                                    try {
-                                        add(session, mailbox, message);
-                                    } catch (MailboxException e) {
-                                        session.getLog().debug("Unable to index message " + message.getUid() + " for mailbox " + mailbox, e);
-                                    }
-                                }
+                        Iterator<Message<Id>> messages = factory.getMessageMapper(session).findInMailbox(mailbox, MessageRange.one(next), FetchType.Full, -1);
+                        while(messages.hasNext()) {
+                            Message<Id> message = messages.next();
+                            try {
+                                add(session, mailbox, message);
+                            } catch (MailboxException e) {
+                                session.getLog().debug("Unable to index message " + message.getUid() + " for mailbox " + mailbox, e);
                             }
-                        });
+                        }
 
                     }
                 } else if (event instanceof ExpungedImpl) {

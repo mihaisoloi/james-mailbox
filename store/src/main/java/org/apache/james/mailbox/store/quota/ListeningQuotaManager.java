@@ -34,8 +34,8 @@ import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
-import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 
 /**
  * {@link QuotaManager} which will keep track of quota by listing for {@link Event}'s.
@@ -93,26 +93,22 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
     public Quota getStorageQuota(MailboxSession session) throws MailboxException {
         long max = getMaxStorage(session);
         if (max != Quota.UNLIMITED || calculateWhenUnlimited) {
-            String id = session.getUser().getUserName();
+            MessageMapper mapper = factory.getMessageMapper(session);
+        	String id = session.getUser().getUserName();
             AtomicLong size = sizes.get(id);
+            
             if (size == null) {
                 final AtomicLong mSizes = new AtomicLong(0);
                 List<Mailbox> mailboxes = factory.getMailboxMapper(session).findMailboxWithPathLike(new MailboxPath(session.getPersonalSpace(), id, "%"));
                 for (int i = 0; i < mailboxes.size(); i++) {
-                    factory.getMessageMapper(session).findInMailbox(mailboxes.get(i), MessageRange.all(), FetchType.Metadata, new MessageCallback<Object>() {
-                        long messageSizes = 0;
-
-                        @Override
-                        public void onMessages(List<Message<Object>> list) throws MailboxException {
-                            for (int i = 0; i < list.size(); i++) {
-                                messageSizes += list.get(i).getFullContentOctets();
-                            }
-                            mSizes.set(mSizes.get() + messageSizes);
-                        }
-                    });
+                	long messageSizes = 0;
+                    Iterator<Message>  messages = mapper.findInMailbox(mailboxes.get(i), MessageRange.all(), FetchType.Metadata, -1);
+                    
+                    while(messages.hasNext()) {
+                        messageSizes +=  messages.next().getFullContentOctets();
+                    }
+                    mSizes.set(mSizes.get() + messageSizes);
                 }
-                
-                
 
                 AtomicLong s = sizes.putIfAbsent(id, mSizes);
                 if (s != null) {

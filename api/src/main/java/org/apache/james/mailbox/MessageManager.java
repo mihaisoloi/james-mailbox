@@ -138,27 +138,14 @@ public interface MessageManager {
      * @param set
      * @param fetchGroup
      *            data to fetch
+     * @param the batchSize to use to fetch the Messages in batches. The implementation may just ignore if it can't optimize the call with batches
      * @param mailboxSession
      *            not null
      * @return MessageResult with the fields defined by FetchGroup
      * @throws MailboxException
      */
-    Iterator<MessageResult> getMessages(MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException;
+    MessageResultIterator getMessages(MessageRange set, FetchGroup fetchGroup, int batchSize, MailboxSession mailboxSession) throws MailboxException;
 
-    /**
-     * Gets messages in the given range.
-     * 
-     * @param set
-     * @param fetchGroup
-     *            data to fetch
-     * @param mailboxSession
-     *            not null
-     * @param messageCallback
-     *            data callback
-     * @return MessageResult with the fields defined by FetchGroup
-     * @throws MailboxException
-     */
-    void getMessages(MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession, MessageCallback messageCallback) throws MailboxException;
 
     /**
      * Gets current meta data for the mailbox.<br>
@@ -176,13 +163,6 @@ public interface MessageManager {
      * @throws MailboxException
      */
     MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException;
-
-    /**
-     * Message batch read callback method
-     */
-    public interface MessageCallback {
-        void onMessages(final Iterator<MessageResult> it) throws MailboxException;
-    }
 
     /**
      * Meta data about the current state of the mailbox.

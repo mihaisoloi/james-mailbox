@@ -19,7 +19,6 @@
 package org.apache.james.mailbox.store.search;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.mail.Flags;
@@ -29,7 +28,6 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.SearchQuery;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
-import org.apache.james.mailbox.store.mail.MessageMapper.MessageCallback;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 
@@ -84,22 +82,16 @@ public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> 
                 done = oldDone;
             }
             synchronized (done) {
-                getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), FetchType.Full, new MessageCallback<Id>() {
-
-                    @Override
-                    public void onMessages(List<Message<Id>> list) throws MailboxException {
-                        for (int i = 0; i < list.size(); i++) {
-                            final Message<Id> message = list.get(i);
-
-                            try {
-                                add(session, mailbox, message);
-                            } catch (MailboxException e) {
-                                session.getLog().debug("Unable to index message " + message.getUid() + " in mailbox " + mailbox.getName(), e);
-                            }
-
-                        }
+                Iterator<Message<Id>> messages = getFactory().getMessageMapper(session).findInMailbox(mailbox, MessageRange.all(), FetchType.Full, -1);
+                while(messages.hasNext()) {
+                    final Message<Id> message = messages.next();
+                    try {
+                        add(session, mailbox, message);
+                    } catch (MailboxException e) {
+                        session.getLog().debug("Unable to index message " + message.getUid() + " in mailbox " + mailbox.getName(), e);
                     }
-                });
+
+                }
             }
         }
        

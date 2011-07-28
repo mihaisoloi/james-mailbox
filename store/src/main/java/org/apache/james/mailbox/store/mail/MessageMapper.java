@@ -46,10 +46,10 @@ public interface MessageMapper<Id> extends Mapper {
      * @param mailbox The mailbox to search
      * @param set message range for batch processing
      * @param type
-     * @param callback callback object 
+     * @param limt the maximal limit of returned {@link Message}'s. Use -1 to set no limit
      * @throws MailboxException
      */
-    void findInMailbox(Mailbox<Id> mailbox, MessageRange set, FetchType type, MessageCallback<Id> callback)
+    Iterator<Message<Id>> findInMailbox(Mailbox<Id> mailbox, MessageRange set, FetchType type, int limit)
             throws MailboxException;
 
     /**
@@ -172,18 +172,6 @@ public interface MessageMapper<Id> extends Mapper {
      * @throws MailboxException
      */
     long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException;
-    
-
-    public interface MessageCallback<Id> {
-        
-        /**
-         * Callback which get executed for a {@link List} of {@link Message}'s
-         * 
-         * @param list
-         * @throws MailboxException
-         */
-        void onMessages(List<Message<Id>> list) throws MailboxException;
-    }
     
     /**
      * Specify what data needs to get filled in a {@link Message} before returning it

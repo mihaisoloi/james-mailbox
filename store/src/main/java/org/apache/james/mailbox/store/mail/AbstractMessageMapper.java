@@ -77,47 +77,42 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
      */
     public Iterator<UpdatedFlags> updateFlags(final Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
         final List<UpdatedFlags> updatedFlags = new ArrayList<UpdatedFlags>();
-        findInMailbox(mailbox, set, FetchType.Metadata, new MessageCallback<Id>() {
-
-            public void onMessages(List<Message<Id>> members) throws MailboxException {
-                
-                long modSeq = -1;
-                if (members.isEmpty() == false) {
-                    // if a mailbox does not support mod-sequences the provider may be null
-                    if (modSeqProvider != null) {
-                        modSeq = modSeqProvider.nextModSeq(mailboxSession, mailbox);
-                    }
-                }
-                for (final Message<Id> member : members) {
-                    Flags originalFlags = member.createFlags();
-                    if (replace) {
-                        member.setFlags(flags);
-                    } else {
-                        Flags current = member.createFlags();
-                        if (value) {
-                            current.add(flags);
-                        } else {
-                            current.remove(flags);
-                        }
-                        member.setFlags(current);
-                    }
-                    Flags newFlags = member.createFlags();
-                    if (UpdatedFlags.flagsChanged(originalFlags, newFlags)) {
-                        // increase the mod-seq as we changed the flags
-                        member.setModSeq(modSeq);
-                        save(mailbox, member);
-                    }
-
-                    
-                    UpdatedFlags uFlags = new UpdatedFlags(member.getUid(), member.getModSeq(), originalFlags, newFlags);
-                    
-                    updatedFlags.add(uFlags);
-                    
-
-                }
-               
+        Iterator<Message<Id>> messages = findInMailbox(mailbox, set, FetchType.Metadata, -1);
+        
+        long modSeq = -1;
+        if (messages.hasNext() == false) {
+            // if a mailbox does not support mod-sequences the provider may be null
+            if (modSeqProvider != null) {
+                modSeq = modSeqProvider.nextModSeq(mailboxSession, mailbox);
             }
-        });
+        }
+        while(messages.hasNext()) {
+        	final Message<Id> member = messages.next();
+            Flags originalFlags = member.createFlags();
+            if (replace) {
+                member.setFlags(flags);
+            } else {
+                Flags current = member.createFlags();
+                if (value) {
+                    current.add(flags);
+                } else {
+                    current.remove(flags);
+                }
+                member.setFlags(current);
+            }
+            Flags newFlags = member.createFlags();
+            if (UpdatedFlags.flagsChanged(originalFlags, newFlags)) {
+                // increase the mod-seq as we changed the flags
+                member.setModSeq(modSeq);
+                save(mailbox, member);
+            }
+
+            
+            UpdatedFlags uFlags = new UpdatedFlags(member.getUid(), member.getModSeq(), originalFlags, newFlags);
+            
+            updatedFlags.add(uFlags);
+            
+        }
 
         return updatedFlags.iterator();
 

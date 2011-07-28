@@ -91,13 +91,13 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         getMembershipByUidForMailbox(mailbox).remove(message.getUid());
     }
 
+
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(java.lang.Object, org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
      */
-    public void findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType ftype, MessageCallback<Long> callback) throws MailboxException {
-        final List<Message<Long>> results;
-        final int batchSize = set.getBatchSize();
+    public Iterator<Message<Long>> findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType ftype, int max) throws MailboxException {
+        List<Message<Long>> results;
         final MessageRange.Type type = set.getType();
         switch (type) {
             case ALL:
@@ -133,15 +133,10 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         }
         Collections.sort(results);
         
-        if(batchSize > 0) {
-	        int i = 0;
-	        while(i*batchSize < results.size()) {
-	        	callback.onMessages(results.subList(i*batchSize, (i+1)*batchSize < results.size() ? (i+1)*batchSize : results.size()));
-	        	i++;
-	        }
-        } else {
-        	callback.onMessages(results);
+        if (results.size() > max) {
+        	results = results.subList(0, max -1);
         }
+        return results.iterator();
     }
     
 
@@ -246,20 +241,15 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {
         final Map<Long, MessageMetaData> filteredResult = new HashMap<Long, MessageMetaData>();
 
-        findInMailbox(mailbox, set, FetchType.Metadata, new MessageCallback<Long>() {
+        Iterator<Message<Long>> it = findInMailbox(mailbox, set, FetchType.Metadata, -1);
+        while(it.hasNext()) {
+            Message<Long> member = it.next();
+            if (member.isDeleted()) {
+                filteredResult.put(member.getUid(), new SimpleMessageMetaData(member));
 
-            public void onMessages(List<Message<Long>> results) throws MailboxException {
-                for (final Iterator<Message<Long>> it = results.iterator(); it.hasNext();) {
-                    Message<Long> member = it.next();
-                    if (member.isDeleted()) {
-                        filteredResult.put(member.getUid(), new SimpleMessageMetaData(member));
-
-                        delete(mailbox, member);
-                    }
-                }
+                delete(mailbox, member);
             }
-        });
-
+        }
         return filteredResult;
     }
 }
