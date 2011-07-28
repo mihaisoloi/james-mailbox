@@ -59,16 +59,16 @@ import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
-import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
-import org.apache.james.mime4j.message.Header;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
-import org.apache.james.mime4j.parser.MimeTokenStream;
-
-import com.sun.mail.imap.protocol.MessageSet;
+import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;
+import org.apache.james.mime4j.message.HeaderImpl;
+import org.apache.james.mime4j.message.MaximalBodyDescriptor;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+import org.apache.james.mime4j.stream.RecursionMode;
 
 /**
  * Base class for {@link org.apache.james.mailbox.MessageManager} implementations. 
@@ -214,20 +214,19 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             bIn = new BodyOffsetInputStream(tmpMsgIn);
             // Disable line length... This should be handled by the smtp server component and not the parser itself
             // https://issues.apache.org/jira/browse/IMAP-122
-            MimeEntityConfig config = new MimeEntityConfig();
-            config.setMaximalBodyDescriptor(true);
+            MimeConfig config = new MimeConfig();
             config.setMaxLineLen(-1);
-            final ConfigurableMimeTokenStream parser = new ConfigurableMimeTokenStream(config);
+            final MimeTokenStream parser = new MimeTokenStream(config, new DefaultBodyDescriptorBuilder());
            
-            parser.setRecursionMode(MimeTokenStream.M_NO_RECURSE);
+            parser.setRecursionMode(RecursionMode.M_NO_RECURSE);
             parser.parse(bIn);
-            final Header header = new Header();
+            final HeaderImpl header = new HeaderImpl();
             
-            int next = parser.next();
-            while (next != MimeTokenStream.T_BODY
-                    && next != MimeTokenStream.T_END_OF_STREAM
-                    && next != MimeTokenStream.T_START_MULTIPART) {
-                if (next == MimeTokenStream.T_FIELD) {
+            EntityState next = parser.next();
+            while (next != EntityState.T_BODY
+                    && next != EntityState.T_END_OF_STREAM
+                    && next != EntityState.T_START_MULTIPART) {
+                if (next == EntityState.T_FIELD) {
                     header.addField(parser.getField());
                 }
                 next = parser.next();
@@ -275,7 +274,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
                 long lines = bodyStream.getLineCount();
                 bodyStream.close();
                 next = parser.next();
-                if (next == MimeTokenStream.T_EPILOGUE)  {
+                if (next == EntityState.T_EPILOGUE)  {
                     final CountingInputStream epilogueStream = new CountingInputStream(parser.getInputStream());
                     epilogueStream.readAll();
                     lines+=epilogueStream.getLineCount();

@@ -63,18 +63,20 @@ import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.ListeningMessageSearchIndex;
 import org.apache.james.mailbox.store.search.SearchUtil;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.descriptor.BodyDescriptor;
-import org.apache.james.mime4j.field.DateTimeField;
-import org.apache.james.mime4j.field.address.Address;
-import org.apache.james.mime4j.field.address.AddressList;
-import org.apache.james.mime4j.field.address.Group;
-import org.apache.james.mime4j.field.address.MailboxList;
-import org.apache.james.mime4j.field.datetime.DateTime;
+import org.apache.james.mime4j.dom.Header;
+import org.apache.james.mime4j.dom.address.Address;
+import org.apache.james.mime4j.dom.address.AddressList;
+import org.apache.james.mime4j.dom.address.Group;
+import org.apache.james.mime4j.dom.address.MailboxList;
+import org.apache.james.mime4j.dom.datetime.DateTime;
+import org.apache.james.mime4j.dom.field.DateTimeField;
+import org.apache.james.mime4j.field.address.AddressFormatter;
+import org.apache.james.mime4j.field.address.LenientAddressBuilder;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
-import org.apache.james.mime4j.message.Header;
 import org.apache.james.mime4j.message.SimpleContentHandler;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.BodyDescriptor;
+import org.apache.james.mime4j.stream.MimeConfig;
 import org.apache.james.mime4j.util.MimeUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.DateTools;
@@ -478,9 +480,9 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 String firstFromDisplay = "";
                 String firstToDisplay = "";
                 
-                Iterator<org.apache.james.mime4j.parser.Field> fields = header.iterator();
+                Iterator<org.apache.james.mime4j.stream.Field> fields = header.iterator();
                 while(fields.hasNext()) {
-                    org.apache.james.mime4j.parser.Field f = fields.next();
+                    org.apache.james.mime4j.stream.Field f = fields.next();
                     String headerName = f.getName().toUpperCase(Locale.ENGLISH);
                     String headerValue = f.getBody().toUpperCase(Locale.ENGLISH);
                     String fullValue =  f.toString().toUpperCase(Locale.ENGLISH);
@@ -517,15 +519,14 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
 
                         // Check if we can index the the address in the right manner
                         if (field != null) {
-                            try {
                                 // not sure if we really should reparse it. It maybe be better to check just for the right type.
                                 // But this impl was easier in the first place
-                                AddressList aList = AddressList.parse(MimeUtil.unfold(f.getBody()));
+                                AddressList aList = LenientAddressBuilder.DEFAULT.parseAddressList(MimeUtil.unfold(f.getBody()));
                                 for (int i = 0; i < aList.size(); i++) {
                                     Address address = aList.get(i);
-                                    if (address instanceof org.apache.james.mime4j.field.address.Mailbox) {
-                                        org.apache.james.mime4j.field.address.Mailbox mailbox = (org.apache.james.mime4j.field.address.Mailbox) address;
-                                        String value = mailbox.getEncodedString().toUpperCase(Locale.ENGLISH);
+                                    if (address instanceof org.apache.james.mime4j.dom.address.Mailbox) {
+                                        org.apache.james.mime4j.dom.address.Mailbox mailbox = (org.apache.james.mime4j.dom.address.Mailbox) address;
+                                        String value = AddressFormatter.DEFAULT.encode(mailbox).toUpperCase(Locale.ENGLISH);
                                         doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
                                         if (i == 0) {
                                             String mailboxAddress = SearchUtil.getMailboxAddress(mailbox);
@@ -546,8 +547,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                                     } else if (address instanceof Group) {
                                         MailboxList mList = ((Group) address).getMailboxes();
                                         for (int a = 0; a < mList.size(); a++) {
-                                            org.apache.james.mime4j.field.address.Mailbox mailbox = mList.get(a);
-                                            String value = mailbox.getEncodedString().toUpperCase(Locale.ENGLISH);
+                                            org.apache.james.mime4j.dom.address.Mailbox mailbox = mList.get(a);
+                                            String value = AddressFormatter.DEFAULT.encode(mailbox).toUpperCase(Locale.ENGLISH);
                                             doc.add(new Field(field, value, Store.NO, Index.ANALYZED));
 
                                             if (i == 0 && a == 0) {
@@ -569,9 +570,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                                     }
                                 }
 
-                            } catch (org.apache.james.mime4j.field.address.parser.ParseException e) {
-                                session.getLog().debug("Unable to parse address from header " + headerName + " for indexing", e);
-                            }
+                            
                             doc.add(new Field(field, headerValue, Store.NO, Index.ANALYZED));
 
                     } else if (headerName.equalsIgnoreCase("Subject")) {
@@ -600,11 +599,9 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                 doc.add(new Field(FIRST_TO_MAILBOX_DISPLAY_FIELD, firstToDisplay, Store.YES, Index.NOT_ANALYZED));
            
             }
-            /*
-             * (non-Javadoc)
-             * @see org.apache.james.mime4j.message.SimpleContentHandler#bodyDecoded(org.apache.james.mime4j.descriptor.BodyDescriptor, java.io.InputStream)
-             */
-            public void bodyDecoded(BodyDescriptor desc, InputStream in) throws IOException {
+
+            @Override
+            public void body(BodyDescriptor desc, InputStream in) throws MimeException, IOException {
                 String mediaType = desc.getMediaType();
                 if (MEDIA_TYPE_TEXT.equalsIgnoreCase(mediaType) || MEDIA_TYPE_MESSAGE.equalsIgnoreCase(mediaType)) {
                     String cset = desc.getCharset();
@@ -628,12 +625,14 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
                     
                 }
             }
+ 
         };
-        MimeEntityConfig config = new MimeEntityConfig();
+        MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
         //config.setStrictParsing(false);
         config.setMaxContentLen(-1);
         MimeStreamParser parser = new MimeStreamParser(config);
+        parser.setContentDecoding(true);
         parser.setContentHandler(handler);
        
         try {

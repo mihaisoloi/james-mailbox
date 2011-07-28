@@ -21,13 +21,14 @@ package org.apache.james.mailbox.store.search;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
+import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
-import org.apache.james.mime4j.field.address.Address;
-import org.apache.james.mime4j.field.address.AddressList;
-import org.apache.james.mime4j.field.address.Group;
-import org.apache.james.mime4j.field.address.Mailbox;
-import org.apache.james.mime4j.field.address.MailboxList;
-import org.apache.james.mime4j.field.address.parser.ParseException;
+import org.apache.james.mime4j.dom.address.Address;
+import org.apache.james.mime4j.dom.address.AddressList;
+import org.apache.james.mime4j.dom.address.Group;
+import org.apache.james.mime4j.dom.address.Mailbox;
+import org.apache.james.mime4j.dom.address.MailboxList;
+import org.apache.james.mime4j.field.address.LenientAddressBuilder;
 import org.apache.james.mime4j.util.MimeUtil;
 
 /**
@@ -106,26 +107,21 @@ public class SearchUtil {
      * @return display
      */
     public static String getDisplayAddress(String headerValue) {
-        try {
-            AddressList addressList = AddressList.parse(MimeUtil.unfold(headerValue));
-            if (addressList != null && addressList.isEmpty() == false) {
-                Address address = addressList.get(0);
-                if (address instanceof Mailbox) {
-                    return getDisplayAddress((Mailbox) address);
-                } else if (address instanceof Group) {
-                    Group group = (Group) address;
-                    if (group != null) {
-                        MailboxList mList = group.getMailboxes();
-                        if (mList != null && mList.isEmpty() == false) {
-                            return getDisplayAddress(mList.get(0));
-                        }
+        AddressList addressList = LenientAddressBuilder.DEFAULT.parseAddressList(MimeUtil.unfold(headerValue));
+        if (addressList != null && addressList.isEmpty() == false) {
+            Address address = addressList.get(0);
+            if (address instanceof Mailbox) {
+                return getDisplayAddress((Mailbox) address);
+            } else if (address instanceof Group) {
+                Group group = (Group) address;
+                if (group != null) {
+                    MailboxList mList = group.getMailboxes();
+                    if (mList != null && mList.isEmpty() == false) {
+                        return getDisplayAddress(mList.get(0));
                     }
                 }
-            } 
-        } catch (ParseException e) {
-            // just catch and return an empty String
+            }
         }
-      
         
         return "";
     }
@@ -153,31 +149,26 @@ public class SearchUtil {
      * @return mailbox
      */
     public static String getMailboxAddress(String headerValue) {
-        try {
-            AddressList aList = AddressList.parse(headerValue);
-            for (int i = 0; i < aList.size(); i++) {
-                Address address = aList.get(i);
-                if (address instanceof Mailbox) {
-                    Mailbox m = (Mailbox) address;
-                    String mailboxName = m.getLocalPart();
+        AddressList aList = LenientAddressBuilder.DEFAULT.parseAddressList(headerValue);
+        for (int i = 0; i < aList.size(); i++) {
+            Address address = aList.get(i);
+            if (address instanceof Mailbox) {
+                Mailbox m = (Mailbox) address;
+                String mailboxName = m.getLocalPart();
+                if (mailboxName == null) {
+                    mailboxName = "";
+                }
+                return mailboxName;
+            } else if (address instanceof Group) {
+                MailboxList mList = ((Group) address).getMailboxes();
+                for (int a = 0; a < mList.size();) {
+                    String mailboxName = mList.get(a).getLocalPart();
                     if (mailboxName == null) {
-                        mailboxName ="";
+                        mailboxName = "";
                     }
                     return mailboxName;
-                } else if (address instanceof Group) {
-                    MailboxList mList = ((Group) address).getMailboxes();
-                    for (int a = 0; a < mList.size(); ) {
-                        String mailboxName = mList.get(a).getLocalPart();
-                        if (mailboxName == null) {
-                            mailboxName ="";
-                        }
-                        return mailboxName;                         
-                    }
                 }
             }
-
-        } catch (org.apache.james.mime4j.field.address.parser.ParseException e) {
-            // Just catch and return an empty string
         }
         return "";
     }
@@ -238,7 +229,7 @@ public class SearchUtil {
             //    as described in "Internationalization Considerations".
             //    Convert all tabs and continuations to space.  Convert all
             //    multiple spaces to a single space.
-            String decodedSubject = MimeUtil.unfold(DecoderUtil.decodeEncodedWords(subject));
+            String decodedSubject = MimeUtil.unfold(DecoderUtil.decodeEncodedWords(subject, DecodeMonitor.SILENT));
             decodedSubject = new String(decodedSubject.getBytes(UTF8), UTF8);
 
             // replace all tabs with spaces and replace multiple spaces with one space

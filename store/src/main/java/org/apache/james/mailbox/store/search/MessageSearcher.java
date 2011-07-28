@@ -27,10 +27,11 @@ import java.nio.CharBuffer;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
-import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
-import org.apache.james.mime4j.parser.MimeTokenStream;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,20 +155,20 @@ public class MessageSearcher {
             final CharBuffer buffer) throws IOException, MimeException {
         try {
             boolean result = false;
-            MimeEntityConfig config = new MimeEntityConfig();
+            MimeConfig config = new MimeConfig();
             config.setMaxLineLen(-1);
 
-            ConfigurableMimeTokenStream parser = new ConfigurableMimeTokenStream(config);            parser.parse(input);
-            while (!result && parser.next() != MimeTokenStream.T_END_OF_STREAM) {
-                final int state = parser.getState();
+            MimeTokenStream parser = new MimeTokenStream(config);            parser.parse(input);
+            while (!result && parser.next() != EntityState.T_END_OF_STREAM) {
+                final EntityState state = parser.getState();
                 switch (state) {
-                    case MimeTokenStream.T_BODY:
-                    case MimeTokenStream.T_PREAMBLE:
-                    case MimeTokenStream.T_EPILOGUE:
+                    case T_BODY:
+                    case T_PREAMBLE:
+                    case T_EPILOGUE:
                         result = checkBody(isCaseInsensitive, buffer, result,
                                 parser);
                         break;
-                    case MimeTokenStream.T_FIELD:
+                    case T_FIELD:
                         if (includeHeaders) {
                             result = checkHeader(isCaseInsensitive, buffer,
                                     result, parser);

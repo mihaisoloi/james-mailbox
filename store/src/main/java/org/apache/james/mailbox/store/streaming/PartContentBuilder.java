@@ -32,24 +32,27 @@ import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultHeader;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
-import org.apache.james.mime4j.parser.MimeTokenStream;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+import org.apache.james.mime4j.stream.RecursionMode;
+
 
 public class PartContentBuilder {
 
     private static final byte[] EMPTY = {};
 
-    private ConfigurableMimeTokenStream parser;
+    private MimeTokenStream parser;
 
     private boolean empty = false;
 
     private boolean topLevel = true;
 
     public PartContentBuilder() {
-        MimeEntityConfig config = new MimeEntityConfig();
+        MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
 
-        parser = new ConfigurableMimeTokenStream(config);
+        parser = new MimeTokenStream(config);
     }
 
     public void markEmpty() {
@@ -58,21 +61,21 @@ public class PartContentBuilder {
 
     public void parse(final InputStream in) {
         
-        parser.setRecursionMode(MimeTokenStream.M_RECURSE);
+        parser.setRecursionMode(RecursionMode.M_RECURSE);
         parser.parse(in);
         topLevel = true;
     }
 
     private void skipToStartOfInner(int position) throws IOException, MimeException {
-        final int state = parser.next();
+        final EntityState state = parser.next();
         switch (state) {
-            case MimeTokenStream.T_START_MULTIPART:
+            case T_START_MULTIPART:
                 break;
-            case MimeTokenStream.T_START_MESSAGE:
+            case T_START_MESSAGE:
                 break;
-            case MimeTokenStream.T_END_OF_STREAM:
+            case T_END_OF_STREAM:
                 throw new PartNotFoundException(position);
-            case MimeTokenStream.T_END_BODYPART:
+            case T_END_BODYPART:
                 throw new PartNotFoundException(position);
             default:
                 skipToStartOfInner(position);
@@ -87,22 +90,22 @@ public class PartContentBuilder {
                 skipToStartOfInner(position);
             }
             for (int count = 0; count < position;) {
-                final int state = parser.next();
+                final EntityState state = parser.next();
                 switch (state) {
-                    case MimeTokenStream.T_BODY:
+                    case T_BODY:
                         if (position == 1) {
                             count++;
                         }
                         break;
-                    case MimeTokenStream.T_START_BODYPART:
+                    case T_START_BODYPART:
                         count++;
                         break;
-                    case MimeTokenStream.T_START_MULTIPART:
+                    case T_START_MULTIPART:
                         if (count > 0 && count < position) {
                             ignoreInnerMessage();
                         }
                         break;
-                    case MimeTokenStream.T_END_OF_STREAM:
+                    case T_END_OF_STREAM:
                         throw new PartNotFoundException(position);
                 }
             }
@@ -112,13 +115,13 @@ public class PartContentBuilder {
     }
 
     private void ignoreInnerMessage() throws IOException, UnexpectedEOFException, MimeException {
-        for (int state = parser.next(); state != MimeTokenStream.T_END_MULTIPART; state = parser
+        for (EntityState state = parser.next(); state != EntityState.T_END_MULTIPART; state = parser
                 .next()) {
             switch (state) {
-                case MimeTokenStream.T_END_OF_STREAM:
+                case T_END_OF_STREAM:
                     throw new UnexpectedEOFException();
 
-                case MimeTokenStream.T_START_MULTIPART:
+                case T_START_MULTIPART:
                     ignoreInnerMessage();
                     break;
             }
@@ -150,11 +153,11 @@ public class PartContentBuilder {
                 valid = false;
             }
             if (valid) {
-                parser.setRecursionMode(MimeTokenStream.M_FLAT);
-                for (int state = parser.getState(); state != MimeTokenStream.T_BODY
-                        && state != MimeTokenStream.T_START_MULTIPART; state = parser
+                parser.setRecursionMode(RecursionMode.M_FLAT);
+                for (EntityState state = parser.getState(); state != EntityState.T_BODY
+                        && state != EntityState.T_START_MULTIPART; state = parser
                         .next()) {
-                    if (state == MimeTokenStream.T_END_OF_STREAM) {
+                    if (state == EntityState.T_END_OF_STREAM) {
                         valid = false;
                         break;
                     }
@@ -181,12 +184,12 @@ public class PartContentBuilder {
         if (empty) {
             content = EMPTY;
         } else {
-            parser.setRecursionMode(MimeTokenStream.M_FLAT);
+            parser.setRecursionMode(RecursionMode.M_FLAT);
             boolean valid = true;
-            for (int state = parser.getState(); state != MimeTokenStream.T_BODY
-                    && state != MimeTokenStream.T_START_MULTIPART; state = parser
+            for (EntityState state = parser.getState(); state != EntityState.T_BODY
+                    && state != EntityState.T_START_MULTIPART; state = parser
                     .next()) {
-                if (state == MimeTokenStream.T_END_OF_STREAM) {
+                if (state == EntityState.T_END_OF_STREAM) {
                     valid = false;
                     break;
                 }
@@ -207,13 +210,13 @@ public class PartContentBuilder {
             results = Collections.EMPTY_LIST;
         } else {
             results = new ArrayList<MessageResult.Header>();
-            for (int state = parser.getState(); state != MimeTokenStream.T_END_HEADER; state = parser
+            for (EntityState state = parser.getState(); state != EntityState.T_END_HEADER; state = parser
                     .next()) {
                 switch (state) {
-                    case MimeTokenStream.T_END_OF_STREAM:
+                    case T_END_OF_STREAM:
                         throw new UnexpectedEOFException();
 
-                    case MimeTokenStream.T_FIELD:
+                    case T_FIELD:
                         final String fieldValue = parser.getField().getBody().trim();
                         final String fieldName = parser.getField().getName();
                         ResultHeader header = new ResultHeader(fieldName, fieldValue);
@@ -235,13 +238,13 @@ public class PartContentBuilder {
             try {
                 advancedToMessage();
 
-                for (int state = parser.getState(); state != MimeTokenStream.T_END_HEADER; state = parser
+                for (EntityState state = parser.getState(); state != EntityState.T_END_HEADER; state = parser
                         .next()) {
                     switch (state) {
-                        case MimeTokenStream.T_END_OF_STREAM:
+                        case T_END_OF_STREAM:
                             throw new IOException("Unexpected EOF");
 
-                        case MimeTokenStream.T_FIELD:
+                        case T_FIELD:
                             final String fieldValue = parser.getField().getBody().trim();
                             final String fieldName = parser.getField().getName();
                             ResultHeader header = new ResultHeader(fieldName, fieldValue);
@@ -257,9 +260,9 @@ public class PartContentBuilder {
     }
 
     private void advancedToMessage() throws IOException, UnexpectedEOFException, MimeException {
-        for (int state = parser.getState(); state != MimeTokenStream.T_START_MESSAGE; state = parser
+        for (EntityState state = parser.getState(); state != EntityState.T_START_MESSAGE; state = parser
                 .next()) {
-            if (state == MimeTokenStream.T_END_OF_STREAM) {
+            if (state == EntityState.T_END_OF_STREAM) {
                 throw new UnexpectedEOFException();
             }
         }

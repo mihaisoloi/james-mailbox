@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mime4j.field.datetime.DateTime;
+import org.apache.james.mime4j.dom.datetime.DateTime;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
 import org.apache.james.mime4j.field.datetime.parser.ParseException;
 

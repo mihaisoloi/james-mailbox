@@ -42,9 +42,9 @@ import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.AbstractContentHandler;
-import org.apache.james.mime4j.parser.Field;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
 import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.Field;
+import org.apache.james.mime4j.stream.MimeConfig;
 
 /**
  *
@@ -59,7 +59,7 @@ public class ResultUtils {
 
     public static List<MessageResult.Header> createHeaders(final Message<?> document) throws IOException {
         final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>();
-        MimeEntityConfig config = new MimeEntityConfig();
+        MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
         final MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(new AbstractContentHandler() {

@@ -47,12 +47,14 @@ import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.comparator.CombinedComparator;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.field.address.Address;
-import org.apache.james.mime4j.field.address.AddressList;
-import org.apache.james.mime4j.field.address.Group;
-import org.apache.james.mime4j.field.address.Mailbox;
-import org.apache.james.mime4j.field.address.MailboxList;
-import org.apache.james.mime4j.field.datetime.DateTime;
+import org.apache.james.mime4j.dom.address.Address;
+import org.apache.james.mime4j.dom.address.AddressList;
+import org.apache.james.mime4j.dom.address.Group;
+import org.apache.james.mime4j.dom.address.Mailbox;
+import org.apache.james.mime4j.dom.address.MailboxList;
+import org.apache.james.mime4j.dom.datetime.DateTime;
+import org.apache.james.mime4j.field.address.AddressFormatter;
+import org.apache.james.mime4j.field.address.LenientAddressBuilder;
 import org.apache.james.mime4j.field.datetime.parser.DateTimeParser;
 import org.apache.james.mime4j.field.datetime.parser.ParseException;
 import org.slf4j.Logger;
@@ -353,27 +355,24 @@ public class MessageSearches implements Iterable<Long>{
             final String name = header.getName();
             if (headerName.equalsIgnoreCase(name)) {
                 final String value = header.getValue();
-                try {
-                    AddressList aList = AddressList.parse(value);
+                    AddressList aList = LenientAddressBuilder.DEFAULT.parseAddressList(value);
                     for (int i = 0; i < aList.size(); i++) {
                         Address address = aList.get(i);
                         if (address instanceof Mailbox) {
-                            if (((Mailbox) address).getEncodedString().toUpperCase(Locale.ENGLISH).contains(text)) {
+                            if (AddressFormatter.DEFAULT.encode((Mailbox) address).toUpperCase(Locale.ENGLISH).contains(text)) {
                                 return true;
                             }
                         } else if (address instanceof Group) {
                             MailboxList mList = ((Group) address).getMailboxes();
                             for (int a = 0; a < mList.size(); a++) {
-                                if (mList.get(a).getEncodedString().toUpperCase(Locale.ENGLISH).contains(text)) {
+                                if (AddressFormatter.DEFAULT.encode(mList.get(a)).toUpperCase(Locale.ENGLISH).contains(text)) {
                                     return true;
                                 }                            
                             }
                         }
                     }
 
-                } catch (org.apache.james.mime4j.field.address.parser.ParseException e) {
-                    log.debug("Unable to parse address from header " + headerName, e);
-                }
+                
                 // Also try to match against raw header now
                 return value.toUpperCase(Locale.ENGLISH).contains(text);
             }

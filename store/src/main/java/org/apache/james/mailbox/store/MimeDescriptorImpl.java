@@ -33,13 +33,14 @@ import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
-import org.apache.james.mime4j.parser.MimeTokenStream;
-import org.apache.james.mime4j.parser.RecursionMode;
+import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;
+import org.apache.james.mime4j.message.MaximalBodyDescriptor;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+import org.apache.james.mime4j.stream.RecursionMode;
 
 public class MimeDescriptorImpl implements MimeDescriptor {
 
@@ -89,24 +90,27 @@ public class MimeDescriptorImpl implements MimeDescriptor {
     public static MimeDescriptorImpl build(final InputStream stream) throws IOException, MimeException {
         // Disable line length limit
         // See https://issues.apache.org/jira/browse/IMAP-132
-        MimeEntityConfig config = new MimeEntityConfig();
-        config.setMaximalBodyDescriptor(true);
+        MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
-        final ConfigurableMimeTokenStream parser = new ConfigurableMimeTokenStream(config);
-
+        
+        //
+        final MimeTokenStream parser = new MimeTokenStream(config, new DefaultBodyDescriptorBuilder());
+        
         parser.parse(stream);
+        
+        // TODO: Shouldn't this get set before we call the parse ?
         parser.setRecursionMode(RecursionMode.M_NO_RECURSE);
         return createDescriptor(parser);
     }
 
     private static MimeDescriptorImpl createDescriptor(
             final MimeTokenStream parser) throws IOException, MimeException {
-        int next = parser.next();
+        EntityState next = parser.next();
         final Collection<MessageResult.Header> headers = new ArrayList<MessageResult.Header>();
-        while (next != MimeTokenStream.T_BODY
-                && next != MimeTokenStream.T_END_OF_STREAM
-                && next != MimeTokenStream.T_START_MULTIPART) {
-            if (next == MimeTokenStream.T_FIELD) {
+        while (next != EntityState.T_BODY
+                && next != EntityState.T_END_OF_STREAM
+                && next != EntityState.T_START_MULTIPART) {
+            if (next == EntityState.T_FIELD) {
                 headers.add(new ResultHeader(parser.getField().getName(), parser
                         .getField().getBody().trim()));
             }
@@ -115,13 +119,13 @@ public class MimeDescriptorImpl implements MimeDescriptor {
 
         final MimeDescriptorImpl mimeDescriptorImpl;
         switch (next) {
-            case MimeTokenStream.T_BODY:
+            case T_BODY:
                 mimeDescriptorImpl = simplePartDescriptor(parser, headers);
                 break;
-            case MimeTokenStream.T_START_MULTIPART:
+            case T_START_MULTIPART:
                 mimeDescriptorImpl = compositePartDescriptor(parser, headers);
                 break;
-            case MimeTokenStream.T_END_OF_STREAM:
+            case T_END_OF_STREAM:
                 throw new MimeException("Premature end of stream");
             default:
                 throw new MimeException("Unexpected parse state");
@@ -136,10 +140,10 @@ public class MimeDescriptorImpl implements MimeDescriptor {
                 .getBodyDescriptor();
         MimeDescriptorImpl mimeDescriptor = createDescriptor(0, 0, descriptor,
                 null, headers);
-        int next = parser.next();
-        while (next != MimeTokenStream.T_END_MULTIPART
-                && next != MimeTokenStream.T_END_OF_STREAM) {
-            if (next == MimeTokenStream.T_START_BODYPART) {
+        EntityState next = parser.next();
+        while (next != EntityState.T_END_MULTIPART
+                && next != EntityState.T_END_OF_STREAM) {
+            if (next == EntityState.T_START_BODYPART) {
                 mimeDescriptor.addPart(createDescriptor(parser));
             }
             next = parser.next();

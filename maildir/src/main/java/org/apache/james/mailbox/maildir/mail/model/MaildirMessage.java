@@ -38,13 +38,15 @@ import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.ConfigurableMimeTokenStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.descriptor.MaximalBodyDescriptor;
-import org.apache.james.mime4j.parser.MimeEntityConfig;
-import org.apache.james.mime4j.parser.MimeTokenStream;
+import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;
+import org.apache.james.mime4j.message.MaximalBodyDescriptor;
+import org.apache.james.mime4j.stream.EntityState;
+import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeTokenStream;
+import org.apache.james.mime4j.stream.RecursionMode;
 
 public class MaildirMessage extends AbstractMessage<Integer> {
 
@@ -246,16 +248,14 @@ public class MaildirMessage extends AbstractMessage<Integer> {
             // Disable line length... This should be handled by the smtp server
             // component and not the parser itself
             // https://issues.apache.org/jira/browse/IMAP-122
-            MimeEntityConfig config = new MimeEntityConfig();
-            config.setMaximalBodyDescriptor(true);
+            MimeConfig config = new MimeConfig();
             config.setMaxLineLen(-1);
-            final ConfigurableMimeTokenStream parser = new ConfigurableMimeTokenStream(config);
-
-            parser.setRecursionMode(MimeTokenStream.M_NO_RECURSE);
+            final MimeTokenStream parser = new MimeTokenStream(config, new DefaultBodyDescriptorBuilder());
+            parser.setRecursionMode(RecursionMode.M_NO_RECURSE);
             parser.parse(tmpMsgIn.newStream(0, -1));
 
-            int next = parser.next();
-            while (next != MimeTokenStream.T_BODY && next != MimeTokenStream.T_END_OF_STREAM && next != MimeTokenStream.T_START_MULTIPART) {
+            EntityState next = parser.next();
+            while (next != EntityState.T_BODY && next != EntityState.T_END_OF_STREAM && next != EntityState.T_START_MULTIPART) {
                 next = parser.next();
             }
             final MaximalBodyDescriptor descriptor = (MaximalBodyDescriptor) parser.getBodyDescriptor();
@@ -305,7 +305,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
                 }
 
                 next = parser.next();
-                if (next == MimeTokenStream.T_EPILOGUE) {
+                if (next == EntityState.T_EPILOGUE) {
                     final CountingInputStream epilogueStream = new CountingInputStream(parser.getInputStream());
                     try {
                         epilogueStream.readAll();
