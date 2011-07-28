@@ -133,7 +133,9 @@ public interface MessageManager {
     long appendMessage(InputStream msgIn, Date internalDate, MailboxSession mailboxSession, boolean isRecent, Flags flags) throws MailboxException;
 
     /**
-     * Gets messages in the given range.
+     * Gets messages in the given range. The messages may get fetched under the-hood in batches so the caller should check if {@link MessageResultIterator#getException()} 
+     * returns <code>null</code> after {@link MessageResultIterator#hasNext()} returns <code>false</code>.
+     *  
      * 
      * @param set
      * @param fetchGroup

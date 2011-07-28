@@ -46,7 +46,8 @@ public interface MessageMapper<Id> extends Mapper {
      * @param mailbox The mailbox to search
      * @param set message range for batch processing
      * @param type
-     * @param limt the maximal limit of returned {@link Message}'s. Use -1 to set no limit
+     * @param limit the maximal limit of returned {@link Message}'s. Use -1 to set no limit. In any case the caller MUST not expect the limit to get applied in all cases as the implementation
+     *              MAY just ignore it
      * @throws MailboxException
      */
     Iterator<Message<Id>> findInMailbox(Mailbox<Id> mailbox, MessageRange set, FetchType type, int limit)
