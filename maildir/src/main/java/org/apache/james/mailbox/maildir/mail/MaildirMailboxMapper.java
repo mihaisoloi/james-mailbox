@@ -65,11 +65,23 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void delete(Mailbox<Integer> mailbox) throws MailboxException {
+        
         String folderName = maildirStore.getFolderName(mailbox);
         File folder = new File(folderName);
         if (folder.isDirectory()) {
             try {
-                FileUtils.deleteDirectory(folder);
+                if (mailbox.getName().equals(MailboxConstants.INBOX)) {
+                    // We must only delete cur, new, tmp and metadata for top INBOX mailbox.
+                    FileUtils.deleteDirectory(new File(folder, MaildirFolder.CUR));
+                    FileUtils.deleteDirectory(new File(folder, MaildirFolder.NEW));
+                    FileUtils.deleteDirectory(new File(folder, MaildirFolder.TMP));
+                    new File(folder, MaildirFolder.UIDLIST_FILE).delete();
+                    new File(folder, MaildirFolder.VALIDITY_FILE).delete();
+                }
+                else {
+                    // We simply delete all the folder for non INBOX mailboxes.
+                    FileUtils.deleteDirectory(folder);
+                }
             } catch (IOException e) {
                 throw new MailboxException("Unable to delete Mailbox " + mailbox, e);
             }
