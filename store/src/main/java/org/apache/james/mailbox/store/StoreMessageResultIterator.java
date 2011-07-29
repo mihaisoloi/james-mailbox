@@ -109,10 +109,9 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
 
     @Override
     public boolean hasNext() {
-        if (next == null || !next.hasNext()) {
+        if (!done && (next == null || !next.hasNext())) {
             try {
                 MessageRange range;
-
                 switch (type) {
                 default:
                 case ALL:
@@ -120,7 +119,6 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
                     break;
                 case FROM:
                     range = MessageRange.from(from);
-
                     break;
                 case ONE:
                     range = MessageRange.one(from);
@@ -131,13 +129,16 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
                 }
 
                 next = mapper.findInMailbox(mailbox, range, ftype, batchSize);
+                if (!next.hasNext()) {
+                	done = true;
+                }
             } catch (MailboxException e) {
                 this.exception = e;
                 done = true;
             }
             return !done;
         } else {
-            return true;
+            return !done;
         }
     }
 
@@ -156,6 +157,9 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
             // move the start UID behind the last fetched message UID if needed
             if (!next.hasNext()) {
                 from = result.getUid() + 1;
+                if (result.getUid() >= to || from > to) {
+                	done = true;
+                }
             }
             return result;
         }
