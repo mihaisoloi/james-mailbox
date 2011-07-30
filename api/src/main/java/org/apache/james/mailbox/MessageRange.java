@@ -208,17 +208,6 @@ public class MessageRange implements Iterable<Long>{
         return ranges;
     }
     
-    /**
-     * @deprecated use {@link #toRanges(Collection)}
-     * 
-     * @param uidsCol
-     * @return
-     */
-    @Deprecated
-    public static List<MessageRange> toRanges(List<Long> uidsCol) {
-        return toRanges((Collection<Long>)uidsCol);
-    }
-
     
     /**
      * Return a read-only {@link Iterator} which contains all uid which fail in the specified range.
