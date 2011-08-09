@@ -133,8 +133,8 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         }
         Collections.sort(results);
         
-        if (results.size() > max) {
-        	results = results.subList(0, max -1);
+        if (max > 0 && results.size() > max) {
+            results = results.subList(0, max -1);
         }
         return results.iterator();
     }
