@@ -45,6 +45,9 @@ import org.apache.james.mime4j.parser.AbstractContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.RawField;
+import org.apache.james.mime4j.util.ByteSequence;
+import org.apache.james.mime4j.util.ContentUtil;
 
 /**
  *
@@ -69,7 +72,18 @@ public class ResultUtils {
             }
             @Override
             public void field(Field field) throws MimeException {
-                String fieldValue = field.getBody();
+                String fieldValue;
+                if (field instanceof RawField) {
+                    // check if we can access the body in the raw form so no unfolding was done under the hood
+                    ByteSequence raw = field.getRaw();
+                    int len = raw.length();
+                    int off = ((RawField) field).getDelimiterIdx() + 1;
+                    if (len > off + 1 && (raw.byteAt(off) & 0xff) == 0x20) off++;
+                
+                    fieldValue = ContentUtil.decode(raw, off, len - off);
+                } else {
+                    fieldValue = field.getBody();
+                }
                 if (fieldValue.endsWith("\r\f")) {
                     fieldValue = fieldValue.substring(0,fieldValue.length() - 2);
                 }
