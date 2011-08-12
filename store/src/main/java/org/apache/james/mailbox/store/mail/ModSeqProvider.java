@@ -34,7 +34,9 @@ public interface ModSeqProvider<Id> {
     /**
      * Return the next mod-sequence which can be used for the {@link Mailbox}.
      * Its important that the returned mod-sequence is higher then the last used and that the next call of this method does return a higher
-     * one
+     * one. 
+     * 
+     * The first mod-seq must be >= 1
      * 
      * @param session
      * @param mailbox
