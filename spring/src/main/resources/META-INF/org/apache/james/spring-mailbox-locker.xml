@@ -24,10 +24,9 @@
           http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-3.0.xsd">
 
     <!-- 
-      Mailbox Util
+      Mailbox Locker
      -->
 
     <bean id="jvm-locker" class="org.apache.james.mailbox.store.JVMMailboxPathLocker"/>
-    <bean id="authenticator" class="org.apache.james.mailbox.spring.AnonymousAuthenticator"/>
 
 </beans>
