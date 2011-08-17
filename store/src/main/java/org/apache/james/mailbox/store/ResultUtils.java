@@ -64,6 +64,7 @@ public class ResultUtils {
         final List<MessageResult.Header> results = new ArrayList<MessageResult.Header>();
         MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
+        config.setMaxHeaderLen(-1);
         final MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(new AbstractContentHandler() {
             @Override

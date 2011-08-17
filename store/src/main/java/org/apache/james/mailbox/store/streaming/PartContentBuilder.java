@@ -51,6 +51,7 @@ public class PartContentBuilder {
     public PartContentBuilder() {
         MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
+        config.setMaxHeaderLen(-1);
 
         parser = new MimeTokenStream(config);
     }

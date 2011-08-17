@@ -216,6 +216,8 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             // https://issues.apache.org/jira/browse/IMAP-122
             MimeConfig config = new MimeConfig();
             config.setMaxLineLen(-1);
+            config.setMaxHeaderLen(-1);
+
             final MimeTokenStream parser = new MimeTokenStream(config, new DefaultBodyDescriptorBuilder());
            
             parser.setRecursionMode(RecursionMode.M_NO_RECURSE);

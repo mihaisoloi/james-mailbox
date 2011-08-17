@@ -92,7 +92,8 @@ public class MimeDescriptorImpl implements MimeDescriptor {
         // See https://issues.apache.org/jira/browse/IMAP-132
         MimeConfig config = new MimeConfig();
         config.setMaxLineLen(-1);
-        
+        config.setMaxHeaderLen(-1);
+
         //
         final MimeTokenStream parser = new MimeTokenStream(config, new DefaultBodyDescriptorBuilder());
         
