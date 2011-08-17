@@ -46,6 +46,7 @@
     <module>jpa</module>
     <module>jcr</module>
     <module>maildir</module>
+    <module>spring</module>
     <module>tool</module>
   </modules>
   
