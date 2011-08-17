@@ -24,14 +24,15 @@
     version="2.0">
 
     <persistence-unit name="James" transaction-type="RESOURCE_LOCAL">
-
-        <class>org.apache.james.mailbox.jpa.mail.model.JPAHeader</class>
         <class>org.apache.james.mailbox.jpa.mail.model.JPAMailbox</class>
         <class>org.apache.james.mailbox.jpa.mail.model.JPAUserFlag</class>
         <class>org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage</class>
         <class>org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage</class>
         <class>org.apache.james.mailbox.jpa.mail.model.JPAProperty</class>
         <class>org.apache.james.mailbox.jpa.user.model.JPASubscription</class>
+        <class>org.apache.james.domainlist.jpa.model.JPADomain</class>
+        <class>org.apache.james.user.jpa.model.JPAUser</class>
+        <class>org.apache.james.rrt.jpa.model.JPARecipientRewrite</class>
         <properties>
             <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
             <property name="openjpa.jdbc.MappingDefaults" value="ForeignKeyDeleteAction=cascade, JoinForeignKeyDeleteAction=cascade"/>
