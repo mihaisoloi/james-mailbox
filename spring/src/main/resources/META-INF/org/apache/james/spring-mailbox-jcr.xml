@@ -71,7 +71,7 @@
     </bean>
     <bean id="jcrUtils" class="org.apache.james.mailbox.jcr.JCRUtils"/>    
     <bean id="config" class="org.apache.jackrabbit.core.config.RepositoryConfig" factory-method="create">
-        <constructor-arg index="0" value="classpath:META-INF/james/jcr-repository.xml" type="java.io.InputStream"/>
+        <constructor-arg index="0" value="classpath:META-INF/org/apache/james/jcr-repository.xml" type="java.io.InputStream"/>
         <constructor-arg index="1" value="var/store/jackrabbit" />
     </bean>
     <alias name="jvm-locker" alias="jcr-locker"/>

@@ -26,7 +26,7 @@ public class SpringMailbox {
     private ApplicationContext applicationContext;
     
     public SpringMailbox() {
-        applicationContext = new ClassPathXmlApplicationContext("META-INF/james/spring-mailbox.xml");
+        applicationContext = new ClassPathXmlApplicationContext("META-INF/org/apache/james/spring-mailbox.xml");
     }
     
     public Object getBean(String beanName) {
