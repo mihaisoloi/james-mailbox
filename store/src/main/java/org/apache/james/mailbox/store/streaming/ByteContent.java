@@ -22,21 +22,21 @@
  */
 package org.apache.james.mailbox.store.streaming;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
+import java.io.InputStream;
 
 import org.apache.james.mailbox.Content;
 
 public final class ByteContent implements Content {
 
-    private final ByteBuffer contents;
+    private final byte[] contents;
 
     private final long size;
 
-    public ByteContent(final ByteBuffer contents) {
+    public ByteContent(final byte[] contents) {
         this.contents = contents;
-        size = contents.limit();
+        size = contents.length;
     }
 
     /*
@@ -47,14 +47,10 @@ public final class ByteContent implements Content {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Content#writeTo(java.nio.channels.WritableByteChannel)
-     */
-    public void writeTo(WritableByteChannel channel) throws IOException {
-        contents.rewind();
-        while (channel.write(contents) > 0) {
-            // write more
-        }
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return new ByteArrayInputStream(contents);
     }
+
+
 }

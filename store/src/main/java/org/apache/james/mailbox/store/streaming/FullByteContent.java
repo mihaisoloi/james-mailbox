@@ -16,50 +16,73 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-
-/**
- * 
- */
 package org.apache.james.mailbox.store.streaming;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.james.mailbox.Content;
 import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.MessageResult.Header;
 
 /**
- * Content which holds the full content, including {@link Header} objets
+ * Abstract base class for {@link Content} implementations which hold the headers and 
+ * the body a email
  *
  */
-public final class FullByteContent extends  AbstractFullContent {
-    private final ByteBuffer contents;
-    private final long size;
+public class FullByteContent implements Content {
 
-    public FullByteContent(final ByteBuffer contents, final List<MessageResult.Header> headers) throws IOException {
-        super(headers);
-        this.contents = contents;
+
+    private List<Header> headers;
+    private byte[] body;
+    private long size;
+    
+    public FullByteContent(final byte[] body, final List<MessageResult.Header> headers) throws IOException {
+        this.headers = headers;
+        this.body = body;
         this.size = caculateSize();
     }
+    
+    protected long caculateSize() throws IOException{
+        long result = body.length;
+        result += 2;
+        for (final Iterator<MessageResult.Header> it = headers.iterator(); it.hasNext();) {
+            final MessageResult.Header header = it.next();
+            if (header != null) {
+                result += header.size();
+                result += 2;
+            }
+        }
+        return result;
+    }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Content#size()
-     */
+    @Override
+    public InputStream getInputStream() throws IOException {
+        List<InputStream> inputs = new ArrayList<InputStream>();
+        for (final Iterator<MessageResult.Header> it = headers.iterator(); it.hasNext();) {
+            final MessageResult.Header header = it.next();
+            if (header != null) {
+                
+                inputs.add(header.getInputStream());
+            }
+            inputs.add(new ByteArrayInputStream("\r\n".getBytes()));
+        }
+        inputs.add(new ByteArrayInputStream("\r\n".getBytes()));
+        inputs.add(new ByteArrayInputStream(body));
+        return new SequenceInputStream(Collections.enumeration(inputs));
+    }
+
+    @Override
     public long size() {
         return size;
     }
+    
 
-    @Override
-    protected void bodyWriteTo(WritableByteChannel channel) throws IOException {
-        contents.rewind();
-        writeAll(channel, contents);        
-    }
-
-    @Override
-    protected long getBodySize() throws IOException {
-        return contents.limit();
-    }
-
+    
 }

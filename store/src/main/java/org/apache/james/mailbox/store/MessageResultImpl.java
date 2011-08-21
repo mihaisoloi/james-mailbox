@@ -19,6 +19,8 @@
 
 package org.apache.james.mailbox.store;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,49 +30,35 @@ import java.util.Map;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.Headers;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MimeDescriptor;
+import org.apache.james.mailbox.store.mail.model.Message;
+import org.apache.james.mailbox.store.streaming.InputStreamContent;
+import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 
 /**
  * Bean based implementation.
  */
 public class MessageResultImpl implements MessageResult {
-    private long uid;
 
-    private Flags flags;
-
-    private int size;
-
-    private Date internalDate;
-
-    private List<Header> headers;
-
-    private Content body;
-
-    private Content fullContent;
-
-    private int includedResults = FetchGroup.MINIMAL;
-
-    private Map<MimePath, PartContent> partsByPath = new HashMap<MimePath, PartContent>();
+    private final Map<MimePath, PartContent> partsByPath = new HashMap<MimePath, PartContent>();
 
     private MimeDescriptor mimeDescriptor;
 
-    private long modSeq;
+	private final Message<?> message;
 
-    public MessageResultImpl(long uid) {
-        setUid(uid);
-    }
+    private HeadersImpl headers;
+    private Content fullContent;
+    private Content bodyContent;
 
-    public MessageResultImpl() {
-    }
-
-    public MessageResultImpl(long uid, Flags flags) {
-        setUid(uid);
-        setFlags(flags);
-    }
     
-    
+    public MessageResultImpl(Message<?> message) throws IOException {
+        this.message = message;
+        this.headers = new HeadersImpl(message);
+        
+    }
 
     /*
      * (non-Javadoc)
@@ -78,7 +66,7 @@ public class MessageResultImpl implements MessageResult {
      * @see org.apache.james.mailbox.MessageResult#getUid()
      */
     public long getUid() {
-        return uid;
+        return message.getUid();
     }
 
     /*
@@ -87,7 +75,7 @@ public class MessageResultImpl implements MessageResult {
      * @see org.apache.james.mailbox.MessageResult#getInternalDate()
      */
     public Date getInternalDate() {
-        return internalDate;
+        return message.getInternalDate();
     }
 
     /*
@@ -96,11 +84,7 @@ public class MessageResultImpl implements MessageResult {
      * @see org.apache.james.mailbox.MessageResult#getFlags()
      */
     public Flags getFlags() {
-        return flags;
-    }
-
-    public void setUid(long uid) {
-        this.uid = uid;
+        return message.createFlags();
     }
 
     /*
@@ -109,11 +93,7 @@ public class MessageResultImpl implements MessageResult {
      * @see org.apache.james.mailbox.MessageResult#getSize()
      */
     public long getSize() {
-        return size;
-    }
-
-    public void setFlags(Flags flags) {
-        this.flags = flags;
+        return message.getFullContentOctets();
     }
 
     /*
@@ -122,9 +102,9 @@ public class MessageResultImpl implements MessageResult {
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(MessageResult that) {
-        if (this.uid > 0 && that.getUid() > 0) {
+        if (getUid() > 0 && that.getUid() > 0) {
             // TODO: this seems inefficient
-            return Long.valueOf(uid).compareTo(Long.valueOf(that.getUid()));
+            return Long.valueOf(getUid()).compareTo(Long.valueOf(that.getUid()));
         } else {
             // TODO: throwing an undocumented untyped runtime seems wrong
             // TODO: if uids must be greater than zero then this should be
@@ -135,52 +115,17 @@ public class MessageResultImpl implements MessageResult {
         }
 
     }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    public void setInternalDate(Date internalDate) {
-        this.internalDate = internalDate;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.james.mailbox.MessageResult#headers()
-     */
-    public Iterator<Header> headers() {
-        if (headers == null) {
-            return null;
-        }
-        return headers.iterator();
-    }
-
-    public List<Header> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(List<Header> headers) {
-        this.headers = headers;
-        if (headers != null) {
-            includedResults |= FetchGroup.HEADERS;
-        }
-    }
-
+   
     /*
      * (non-Javadoc)
      * 
      * @see org.apache.james.mailbox.MessageResult#getFullContent()
      */
-    public final Content getFullContent() {
-        return fullContent;
-    }
-
-    public final void setFullContent(Content fullMessage) {
-        this.fullContent = fullMessage;
-        if (fullMessage != null) {
-            includedResults |= FetchGroup.FULL_CONTENT;
+    public synchronized final Content getFullContent() throws IOException {
+        if (fullContent == null) {
+            fullContent = new InputStreamContent(message, Type.Full);
         }
+        return fullContent;
     }
 
     /*
@@ -188,16 +133,13 @@ public class MessageResultImpl implements MessageResult {
      * 
      * @see org.apache.james.mailbox.MessageResult#getBody()
      */
-    public final Content getBody() {
-        return body;
+    public synchronized final Content getBody() throws IOException {
+        if (bodyContent == null) {
+            bodyContent = new InputStreamContent(message, Type.Body);
+        }
+        return bodyContent;
     }
 
-    public final void setBody(Content messageBody) {
-        this.body = messageBody;
-        if (messageBody != null) {
-            includedResults |= FetchGroup.BODY_CONTENT;
-        }
-    }
 
     /**
      * Renders suitably for logging.
@@ -207,7 +149,7 @@ public class MessageResultImpl implements MessageResult {
     public String toString() {
         final String TAB = " ";
 
-        String retValue = "MessageResultImpl ( " + "uid = " + this.uid + TAB + "flags = " + this.flags + TAB + "size = " + this.size + TAB + "internalDate = " + this.internalDate + TAB + "includedResults = " + this.includedResults + TAB + " )";
+        String retValue = "MessageResultImpl ( " + "uid = " + getUid() + TAB + "flags = " + getFlags() + TAB + "size = " + getSize() + TAB + "internalDate = " + getInternalDate()+ ")";
 
         return retValue;
     }
@@ -396,7 +338,6 @@ public class MessageResultImpl implements MessageResult {
     }
 
     public void setMimeDescriptor(final MimeDescriptor mimeDescriptor) {
-        includedResults |= FetchGroup.MIME_DESCRIPTOR;
         this.mimeDescriptor = mimeDescriptor;
     }
 
@@ -414,10 +355,46 @@ public class MessageResultImpl implements MessageResult {
      * @see org.apache.james.mailbox.MessageMetaData#getModSeq()
      */
     public long getModSeq() {
-        return modSeq;
+        return message.getModSeq();
     }
     
-    public void setModSeq(long modSeq) {
-        this.modSeq = modSeq;
+    @Override
+    public synchronized Headers getHeaders() throws MailboxException {
+        if (headers == null) {
+            headers = new HeadersImpl(message);
+        }
+        return headers;
+    }
+    
+    private final class HeadersImpl implements Headers {
+
+        private Message<?> msg;
+        private List<Header> headers;
+        
+        public HeadersImpl(Message<?> msg) {
+            this.msg = msg;
+        }
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return msg.getHeaderContent();
+        }
+
+        @Override
+        public long size() {
+            return msg.getFullContentOctets() - msg.getBodyOctets();
+        }
+
+        @Override
+        public synchronized Iterator<Header> headers() throws MailboxException {
+            if (headers == null) {
+                try {
+                    headers = ResultUtils.createHeaders(message);
+                } catch (IOException e) {
+                    throw new MailboxException("Unable to parse headers", e);
+                }
+            }
+            return headers.iterator();
+        }
+        
     }
 }

@@ -19,6 +19,7 @@
 
 package org.apache.james.mailbox;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ import java.util.Set;
  * </p>
  */
 
-public interface MessageResult extends Comparable<MessageResult>, MessageMetaData, Headers {
+public interface MessageResult extends Comparable<MessageResult>, MessageMetaData {
 
     /**
      * Indicates the results fetched.
@@ -185,8 +186,9 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @return <code>Content</code>, or or null if
      *         {@link FetchGroup#FULL_CONTENT} has not been included in the
      *         results
+     * @throws IOException 
      */
-    Content getFullContent() throws MailboxException;
+    Content getFullContent() throws MailboxException, IOException;
 
     /**
      * Gets the full content of the given mime part.
@@ -207,8 +209,9 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @return <code>Content</code>, or or null if
      *         {@link FetchGroup#FULL_CONTENT} has not been included in the
      *         results
+     * @throws IOException 
      */
-    Content getBody() throws MailboxException;
+    Content getBody() throws MailboxException, IOException;
 
     /**
      * Gets the body of the given mime part.
@@ -234,6 +237,9 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      */
     Content getMimeBody(MimePath path) throws MailboxException;
 
+    
+    Headers getHeaders() throws MailboxException;
+    
     /**
      * Describes a path within a multipart MIME message. All implementations
      * must implement equals. Two paths are equal if and only if each position

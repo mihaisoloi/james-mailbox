@@ -151,30 +151,20 @@ public class ResultUtils {
      * @return result
      * @throws MailboxException
      */
-    public static MessageResult loadMessageResult(final Message<?> message, final FetchGroup fetchGroup) 
-                throws MailboxException {
+    public static MessageResult loadMessageResult(final Message<?> message, final FetchGroup fetchGroup) throws MailboxException {
+        try {
 
-        MessageResultImpl messageResult = new MessageResultImpl();
-        messageResult.setUid(message.getUid());
-        if (fetchGroup != null) {
-            int content = fetchGroup.content();
-            messageResult.setFlags(message.createFlags());
-            messageResult.setSize((int)message.getFullContentOctets());
-            messageResult.setInternalDate(message.getInternalDate());
-            messageResult.setModSeq(message.getModSeq());
-            
-            try {
+            MessageResultImpl messageResult = new MessageResultImpl(message);
+            if (fetchGroup != null) {
+                int content = fetchGroup.content();
 
                 if ((content & FetchGroup.HEADERS) > 0) {
-                    addHeaders(message, messageResult);
                     content -= FetchGroup.HEADERS;
                 }
                 if ((content & FetchGroup.BODY_CONTENT) > 0) {
-                    addBody(message, messageResult);
                     content -= FetchGroup.BODY_CONTENT;
                 }
                 if ((content & FetchGroup.FULL_CONTENT) > 0) {
-                    addFullContent(message, messageResult);
                     content -= FetchGroup.FULL_CONTENT;
                 }
                 if ((content & FetchGroup.MIME_DESCRIPTOR) > 0) {
@@ -186,13 +176,15 @@ public class ResultUtils {
                 }
 
                 addPartContent(fetchGroup, message, messageResult);
-            } catch (IOException e) {
-                throw new MailboxException("Unable to parse message", e);
-            } catch (MimeException e) {
-                throw new MailboxException("Unable to parse message", e);
             }
+            return messageResult;
+
+        } catch (IOException e) {
+            throw new MailboxException("Unable to parse message", e);
+        } catch (MimeException e) {
+            throw new MailboxException("Unable to parse message", e);
         }
-        return messageResult;
+
     }
 
     private static void addMimeDescriptor(Message<?> message, MessageResultImpl messageResult) throws IOException, MimeException {
@@ -200,23 +192,6 @@ public class ResultUtils {
             messageResult.setMimeDescriptor(descriptor);
     }
 
-    private static void addFullContent(final Message<?> messageRow, MessageResultImpl messageResult) throws IOException {
-        Content content = createFullContent(messageRow);
-        messageResult.setFullContent(content);
-
-    }
-
-    private static void addBody(final Message<?> message, MessageResultImpl messageResult)throws IOException {
-        final Content content = createBodyContent(message);
-        messageResult.setBody(content);
-
-    }
-
-    private static void addHeaders(final Message<?> message,
-            MessageResultImpl messageResult) throws IOException {
-        final List<MessageResult.Header> headers = createHeaders(message);
-        messageResult.setHeaders(headers);
-    }
 
     private static void addPartContent(final FetchGroup fetchGroup,
             Message<?> message, MessageResultImpl messageResult)
@@ -287,9 +262,8 @@ public class ResultUtils {
             MessageResultImpl messageResult, MimePath mimePath)
             throws IOException, MimeException {
         final int[] path = path(mimePath);
-        if (path == null) {
-            addHeaders(message, messageResult);
-        } else {
+        if (path != null) {
+       
             final PartContentBuilder builder = build(path, message);
             final List<MessageResult.Header> headers = builder.getMessageHeaders();
             messageResult.setHeaders(mimePath, headers.iterator());
@@ -300,9 +274,7 @@ public class ResultUtils {
             MessageResultImpl messageResult, MimePath mimePath)
             throws IOException, MimeException {
         final int[] path = path(mimePath);
-        if (path == null) {
-            addHeaders(message, messageResult);
-        } else {
+        if (path != null) {
             final PartContentBuilder builder = build(path, message);
             final List<MessageResult.Header> headers = builder.getMimeHeaders();
             messageResult.setMimeHeaders(mimePath, headers.iterator());
@@ -312,9 +284,7 @@ public class ResultUtils {
     private static void addBodyContent(Message<?> message,
             MessageResultImpl messageResult, MimePath mimePath) throws IOException, MimeException {
         final int[] path = path(mimePath);
-        if (path == null) {
-            addBody(message, messageResult);
-        } else {
+        if (path != null) {
             final PartContentBuilder builder = build(path, message);
             final Content content = builder.getMessageBodyContent();
             messageResult.setBodyContent(mimePath, content);
@@ -335,9 +305,7 @@ public class ResultUtils {
             throws MailboxException, IOException,
             MimeException {
         final int[] path = path(mimePath);
-        if (path == null) {
-            addFullContent(message, messageResult);
-        } else {
+        if (path != null) {
             final PartContentBuilder builder = build(path, message);
             final Content content = builder.getFullContent();
             messageResult.setFullContent(mimePath, content);

@@ -24,10 +24,7 @@ import java.util.Iterator;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResult.Header;
 
-/**
- * TODO: remove when MessageResult is sorted out
- */
-public interface Headers {
+public interface Headers extends Content{
     /**
      * Gets headers for the message.
      * 
@@ -35,4 +32,6 @@ public interface Headers {
      *         {@link FetchGroup#HEADERS} was not fetched
      */
     Iterator<Header> headers() throws MailboxException;
+    
+    
 }

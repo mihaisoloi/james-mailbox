@@ -20,7 +20,7 @@
 package org.apache.james.mailbox;
 
 import java.io.IOException;
-import java.nio.channels.WritableByteChannel;
+import java.io.InputStream;
 
 /**
  * IMAP needs to know the size of the content before it starts to write it out.
@@ -28,21 +28,15 @@ import java.nio.channels.WritableByteChannel;
  */
 public interface Content {
 
-    /**
-     * Writes content to the given channel.
-     * 
-     * Be aware that this operation may only be called once one the content
-     * because its possible dispose temp data. If you need to write the content
-     * more then one time you should "re-create" the content
-     * 
-     * @param channel
-     *            <code>Channel</code> open, not null
-     * @throws MailboxException
-     * @throws IOException
-     *             when channel IO fails
-     */
-    void writeTo(WritableByteChannel channel) throws IOException;
 
+    /**
+     * Return the content as {@link InputStream}
+     * 
+     * @return content
+     * @throws IOException
+     */
+    InputStream getInputStream() throws IOException;
+    
     /**
      * Size (in octets) of the content.
      * 

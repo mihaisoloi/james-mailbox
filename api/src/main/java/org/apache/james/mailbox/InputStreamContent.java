@@ -18,19 +18,14 @@
  ****************************************************************/
 package org.apache.james.mailbox;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * {@link Content} which offers the content via {@link InputStream} too
+ * 
+ * @deprecated use {@link Content}
  */
+@Deprecated
 public interface InputStreamContent extends Content {
 
-    /**
-     * Return the content as {@link InputStream}
-     * 
-     * @return content
-     * @throws IOException
-     */
-    InputStream getInputStream() throws IOException;
 }

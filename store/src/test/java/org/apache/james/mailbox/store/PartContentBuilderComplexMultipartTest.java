@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultHeader;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
@@ -191,16 +192,12 @@ public class PartContentBuilderComplexMultipartTest {
 
     private String fullContent(int[] position) throws Exception {
         to(position);
-        StringBuilderChannel buffer = new StringBuilderChannel();
-        builder.getFullContent().writeTo(buffer);
-        return buffer.toString();
+        return IOUtils.toString(builder.getFullContent().getInputStream());
     }
 
     private String bodyContent(int[] position) throws Exception {
         to(position);
-        StringBuilderChannel buffer = new StringBuilderChannel();
-        builder.getMimeBodyContent().writeTo(buffer);
-        return buffer.toString();
+        return IOUtils.toString(builder.getMimeBodyContent().getInputStream());
     }
 
     private void checkContentType(String contentType, int[] position)

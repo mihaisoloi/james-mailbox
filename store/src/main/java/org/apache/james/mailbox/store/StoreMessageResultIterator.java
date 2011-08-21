@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import javax.mail.Flags;
 
 import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.Headers;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MimeDescriptor;
@@ -223,10 +224,6 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
             return uid;
         }
 
-        public Iterator<Header> headers() throws MailboxException {
-            throw exception;
-        }
-
         public int compareTo(MessageResult that) {
             // Java 1.5 return (int) Math.signum(uid - that.getUid());
             long diff = uid - that.getUid();
@@ -259,6 +256,11 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
 
         public long getModSeq() {
             return modSeq;
+        }
+
+        @Override
+        public Headers getHeaders() throws MailboxException {
+            throw exception;
         }
 
     }

@@ -21,7 +21,6 @@ package org.apache.james.mailbox.store.streaming;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -132,12 +131,12 @@ public class PartContentBuilder {
     public Content getFullContent() throws IOException, UnexpectedEOFException, MimeException {
         final List<Header> headers = getMimeHeaders();
         final byte[] content = mimeBodyContent();
-        return new FullByteContent(ByteBuffer.wrap(content), headers);
+        return new FullByteContent(content, headers);
     }
 
     public Content getMessageBodyContent() throws IOException, MimeException {
         final byte[] content = messageBodyContent();
-        return new ByteContent(ByteBuffer.wrap(content));
+        return new ByteContent(content);
     }
 
     private byte[] messageBodyContent() throws IOException, MimeException {
@@ -177,7 +176,7 @@ public class PartContentBuilder {
 
     public Content getMimeBodyContent() throws IOException, MimeException {
         final byte[] content = mimeBodyContent();
-        return new ByteContent(ByteBuffer.wrap(content));
+        return new ByteContent(content);
     }
 
     private byte[] mimeBodyContent() throws IOException, MimeException {
