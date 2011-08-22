@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultHeader;
@@ -128,7 +129,7 @@ public class PartContentBuilder {
         }
     }
 
-    public Content getFullContent() throws IOException, UnexpectedEOFException, MimeException {
+    public Content getFullContent() throws IOException, UnexpectedEOFException, MimeException, MailboxException {
         final List<Header> headers = getMimeHeaders();
         final byte[] content = mimeBodyContent();
         return new FullByteContent(content, headers);

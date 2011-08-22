@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.Header;
 
@@ -43,13 +44,13 @@ public class FullByteContent implements Content {
     private byte[] body;
     private long size;
     
-    public FullByteContent(final byte[] body, final List<MessageResult.Header> headers) throws IOException {
+    public FullByteContent(final byte[] body, final List<MessageResult.Header> headers) throws MailboxException {
         this.headers = headers;
         this.body = body;
         this.size = caculateSize();
     }
     
-    protected long caculateSize() throws IOException{
+    protected long caculateSize() throws MailboxException{
         long result = body.length;
         result += 2;
         for (final Iterator<MessageResult.Header> it = headers.iterator(); it.hasNext();) {

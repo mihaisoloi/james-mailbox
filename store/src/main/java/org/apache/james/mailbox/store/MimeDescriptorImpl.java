@@ -19,8 +19,10 @@
 
 package org.apache.james.mailbox.store;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -44,6 +47,8 @@ import org.apache.james.mime4j.stream.RecursionMode;
 
 public class MimeDescriptorImpl implements MimeDescriptor {
 
+    private final static Charset US_ASCII = Charset.forName("US-ASCII");
+    
     public static MimeDescriptorImpl build(final Message<?> document) throws IOException, MimeException {
         final MimeDescriptorImpl result;
         final String mediaType = document.getMediaType();
@@ -255,6 +260,7 @@ public class MimeDescriptorImpl implements MimeDescriptor {
 
     private final String md5;
 
+
     public MimeDescriptorImpl(final long bodyOctets,
             final String contentDescription, final String contentId,
             final long lines, final String subType, final String type,
@@ -348,5 +354,33 @@ public class MimeDescriptorImpl implements MimeDescriptor {
 
     public String getContentMD5() {
         return md5;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        Iterator<MessageResult.Header> hIt = headers.iterator();
+        while(hIt.hasNext()) {
+            MessageResult.Header header = hIt.next();
+            try {
+                sb.append(header.getName()).append(": " ).append(header.getValue()).append("\r\n");
+            } catch (MailboxException e) {
+                throw new IOException("Unable to read headers", e);
+            }
+        }
+        return new ByteArrayInputStream(sb.toString().getBytes(US_ASCII));
+    }
+
+    @Override
+    public long size() throws MailboxException {
+        long result = 0;
+        for (final Iterator<MessageResult.Header> it = headers.iterator(); it.hasNext();) {
+            final MessageResult.Header header = it.next();
+            if (header != null) {
+                result += header.size();
+                result += 2;
+            }
+        }
+        return result;
     }
 }

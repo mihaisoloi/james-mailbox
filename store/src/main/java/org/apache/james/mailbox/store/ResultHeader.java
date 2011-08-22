@@ -23,24 +23,20 @@
 package org.apache.james.mailbox.store;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 
-import org.apache.james.mailbox.InputStreamContent;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 
-public final class ResultHeader implements MessageResult.Header, InputStreamContent {
+public final class ResultHeader implements MessageResult.Header {
     private final String name;
 
     private final String value;
 
     private final long size;
-
+    private final static Charset US_ASCII = Charset.forName("US-ASCII");
 
     public ResultHeader(String name, String value) {
         this.name = name;
@@ -72,25 +68,6 @@ public final class ResultHeader implements MessageResult.Header, InputStreamCont
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Content#writeTo(java.nio.channels.WritableByteChannel)
-     */
-    public void writeTo(WritableByteChannel channel) throws IOException {
-        writeAll(channel, ResultUtils.US_ASCII.encode(name));
-        ByteBuffer buffer = ByteBuffer
-                .wrap(ResultUtils.BYTES_HEADER_FIELD_VALUE_SEP);
-        writeAll(channel, buffer);
-        writeAll(channel, ResultUtils.US_ASCII.encode(value));
-    }
-
-    private void writeAll(WritableByteChannel channel, ByteBuffer buffer)
-            throws IOException {
-        while (channel.write(buffer) > 0) {
-            // write more
-        }
-    }
-
     public String toString() {
         return "[HEADER " + name + ": " + value + "]";
     }
@@ -100,8 +77,6 @@ public final class ResultHeader implements MessageResult.Header, InputStreamCont
      * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTo(Channels.newChannel(out));
-        return new ByteArrayInputStream(out.toByteArray());
+        return new ByteArrayInputStream((name + ": " + value).getBytes(US_ASCII));
     }
 }
