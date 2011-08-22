@@ -34,7 +34,7 @@ import org.apache.james.mailbox.store.mail.model.Message;
  * {@link Content} which is stored in a {@link InputStream}
  *
  */
-public final class InputStreamContent implements org.apache.james.mailbox.InputStreamContent{
+public final class InputStreamContent implements Content{
     private Message<?> m;
     private Type type;
 

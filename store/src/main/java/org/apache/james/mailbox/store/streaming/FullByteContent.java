@@ -19,11 +19,10 @@
 package org.apache.james.mailbox.store.streaming;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,18 +64,20 @@ public class FullByteContent implements Content {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        List<InputStream> inputs = new ArrayList<InputStream>();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (final Iterator<MessageResult.Header> it = headers.iterator(); it.hasNext();) {
             final MessageResult.Header header = it.next();
             if (header != null) {
-                
-                inputs.add(header.getInputStream());
+                try {
+                    out.write((header.getName() + ": " + header.getValue() + "\r\n").getBytes("US-ASCII"));
+                } catch (MailboxException e) {
+                    throw new IOException("Unable to read headers", e);
+                }
             }
-            inputs.add(new ByteArrayInputStream("\r\n".getBytes()));
         }
-        inputs.add(new ByteArrayInputStream("\r\n".getBytes()));
-        inputs.add(new ByteArrayInputStream(body));
-        return new SequenceInputStream(Collections.enumeration(inputs));
+        out.write("\r\n".getBytes("US-ASCII"));
+        out.flush();
+        return new SequenceInputStream(new ByteArrayInputStream(out.toByteArray()), new ByteArrayInputStream(body));
     }
 
     @Override
