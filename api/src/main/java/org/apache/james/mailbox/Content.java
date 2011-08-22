@@ -43,5 +43,5 @@ public interface Content {
      * @return number of octets to be written
      * @throws MessagingException
      */
-    long size();
+    long size() throws MailboxException;
 }

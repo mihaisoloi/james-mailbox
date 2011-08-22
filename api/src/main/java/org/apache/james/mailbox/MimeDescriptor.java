@@ -25,9 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.james.mailbox.MessageResult.Header;
-
-public interface MimeDescriptor  {
+public interface MimeDescriptor extends Headers{
 
     /**
      * Gets the top level MIME content media type.
@@ -139,7 +137,5 @@ public interface MimeDescriptor  {
      * @return <code>Header</code> <code>Iterator</code>, not null
      */
     Map<String, String> contentTypeParameters();
-    
-    Iterator<Header> headers() throws MailboxException;
 
 }
