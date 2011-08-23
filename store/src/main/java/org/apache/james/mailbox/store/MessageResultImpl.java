@@ -37,6 +37,7 @@ import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
+import org.apache.james.mime4j.MimeException;
 
 /**
  * Bean based implementation.
@@ -337,16 +338,28 @@ public class MessageResultImpl implements MessageResult {
         }
     }
 
-    public void setMimeDescriptor(final MimeDescriptor mimeDescriptor) {
-        this.mimeDescriptor = mimeDescriptor;
-    }
-
     /*
      * (non-Javadoc)
      * 
      * @see org.apache.james.mailbox.MessageResult#getMimeDescriptor()
      */
-    public MimeDescriptor getMimeDescriptor() {
+    public MimeDescriptor getMimeDescriptor() throws MailboxException {
+        
+        // check if we need to create the MimeDescriptor which is done in a lazy fashion because
+        // it can be relative expensive on big messages and slow mailbox implementations
+        if (mimeDescriptor == null) {
+            try {
+                if (MimeDescriptorImpl.isComposite(message.getMediaType())) {
+                    mimeDescriptor = MimeDescriptorImpl.build(getFullContent().getInputStream());
+                } else {
+                    mimeDescriptor = new LazyMimeDescriptor(this, message);
+                }
+            } catch (IOException e) {
+                throw new MailboxException("Unable to create the MimeDescriptor", e);
+            } catch (MimeException e) {
+                throw new MailboxException("Unable to create the MimeDescriptor", e);
+            }
+        }
         return mimeDescriptor;
     }
 

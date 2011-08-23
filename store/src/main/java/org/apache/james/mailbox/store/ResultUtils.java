@@ -35,10 +35,7 @@ import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResult.MimePath;
-import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.streaming.InputStreamContent;
-import org.apache.james.mailbox.store.streaming.InputStreamContent.Type;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.AbstractContentHandler;
@@ -105,30 +102,8 @@ public class ResultUtils {
         return results;
     }
 
-    /**
-     * Return the {@link Content} which holds only the Body for the given {@link MailboxMembership}
-     * 
-     * @param membership
-     * @return bodyContent
-     * @throws IOException 
-     */
-    public static Content createBodyContent(Message<?> membership) throws IOException {
-        final InputStreamContent result = new InputStreamContent(membership, Type.Body);
-        return result;
-    }
-
-    /**
-     * Return the {@link Content} which holds the full data for the given {@link MailboxMembership}
-     * 
-     * @param membership
-     * @return content
-     * @throws IOException 
-     */
-    public static Content createFullContent(final Message<?> membership) throws IOException {
-        final InputStreamContent result = new InputStreamContent(membership, Type.Full);
-        return result;
-    }
-
+  
+   
     /**
      * Return an {@link InputStream} which holds the full content of the message
      * @param message
@@ -168,7 +143,6 @@ public class ResultUtils {
                     content -= FetchGroup.FULL_CONTENT;
                 }
                 if ((content & FetchGroup.MIME_DESCRIPTOR) > 0) {
-                    addMimeDescriptor(message, messageResult);
                     content -= FetchGroup.MIME_DESCRIPTOR;
                 }
                 if (content != 0) {
@@ -186,12 +160,6 @@ public class ResultUtils {
         }
 
     }
-
-    private static void addMimeDescriptor(Message<?> message, MessageResultImpl messageResult) throws IOException, MimeException {
-            MimeDescriptor descriptor = MimeDescriptorImpl.build(message);
-            messageResult.setMimeDescriptor(descriptor);
-    }
-
 
     private static void addPartContent(final FetchGroup fetchGroup,
             Message<?> message, MessageResultImpl messageResult)

@@ -33,9 +33,6 @@ import java.util.TreeMap;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MimeDescriptor;
-import org.apache.james.mailbox.store.mail.model.Message;
-import org.apache.james.mailbox.store.mail.model.Property;
-import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;
@@ -48,37 +45,7 @@ import org.apache.james.mime4j.stream.RecursionMode;
 public class MimeDescriptorImpl implements MimeDescriptor {
 
     private final static Charset US_ASCII = Charset.forName("US-ASCII");
-    
-    public static MimeDescriptorImpl build(final Message<?> document) throws IOException, MimeException {
-        final MimeDescriptorImpl result;
-        final String mediaType = document.getMediaType();
-        if (isComposite(mediaType)) {
-            result = build(ResultUtils.toInput(document));
-        } else {
-            final List<MessageResult.Header> headers = ResultUtils.createHeaders(document);
-            final List<Property> properties = document.getProperties();
-            final PropertyBuilder builder = new PropertyBuilder(properties);
-            final Long textualLineCount = document.getTextualLineCount();
-            result = new MimeDescriptorImpl(
-                    document.getBodyOctets(), 
-                    builder.getContentDescription(), 
-                    builder.getContentID(), 
-                    textualLineCount == null? -1: textualLineCount.longValue(), 
-                    document.getSubType(),
-                    mediaType, 
-                    builder.getContentTransferEncoding(), 
-                    headers, 
-                    builder.getContentTypeParameters(),
-                    builder.getContentLanguage(), 
-                    builder.getContentDispositionType(), 
-                    builder.getContentDispositionParameters(), 
-                    null,
-                    new ArrayList<MimeDescriptor>(), 
-                    builder.getContentLocation(), 
-                    builder.getContentMD5());
-        }
-        return result;
-    }
+
     
     /**
      * Is this a composite media type (as per RFC2045)?
