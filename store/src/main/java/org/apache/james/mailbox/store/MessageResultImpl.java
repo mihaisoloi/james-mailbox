@@ -122,7 +122,7 @@ public class MessageResultImpl implements MessageResult {
      * 
      * @see org.apache.james.mailbox.MessageResult#getFullContent()
      */
-    public synchronized final Content getFullContent() throws IOException {
+    public final Content getFullContent() throws IOException {
         if (fullContent == null) {
             fullContent = new InputStreamContent(message, Type.Full);
         }
@@ -134,7 +134,7 @@ public class MessageResultImpl implements MessageResult {
      * 
      * @see org.apache.james.mailbox.MessageResult#getBody()
      */
-    public synchronized final Content getBody() throws IOException {
+    public final Content getBody() throws IOException {
         if (bodyContent == null) {
             bodyContent = new InputStreamContent(message, Type.Body);
         }
@@ -372,7 +372,7 @@ public class MessageResultImpl implements MessageResult {
     }
     
     @Override
-    public synchronized Headers getHeaders() throws MailboxException {
+    public Headers getHeaders() throws MailboxException {
         if (headers == null) {
             headers = new HeadersImpl(message);
         }
@@ -398,7 +398,7 @@ public class MessageResultImpl implements MessageResult {
         }
 
         @Override
-        public synchronized Iterator<Header> headers() throws MailboxException {
+        public Iterator<Header> headers() throws MailboxException {
             if (headers == null) {
                 try {
                     headers = ResultUtils.createHeaders(message);
