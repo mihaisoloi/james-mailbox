@@ -61,7 +61,7 @@ public class JPAMessage extends AbstractJPAMessage {
     public JPAMessage(JPAMailbox mailbox,Date internalDate, int size, Flags flags, SharedInputStream content, int bodyStartOctet, final PropertyBuilder propertyBuilder) throws MailboxException {
         super(mailbox, internalDate, flags, size ,bodyStartOctet, propertyBuilder);
         try {
-            int headerEnd = bodyStartOctet -2;
+            int headerEnd = bodyStartOctet;
             if (headerEnd < 0) {
                 headerEnd = 0;
             }

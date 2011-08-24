@@ -19,15 +19,11 @@
 
 package org.apache.james.mailbox.store;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.james.mailbox.Content;
@@ -94,8 +90,7 @@ public class ResultUtils {
             }
         });
         try {
-            // add the header seperator to the stream to mime4j don't log a warning
-            parser.parse(new SequenceInputStream(document.getHeaderContent(), new ByteArrayInputStream(BYTES_NEW_LINE)));
+            parser.parse(document.getHeaderContent());
         } catch (MimeException e) {
             throw new IOException("Unable to parse headers of message " + document, e);
         }
@@ -103,20 +98,7 @@ public class ResultUtils {
     }
 
   
-   
-    /**
-     * Return an {@link InputStream} which holds the full content of the message
-     * @param message
-     * @return
-     * @throws IOException
-     */
-    public static InputStream toInput(final Message<?> message) throws IOException{
-        return toInput(message.getHeaderContent(), message.getBodyContent());
-    }
-    
-    public static InputStream toInput(final InputStream header, final InputStream body) {
-        return new SequenceInputStream(Collections.enumeration(Arrays.asList(header, new ByteArrayInputStream(BYTES_NEW_LINE), body)));
-    }
+  
     
     /**
      * Return the {@link MessageResult} for the given {@link MailboxMembership} and {@link FetchGroup}
@@ -198,7 +180,7 @@ public class ResultUtils {
 
     private static PartContentBuilder build(int[] path, final Message<?> message)
             throws IOException, MimeException {
-        final InputStream stream = toInput(message);
+        final InputStream stream = message.getFullContent();
         PartContentBuilder result = new PartContentBuilder();
         result.parse(stream);
         try {

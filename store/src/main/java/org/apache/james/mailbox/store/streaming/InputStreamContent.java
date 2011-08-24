@@ -18,16 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.streaming;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
 
-import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.Content;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
@@ -70,76 +64,11 @@ public final class InputStreamContent implements Content{
         // wrap the streams in a BoundedInputStream to make sure it really match with the stored size.
         switch (type) {
         case Full:
-            return new BoundedInputStream(ResultUtils.toInput(m), size());
+            return m.getFullContent();
         default:
-            return new BoundedInputStream(m.getBodyContent(), size());
+            return m.getBodyContent();
         }
        
     }
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Content#writeTo(java.nio.channels.WritableByteChannel)
-     */
-    public void writeTo(WritableByteChannel channel) throws IOException {
-        InputStream in = null;
-        InputStream wrapped = null;
-        long skipped = 0;
-        try {
-            switch (type) {
-            case Full:
-                in = ResultUtils.toInput(m);
-                break;
-            default:
-                in = m.getBodyContent();
-                break;
-            }
-            
-            if (in instanceof LazySkippingInputStream) {
-                skipped = ((LazySkippingInputStream) in).getSkippedBytes();
-                wrapped = ((LazySkippingInputStream) in).getWrapped(); 
-            } else {
-            	wrapped = in;
-            }
-            
-            if (wrapped instanceof FileInputStream) {
-                FileChannel fileChannel = ((FileInputStream)wrapped).getChannel();
-                fileChannel.transferTo(skipped, fileChannel.size(), channel);
-                fileChannel.close();
-            } else {
-                int i = 0;
-
-                // read all the content of the underlying InputStream in 16384 byte chunks, wrap them
-                // in a ByteBuffer and finally write the Buffer to the channel
-                byte[] buf = new byte[16384];
-                while ((i = in.read(buf)) != -1) {
-                    
-                    ByteBuffer buffer = ByteBuffer.wrap(buf);
-                    // set the limit of the buffer to the returned bytes
-                    buffer.limit(i);
-                    channel.write(buffer);
-                }
-            }
-        } finally {
-            if(in != null) {
-            	try {
-            		in.close();
-            	} catch (IOException e) {
-            		
-            	}
-            }
-            
-            if(wrapped != null) {
-            	try {
-            		wrapped.close();
-            	} catch (IOException e) {
-            		
-            	}
-            }
-            
-        }
-        
-    }
-    
-   
 
 }

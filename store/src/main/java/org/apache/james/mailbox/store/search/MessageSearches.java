@@ -190,7 +190,7 @@ public class MessageSearches implements Iterable<Long>{
 
     private static boolean bodyContains(String value, Message<?> message, Logger log)
             throws IOException, MimeException {
-        final InputStream input = ResultUtils.toInput(message);
+        final InputStream input = message.getFullContent();
         final boolean result = isInMessage(value, input, false, log);
         return result;
     }
@@ -208,7 +208,7 @@ public class MessageSearches implements Iterable<Long>{
 
     private static boolean messageContains(String value, Message<?> message, Logger log)
             throws IOException, MimeException {
-        final InputStream input = ResultUtils.toInput(message);
+        final InputStream input = message.getFullContent();
         final boolean result = isInMessage(value, input, true, log);
         return result;
     }

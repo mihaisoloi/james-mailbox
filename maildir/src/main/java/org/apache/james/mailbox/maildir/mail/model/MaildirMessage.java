@@ -31,7 +31,6 @@ import javax.mail.Flags;
 import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
@@ -39,7 +38,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
+import org.apache.james.mailbox.store.streaming.LimitingFileInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;
 import org.apache.james.mime4j.message.MaximalBodyDescriptor;
@@ -424,7 +423,11 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return messageName.getInternalDate();
     }
 
-    private InputStream getFullContent() throws IOException {
+    /**
+     * Return the full content of the message via a {@link FileInputStream}
+     */
+    @Override
+    public InputStream getFullContent() throws IOException {
         return new FileInputStream(messageName.getFile());
     }
 
@@ -434,7 +437,9 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      */
     public InputStream getBodyContent() throws IOException {
         parseMessage();
-        return new LazySkippingInputStream(getFullContent(), bodyStartOctet);
+        FileInputStream body = new FileInputStream(messageName.getFile());
+        IOUtils.skipFully(body, bodyStartOctet);
+        return body;
 
     }
 
@@ -450,11 +455,11 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     @Override
     public InputStream getHeaderContent() throws IOException {
         parseMessage();
-        long limit = getBodyStartOctet() -2;
+        long limit = getBodyStartOctet();
         if (limit < 0) {
             limit = 0;
         }
-        return new BoundedInputStream(getFullContent(), limit);
+        return new LimitingFileInputStream(messageName.getFile(), limit);
 
     }
 

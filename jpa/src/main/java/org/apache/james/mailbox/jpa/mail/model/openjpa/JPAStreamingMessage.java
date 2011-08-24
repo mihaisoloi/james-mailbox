@@ -33,7 +33,6 @@ import javax.persistence.Table;
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.openjpa.persistence.Persistent;
@@ -89,7 +88,7 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     public JPAStreamingMessage(JPAMailbox mailbox, long uid, long modSeq, Message<?> message) throws MailboxException {
         super(mailbox, uid, modSeq, message);
         try {
-            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
+            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
             this.header = getHeaderContent();
             this.body = getBodyContent();
         } catch (IOException e) {

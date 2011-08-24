@@ -40,12 +40,10 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
-import org.apache.james.mailbox.store.streaming.LazySkippingInputStream;
 import org.slf4j.Logger;
 
 /**
@@ -142,7 +140,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
         this.modSeq = modSeq;
         this.logger = logger;
         try {
-            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(message)));
+            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(message.getFullContent()));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
@@ -679,7 +677,8 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
     }
 
 
-    protected InputStream getFullContent() throws IOException {
+    @Override
+    public InputStream getFullContent() throws IOException {
         if (isPersistent()) {
             try {
                 //TODO: Maybe we should cache this somehow...
@@ -697,7 +696,9 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
-        return new LazySkippingInputStream(getFullContent(), getBodyStartOctet());
+        InputStream body = getFullContent();
+        IOUtils.skipFully(body,  getBodyStartOctet());
+        return body;
     }
 
     /*
@@ -754,7 +755,7 @@ public class JCRMessage extends AbstractMessage<String> implements JCRImapConsta
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream getHeaderContent() throws IOException {
-        long limit = getBodyStartOctet() -2;
+        long limit = getBodyStartOctet();
         if (limit < 0) {
             limit = 0;
         }

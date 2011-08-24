@@ -335,6 +335,7 @@ public class MimeDescriptorImpl implements MimeDescriptor {
                 throw new IOException("Unable to read headers", e);
             }
         }
+        sb.append("\r\n");
         return new ByteArrayInputStream(sb.toString().getBytes(US_ASCII));
     }
 
@@ -348,6 +349,9 @@ public class MimeDescriptorImpl implements MimeDescriptor {
                 result += 2;
             }
         }
+        
+        // Add for CLRF
+        result +=2;
         return result;
     }
 }

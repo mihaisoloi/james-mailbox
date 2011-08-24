@@ -31,7 +31,6 @@ import javax.mail.util.SharedByteArrayInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -79,7 +78,7 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         this.mailboxId = mailbox.getMailboxId();
         setFlags(original.createFlags());
         try {
-            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(ResultUtils.toInput(original)));
+            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(original.getFullContent()));
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message",e);
         }
@@ -247,7 +246,7 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
 
     @Override
     public InputStream getHeaderContent() throws IOException {
-        long headerEnd = getBodyStartOctet() -2;
+        long headerEnd = getBodyStartOctet();
         if (headerEnd < 0) {
             headerEnd = 0;
         }

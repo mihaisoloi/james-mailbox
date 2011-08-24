@@ -394,7 +394,7 @@ public class MessageResultImpl implements MessageResult {
 
         @Override
         public long size() {
-            return msg.getFullContentOctets() - msg.getBodyOctets() -2;
+            return msg.getFullContentOctets() - msg.getBodyOctets();
         }
 
         @Override

@@ -177,7 +177,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
     public Long getTextualLineCount();
     
     /**
-     * Gets the header as {@link InputStream}. This MUST exclude the CRLF terminator
+     * Gets the header as {@link InputStream}. This MUST INCLUDE the CRLF terminator
      * 
      * Be aware that this method need to return a new fresh {@link InputStream}
      * on every call
@@ -186,6 +186,18 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * @throws IOException 
      */
     InputStream getHeaderContent() throws IOException;
+    
+    /**
+     *Returns the full raw content of the Message via an {@link InputStream}.
+     *
+     * Be aware that this method need to return a new fresh {@link InputStream}
+     * on every call
+     *
+     * @return content
+     * @throws IOException
+     */
+    InputStream getFullContent() throws IOException;
+
     
     /**
      * Gets a read-only list of meta-data properties.

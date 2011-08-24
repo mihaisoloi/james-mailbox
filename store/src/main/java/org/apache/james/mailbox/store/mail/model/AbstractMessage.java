@@ -18,6 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail.model;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+
 import javax.mail.Flags;
 
 
@@ -99,6 +103,21 @@ public abstract class AbstractMessage<Id> implements Message<Id> {
      * @return startOctet
      */
     protected abstract int getBodyStartOctet();
+
+
+
+    
+    /**
+     * This implementation just concat {@link #getHeaderContent()} and {@link #getBodyContent()}.
+     * 
+     * Implementation should override this if they can provide a more performant solution
+     * 
+     * @return content
+     * @throws exception
+     */
+    public InputStream getFullContent() throws IOException {
+        return new SequenceInputStream(getHeaderContent(), getBodyContent());
+    }
 
     
 

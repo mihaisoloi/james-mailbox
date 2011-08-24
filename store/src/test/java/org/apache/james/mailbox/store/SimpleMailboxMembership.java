@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.SequenceInputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -264,6 +265,7 @@ public class SimpleMailboxMembership implements Message<Long> {
             writer.write(header.getValue());
             writer.write(NEW_LINE);
         }
+        writer.write(NEW_LINE);
         writer.flush();
         return new ByteArrayInputStream(baos.toByteArray());
 
@@ -311,6 +313,11 @@ public class SimpleMailboxMembership implements Message<Long> {
 
     public void setUid(long uid) {
         this.uid = uid;
+    }
+
+    @Override
+    public InputStream getFullContent() throws IOException {
+        return new SequenceInputStream(getHeaderContent(), getBodyContent());
     }
     
     

@@ -56,7 +56,6 @@ import org.apache.james.mailbox.SearchQuery.NumericOperator;
 import org.apache.james.mailbox.SearchQuery.NumericRange;
 import org.apache.james.mailbox.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.UnsupportedSearchException;
-import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -637,7 +636,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
        
         try {
             // parse the message to index headers and body
-            parser.parse(ResultUtils.toInput(membership));
+            parser.parse(membership.getFullContent());
         } catch (MimeException e) {
             // This should never happen as it was parsed before too without problems.            
             throw new MailboxException("Unable to index content of message", e);
