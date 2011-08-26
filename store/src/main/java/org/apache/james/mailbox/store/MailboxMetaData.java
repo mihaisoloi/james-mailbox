@@ -54,7 +54,7 @@ public class MailboxMetaData implements MessageManager.MetaData {
 
         }
         this.highestModSeq = highestModSeq;
-        recentCount = recent.size();
+        recentCount = this.recent.size();
 
         this.premanentFlags = premanentFlags;
         this.uidValidity = uidValidity;
