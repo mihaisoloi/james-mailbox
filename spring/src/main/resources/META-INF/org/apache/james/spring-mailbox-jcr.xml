@@ -37,8 +37,8 @@
     </bean>
     <bean id="jcr-sessionMapperFactory" class="org.apache.james.mailbox.jcr.JCRMailboxSessionMapperFactory">
         <constructor-arg index="0" ref="jcr-sessionJcrRepository"/>
-        <constructor-arg index="1" ref="jpa-uidProvider"/>
-        <constructor-arg index="2" ref="jpa-modSeqProvider"/>
+        <constructor-arg index="1" ref="jcr-uidProvider"/>
+        <constructor-arg index="2" ref="jcr-modSeqProvider"/>
     </bean>
     <bean id ="jcr-sessionJcrRepository" class="org.apache.james.mailbox.jcr.GlobalMailboxSessionJCRRepository" depends-on="imapCndLoader">
         <constructor-arg index="0" ref="jcrRepository"/>
