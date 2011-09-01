@@ -36,6 +36,7 @@ import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage;
+import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
@@ -331,6 +332,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         Message<Long> copy;
         if (original instanceof JPAStreamingMessage) {
             copy = new JPAStreamingMessage((JPAMailbox) mailbox, uid, modSeq, original);
+        } else if(original instanceof JPAEncryptedMessage) {
+            copy = new JPAEncryptedMessage((JPAMailbox) mailbox, uid, modSeq, original);
         } else {
             copy = new JPAMessage((JPAMailbox) mailbox, uid, modSeq, original);
         }
