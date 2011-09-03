@@ -19,6 +19,12 @@
 
 package org.apache.james.mailbox;
 
+/**
+ * Implementations of this interface supports {@link MailboxListener}. Its needed that the events get handled
+ * in the submitted order
+ * 
+ *
+ */
 public interface MailboxListenerSupport {
 
     /**
