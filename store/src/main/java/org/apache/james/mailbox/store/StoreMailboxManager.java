@@ -148,6 +148,10 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         return mailboxSessionMapperFactory;
     }
     
+    public MailboxPathLocker getLocker() {
+        return locker;
+    }
+    
     
     /**
      * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link HashMapDelegatingMailboxListener} instance will
@@ -258,7 +262,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @return storeMailbox
      */
     protected StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailbox, MailboxSession session) throws MailboxException {
-        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), mailbox);
+        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailbox);
     }
 
     /**

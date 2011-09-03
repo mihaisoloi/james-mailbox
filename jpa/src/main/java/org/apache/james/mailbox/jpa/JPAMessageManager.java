@@ -24,6 +24,7 @@ import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
@@ -40,8 +41,8 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
  */
 public class JPAMessageManager extends StoreMessageManager<Long> {
     
-    public JPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, final MessageSearchIndex<Long> index, final MailboxEventDispatcher<Long> dispatcher,final Mailbox<Long> mailbox) throws MailboxException {
-        super(mapperFactory, index, dispatcher, mailbox);     
+    public JPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, final MessageSearchIndex<Long> index, final MailboxEventDispatcher<Long> dispatcher, final MailboxPathLocker locker, final Mailbox<Long> mailbox) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox);     
     }
     
     @Override

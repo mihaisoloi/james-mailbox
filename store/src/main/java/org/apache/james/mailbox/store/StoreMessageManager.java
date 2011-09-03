@@ -41,6 +41,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageMetaData;
@@ -103,12 +104,15 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     private final MessageMapperFactory<Id> mapperFactory;
 
     private final MessageSearchIndex<Id> index;
+
+	private MailboxPathLocker locker;
     
-    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final Mailbox<Id> mailbox) throws MailboxException {
+    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final MailboxPathLocker locker, final Mailbox<Id> mailbox) throws MailboxException {
         this.mailbox = mailbox;
         this.dispatcher = dispatcher;
         this.mapperFactory = mapperFactory;
         this.index = index;
+        this.locker = locker;
     }
     
     
@@ -193,6 +197,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     public long appendMessage(final InputStream msgIn, Date internalDate,
             final MailboxSession mailboxSession,final boolean isRecent, final Flags flagsToBeSet)
     throws MailboxException {
+        
         File file = null;
         TeeInputStream tmpMsgIn = null;
         BodyOffsetInputStream bIn = null;
@@ -315,12 +320,19 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             final int size = (int) file.length();
 
             final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, contentIn, flags, propertyBuilder);
-            MessageMetaData data = appendMessageToStore(message, mailboxSession);
-                       
-            Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
-            uids.put(data.getUid(), data);
-            dispatcher.added(mailboxSession, uids, getMailboxEntity());
-            return data.getUid();
+            return locker.executeWithLock(mailboxSession, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<Long>() {
+
+                @Override
+                public Long execute() throws MailboxException {
+                    MessageMetaData data = appendMessageToStore(message, mailboxSession);
+                    
+                    Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
+                    uids.put(data.getUid(), data);
+                    dispatcher.added(mailboxSession, uids, getMailboxEntity());
+                    return data.getUid();
+                }
+            }, true);
+            
         } catch (IOException e) {
             throw new MailboxException("Unable to parse message", e);
         } catch (MimeException e) {

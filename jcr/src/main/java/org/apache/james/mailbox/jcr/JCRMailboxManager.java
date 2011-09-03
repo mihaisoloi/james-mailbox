@@ -50,7 +50,7 @@ public class JCRMailboxManager extends StoreMailboxManager<String> implements JC
     
     @Override
     protected StoreMessageManager<String> createMessageManager(Mailbox<String> mailboxEntity, MailboxSession session) throws MailboxException{
-        return new JCRMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), (JCRMailbox) mailboxEntity, logger, getDelimiter());
+        return new JCRMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), (JCRMailbox) mailboxEntity, logger, getDelimiter());
     }
 
     @Override

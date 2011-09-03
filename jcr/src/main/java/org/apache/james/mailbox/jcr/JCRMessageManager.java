@@ -24,6 +24,7 @@ import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
@@ -44,8 +45,8 @@ public class JCRMessageManager extends StoreMessageManager<String> {
     private final Logger log;
 
     public JCRMessageManager(MailboxSessionMapperFactory<String> mapperFactory, MessageSearchIndex<String> index, 
-            final MailboxEventDispatcher<String> dispatcher, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
-        super(mapperFactory, index, dispatcher, mailbox);
+            final MailboxEventDispatcher<String> dispatcher, final MailboxPathLocker locker, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox);
         this.log = log;
     }
 

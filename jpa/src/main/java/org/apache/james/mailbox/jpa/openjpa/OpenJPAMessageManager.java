@@ -25,6 +25,7 @@ import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 
 import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage;
@@ -50,13 +51,13 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     }
     
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index,
-            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox) throws MailboxException {
-        this(mapperFactory, index, dispatcher, mailbox, AdvancedFeature.None);
+            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox) throws MailboxException {
+        this(mapperFactory, index, dispatcher, locker,  mailbox, AdvancedFeature.None);
     }
 
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, 
-            MailboxEventDispatcher<Long> dispatcher, Mailbox<Long> mailbox, final AdvancedFeature f) throws MailboxException {
-        super(mapperFactory,  index, dispatcher, mailbox);
+            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox, final AdvancedFeature f) throws MailboxException {
+        super(mapperFactory,  index, dispatcher, locker, mailbox);
         this.feature = f;
     }
 
