@@ -115,7 +115,8 @@ public interface MessageManager {
     Map<Long, Flags> setFlags(Flags flags, boolean value, boolean replace, MessageRange set, MailboxSession mailboxSession) throws MailboxException;
 
     /**
-     * Appends a message to this mailbox.
+     * Appends a message to this mailbox. This method must return a higher UID as the last call in every case.
+     * 
      * 
      * @param internalDate
      *            the time of addition to be set, not null
