@@ -519,16 +519,21 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @param session
      * @throws MailboxException
      */
-    public List<MessageRange> copyTo(MessageRange set, StoreMessageManager<Id> toMailbox, MailboxSession session) throws MailboxException {
+    public List<MessageRange> copyTo(final MessageRange set, final StoreMessageManager<Id> toMailbox, final MailboxSession session) throws MailboxException {
         if (!toMailbox.isWriteable(session)) {
             throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),session.getPathDelimiter());
         }
         
         try {
-            Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
-            dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
+            return locker.executeWithLock(session, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
 
-            return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
+                @Override
+                public List<MessageRange> execute() throws MailboxException {
+                    Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
+                    dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
+                    return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
+                }
+            }, true);
         } catch (MailboxException e) {
             throw new MailboxException("Unable to parse message", e);
         }
