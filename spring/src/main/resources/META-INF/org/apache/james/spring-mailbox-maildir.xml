@@ -28,6 +28,11 @@
       WARNING: Maildir does only work on UNIX like operation systems
      -->
 
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name ="location" value="classpath:META-INF/org/apache/james/maildir.properties"/>
+    </bean>
+
     <bean id="maildir-mailboxmanager" class="org.apache.james.mailbox.store.StoreMailboxManager" init-method="init">
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
@@ -41,7 +46,7 @@
         <constructor-arg index="0" ref="maildirStore"/>
     </bean>
     <bean id="maildirStore" class="org.apache.james.mailbox.maildir.MaildirStore">
-        <constructor-arg index="0" value="file://var/store/maildir/"/>
+        <constructor-arg index="0" value="${maildir.folder}"/>
     </bean>
     <alias name="jvm-locker" alias="maildir-locker"/>
 
