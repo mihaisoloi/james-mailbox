@@ -25,7 +25,7 @@
 
 <body>
 
-  <section name="Responsibility">
+  <section name="Mailbox Store Responsibility">
     <p>The Mailbox Store is responsible for all "common/util" implementations that can be
        used by the various Mailbox implementations.</p>
   </section>
@@ -34,29 +34,41 @@
     <p>The main classes are the Mailbox and the Message. 
        A Message contains a list of Property and a list of Header.
        A Subscription has a mailbox and a user attribute.</p>
+<!-- 
+Image is no more in line with trunk
     <p><img src="images/uml/org-apache-james-mailbox-store-model.png"/></p>
+-->
   </section>
 
-  <section name="Managers">
+  <section name="Mailbox Store Managers">
   
     <subsection name="Store Mailbox Manager">
       <p>All public and protected methods that can be used by a Mailbox Manager implementations.</p>
       <p>You need to instanciate the StoreMailboxManager with a mailboxSessionMapperFactory,
          an authenticator, a uidProvider and a mailboxPathlocker.</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-store-mailboxmanager.png"/></p>
+-->
     </subsection>
 
     <subsection name="Store Message Manager">
       <p>All public and protected methods that can be used by a Message Manager implementations.</p>
       <p>You need to instanciate the StoreMessageManager with a messageSessionMapperFactory,
          a uidProvider, a mailboxEventDispatcher and a mailbox.</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-store-messagemanager.png"/></p>
+-->
     </subsection>
 
     <subsection name="Store Subscription Manager">
       <p>All public and protected methods that can be used by a Subscription Manager implementations.</p>
       <p>You need to instanciate the StoreSubscriptionManager with a subscriptionSessionMapperFactory.</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-store-subscriptionmanager.png"/></p>
+-->
     </subsection>
     
   </section>

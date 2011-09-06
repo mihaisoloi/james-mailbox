@@ -25,7 +25,7 @@
 
 <body>
 
-  <section name="Responsibility">
+  <section name="Mailbox API Responsibility">
     <p>This module contains the interfaces and exceptions to be used by the 
        mailbox clients. It represents the "external view" of the mailbox
        library client.</p>
@@ -49,23 +49,35 @@
     <subsection name="Mailbox Manager">
       <p>The Mailbox Manager is responsible for session creation, operations on mailbox (create, delete, search)
          and to return a Message Manager. It also allows to copy and list messages.</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-api-mailboxmanager.png"/></p>
+-->
     </subsection>
     
     <subsection name="Message Manager">
       <p>The Message Manager is responsible to create, delete message and its associated metadata (the uid and the flags).</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-api-messagemanager.png"/></p>
+ -->
     </subsection>
 
     <subsection name="Subscription Manager">
       <p>The Subscription Manager is responsible for the (un)subscription between a user and a mailbox.</p>
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-api-subscriptionmanager.png"/></p>
+-->
     </subsection>
 
   </section>
   
   <section name="Other Interfaces and Classes">
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-api-msc.png"/></p>
+-->
   </section>
 
 </body>

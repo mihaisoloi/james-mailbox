@@ -25,13 +25,16 @@
 
 <body>
 
-  <section name="Responsibility">
+  <section name="Mailbox Memory Responsibility">
   </section>
 
-  <section name="Classes">
+  <section name="Mailbox Memory Classes">
   
     <subsection name="Managers">
+<!-- 
+Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-memory-managers.png"/></p>
+-->
     </subsection>
     
   </section>
