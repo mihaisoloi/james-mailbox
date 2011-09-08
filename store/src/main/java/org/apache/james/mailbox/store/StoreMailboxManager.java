@@ -200,7 +200,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @param log
      * @return session
      */
-    private MailboxSession createSession(String userName, String password, Logger log, SessionType type) {
+    protected MailboxSession createSession(String userName, String password, Logger log, SessionType type) {
         return new SimpleMailboxSession(randomId(), userName, password, log, new ArrayList<Locale>(), getDelimiter(), type);
     }
 
