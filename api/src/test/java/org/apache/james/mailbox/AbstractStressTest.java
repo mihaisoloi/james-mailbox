@@ -59,10 +59,7 @@ public abstract class AbstractStressTest {
         final MailboxPath path = new MailboxPath(MailboxConstants.USER_NAMESPACE, "username", "INBOX");
         getMailboxManager().createMailbox(path, session);
         getMailboxManager().addListener(path, new MailboxListener() {
-			@Override
-			public boolean isClosed() {
-				return false;
-			}
+			
 			
 			@Override
 			public void event(Event event) {
