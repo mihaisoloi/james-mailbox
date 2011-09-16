@@ -20,7 +20,6 @@
 package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,20 +40,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
 
     private final Set<MailboxListener> listeners = new CopyOnWriteArraySet<MailboxListener>();
 
-    /**
-     * Remove all closed MailboxListener
-     */
-    private void pruneClosed() {
-        final Collection<MailboxListener> closedListeners = new ArrayList<MailboxListener>();
-        for (MailboxListener listener : listeners) {
-            if (listener.isClosed()) {
-                closedListeners.add(listener);
-            }
-        }
-        if (!closedListeners.isEmpty()) {
-            listeners.removeAll(closedListeners);
-        }
-    }
+    
 
     /**
      * Add a MailboxListener to this dispatcher
@@ -62,7 +48,6 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      * @param mailboxListener
      */
     public void addMailboxListener(MailboxListener mailboxListener) {
-        pruneClosed();
         listeners.add(mailboxListener);
     }
 
@@ -75,7 +60,6 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      * @param path
      */
     public void added(MailboxSession session, Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
-        pruneClosed();
         final AddedImpl added = new AddedImpl(session, mailbox, uids);
         event(added);
     }
@@ -119,11 +103,8 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
         List<MailboxListener> closed = new ArrayList<MailboxListener>();
         for (Iterator<MailboxListener> iter = listeners.iterator(); iter.hasNext();) {
             MailboxListener mailboxListener = iter.next();
-            if (mailboxListener.isClosed() == false) {
-                mailboxListener.event(event);
-            } else {
-                closed.add(mailboxListener);
-            }
+            mailboxListener.event(event);
+           
         }
         for (int i = 0; i < closed.size(); i++)
             listeners.remove(closed.get(i));

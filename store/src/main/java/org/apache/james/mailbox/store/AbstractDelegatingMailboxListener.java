@@ -45,16 +45,12 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         synchronized (listeners) {
             List<MailboxListener> mListeners = listeners.get(path);
             if (mListeners != null && mListeners.isEmpty() == false) {
-                List<MailboxListener> closedListener = new ArrayList<MailboxListener>();
                 
                 int sz = mListeners.size();
                 for (int i = 0; i < sz; i++) {
                     MailboxListener l = mListeners.get(i);
-                    if (l.isClosed()) {
-                        closedListener.add(l);
-                    } else {
-                        l.event(event);
-                    }
+                    l.event(event);
+                    
                 }
                 
                 if (event instanceof MailboxDeletion) {
@@ -68,12 +64,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
                         listeners.put(renamed.getNewPath(), l);
                     }
                 }
-                if (closedListener.isEmpty() == false) {
-                    mListeners.removeAll(closedListener);
-                    if (mListeners.isEmpty()) {
-                        listeners.remove(path);
-                    }
-                }
+                
             }  
             
         }
@@ -87,11 +78,8 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
                 int sz = globalListeners.size();
                 for (int i = 0; i < sz; i++) {
                     MailboxListener l = globalListeners.get(i);
-                    if (l.isClosed()) {
-                        closedListener.add(l);
-                    } else {
-                        l.event(event);
-                    }
+                    l.event(event);
+                    
                 }
                 
               
@@ -125,13 +113,13 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
         synchronized (listeners) {
             List<MailboxListener> mListeners = listeners.get(path);
-            if (mListeners == null) {
-                mListeners = new ArrayList<MailboxListener>();
-                listeners.put(path, mListeners);
+            if (mListeners != null) {
+                mListeners.remove(listener);
+                if (mListeners.isEmpty()) {
+                    listeners.remove(path);
+                }
             }
-            if (mListeners.contains(listener) == false) {
-                mListeners.add(listener);
-            }        
+                  
         }
     }
 
@@ -144,6 +132,38 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         List<MailboxListener> gListeners = getGlobalListeners();
         synchronized (gListeners) {
             gListeners.add(listener);
+        }
+    }
+
+    
+    
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#removeListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     */
+    public void removeListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException {
+        Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
+        synchronized (listeners) {
+            List<MailboxListener> mListeners = listeners.get(mailboxPath);
+            if (mListeners == null) {
+                mListeners = new ArrayList<MailboxListener>();
+                listeners.put(mailboxPath, mListeners);
+            }
+            if (mListeners.contains(listener) == false) {
+                mListeners.add(listener);
+            }        
+        }        
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#removeGlobalListener(org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     */
+    public void removeGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
+        List<MailboxListener> gListeners = getGlobalListeners();
+
+        synchronized (gListeners) {
+            gListeners.remove(listener);
         }
     }
 
@@ -160,4 +180,6 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
      * @return globalListeners
      */
     protected abstract List<MailboxListener> getGlobalListeners();
+    
+    
 }

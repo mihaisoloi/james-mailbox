@@ -550,4 +550,19 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     public void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
         delegatingListener.addGlobalListener(listener, session);
     }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#removeListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     */
+    public void removeListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException {
+        delegatingListener.removeListener(mailboxPath, listener, session);
+        
+    }
+
+    @Override
+    public void removeGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
+        delegatingListener.removeGlobalListener(listener, session);
+        
+    }
 }

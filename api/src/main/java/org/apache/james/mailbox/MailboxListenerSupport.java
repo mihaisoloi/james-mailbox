@@ -49,6 +49,16 @@ public interface MailboxListenerSupport {
     void addListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException;
 
     /**
+     * Remove the {@link MailboxListener}
+     * 
+     * @param mailboxPath
+     * @param listner
+     * @param session
+     * @throws MailboxException
+     */
+    void removeListener(MailboxPath mailboxPath, MailboxListener listner, MailboxSession session) throws MailboxException;
+    
+    /**
      * Add a {@link MailboxListener} which get fired for ever
      * {@link MailboxPath}
      * 
@@ -57,5 +67,16 @@ public interface MailboxListenerSupport {
      * @throws MailboxException
      */
     void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException;
+    
+    
+    /**
+     * Remove the {@link MailboxListener}
+     * 
+     * @param listner
+     * @param session
+     * @throws MailboxException
+     */
+    void removeGlobalListener(MailboxListener listner, MailboxSession session) throws MailboxException;
+
 
 }

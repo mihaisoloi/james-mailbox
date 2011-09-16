@@ -39,20 +39,6 @@ public interface MailboxListener {
     void event(final Event event);
 
     /**
-     * <p>
-     * Is this listener closed?<br>
-     * Closed listeners may be unsubscribed.
-     * </p>
-     * <p>
-     * Be aware that if the listener is marked as close it will not get any
-     * events passed anymore!
-     * </p>
-     * 
-     * @return true when closed, false when open
-     */
-    boolean isClosed();
-
-    /**
      * A mailbox event.
      */
     public class Event {
