@@ -326,7 +326,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
                 public Long execute() throws MailboxException {
                     MessageMetaData data = appendMessageToStore(message, mailboxSession);
                     
-                    Map<Long, MessageMetaData> uids = new HashMap<Long, MessageMetaData>();
+                    SortedMap<Long, MessageMetaData> uids = new TreeMap<Long, MessageMetaData>();
                     uids.put(data.getUid(), data);
                     dispatcher.added(mailboxSession, uids, getMailboxEntity());
                     return data.getUid();
@@ -529,7 +529,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
                 @Override
                 public List<MessageRange> execute() throws MailboxException {
-                    Map<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
+                    SortedMap<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
                     dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
                     return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
                 }
@@ -663,11 +663,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
-    private Map<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
+    private SortedMap<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         try {
             MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            final Map<Long, MessageMetaData> copiedMessages = new HashMap<Long, MessageMetaData>();
+            final SortedMap<Long, MessageMetaData> copiedMessages = new TreeMap<Long, MessageMetaData>();
             Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
             Iterator<MessageMetaData> ids = to.copy(originalRows, session);
             while (ids.hasNext()) {

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.james.mailbox.MailboxListener;
@@ -59,7 +60,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      * @param sessionId
      * @param path
      */
-    public void added(MailboxSession session, Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
+    public void added(MailboxSession session, SortedMap<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         final AddedImpl added = new AddedImpl(session, mailbox, uids);
         event(added);
     }
@@ -133,10 +134,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
 
     public final class AddedImpl extends MailboxListener.Added {
 
-        private Map<Long, MessageMetaData> added;
+        private SortedMap<Long, MessageMetaData> added;
         private final Mailbox<Id> mailbox;
 
-        public AddedImpl(final MailboxSession session, final Mailbox<Id> mailbox, final Map<Long, MessageMetaData> added) {
+        public AddedImpl(final MailboxSession session, final Mailbox<Id> mailbox, final SortedMap<Long, MessageMetaData> added) {
             super(session, new StoreMailboxPath<Id>(mailbox));
             this.added = added;
             this.mailbox = mailbox;
