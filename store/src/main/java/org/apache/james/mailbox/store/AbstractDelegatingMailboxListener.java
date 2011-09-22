@@ -113,13 +113,13 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
         synchronized (listeners) {
             List<MailboxListener> mListeners = listeners.get(path);
-            if (mListeners != null) {
-                mListeners.remove(listener);
-                if (mListeners.isEmpty()) {
-                    listeners.remove(path);
-                }
+            if (mListeners == null) {
+                mListeners = new ArrayList<MailboxListener>();
+                listeners.put(path, mListeners);
             }
-                  
+            if (mListeners.contains(listener) == false) {
+                mListeners.add(listener);
+            }        
         }
     }
 
@@ -145,12 +145,11 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
         synchronized (listeners) {
             List<MailboxListener> mListeners = listeners.get(mailboxPath);
-            if (mListeners == null) {
-                mListeners = new ArrayList<MailboxListener>();
-                listeners.put(mailboxPath, mListeners);
-            }
-            if (mListeners.contains(listener) == false) {
-                mListeners.add(listener);
+            if (mListeners != null) {
+                mListeners.remove(listener);
+                if (mListeners.isEmpty()) {
+                    listeners.remove(mailboxPath);
+                }
             }        
         }        
     }
