@@ -337,8 +337,6 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             throw new MailboxException("Unable to parse message", e);
         } catch (MimeException e) {
             throw new MailboxException("Unable to parse message", e);
-        } catch (MailboxException e) {
-            throw new MailboxException("Unable to parse message", e);
         } finally {
             IOUtils.closeQuietly(bIn);
             IOUtils.closeQuietly(tmpMsgIn);
@@ -524,19 +522,15 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
             throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),session.getPathDelimiter());
         }
         
-        try {
-            return locker.executeWithLock(session, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
+        return locker.executeWithLock(session, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
 
-                @Override
-                public List<MessageRange> execute() throws MailboxException {
-                    SortedMap<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
-                    dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
-                    return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
-                }
-            }, true);
-        } catch (MailboxException e) {
-            throw new MailboxException("Unable to parse message", e);
-        }
+        	@Override
+        	public List<MessageRange> execute() throws MailboxException {
+        		SortedMap<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
+        		dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
+        		return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
+        	}
+        }, true);
     }
     
     protected MessageMetaData appendMessageToStore(final Message<Id> message, MailboxSession session) throws MailboxException {
@@ -638,25 +632,21 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
 
     private Iterator<MessageMetaData> copy(final Iterator<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
-        try {
-            final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
-            final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
+    	final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
+    	final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            while(originalRows.hasNext()) {
-				final Message<Id> originalMessage = originalRows.next();
-				MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
-					public MessageMetaData run() throws MailboxException {
-					    return messageMapper.copy(getMailboxEntity(), originalMessage);
+    	while(originalRows.hasNext()) {
+    		final Message<Id> originalMessage = originalRows.next();
+    		MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
+    			public MessageMetaData run() throws MailboxException {
+    				return messageMapper.copy(getMailboxEntity(), originalMessage);
 
-					}
+    			}
 
-				});
-				copiedRows.add(data);
-            }
-            return copiedRows.iterator();
-        } catch (MailboxException e) {
-            throw new MailboxException("Unable to parse message", e);
-        }
+    		});
+    		copiedRows.add(data);
+    	}
+    	return copiedRows.iterator();
     }
     
     /*
@@ -664,22 +654,17 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
     private SortedMap<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
-        try {
-            MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
+    	MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-            final SortedMap<Long, MessageMetaData> copiedMessages = new TreeMap<Long, MessageMetaData>();
-            Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
-            Iterator<MessageMetaData> ids = to.copy(originalRows, session);
-            while (ids.hasNext()) {
-                MessageMetaData data = ids.next();
-                copiedMessages.put(data.getUid(), data);
-            }
-            
-            return copiedMessages;
+    	final SortedMap<Long, MessageMetaData> copiedMessages = new TreeMap<Long, MessageMetaData>();
+    	Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
+    	Iterator<MessageMetaData> ids = to.copy(originalRows, session);
+    	while (ids.hasNext()) {
+    		MessageMetaData data = ids.next();
+    		copiedMessages.put(data.getUid(), data);
+    	}
 
-        } catch (MailboxException e) {
-            throw new MailboxException("Unable to parse message", e);
-        }
+    	return copiedMessages;
     }
 
 
