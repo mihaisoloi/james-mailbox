@@ -51,7 +51,6 @@ import org.apache.james.mailbox.hbase.io.ChunkOutputStream;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper;
-import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -583,6 +582,8 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
     protected MessageMetaData save(Mailbox<UUID> mailbox, Message<UUID> message) throws MailboxException {
         HTable messages = null;
         HTable mailboxes = null;
+        BufferedInputStream in = null;
+        ChunkOutputStream out = null;
         try {
             //TODO: update the mailbox information about messages
             messages = new HTable(conf, MESSAGES_TABLE);
@@ -593,13 +594,14 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
             //save the message content
             //TODO: current implementation is crude.
 
-            ChunkOutputStream out = new ChunkOutputStream(conf,
-                    MESSAGES_TABLE, MESSAGE_DATA_BODY, messageRowKey(message), MAX_COLUMN_SIZE);
             int b;
-            BufferedInputStream in = new BufferedInputStream(message.getBodyContent());
+            out = new ChunkOutputStream(conf,
+                    MESSAGES_TABLE, MESSAGE_DATA_BODY, messageRowKey(message), MAX_COLUMN_SIZE);
+            in = new BufferedInputStream(message.getBodyContent());
             while ((b = in.read()) != -1) {
                 out.write(b);
             }
+            in.close();
             out.close();
             out = new ChunkOutputStream(conf,
                     MESSAGES_TABLE, MESSAGE_DATA_HEADERS, messageRowKey(message), MAX_COLUMN_SIZE);
@@ -607,6 +609,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
             while ((b = in.read()) != -1) {
                 out.write(b);
             }
+            in.close();
             out.close();
             // increase the message count for the current mailbox
             mailboxes.incrementColumnValue(mailboxRowKey(mailbox.getMailboxId()), MAILBOX_CF, MAILBOX_MESSAGE_COUNT, 1);
@@ -626,6 +629,20 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
                     mailboxes.close();
                 } catch (IOException ex) {
                     throw new MailboxException("Error closing table " + mailboxes, ex);
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    throw new MailboxException("Error closing Inputtream", ex);
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException ex) {
+                    throw new MailboxException("Error closing OutputStream", ex);
                 }
             }
         }

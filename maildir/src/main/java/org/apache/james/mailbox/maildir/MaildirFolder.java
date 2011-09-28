@@ -580,7 +580,7 @@ public class MaildirFolder {
         } finally {
             IOUtils.closeQuietly(pw);
             IOUtils.closeQuietly(fileReader);
-            IOUtils.closeQuietly(fileReader);
+            IOUtils.closeQuietly(reader);
         }               
         return uidMap;
     }
