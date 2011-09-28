@@ -33,7 +33,7 @@
         <constructor-arg index="0" ref="jpa-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
         <constructor-arg index="2" ref="jpa-locker"/>
-        <constructor-arg index="3" value="false"/>
+        <constructor-arg index="3" type="boolean" value="false"/>
     </bean>
     <bean id ="jpa-subscriptionManager" class="org.apache.james.mailbox.jpa.JPASubscriptionManager">
         <constructor-arg index="0" ref="jpa-sessionMapperFactory"/>
