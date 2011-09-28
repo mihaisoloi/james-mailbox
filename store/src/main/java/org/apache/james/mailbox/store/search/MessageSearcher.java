@@ -103,7 +103,7 @@ public class MessageSearcher {
      * 
      * @return search content, initially null
      */
-    public CharSequence getSearchContent() {
+    public synchronized CharSequence getSearchContent() {
         return searchContent;
     }
 
