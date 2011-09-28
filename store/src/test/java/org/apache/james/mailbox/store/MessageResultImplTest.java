@@ -23,15 +23,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
+
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.junit.Before;
 import org.junit.Test;
 
 public class MessageResultImplTest {
-    private MessageResultImpl nameA;
-    private MessageResultImpl nameACopy;
-    private MessageResultImpl nameB;
-    private MessageResultImpl nameC;
+    private MessageResultImpl msgResultA;
+    private MessageResultImpl msgResultACopy;
+    private MessageResultImpl msgResultB;
+    private MessageResultImpl msgResultC;
 
     /**
      * Initialize name instances
@@ -39,20 +41,22 @@ public class MessageResultImplTest {
     @Before
     public void initNames() throws Exception
     {
-        Message<Long> msgA = buildMessage(100);
-        Message<Long> msgB = buildMessage(100);
-        Message<Long> msgC = buildMessage(200);
+        Date dateAB = new Date();
+        Message<Long> msgA = buildMessage(100, dateAB);
+        Message<Long> msgB = buildMessage(100, dateAB);
+        Message<Long> msgC = buildMessage(200, new Date());
         
-        nameA = new MessageResultImpl(msgA);
-        nameACopy = new MessageResultImpl(msgA);
-        nameB = new MessageResultImpl(msgB);
-        nameC = new MessageResultImpl(msgC);
+        msgResultA = new MessageResultImpl(msgA);
+        msgResultACopy = new MessageResultImpl(msgA);
+        msgResultB = new MessageResultImpl(msgB);
+        msgResultC = new MessageResultImpl(msgC);
     }
 
 
-    private Message<Long> buildMessage(int uid) throws Exception {
+    private Message<Long> buildMessage(int uid, Date aDate) throws Exception {
         MessageBuilder builder = new MessageBuilder();
         builder.uid = uid;
+        builder.internalDate = aDate;
         return builder.build();
     }
 
@@ -60,90 +64,90 @@ public class MessageResultImplTest {
     @Test
     public void testEqualsNull() throws Exception
     {
-        assertFalse(nameA.equals(null));
+        assertFalse(msgResultA.equals(null));
     }
 
 
     @Test
     public void testEqualsReflexive() throws Exception
     {
-        assertEquals(nameA, nameA);
+        assertEquals(msgResultA, msgResultA);
     }
 
 
     @Test
     public void testCompareToReflexive() throws Exception
     {
-        assertEquals(0, nameA.compareTo(nameA));
+        assertEquals(0, msgResultA.compareTo(msgResultA));
     }
 
 
     @Test
     public void testHashCodeReflexive() throws Exception
     {
-        assertEquals(nameA.hashCode(), nameA.hashCode());
+        assertEquals(msgResultA.hashCode(), msgResultA.hashCode());
     }
 
 
     @Test
     public void testEqualsSymmetric() throws Exception
     {
-        assertEquals(nameA, nameACopy);
-        assertEquals(nameACopy, nameA);
+        assertEquals(msgResultA, msgResultACopy);
+        assertEquals(msgResultACopy, msgResultA);
     }
 
 
     @Test
     public void testHashCodeSymmetric() throws Exception
     {
-        assertEquals(nameA.hashCode(), nameACopy.hashCode());
-        assertEquals(nameACopy.hashCode(), nameA.hashCode());
+        assertEquals(msgResultA.hashCode(), msgResultACopy.hashCode());
+        assertEquals(msgResultACopy.hashCode(), msgResultA.hashCode());
     }
 
 
     @Test
     public void testEqualsTransitive() throws Exception
     {
-        assertEquals(nameA, nameACopy);
-        assertEquals(nameACopy, nameB);
-        assertEquals(nameA, nameB);
+        assertEquals(msgResultA, msgResultACopy);
+        assertEquals(msgResultACopy, msgResultB);
+        assertEquals(msgResultA, msgResultB);
     }
 
 
     @Test
     public void testCompareToTransitive() throws Exception
     {
-        assertEquals(0, nameA.compareTo(nameACopy));
-        assertEquals(0, nameACopy.compareTo(nameB));
-        assertEquals(0, nameA.compareTo(nameB));
+        assertEquals(0, msgResultA.compareTo(msgResultACopy));
+        assertEquals(0, msgResultACopy.compareTo(msgResultB));
+        assertEquals(0, msgResultA.compareTo(msgResultB));
     }
 
 
     @Test
     public void testHashCodeTransitive() throws Exception
     {
-        assertEquals(nameA.hashCode(), nameACopy.hashCode());
-        assertEquals(nameACopy.hashCode(), nameB.hashCode());
-        assertEquals(nameA.hashCode(), nameB.hashCode());
+        assertEquals(msgResultA.hashCode(), msgResultACopy.hashCode());
+        assertEquals(msgResultACopy.hashCode(), msgResultB.hashCode());
+        assertEquals(msgResultA.hashCode(), msgResultB.hashCode());
     }
 
 
     @Test
     public void testNotEqualDiffValue() throws Exception
     {
-        assertFalse(nameA.equals(nameC));
-        assertFalse(nameC.equals(nameA));
+        assertFalse(msgResultA.equals(msgResultC));
+        assertFalse(msgResultC.equals(msgResultA));
     }
 
     @Test
     public void testShouldReturnPositiveWhenFirstGreaterThanSecond()
             throws Exception {
-        assertTrue( nameC.compareTo(nameB) > 0);
+        assertTrue( msgResultC.compareTo(msgResultB) > 0);
     }
 
     @Test
     public void testShouldReturnNegativeWhenFirstLessThanSecond()
             throws Exception {
-        assertTrue( nameB.compareTo(nameC) < 0);
+        assertTrue( msgResultB.compareTo(msgResultC) < 0);
     }
 }
