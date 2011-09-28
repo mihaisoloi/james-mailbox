@@ -116,7 +116,31 @@ public class MessageResultImpl implements MessageResult {
         }
 
     }
-   
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return 37 * 17 + (int)getUid();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof MessageResultImpl) {
+            MessageResultImpl that = (MessageResultImpl)obj;
+            return this.headers.equals(that.headers) && this.message.equals(that.message);
+//            return this.message.equals(that.message);
+        }
+        return false;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -387,6 +411,23 @@ public class MessageResultImpl implements MessageResult {
         public HeadersImpl(Message<?> msg) {
             this.msg = msg;
         }
+
+        @Override
+        public int hashCode() {
+            return 39 * 19 + message.hashCode();
+        }
+
+        @Override
+        public boolean equals (Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof HeadersImpl) {
+                return msg.equals(((HeadersImpl)obj).msg);
+            }
+            return false;
+        }
+
         @Override
         public InputStream getInputStream() throws IOException {
             return msg.getHeaderContent();
