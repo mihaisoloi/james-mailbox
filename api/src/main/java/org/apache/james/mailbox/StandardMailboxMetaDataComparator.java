@@ -18,12 +18,15 @@
  ****************************************************************/
 package org.apache.james.mailbox;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * Orders by name with INBOX first.
  */
-public class StandardMailboxMetaDataComparator implements Comparator<MailboxMetaData> {
+public class StandardMailboxMetaDataComparator implements Comparator<MailboxMetaData>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Static comparison.
