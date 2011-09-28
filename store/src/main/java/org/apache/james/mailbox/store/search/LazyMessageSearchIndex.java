@@ -70,7 +70,6 @@ public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> 
      * complete
      * 
      */
-    @Override
     public Iterator<Long> search(final MailboxSession session, final Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
         Id id = mailbox.getMailboxId();
         
