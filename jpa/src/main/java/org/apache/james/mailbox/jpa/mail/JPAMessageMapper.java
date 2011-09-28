@@ -130,25 +130,24 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
             final long to = set.getUidTo();
             final Type type = set.getType();
 
-			switch (type) {
-			default:
-			case ALL:
-				results = findMessagesInMailbox(mailbox, max);
-				break;
-			case FROM:
-				results = findMessagesInMailboxAfterUID(mailbox, from, max);
-				break;
-			case ONE:
-				results = findMessagesInMailboxWithUID(mailbox, from);
-				break;
-			case RANGE:
-				results = findMessagesInMailboxBetweenUIDs(mailbox, from, to,
-						max);
-				break;
-			}
+            switch (type) {
+            default:
+            case ALL:
+                results = findMessagesInMailbox(mailbox, max);
+                break;
+            case FROM:
+                results = findMessagesInMailboxAfterUID(mailbox, from, max);
+                break;
+            case ONE:
+                results = findMessagesInMailboxWithUID(mailbox, from);
+                break;
+            case RANGE:
+                results = findMessagesInMailboxBetweenUIDs(mailbox, from, to, max);
+                break;
+            }
 
-			return results.iterator();
-               
+            return results.iterator();
+
         } catch (PersistenceException e) {
             throw new MailboxException("Search of MessageRange " + set + " failed in mailbox " + mailbox, e);
         }
