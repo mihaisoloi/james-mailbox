@@ -168,11 +168,15 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     private void writeSubscriptions(File mailboxFolder, final Set<String> subscriptions) throws IOException {
         List<String> sortedSubscriptions = new ArrayList<String>(subscriptions);
         Collections.sort(sortedSubscriptions);
-        if (!mailboxFolder.exists()) mailboxFolder.mkdirs();
+        if (!mailboxFolder.exists())
+            if (!mailboxFolder.mkdirs())
+                throw new IOException("Could not create folder " + mailboxFolder);
         
         File subscriptionFile = new File(mailboxFolder, FILE_SUBSCRIPTION);
         if (!subscriptionFile.exists())
-            subscriptionFile.createNewFile();
+            if (!subscriptionFile.createNewFile())
+                throw new IOException("Could not create file " + subscriptionFile);
+                
         FileWriter fileWriter = new FileWriter(subscriptionFile);
         PrintWriter writer = new PrintWriter(fileWriter);
         for (String subscription : sortedSubscriptions)

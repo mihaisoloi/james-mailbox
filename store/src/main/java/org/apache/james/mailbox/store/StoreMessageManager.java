@@ -345,7 +345,10 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
             // delete the temporary file if one was specified
             if (file != null) {
-                file.delete();
+                if (!file.delete()) {
+                    // Don't throw an IOException. The message could be appended and the temporary file
+                    // will be deleted hopefully some day
+                }
             }
         }
 

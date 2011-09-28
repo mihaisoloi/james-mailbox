@@ -75,8 +75,12 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                     FileUtils.deleteDirectory(new File(folder, MaildirFolder.CUR));
                     FileUtils.deleteDirectory(new File(folder, MaildirFolder.NEW));
                     FileUtils.deleteDirectory(new File(folder, MaildirFolder.TMP));
-                    new File(folder, MaildirFolder.UIDLIST_FILE).delete();
-                    new File(folder, MaildirFolder.VALIDITY_FILE).delete();
+                    File uidListFile = new File(folder, MaildirFolder.UIDLIST_FILE);
+                    File validityFile = new File(folder, MaildirFolder.VALIDITY_FILE);
+                    if (!uidListFile.delete())
+                        throw new IOException("Could not delete file " + uidListFile);
+                    if (!validityFile.delete())
+                        throw new IOException("Could not delete file " + validityFile);
                 }
                 else {
                     // We simply delete all the folder for non INBOX mailboxes.
@@ -152,22 +156,36 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                 MaildirFolder originalFolder = maildirStore.createMaildirFolder(originalMailbox);
                 // renaming the INBOX means to move its contents to the new folder 
                 if (originalMailbox.getName().equals(MailboxConstants.INBOX)) {
-                    File inboxFolder = originalFolder.getRootFile();
-                    File newFolder = folder.getRootFile();
-                    if (!newFolder.mkdirs())
-                        throw new MailboxException("Failed to saveMailbox " + mailbox);
-                    originalFolder.getCurFolder().renameTo(folder.getCurFolder());
-                    originalFolder.getNewFolder().renameTo(folder.getNewFolder());
-                    originalFolder.getTmpFolder().renameTo(folder.getTmpFolder());
-                    (new File(inboxFolder, MaildirFolder.UIDLIST_FILE)).renameTo(
-                            (new File(newFolder, MaildirFolder.UIDLIST_FILE)));
-                    (new File(inboxFolder, MaildirFolder.VALIDITY_FILE)).renameTo(
-                            (new File(newFolder, MaildirFolder.VALIDITY_FILE)));
-                    // recreate the INBOX folders, uidvalidity and uidlist will
-                    // automatically be recreated later
-                    originalFolder.getCurFolder().mkdir();
-                    originalFolder.getNewFolder().mkdir();
-                    originalFolder.getTmpFolder().mkdir();
+                    try {
+                        File inboxFolder = originalFolder.getRootFile();
+                        File newFolder = folder.getRootFile();
+                        if (!newFolder.mkdirs())
+                            throw new IOException("Could not create folder " + newFolder);
+                        if (!originalFolder.getCurFolder().renameTo(folder.getCurFolder()))
+                            throw new IOException("Could not rename folder " + originalFolder.getCurFolder() + " to " + folder.getCurFolder());
+                        if (!originalFolder.getNewFolder().renameTo(folder.getNewFolder()))
+                            throw new IOException("Could not rename folder " + originalFolder.getNewFolder() + " to " + folder.getNewFolder());
+                        if (!originalFolder.getTmpFolder().renameTo(folder.getTmpFolder()))
+                            throw new IOException("Could not rename folder " + originalFolder.getTmpFolder() + " to " + folder.getTmpFolder());
+                        File oldUidListFile = new File(inboxFolder, MaildirFolder.UIDLIST_FILE);
+                        File newUidListFile = new File(newFolder, MaildirFolder.UIDLIST_FILE);
+                        if (!oldUidListFile.renameTo(newUidListFile))
+                            throw new IOException("Could not rename file " + oldUidListFile + " to " + newUidListFile);
+                        File oldValidityFile = new File(inboxFolder, MaildirFolder.VALIDITY_FILE);
+                        File newValidityFile = new File(newFolder, MaildirFolder.VALIDITY_FILE);
+                        if (!oldValidityFile.renameTo(newValidityFile))
+                            throw new IOException("Could not rename file " + oldValidityFile + " to " + newValidityFile);
+                        // recreate the INBOX folders, uidvalidity and uidlist will
+                        // automatically be recreated later
+                        if (!originalFolder.getCurFolder().mkdir())
+                            throw new IOException("Could not create folder " + originalFolder.getCurFolder());
+                        if (!originalFolder.getNewFolder().mkdir())
+                            throw new IOException("Could not create folder " + originalFolder.getNewFolder());
+                        if (!originalFolder.getTmpFolder().mkdir())
+                            throw new IOException("Could not create folder " + originalFolder.getTmpFolder());
+                    } catch (IOException e) {
+                        throw new MailboxException("Failed to save Mailbox " + mailbox, e);
+                    }
                 }
                 else {
                     if (!originalFolder.getRootFile().renameTo(folder.getRootFile()))

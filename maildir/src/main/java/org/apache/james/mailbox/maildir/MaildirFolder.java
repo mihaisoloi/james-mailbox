@@ -256,7 +256,8 @@ public class MaildirFolder {
      */
     private void saveUidValidity(long uidValidity) throws IOException {
         File validityFile = new File(rootFolder, VALIDITY_FILE);
-        validityFile.createNewFile();
+        if (!validityFile.createNewFile())
+            throw new IOException("Could not create file " + validityFile);
         FileOutputStream fos = new FileOutputStream(validityFile);
         try {
             fos.write(String.valueOf(uidValidity).getBytes());
@@ -432,7 +433,8 @@ public class MaildirFolder {
 
                 try {
                     if (!uidList.isFile()) {
-                        uidList.createNewFile();
+                        if (!uidList.createNewFile())
+                            throw new IOException("Could not create file " + uidList);
                         String[] curFiles = curFolder.list();
                         String[] newFiles = newFolder.list();
                         messageCount = curFiles.length + newFiles.length;
@@ -511,7 +513,8 @@ public class MaildirFolder {
         File uidList = uidFile;
         PrintWriter pw = null;
         try {
-            uidList.createNewFile();
+            if (!uidList.createNewFile())
+                throw new IOException("Could not create file " + uidList);
             lastUid = 0;
             String[] curFiles = curFolder.list();
             String[] newFiles = newFolder.list();
@@ -727,7 +730,8 @@ public class MaildirFolder {
                     }
                     else {
                         // create the file
-                        uidList.createNewFile();
+                        if (!uidList.createNewFile())
+                            throw new IOException("Could not create file " + uidList);
                         String[] curFiles = curFolder.list();
                         String[] newFiles = newFolder.list();
                         messageCount = curFiles.length + newFiles.length;

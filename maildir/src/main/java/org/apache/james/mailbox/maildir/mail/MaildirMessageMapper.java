@@ -295,7 +295,8 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         FileOutputStream fos = null;
         InputStream input = null;
         try {
-            messageFile.createNewFile();
+            if (!messageFile.createNewFile())
+                throw new IOException("Could not create file " + messageFile);
             fos = new FileOutputStream(messageFile);
             input = message.getFullContent();
             byte[] b = new byte[BUF_SIZE];
