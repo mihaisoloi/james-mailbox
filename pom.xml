@@ -22,6 +22,7 @@
     <artifactId>james-project</artifactId>
     <groupId>org.apache.james</groupId>
     <version>1.6</version>
+    <relativePath></relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -771,6 +772,30 @@
       END GERONIMO ANNOTATION
      -->
 
+      <!-- 
+        START HBASE/HADOOP
+      -->
+      <dependency>
+          <groupId>org.apache.hbase</groupId>
+          <artifactId>hbase</artifactId>
+          <version>${version.hbase}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.hbase</groupId>
+          <artifactId>hbase</artifactId>
+          <version>${version.hbase}</version>
+          <type>test-jar</type>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-test</artifactId>
+          <version>${version.hadoop}</version>
+          <scope>test</scope>
+      </dependency>
+      <!-- 
+        END HBASE/HADOOP
+      -->
     </dependencies>
   </dependencyManagement>
 
@@ -804,6 +829,8 @@
     <version.jmock>2.5.1</version.jmock>
     <version.lucene>3.1.0</version.lucene>
     <version.jackrabbit>2.2.0</version.jackrabbit>
+    <version.hbase>0.90.3</version.hbase>
+    <version.hadoop>0.20-append-r1057313</version.hadoop>
     
     <target.jdk>1.6</target.jdk>
   </properties>
