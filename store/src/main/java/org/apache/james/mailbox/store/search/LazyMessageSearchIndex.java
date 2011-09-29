@@ -44,7 +44,7 @@ import org.apache.james.mailbox.store.mail.model.Message;
 public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> {
 
     private ListeningMessageSearchIndex<Id> index;
-    private final ConcurrentHashMap<Id, Boolean> indexed = new ConcurrentHashMap<Id, Boolean>();
+    private final ConcurrentHashMap<Id, Object> indexed = new ConcurrentHashMap<Id, Object>();
     
     
     public LazyMessageSearchIndex(ListeningMessageSearchIndex<Id> index) {
@@ -74,10 +74,10 @@ public class LazyMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id> 
     public Iterator<Long> search(final MailboxSession session, final Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
         Id id = mailbox.getMailboxId();
         
-        Boolean done = indexed.get(id);
+        Object done = indexed.get(id);
         if (done == null) {
-            done = new Boolean(true);
-            Boolean oldDone = indexed.putIfAbsent(id, done);
+            done = new Object();
+            Object oldDone = indexed.putIfAbsent(id, done);
             if (oldDone != null) {
                 done = oldDone;
             }
