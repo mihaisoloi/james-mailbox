@@ -230,6 +230,32 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
             return (int) diff == 0 ? 0 : diff > 0 ? 1 : -1;
         }
 
+        @Override
+        public int hashCode() {
+            int ret = 19 * 37;
+            ret = ret * 37 + exception.hashCode();
+            ret = ret * 37 + internalDate.hashCode();
+            ret = ret * 37 + (int)size;
+            ret = ret * 37 + (int)uid;
+            ret = ret * 37 + flags.hashCode();
+            ret = ret * 37 + (int)modSeq;
+            return ret;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof UnloadedMessageResult) {
+                @SuppressWarnings("unchecked")
+                UnloadedMessageResult<Id> that = (UnloadedMessageResult<Id>)obj;
+                return (size == that.size) && (uid == that.uid) && (modSeq == that.modSeq) && exception.equals(that.exception)
+                        && internalDate.equals(that.internalDate) && flags.equals(that.flags);
+            }
+            return false;
+        }
+
         public Content getFullContent(MimePath path) throws MailboxException {
             throw exception;
         }
