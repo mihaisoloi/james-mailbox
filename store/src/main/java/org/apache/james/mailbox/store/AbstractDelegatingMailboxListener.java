@@ -163,8 +163,10 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
     public void removeGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
         List<MailboxListener> gListeners = getGlobalListeners();
 
-        synchronized (gListeners) {
-            gListeners.remove(listener);
+        if (gListeners != null) {
+            synchronized (gListeners) {
+                gListeners.remove(listener);
+            }
         }
     }
 
