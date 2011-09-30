@@ -83,7 +83,7 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
                     count = c;
                 }
             }
-            return QuotaImpl.quota(max, count.get());
+            return QuotaImpl.quota(max, count != null ? count.get() : 0);
         } else {
             return QuotaImpl.unlimited();
         }
