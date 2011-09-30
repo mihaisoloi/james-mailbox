@@ -71,20 +71,22 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         
         
         List<MailboxListener> globalListeners = getGlobalListeners();
-        synchronized (globalListeners) {
-            if (globalListeners != null && globalListeners.isEmpty() == false) {
-                List<MailboxListener> closedListener = new ArrayList<MailboxListener>();
-                
-                int sz = globalListeners.size();
-                for (int i = 0; i < sz; i++) {
-                    MailboxListener l = globalListeners.get(i);
-                    l.event(event);
+        if (globalListeners != null) {
+            synchronized (globalListeners) {
+                if (globalListeners.isEmpty() == false) {
+                    List<MailboxListener> closedListener = new ArrayList<MailboxListener>();
                     
-                }
-                
-              
-                if (closedListener.isEmpty() == false) {
-                    globalListeners.removeAll(closedListener);
+                    int sz = globalListeners.size();
+                    for (int i = 0; i < sz; i++) {
+                        MailboxListener l = globalListeners.get(i);
+                        l.event(event);
+                        
+                    }
+                    
+                  
+                    if (closedListener.isEmpty() == false) {
+                        globalListeners.removeAll(closedListener);
+                    }
                 }
             }
         }
