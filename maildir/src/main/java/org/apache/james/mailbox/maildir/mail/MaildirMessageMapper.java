@@ -54,7 +54,7 @@ import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
 public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
 
     private final MaildirStore maildirStore;
-    private final int BUF_SIZE = 2048;
+    private final static int BUF_SIZE = 2048;
 
     public MaildirMessageMapper(MailboxSession session, MaildirStore  maildirStore) {
         super(session, maildirStore, maildirStore);
