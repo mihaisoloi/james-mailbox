@@ -656,6 +656,8 @@ public class MaildirFolder {
      * @throws IOException
      */
     private void readUidListHeader(String line) throws IOException {
+        if (line == null)
+            throw new IOException("Header entry in uid-file is null");
         int gap1 = line.indexOf(" ");
         if (gap1 == -1) {
             // there must be some issues in the file if no gap can be found
