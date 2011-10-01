@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -522,10 +521,10 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      */
     public List<MessageRange> copyTo(final MessageRange set, final StoreMessageManager<Id> toMailbox, final MailboxSession session) throws MailboxException {
         if (!toMailbox.isWriteable(session)) {
-            throw new ReadOnlyException(new StoreMailboxPath<Id>(getMailboxEntity()),session.getPathDelimiter());
+            throw new ReadOnlyException(new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()),session.getPathDelimiter());
         }
         
-        return locker.executeWithLock(session, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
+        return locker.executeWithLock(session, new StoreMailboxPath<Id>(toMailbox.getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
 
             @Override
             public List<MessageRange> execute() throws MailboxException {
