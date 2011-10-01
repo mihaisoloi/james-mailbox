@@ -113,15 +113,20 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
      */
     public void addListener(MailboxPath path, MailboxListener listener, MailboxSession session) throws MailboxException {
         Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
-        synchronized (listeners) {
-            List<MailboxListener> mListeners = listeners.get(path);
-            if (mListeners == null) {
-                mListeners = new ArrayList<MailboxListener>();
-                listeners.put(path, mListeners);
+        
+        if (listeners != null) {
+            synchronized (listeners) {
+                List<MailboxListener> mListeners = listeners.get(path);
+                if (mListeners == null) {
+                    mListeners = new ArrayList<MailboxListener>();
+                    listeners.put(path, mListeners);
+                }
+                if (mListeners.contains(listener) == false) {
+                    mListeners.add(listener);
+                }        
             }
-            if (mListeners.contains(listener) == false) {
-                mListeners.add(listener);
-            }        
+        } else {
+            throw new MailboxException("Cannot add MailboxListener to null list");
         }
     }
 
@@ -132,8 +137,13 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
      */
     public void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
         List<MailboxListener> gListeners = getGlobalListeners();
-        synchronized (gListeners) {
-            gListeners.add(listener);
+        
+        if (gListeners != null) {
+            synchronized (gListeners) {
+                gListeners.add(listener);
+            }
+        } else {
+            throw new MailboxException("Cannot add MailboxListener to null list");
         }
     }
 
@@ -145,15 +155,20 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
      */
     public void removeListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException {
         Map<MailboxPath, List<MailboxListener>> listeners = getListeners();
-        synchronized (listeners) {
-            List<MailboxListener> mListeners = listeners.get(mailboxPath);
-            if (mListeners != null) {
-                mListeners.remove(listener);
-                if (mListeners.isEmpty()) {
-                    listeners.remove(mailboxPath);
+        
+        if (listeners != null) {
+            synchronized (listeners) {
+                List<MailboxListener> mListeners = listeners.get(mailboxPath);
+                if (mListeners != null) {
+                    mListeners.remove(listener);
+                    if (mListeners.isEmpty()) {
+                        listeners.remove(mailboxPath);
+                    }
                 }
-            }        
-        }        
+            }
+        } else {
+            throw new MailboxException("Cannot remove MailboxListener from null list");
+        }
     }
 
     /*
@@ -167,6 +182,8 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
             synchronized (gListeners) {
                 gListeners.remove(listener);
             }
+        } else {
+            throw new MailboxException("Cannot remove MailboxListener from null list");
         }
     }
 
