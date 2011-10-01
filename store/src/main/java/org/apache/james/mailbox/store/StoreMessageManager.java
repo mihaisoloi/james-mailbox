@@ -527,12 +527,12 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         
         return locker.executeWithLock(session, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<List<MessageRange>>() {
 
-        	@Override
-        	public List<MessageRange> execute() throws MailboxException {
-        		SortedMap<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
-        		dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
-        		return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
-        	}
+            @Override
+            public List<MessageRange> execute() throws MailboxException {
+                SortedMap<Long, MessageMetaData> copiedUids = copy(set, toMailbox, session);
+                dispatcher.added(session, copiedUids, toMailbox.getMailboxEntity());
+                return MessageRange.toRanges(new ArrayList<Long>(copiedUids.keySet()));
+            }
         }, true);
     }
     
