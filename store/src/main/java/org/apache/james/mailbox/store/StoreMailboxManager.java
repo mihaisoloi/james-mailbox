@@ -21,6 +21,7 @@ package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -73,6 +74,9 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     private final Authenticator authenticator;
     private final static Random RANDOM = new Random();
     
+    private int copyBatchSize = 0;
+    
+    
 
     private MailboxPathLocker locker;
 
@@ -89,6 +93,10 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker());
     }
    
+    public void setCopyBatchSize(int copyBatchSize) {
+        this.copyBatchSize = copyBatchSize;
+    }
+    
     /**
      * Init the {@link MailboxManager}
      * 
@@ -441,7 +449,17 @@ public class StoreMailboxManager<Id> implements MailboxManager {
 	public List<MessageRange> copyMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException {
         StoreMessageManager<Id> toMailbox = (StoreMessageManager<Id>) getMailbox(to, session);
         StoreMessageManager<Id> fromMailbox = (StoreMessageManager<Id>) getMailbox(from, session);
-        return fromMailbox.copyTo(set, toMailbox, session);
+        
+        if (copyBatchSize > 0) {
+            List<MessageRange> copiedRanges = new ArrayList<MessageRange>();
+            Iterator<MessageRange> ranges = set.split(copyBatchSize).iterator();
+            while(ranges.hasNext()) {
+                copiedRanges.addAll(fromMailbox.copyTo(ranges.next(), toMailbox, session));
+            }
+            return copiedRanges;
+        } else {
+            return fromMailbox.copyTo(set, toMailbox, session);
+        }
     }
 
     /*
