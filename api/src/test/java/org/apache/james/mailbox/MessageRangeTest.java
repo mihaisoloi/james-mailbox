@@ -57,4 +57,37 @@ public class MessageRangeTest {
         assertEquals(from, range.getUidFrom());
         assertEquals(to, range.getUidTo());
     }
+    
+    @Test
+    public void testSplitOne() {
+        MessageRange one = MessageRange.one(1);
+        List<MessageRange> ranges = one.split(2);
+        assertEquals(1, ranges.size());
+        checkRange(1, 1, ranges.get(0));
+        assertEquals(MessageRange.Type.ONE, ranges.get(0).getType());
+    }
+    
+    @Test
+    public void testSplitFrom() {
+        MessageRange from = MessageRange.from(1);
+        List<MessageRange> ranges = from.split(2);
+        assertEquals(1, ranges.size());
+        checkRange(1, MessageRange.NOT_A_UID, ranges.get(0));
+        assertEquals(MessageRange.Type.FROM, ranges.get(0).getType());
+    }
+    
+    @Test
+    public void testSplitRange() {
+        MessageRange range = MessageRange.range(1,10);
+        List<MessageRange> ranges = range.split(3);
+        assertEquals(4, ranges.size());
+        checkRange(1, 3, ranges.get(0));
+        assertEquals(MessageRange.Type.RANGE, ranges.get(0).getType());
+        checkRange(4, 6, ranges.get(1));
+        assertEquals(MessageRange.Type.RANGE, ranges.get(1).getType());
+        checkRange(7, 9, ranges.get(2));
+        assertEquals(MessageRange.Type.RANGE, ranges.get(2).getType());
+        checkRange(10, 10, ranges.get(3));
+        assertEquals(MessageRange.Type.ONE, ranges.get(3).getType());
+    }
 }

@@ -43,7 +43,7 @@ public class MessageRange implements Iterable<Long>{
         RANGE
     }
 
-    private static final int NOT_A_UID = -1;
+    public static final int NOT_A_UID = -1;
 
 
     /**
@@ -260,5 +260,41 @@ public class MessageRange implements Iterable<Long>{
             throw new java.lang.UnsupportedOperationException("Read-Only");
         }
         
+    }
+    
+    
+    /**
+     * Tries to split the given {@link MessageRange} to a {@link List} of {@link MessageRange}'s which 
+     * select only a max amount of items. This only work for {@link MessageRange}'s with {@link Type} of 
+     * {@link Type#RANGE}.
+     * 
+     * @param range
+     * @param maxItems
+     * @return ranges
+     */
+    public List<MessageRange> split( int maxItems) {
+        List<MessageRange> ranges = new ArrayList<MessageRange>();
+        if (getType() == Type.RANGE) {
+            long from = getUidFrom();
+            long to = getUidTo();
+            long realTo = to;
+            while(from <= realTo) {
+                if (from + maxItems  -1 < realTo) {
+                    to = from + maxItems -1;
+                } else {
+                    to = realTo;
+                }
+                if (from == to) {
+                    ranges.add(MessageRange.one(from));
+                } else {
+                    ranges.add(MessageRange.range(from, to));
+                }
+                
+                from = to + 1;
+            }
+        } else {
+            ranges.add(this);
+        }
+        return ranges;
     }
 }
