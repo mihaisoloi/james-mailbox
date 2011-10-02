@@ -19,6 +19,7 @@
 
 package org.apache.james.mailbox;
 
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -41,7 +42,8 @@ public interface MailboxListener {
     /**
      * A mailbox event.
      */
-    public class Event {
+    @SuppressWarnings("serial")
+    public abstract class Event implements Serializable {
         private final MailboxSession session;
         private final MailboxPath path;
 
@@ -75,6 +77,11 @@ public interface MailboxListener {
      */
     public class MailboxDeletion extends Event {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public MailboxDeletion(final MailboxSession session, MailboxPath path) {
             super(session, path);
         }
@@ -84,6 +91,11 @@ public interface MailboxListener {
      * Indicates that a mailbox has been Added.
      */
     public class MailboxAdded extends Event {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public MailboxAdded(final MailboxSession session, MailboxPath path) {
             super(session, path);
         }
@@ -93,6 +105,11 @@ public interface MailboxListener {
      * Indicates that a mailbox has been renamed.
      */
     public abstract class MailboxRenamed extends Event {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public MailboxRenamed(final MailboxSession session, MailboxPath path) {
             super(session, path);
         }
@@ -110,6 +127,11 @@ public interface MailboxListener {
      */
     public abstract class MessageEvent extends Event {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public MessageEvent(MailboxSession session, MailboxPath path) {
             super(session, path);
         }
@@ -123,6 +145,11 @@ public interface MailboxListener {
     }
 
     public abstract class Expunged extends MessageEvent {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
 
         public Expunged(MailboxSession session, MailboxPath path) {
             super(session, path);
@@ -141,6 +168,11 @@ public interface MailboxListener {
      */
     public abstract class FlagsUpdated extends MessageEvent {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public FlagsUpdated(MailboxSession session, MailboxPath path) {
             super(session, path);
         }
@@ -152,6 +184,11 @@ public interface MailboxListener {
      * A mailbox event related to added message
      */
     public abstract class Added extends MessageEvent {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
 
         public Added(MailboxSession session, MailboxPath path) {
             super(session, path);
