@@ -30,20 +30,6 @@
     <name>Apache James HBase Mailbox</name>
     <description>Apache James Mailbox implementation over HBase</description>
     
-    <repositories>
-        <repository>
-            <id>hadoop-non-releases</id>
-            <name>Hadoop non-releases</name>
-            <url>http://people.apache.org/~rawson/repo/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>${javax.mail.groupId}</groupId>
@@ -111,7 +97,7 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
-            <version>0.20-append-r1056497</version>
+            <version>${version.hadoop}</version>
         </dependency>
         <dependency>
             <groupId>jaxme</groupId>

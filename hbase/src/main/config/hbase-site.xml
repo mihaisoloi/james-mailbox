@@ -28,7 +28,7 @@
 -->
     <property>
         <name>hbase.rootdir</name>
-        <value>file:///home/ieugen/contracte/gsoc2011/hbaseROOT/hbase</value>
+        <value>hdfs://localhost:9000/hbase</value>
     </property>
 	
     <property>
