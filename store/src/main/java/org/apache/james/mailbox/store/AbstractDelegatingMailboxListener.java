@@ -29,11 +29,8 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 
 public abstract class AbstractDelegatingMailboxListener implements MailboxListener, MailboxListenerSupport{
-
-    private boolean isClosed;
     
     protected AbstractDelegatingMailboxListener() {
-    	isClosed = false;
     }
     
     /**
@@ -92,21 +89,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         }
         
     }
-
-    /**
-     * Close the listener
-     */
-    public synchronized void close() {
-        isClosed = true;
-    }
     
-    /**
-     * Check if closed
-     */
-    public synchronized boolean isClosed() {
-        return isClosed;
-    }
-
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.MailboxListenerSupport#addListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
