@@ -103,7 +103,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
     /**
      * Check if closed
      */
-    public boolean isClosed() {
+    public synchronized boolean isClosed() {
         return isClosed;
     }
 
