@@ -101,14 +101,11 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      * .MailboxListener.Event)
      */
     public void event(Event event) {
-        List<MailboxListener> closed = new ArrayList<MailboxListener>();
         for (Iterator<MailboxListener> iter = listeners.iterator(); iter.hasNext();) {
             MailboxListener mailboxListener = iter.next();
             mailboxListener.event(event);
            
         }
-        for (int i = 0; i < closed.size(); i++)
-            listeners.remove(closed.get(i));
     }
 
     /**
@@ -134,6 +131,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
 
     public final class AddedImpl extends MailboxListener.Added {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
         private SortedMap<Long, MessageMetaData> added;
         private final Mailbox<Id> mailbox;
 
@@ -165,7 +166,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
     }
 
     public final class ExpungedImpl extends MailboxListener.Expunged {
-
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
         private final Map<Long, MessageMetaData> uids;
         private final Mailbox<Id> mailbox;
 
@@ -196,7 +200,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
     }
 
     public final class FlagsUpdatedImpl extends MailboxListener.FlagsUpdated {
-
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
         private final List<Long> uids;
 
         private final Mailbox<Id> mailbox;
@@ -233,7 +240,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
     }
 
     public final class MailboxDeletionImpl extends MailboxDeletion {
-
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
         private final Mailbox<Id> mailbox;
 
         public MailboxDeletionImpl(MailboxSession session, Mailbox<Id> mailbox) {
@@ -249,7 +259,11 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
     }
     
     public final class MailboxAddedImpl extends MailboxAdded {
-
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+        
         private final Mailbox<Id> mailbox;
 
         public MailboxAddedImpl(MailboxSession session, Mailbox<Id> mailbox) {
@@ -288,6 +302,11 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
     }
 
     public final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+        
         private final MailboxPath newPath;
         private final Mailbox<Id> newMailbox;
 
