@@ -632,43 +632,41 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return index.search(mailboxSession, getMailboxEntity(), query);
     }
 
-
     private Iterator<MessageMetaData> copy(final Iterator<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
-    	final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
-    	final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
+        final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
+        final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-    	while(originalRows.hasNext()) {
-    		final Message<Id> originalMessage = originalRows.next();
-    		MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
-    			public MessageMetaData run() throws MailboxException {
-    				return messageMapper.copy(getMailboxEntity(), originalMessage);
+        while (originalRows.hasNext()) {
+            final Message<Id> originalMessage = originalRows.next();
+            MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
+                public MessageMetaData run() throws MailboxException {
+                    return messageMapper.copy(getMailboxEntity(), originalMessage);
 
-    			}
+                }
 
-    		});
-    		copiedRows.add(data);
-    	}
-    	return copiedRows.iterator();
+            });
+            copiedRows.add(data);
+        }
+        return copiedRows.iterator();
     }
-    
+
     /*
      * (non-Javadoc)
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
     private SortedMap<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
-    	MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
+        MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
 
-    	final SortedMap<Long, MessageMetaData> copiedMessages = new TreeMap<Long, MessageMetaData>();
-    	Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
-    	Iterator<MessageMetaData> ids = to.copy(originalRows, session);
-    	while (ids.hasNext()) {
-    		MessageMetaData data = ids.next();
-    		copiedMessages.put(data.getUid(), data);
-    	}
+        final SortedMap<Long, MessageMetaData> copiedMessages = new TreeMap<Long, MessageMetaData>();
+        Iterator<Message<Id>> originalRows = messageMapper.findInMailbox(mailbox, set, FetchType.Full, -1);
+        Iterator<MessageMetaData> ids = to.copy(originalRows, session);
+        while (ids.hasNext()) {
+            MessageMetaData data = ids.next();
+            copiedMessages.put(data.getUid(), data);
+        }
 
-    	return copiedMessages;
+        return copiedMessages;
     }
-
 
 
     /**
