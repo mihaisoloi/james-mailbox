@@ -30,6 +30,20 @@
     <name>Apache James HBase Mailbox</name>
     <description>Apache James Mailbox implementation over HBase</description>
     
+    <repositories>
+        <repository>
+            <id>hadoop-non-releases</id>
+            <name>Hadoop non-releases</name>
+            <url>http://people.apache.org/~rawson/repo/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>${javax.mail.groupId}</groupId>
