@@ -106,9 +106,9 @@ public class MailboxEventDispatcherFlagsTest {
     
     @Before
     public void setUp() throws Exception {
-        dispatcher = new MailboxEventDispatcher<Long>();
         collector = new EventCollector();
-        dispatcher.addMailboxListener(collector);
+
+        dispatcher = new MailboxEventDispatcher<Long>(collector);
         result = mockery.mock(MessageResult.class);
         mockery.checking(new Expectations() {{
             allowing(result).getUid();will(returnValue(23L));

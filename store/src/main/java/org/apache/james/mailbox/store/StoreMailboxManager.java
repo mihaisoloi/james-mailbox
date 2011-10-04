@@ -67,7 +67,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     
     public static final char SQL_WILDCARD_CHAR = '%';
     
-    private final MailboxEventDispatcher<Id> dispatcher = new MailboxEventDispatcher<Id>();
+    private MailboxEventDispatcher<Id> dispatcher;
     private AbstractDelegatingMailboxListener delegatingListener = null;  
     private final MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory;    
     
@@ -105,7 +105,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     @SuppressWarnings("rawtypes")
     public void init() throws MailboxException{
         // The dispatcher need to have the delegating listener added
-        dispatcher.addMailboxListener(getDelegationListener());
+        dispatcher = new MailboxEventDispatcher<Id>(getDelegationListener());
         
         if (index == null) {
             index = new SimpleMessageSearchIndex<Id>(mailboxSessionMapperFactory);
@@ -169,7 +169,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      */
     public void setDelegatingMailboxListener(AbstractDelegatingMailboxListener delegatingListener) {
         this.delegatingListener = delegatingListener;
-        dispatcher.addMailboxListener(this.delegatingListener);
+        dispatcher = new MailboxEventDispatcher<Id>(getDelegationListener());
     }
     
     /**

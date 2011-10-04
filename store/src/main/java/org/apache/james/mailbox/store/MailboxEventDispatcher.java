@@ -20,14 +20,12 @@
 package org.apache.james.mailbox.store;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.james.mailbox.MailboxListener;
+import org.apache.james.mailbox.MailboxListener.MailboxAdded;
+import org.apache.james.mailbox.MailboxListener.MailboxDeletion;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageMetaData;
@@ -37,20 +35,15 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 /**
  * Helper class to dispatch {@link Event}'s to registerend MailboxListener
  */
-public class MailboxEventDispatcher<Id> implements MailboxListener {
-
-    private final Set<MailboxListener> listeners = new CopyOnWriteArraySet<MailboxListener>();
+public class MailboxEventDispatcher<Id> {
 
     
+    private final MailboxListener listener;
 
-    /**
-     * Add a MailboxListener to this dispatcher
-     * 
-     * @param mailboxListener
-     */
-    public void addMailboxListener(MailboxListener mailboxListener) {
-        listeners.add(mailboxListener);
+    public MailboxEventDispatcher(MailboxListener listener) {
+        this.listener = listener;
     }
+    
 
     /**
      * Should get called when a new message was added to a Mailbox. All
@@ -62,7 +55,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      */
     public void added(MailboxSession session, SortedMap<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         final AddedImpl added = new AddedImpl(session, mailbox, uids);
-        event(added);
+        listener.event(added);
     }
 
     /**
@@ -75,7 +68,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      */
     public void expunged(final MailboxSession session,  Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         final ExpungedImpl expunged = new ExpungedImpl(session, mailbox, uids);
-        event(expunged);
+        listener.event(expunged);
     }
 
     /**
@@ -90,32 +83,10 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      */
     public void flagsUpdated(MailboxSession session, final List<Long> uids, final Mailbox<Id> mailbox, final List<UpdatedFlags> uflags) {
         final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, mailbox, uids, uflags);
-        event(flags);
+        listener.event(flags);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.james.mailbox.MailboxListener#event(org.apache.james.mailbox
-     * .MailboxListener.Event)
-     */
-    public void event(Event event) {
-        for (Iterator<MailboxListener> iter = listeners.iterator(); iter.hasNext();) {
-            MailboxListener mailboxListener = iter.next();
-            mailboxListener.event(event);
-           
-        }
-    }
 
-    /**
-     * Return the the count of all registered MailboxListener
-     * 
-     * @return count
-     */
-    public int count() {
-        return listeners.size();
-    }
 
     /**
      * Should get called when a Mailbox was renamed. All registered
@@ -126,7 +97,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      * @param sessionId
      */
     public void mailboxRenamed(MailboxSession session, MailboxPath from, Mailbox<Id> to) {
-        event(new MailboxRenamedEventImpl(session, from, to));
+        listener.event(new MailboxRenamedEventImpl(session, from, to));
     }
 
     public final class AddedImpl extends MailboxListener.Added {
@@ -286,7 +257,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      */
     public void mailboxDeleted(MailboxSession session, Mailbox<Id> mailbox) {
         final MailboxDeletion event = new MailboxDeletionImpl(session, mailbox);
-        event(event);
+        listener.event(event);
     }
 
     /**
@@ -298,7 +269,7 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
      */
     public void mailboxAdded(MailboxSession session, Mailbox<Id> mailbox) {
         final MailboxAdded event = new MailboxAddedImpl(session, mailbox);
-        event(event);
+        listener.event(event);
     }
 
     public final class MailboxRenamedEventImpl extends MailboxListener.MailboxRenamed {
@@ -329,14 +300,5 @@ public class MailboxEventDispatcher<Id> implements MailboxListener {
         public Mailbox<Id> getNewMailbox() {
             return newMailbox;
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.james.mailbox.MailboxListener#isClosed()
-     */
-    public boolean isClosed() {
-        return false;
     }
 }

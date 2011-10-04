@@ -94,8 +94,15 @@ public class MailboxCopierTest {
      */
     @Test
     public void testMailboxCopy() throws MailboxException, IOException {
-        
+    	 if (srcMemMailboxManager instanceof StoreMailboxManager) {
+             ((StoreMailboxManager) srcMemMailboxManager).init();
+         }
+         if (dstMemMailboxManager instanceof StoreMailboxManager) {
+             ((StoreMailboxManager) dstMemMailboxManager).init();
+         }
+    
         srcMemMailboxManager = new MockMailboxManager(srcMemMailboxManager).getMockMailboxManager();
+       
         assertMailboxManagerSize(srcMemMailboxManager, 1);
         
         mailboxCopier.copyMailboxes(srcMemMailboxManager, dstMemMailboxManager);

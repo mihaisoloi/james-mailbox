@@ -371,17 +371,6 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
     
     /**
-     * Add the {@link MailboxListener}
-     * 
-     * @param listener
-     * @throws MailboxException
-     */
-    public void addListener(MailboxListener listener) throws MailboxException {
-        dispatcher.addMailboxListener(listener);
-    }
-    
-
-    /**
      * This mailbox is writable
      */
     public boolean isWriteable(MailboxSession session) {
