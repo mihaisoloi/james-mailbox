@@ -38,6 +38,7 @@ import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxQuery;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MailboxSessionIdGenerator;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.RequestAware;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
@@ -82,6 +83,8 @@ public class StoreMailboxManager<Id> implements MailboxManager {
 
     private MessageSearchIndex<Id> index;
 
+    private MailboxSessionIdGenerator idGenerator;
+
     
     public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
         this.authenticator = authenticator;
@@ -93,6 +96,10 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker());
     }
    
+    public void setMailboxSessionIdGenerator(MailboxSessionIdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
+    
     public void setCopyBatchSize(int copyBatchSize) {
         this.copyBatchSize = copyBatchSize;
     }
@@ -112,6 +119,10 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         }
         if (index instanceof ListeningMessageSearchIndex) {
             addGlobalListener((ListeningMessageSearchIndex) index, null);
+        }
+        
+        if (idGenerator == null) {
+            idGenerator = new RandomMailboxSessionIdGenerator();
         }
     }
     
@@ -216,7 +227,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @return id
      */
     protected long randomId() {
-        return RANDOM.nextLong();
+        return idGenerator.nextId();
     }
     
     /*
