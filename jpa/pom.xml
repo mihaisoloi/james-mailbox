@@ -94,6 +94,7 @@
         <version>1.1</version>
         <configuration>
           <includes>org/apache/james/mailbox/jpa/*/model/**/*.class</includes>
+          <excludes>org/apache/james/mailbox/jpa/mail/model/openjpa/EncryptDecryptHelper.class</excludes>
           <addDefaultConstructor>true</addDefaultConstructor>
           <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
           <toolProperties>
