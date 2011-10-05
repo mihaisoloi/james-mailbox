@@ -19,22 +19,24 @@
 
 package org.apache.james.mailbox.store;
 
-import java.util.Random;
-
+import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MailboxSessionIdGenerator;
 
-
-/**
- * {@link MailboxSessionIdGenerator} which use a {@link Random} to generate the next Id to use
- * 
- *
- */
-public class RandomMailboxSessionIdGenerator extends AbstractMailboxSessionIdGenerator {
-    private final static Random RANDOM = new Random();
+public abstract class AbstractMailboxSessionIdGenerator implements MailboxSessionIdGenerator {
 
     @Override
-    protected long generateNextId() {
-        return RANDOM.nextLong();
+    public long nextId() {
+        long id;
+        while ((id = generateNextId()) == MailboxSession.SYSTEM_SESSION_ID) {
+            // loop till the id is not 0L
+            //
+            // See also MAILBOX-149
+        }
+        return id;
     }
+    
+    
+    protected abstract long generateNextId();
+    
 
 }
