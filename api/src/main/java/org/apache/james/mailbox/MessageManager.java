@@ -142,13 +142,12 @@ public interface MessageManager {
      * @param set
      * @param fetchGroup
      *            data to fetch
-     * @param the batchSize to use to fetch the Messages in batches. The implementation may just ignore if it can't optimize the call with batches
      * @param mailboxSession
      *            not null
      * @return MessageResult with the fields defined by FetchGroup
      * @throws MailboxException
      */
-    MessageResultIterator getMessages(MessageRange set, FetchGroup fetchGroup, int batchSize, MailboxSession mailboxSession) throws MailboxException;
+    MessageResultIterator getMessages(MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException;
 
 
     /**

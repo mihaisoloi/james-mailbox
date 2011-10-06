@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 public class StoreMailboxManager<Id> implements MailboxManager {
     
     public static final char SQL_WILDCARD_CHAR = '%';
+    public static final int DEFAULT_FETCH_BATCH_SIZE = 200;
     
     private MailboxEventDispatcher<Id> dispatcher;
     private AbstractDelegatingMailboxListener delegatingListener = null;  
@@ -84,6 +85,8 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     private MessageSearchIndex<Id> index;
 
     private MailboxSessionIdGenerator idGenerator;
+
+    private int fetchBatchSize = DEFAULT_FETCH_BATCH_SIZE;
 
     
     public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
@@ -103,6 +106,11 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     public void setCopyBatchSize(int copyBatchSize) {
         this.copyBatchSize = copyBatchSize;
     }
+    
+    public void setFetchBatchSize(int fetchBatchSize) {
+        this.fetchBatchSize = fetchBatchSize;
+    }
+    
     
     /**
      * Init the {@link MailboxManager}
@@ -311,6 +319,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
             session.getLog().debug("Loaded mailbox " + mailboxPath);
             
             StoreMessageManager<Id>  m = createMessageManager(mailboxRow, session);
+            m.setFetchBatchSize(fetchBatchSize);
             return m;
         }
     }

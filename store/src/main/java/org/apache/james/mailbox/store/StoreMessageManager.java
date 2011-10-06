@@ -105,6 +105,8 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     private final MessageSearchIndex<Id> index;
 
 	private MailboxPathLocker locker;
+
+    private int fetchBatchSize;
     
     public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final MailboxPathLocker locker, final Mailbox<Id> mailbox) throws MailboxException {
         this.mailbox = mailbox;
@@ -114,6 +116,9 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         this.locker = locker;
     }
     
+    public void setFetchBatchSize(int fetchBatchSize) {
+        this.fetchBatchSize = fetchBatchSize;
+    }
     
     
     /**
@@ -550,11 +555,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
     /*
      * (non-Javadoc)
-     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, int, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
      */
-    public MessageResultIterator getMessages(final MessageRange set, FetchGroup fetchGroup, int batchSize, MailboxSession mailboxSession) throws MailboxException {
+    public MessageResultIterator getMessages(final MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException {
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
-        return new StoreMessageResultIterator<Id>(messageMapper, mailbox, set, batchSize, fetchGroup);
+        return new StoreMessageResultIterator<Id>(messageMapper, mailbox, set, fetchBatchSize, fetchGroup);
     }
 
  
