@@ -168,7 +168,8 @@ public class MessageRange implements Iterable<Long>{
     /**
      * Converts the given {@link Collection} of uids to a {@link List} of {@link MessageRange} instances
      * 
-     * @param uids
+     * @param uidsCol
+     *          collection of uids to convert
      * @return ranges
      */
     public static List<MessageRange> toRanges(Collection<Long> uidsCol) {
@@ -268,7 +269,6 @@ public class MessageRange implements Iterable<Long>{
      * select only a max amount of items. This only work for {@link MessageRange}'s with {@link Type} of 
      * {@link Type#RANGE}.
      * 
-     * @param range
      * @param maxItems
      * @return ranges
      */

@@ -43,7 +43,7 @@ public interface SubscriptionManager extends RequestAware {
     /**
      * Finds all subscriptions for the user in the session.
      * 
-     * @param user
+     * @param session
      *            not null
      * @return not null
      * @throws SubscriptionException

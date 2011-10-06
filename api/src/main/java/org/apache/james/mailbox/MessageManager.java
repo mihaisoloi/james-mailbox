@@ -89,7 +89,7 @@ public interface MessageManager {
      *            not null
      * @param mailboxSession
      *            not null
-     * @return
+     * @return uid iterator
      * @throws MailboxException
      *             if anything went wrong
      */

@@ -268,12 +268,11 @@ public class SearchQuery {
      * Creates a filter matching messages with internal date after the given
      * date.
      * 
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion internalDateAfter(Date date, DateResolution res) {
@@ -283,12 +282,11 @@ public class SearchQuery {
     /**
      * Creates a filter matching messages with internal date on the given date.
      * 
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion internalDateOn(Date date, DateResolution res) {
@@ -299,12 +297,11 @@ public class SearchQuery {
      * Creates a filter matching messages with internal date before the given
      * date.
      * 
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion internalDateBefore(Date date, DateResolution res) {
@@ -318,12 +315,11 @@ public class SearchQuery {
      * 
      * @param headerName
      *            name of the header whose value will be compared, not null
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion headerDateAfter(String headerName, Date date, DateResolution res) {
@@ -337,12 +333,11 @@ public class SearchQuery {
      * 
      * @param headerName
      *            name of the header whose value will be compared, not null
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion headerDateOn(String headerName, Date date, DateResolution res) {
@@ -356,12 +351,11 @@ public class SearchQuery {
      * 
      * @param headerName
      *            name of the header whose value will be compared, not null
-     * @param day
-     *            one based day of the month
-     * @param month
-     *            one based month of the year
-     * @param year
-     *            year
+     * @param date
+     *            given date
+     * @param res
+     *            the date resolution, either {@link DateResolution#Year}, {@link DateResolution#Month}, {@link DateResolution#Day},
+     *            {@link DateResolution#Hour}, {@link DateResolution#Minute} or {@link DateResolution#Second}
      * @return <code>Criterion</code>, not null
      */
     public static final Criterion headerDateBefore(String headerName, Date date, DateResolution res) {
@@ -1923,8 +1917,8 @@ public class SearchQuery {
         /**
          * Gets the operator type.
          * 
-         * @return the type, either {@link #BEFORE}, {@link #AFTER} or
-         *         {@link ON}
+         * @return the type, either {@link DateComparator#BEFORE}, {@link DateComparator#AFTER} or
+         *         {@link DateComparator#ON}
          */
         public DateComparator getType() {
             return type;

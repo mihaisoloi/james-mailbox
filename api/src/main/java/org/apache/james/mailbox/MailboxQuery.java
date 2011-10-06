@@ -52,11 +52,8 @@ public final class MailboxQuery {
      *            base reference name, not null
      * @param expression
      *            mailbox match expression, not null
-     * @param freeWildcard
-     *            matches any series of charaters
-     * @param localWildcard
-     *            matches any sequence of characters up to the next hierarchy
-     *            delimiter
+     * @param pathDelimiter
+     *            path delimiter to use
      */
     public MailboxQuery(final MailboxPath base, final String expression, final char pathDelimiter) {
         super();
@@ -117,8 +114,6 @@ public final class MailboxQuery {
      * 
      * @param name
      *            name to be matched
-     * @param hierarchyDelimiter
-     *            mailbox hierarchy delimiter
      * @return true if the given name matches this expression, false otherwise
      */
     public final boolean isExpressionMatch(String name) {

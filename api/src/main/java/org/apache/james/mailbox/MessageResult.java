@@ -85,11 +85,11 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
          * 
          * @return bitwise description
          * @see #MINIMAL
-         * @see #MIME_MESSAGE
-         * @see #KEY
+         * @see #MIME_DESCRIPTOR
          * @see #HEADERS
          * @see #FULL_CONTENT
          * @see #BODY_CONTENT
+         * @see #MIME_HEADERS
          * @see #MIME_CONTENT
          */
         int content();
@@ -114,11 +114,12 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
              * 
              * @return bitwise descripion
              * @see #MINIMAL
-             * @see #MIME_MESSAGE
-             * @see #KEY
+             * @see #MIME_DESCRIPTOR
              * @see #HEADERS
              * @see #FULL_CONTENT
              * @see #BODY_CONTENT
+             * @see #MIME_HEADERS
+             * @see #MIME_CONTENT
              */
             int content();
 
@@ -139,7 +140,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @param path
      *            describing the part's position within a multipart message
      * @return <code>Header</code> <code>Iterator</code>, or null when
-     *         {@link FetchGroup#mimeHeaders()} does not include the index and
+     *         {@link FetchGroup#content()} does not include the index and
      *         when the mime part cannot be found
      * @throws MailboxException
      */
@@ -151,7 +152,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @param path
      *            describing the part's position within a multipart message
      * @return <code>Header</code> <code>Iterator</code>, or null when
-     *         {@link FetchGroup#mimeHeaders()} does not include the index and
+     *         {@link FetchGroup#content()} does not include the index and
      *         when the mime part cannot be found
      * @throws MailboxException
      */
@@ -196,7 +197,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @param path
      *            describes the part
      * @return <code>Content</code>, or null when
-     *         {@link FetchGroup#mimeBodies()} did not been include the given
+     *         {@link FetchGroup#content()} did not been include the given
      *         index and when the mime part cannot be found
      * @throws MailboxException
      */
@@ -219,7 +220,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @param path
      *            describes the part
      * @return <code>Content</code>, or null when
-     *         {@link FetchGroup#mimeBodies()} did not been include the given
+     *         {@link FetchGroup#content()} did not been include the given
      *         index and when the mime part cannot be found
      * @throws MailboxException
      */
@@ -231,7 +232,7 @@ public interface MessageResult extends Comparable<MessageResult>, MessageMetaDat
      * @param path
      *            describes the part
      * @return <code>Content</code>, or null when
-     *         {@link FetchGroup#mimeBodies()} did not been include the given
+     *         {@link FetchGroup#content()} did not been include the given
      *         index and when the mime part cannot be found
      * @throws MailboxException
      */

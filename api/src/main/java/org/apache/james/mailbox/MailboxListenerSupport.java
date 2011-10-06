@@ -33,10 +33,6 @@ public interface MailboxListenerSupport {
      * listening and do some caching and even postpone persistence until
      * everyone has removed itself.
      * </p>
-     * <p>
-     * Listeners should return true from {@link MailboxListener#isClosed()} when
-     * they are ready to be removed.
-     * </p>
      * 
      * @param mailboxPath
      *            not null

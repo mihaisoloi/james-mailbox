@@ -58,8 +58,6 @@ public interface MailboxPathLocker {
         /**
          * Execute code block
          * 
-         * @param session
-         * @param path
          * @throws MailboxException
          */
         public T execute() throws MailboxException;

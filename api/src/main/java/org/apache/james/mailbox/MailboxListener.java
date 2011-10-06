@@ -25,9 +25,7 @@ import java.util.List;
 
 /**
  * Listens to <code>Mailbox</code> events.<br>
- * Note that listeners may be removed asynchronously.<br>
- * When {@link #isClosed()} returns true, the listener may be removed from the
- * mailbox by the dispatcher.
+ * Note that listeners may be removed asynchronously.
  */
 public interface MailboxListener {
 

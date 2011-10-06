@@ -150,7 +150,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
     /**
      * Does the given mailbox exist?
      * 
-     * @param mailboxName
+     * @param mailboxPath
      *            not null
      * @param session
      *            the context for this call, not null
@@ -163,7 +163,7 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
     /**
      * Creates a new system session.<br>
      * A system session is intended to be used for programmatic access.<br>
-     * Use {@link #login(String, String, Log)} when accessing this API from a
+     * Use {@link #login(String, String, Logger)} when accessing this API from a
      * protocol.
      * 
      * @param userName

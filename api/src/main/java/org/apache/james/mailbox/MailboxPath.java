@@ -113,7 +113,7 @@ public class MailboxPath {
      * </pre>
      * 
      * @param delimiter
-     * @return
+     * @return list of hierarchy levels
      */
     public List<MailboxPath> getHierarchyLevels(char delimiter) {
         ArrayList<MailboxPath> levels = new ArrayList<MailboxPath>();
