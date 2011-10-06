@@ -67,81 +67,77 @@ public class MailboxMetaData implements MessageManager.MetaData {
     }
 
     /**
-     * @see {@link Mailbox.MetaData#countRecent()()}
+     * @see MailboxMetaData#countRecent()
      */
     public long countRecent() {
         return recentCount;
     }
 
     /**
-     * @see {@link Mailbox.MetaData#getPermanentFlags()()}
+     * @see MailboxMetaData#getPermanentFlags()
      */
     public Flags getPermanentFlags() {
         return premanentFlags;
     }
 
     /**
-     * @see {@link MessageManager.MetaData#getRecent()}
+     * @see MailboxMetaData#getRecent()
      */
     public List<Long> getRecent() {
         return recent;
     }
 
     /**
-     * @see {@link MessageManager.MetaData#getUidValidity()}
+     * @see MailboxMetaData#getUidValidity()
      */
     public long getUidValidity() {
         return uidValidity;
     }
 
     /**
-     * @see {@link MessageManager.MetaData#getUidNext()}
+     * @see MailboxMetaData#getUidNext()
      */
     public long getUidNext() {
         return nextUid;
     }
 
     /**
-     * @see {@link MessageManager.MetaData#getMessageCount()}
+     * @see MailboxMetaData#getMessageCount()
      */
     public long getMessageCount() {
         return messageCount;
     }
 
     /**
-     * @see {@link MessageManager.MetaData#getUnseenCount()}
+     * @see MailboxMetaData#getUnseenCount()
      */
     public long getUnseenCount() {
         return unseenCount;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox.MetaData#getFirstUnseen()
+    /**
+     * @see MailboxMetaData#getFirstUnseen()
      */
     public Long getFirstUnseen() {
         return firstUnseen;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox.MetaData#isWriteable()
+    /**
+     * @see MailboxMetaData#isWriteable()
      */
     public boolean isWriteable() {
         return writeable;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MessageManager.MetaData#getHighestModSeq()
+    /**
+     * @see MailboxMetaData#getHighestModSeq()
      */
     public long getHighestModSeq() {
         return highestModSeq;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MessageManager.MetaData#isModSeqPermanent()
+    /**
+     * @see MailboxMetaData#isModSeqPermanent()
      */
     public boolean isModSeqPermanent() {
         return modSeqPermanent;

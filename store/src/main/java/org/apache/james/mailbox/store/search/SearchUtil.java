@@ -101,7 +101,7 @@ public class SearchUtil {
     /**
      * Parse the headerValue and delegate to {@link #getDisplayAddress(Mailbox)}
      * 
-     * If an {@link ParseException} was thrown, an empty String is returned
+     * If no display address is found an empty String is returned
      * 
      * @param headerValue
      * @return display
@@ -143,7 +143,7 @@ public class SearchUtil {
     /**
      * Parse the headerValue and delegate to {@link #getMailboxAddress(Mailbox)}
      * 
-     * If an {@link ParseException} was thrown, an empty String is returned
+     * If no mailbox name is found an empty String is returned
      * 
      * @param headerValue
      * @return mailbox

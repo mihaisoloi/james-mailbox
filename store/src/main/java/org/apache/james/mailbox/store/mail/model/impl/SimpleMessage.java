@@ -220,24 +220,21 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         return bodyStartOctet;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
      */
     public long getModSeq() {
         return modSeq;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
      */
     public void setModSeq(long modSeq) {
         this.modSeq = modSeq;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#setUid(long)
      */
     public void setUid(long uid) {

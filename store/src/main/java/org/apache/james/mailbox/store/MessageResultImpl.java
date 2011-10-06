@@ -61,45 +61,35 @@ public class MessageResultImpl implements MessageResult {
         
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getUid()
      */
     public long getUid() {
         return message.getUid();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getInternalDate()
      */
     public Date getInternalDate() {
         return message.getInternalDate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getFlags()
      */
     public Flags getFlags() {
         return message.createFlags();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getSize()
      */
     public long getSize() {
         return message.getFullContentOctets();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(MessageResult that) {
@@ -141,9 +131,7 @@ public class MessageResultImpl implements MessageResult {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getFullContent()
      */
     public final Content getFullContent() throws IOException {
@@ -153,9 +141,7 @@ public class MessageResultImpl implements MessageResult {
         return fullContent;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getBody()
      */
     public final Content getBody() throws IOException {
@@ -179,12 +165,9 @@ public class MessageResultImpl implements MessageResult {
         return retValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.MessageResult#getBody(org.apache.james.mailbox
-     * .MessageResult.MimePath)
+     * org.apache.james.mailbox.MessageResult#getBody(org.apache.james.mailbox.MessageResult.MimePath)
      */
     public Content getBody(MimePath path) throws MailboxException {
         final Content result;
@@ -197,12 +180,9 @@ public class MessageResultImpl implements MessageResult {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.MessageResult#getMimeBody(org.apache.james.mailbox
-     * .MessageResult.MimePath)
+     * org.apache.james.mailbox.MessageResult#getMimeBody(org.apache.james.mailbox.MessageResult.MimePath)
      */
     public Content getMimeBody(MimePath path) throws MailboxException {
         final Content result;
@@ -215,12 +195,9 @@ public class MessageResultImpl implements MessageResult {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.MessageResult#getFullContent(org.apache.james
-     * .mailbox.MessageResult.MimePath)
+     * org.apache.james.mailbox.MessageResult#getFullContent(org.apache.james.mailbox.MessageResult.MimePath)
      */
     public Content getFullContent(MimePath path) throws MailboxException {
         final Content result;
@@ -233,12 +210,9 @@ public class MessageResultImpl implements MessageResult {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.MessageResult#iterateHeaders(org.apache.james
-     * .mailbox.MessageResult.MimePath)
+     * org.apache.james.mailbox.MessageResult#iterateHeaders(org.apache.james.mailbox.MessageResult.MimePath)
      */
     public Iterator<Header> iterateHeaders(MimePath path) throws MailboxException {
         final Iterator<Header> result;
@@ -251,12 +225,9 @@ public class MessageResultImpl implements MessageResult {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.MessageResult#iterateMimeHeaders(org.apache.
-     * james.mailbox.MessageResult.MimePath)
+     * org.apache.james.mailbox.MessageResult#iterateMimeHeaders(org.apache.james.mailbox.MessageResult.MimePath)
      */
     public Iterator<Header> iterateMimeHeaders(MimePath path) throws MailboxException {
         final Iterator<Header> result;
@@ -362,9 +333,7 @@ public class MessageResultImpl implements MessageResult {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MessageResult#getMimeDescriptor()
      */
     public MimeDescriptor getMimeDescriptor() throws MailboxException {
@@ -387,8 +356,7 @@ public class MessageResultImpl implements MessageResult {
         return mimeDescriptor;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MessageMetaData#getModSeq()
      */
     public long getModSeq() {

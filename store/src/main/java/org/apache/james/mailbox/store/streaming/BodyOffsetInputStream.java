@@ -40,8 +40,7 @@ public class BodyOffsetInputStream extends InputStream{
         this.in = new PushbackInputStream(in, 3);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see java.io.InputStream#read()
      */
     public int read() throws IOException {

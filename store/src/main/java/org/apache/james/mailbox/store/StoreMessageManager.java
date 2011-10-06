@@ -142,7 +142,6 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     /**
      * Return the underlying {@link Mailbox}
      * 
-     * @param session
      * @return mailbox
      * @throws MailboxException
      */
@@ -190,11 +189,8 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return true;
     }
 
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.MessageManager#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> expunge(final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
         if (!isWriteable(mailboxSession)) {
@@ -206,12 +202,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return uids.keySet().iterator();    
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#appendMessage(byte[], java.util.Date, org.apache.james.mailbox.MailboxSession, boolean, javax.mail.Flags)
+    /**
+     * @see org.apache.james.mailbox.MessageManager#appendMessage(java.io.InputStream, java.util.Date, org.apache.james.mailbox.MailboxSession, boolean, javax.mail.Flags)
      */
     public long appendMessage(final InputStream msgIn, Date internalDate,
-            final MailboxSession mailboxSession,final boolean isRecent, final Flags flagsToBeSet)
+            final MailboxSession mailboxSession, final boolean isRecent, final Flags flagsToBeSet)
     throws MailboxException {
         
         File file = null;
@@ -372,7 +367,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
 
     /**
-     * Create a new {@link MailboxMembership} for the given data
+     * Create a new {@link Message} for the given data
      * 
      * @param internalDate
      * @param size
@@ -396,7 +391,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     
     
     /**
-     * @see {@link Mailbox#getMetaData(boolean, MailboxSession, FetchGroup)}
+     * @see MessageManager#getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)
      */
     public MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, 
             org.apache.james.mailbox.MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException {
@@ -479,9 +474,8 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
       
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#setFlags(javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.MessageManager#setFlags(javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Map<Long, Flags> setFlags(final Flags flags, final boolean value, final boolean replace,
             final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
@@ -518,7 +512,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
 
 
     /**
-     * Copy the {@link MessageSet} to the {@link MapperStoreMessageManager}
+     * Copy the {@link MessageRange} to the {@link StoreMessageManager}
      * 
      * @param set
      * @param toMailbox
@@ -552,29 +546,20 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         });
     }
 
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#getMessageCount(org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.MessageManager#getMessageCount(org.apache.james.mailbox.MailboxSession)
      */
     public long getMessageCount(MailboxSession mailboxSession) throws MailboxException {
         return mapperFactory.getMessageMapper(mailboxSession).countMessagesInMailbox(getMailboxEntity());
     }
 
-
-
-
-
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
      */
     public MessageResultIterator getMessages(final MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException {
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
         return new StoreMessageResultIterator<Id>(messageMapper, mailbox, set, fetchBatchSize, fetchGroup);
     }
-
- 
 
     /**
      * Return a List which holds all uids of recent messages and optional reset
@@ -612,8 +597,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         });
         
     }
-
-    
+   
     protected Map<Long, MessageMetaData> deleteMarkedInMailbox(final MessageRange range, final MailboxSession session) throws MailboxException {
 
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
@@ -627,12 +611,8 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         });       
     }
 
-
-
-
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.Mailbox#search(org.apache.james.mailbox.SearchQuery, org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.MessageManager#search(org.apache.james.mailbox.SearchQuery, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> search(SearchQuery query, MailboxSession mailboxSession) throws MailboxException {
         return index.search(mailboxSession, getMailboxEntity(), query);
@@ -656,8 +636,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return copiedRows.iterator();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
     private SortedMap<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
@@ -674,13 +653,11 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return copiedMessages;
     }
 
-
     /**
      * Return the count of unseen messages
      * 
-     * @param mailbox
      * @param session
-     * @return
+     * @return count of unseen messages
      * @throws MailboxException
      */
     protected long countUnseenMessagesInMailbox(MailboxSession session) throws MailboxException {
@@ -688,12 +665,9 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return messageMapper.countUnseenMessagesInMailbox(getMailboxEntity());
     }
 
-
-
     /**
      * Return the uid of the first unseen message or null of none is found
      * 
-     * @param mailbox
      * @param session
      * @return uid
      * @throws MailboxException

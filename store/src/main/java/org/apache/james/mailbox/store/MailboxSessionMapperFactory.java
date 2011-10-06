@@ -42,9 +42,8 @@ public abstract class MailboxSessionMapperFactory <Id> implements RequestAware, 
     
     
     
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MessageMapperFactory#getMessageMapper(org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapperFactory#getMessageMapper(MailboxSession)
      */
     @SuppressWarnings("unchecked")
     public MessageMapper<Id> getMessageMapper(MailboxSession session) throws MailboxException {
@@ -66,9 +65,8 @@ public abstract class MailboxSessionMapperFactory <Id> implements RequestAware, 
     protected abstract MessageMapper<Id> createMessageMapper(MailboxSession session) throws MailboxException;
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MailboxMapperFactory#getMailboxMapper(org.apache.james.mailbox.MailboxSession)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapperFactory#getMailboxMapper(MailboxSession)
      */
     @SuppressWarnings("unchecked")
     public MailboxMapper<Id> getMailboxMapper(MailboxSession session) throws MailboxException {

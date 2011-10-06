@@ -41,8 +41,7 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
     private final ConcurrentHashMap<MailboxPath, ReadWriteLock> paths = new ConcurrentHashMap<MailboxPath, ReadWriteLock>();
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#lock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath, boolean)
      */
     protected void lock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException {
@@ -57,9 +56,8 @@ public final class JVMMailboxPathLocker extends AbstractMailboxPathLocker {
         getLock(lock, writeLock).lock();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath)
+    /**
+     * @see org.apache.james.mailbox.store.AbstractMailboxPathLocker#unlock(MailboxSession, MailboxPath, boolean)
      */
     protected void unlock(MailboxSession session, MailboxPath path, boolean writeLock) throws MailboxException {
         ReadWriteLock lock = paths.get(path);

@@ -52,16 +52,14 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     }
     
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#getHighestModSeq(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long getHighestModSeq(Mailbox<Id> mailbox) throws MailboxException {
         return modSeqProvider.highestModSeq(mailboxSession, mailbox);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#getLastUid(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long getLastUid(Mailbox<Id> mailbox) throws MailboxException {
@@ -71,8 +69,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
 
 
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
     public Iterator<UpdatedFlags> updateFlags(final Mailbox<Id> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
@@ -117,8 +114,8 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
         return updatedFlags.iterator();
 
     }
-    /*
-     * (non-Javadoc)
+
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#add(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public MessageMetaData add(final Mailbox<Id> mailbox, Message<Id> message) throws MailboxException {
@@ -135,8 +132,7 @@ public abstract class AbstractMessageMapper<Id> extends TransactionalMapper impl
     }
 
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public MessageMetaData copy(final Mailbox<Id> mailbox, final Message<Id> original) throws MailboxException {

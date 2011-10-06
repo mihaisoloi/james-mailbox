@@ -101,7 +101,7 @@ public class ResultUtils {
   
     
     /**
-     * Return the {@link MessageResult} for the given {@link MailboxMembership} and {@link FetchGroup}
+     * Return the {@link MessageResult} for the given {@link Message} and {@link FetchGroup}
      * 
      * @param message
      * @param fetchGroup

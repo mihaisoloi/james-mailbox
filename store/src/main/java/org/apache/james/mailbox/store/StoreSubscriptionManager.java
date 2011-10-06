@@ -46,8 +46,7 @@ public class StoreSubscriptionManager implements SubscriptionManager {
         this.mapperFactory = mapperFactory;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.SubscriptionManager#subscribe(org.apache.james.mailbox.MailboxSession, java.lang.String)
      */
     public void subscribe(final MailboxSession session, final String mailbox) throws SubscriptionException {
@@ -82,9 +81,7 @@ public class StoreSubscriptionManager implements SubscriptionManager {
         return new SimpleSubscription(session.getUser().getUserName(), mailbox);
     }
 
-
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.SubscriptionManager#subscriptions(org.apache.james.mailbox.MailboxSession)
      */
     public Collection<String> subscriptions(final MailboxSession session) throws SubscriptionException {
@@ -97,8 +94,7 @@ public class StoreSubscriptionManager implements SubscriptionManager {
         return results;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.SubscriptionManager#unsubscribe(org.apache.james.mailbox.MailboxSession, java.lang.String)
      */
     public void unsubscribe(final MailboxSession session, final String mailbox) throws SubscriptionException {
@@ -119,8 +115,7 @@ public class StoreSubscriptionManager implements SubscriptionManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.SubscriptionManager#endProcessingRequest(org.apache.james.mailbox.MailboxSession)
      */
     public void endProcessingRequest(MailboxSession session) {

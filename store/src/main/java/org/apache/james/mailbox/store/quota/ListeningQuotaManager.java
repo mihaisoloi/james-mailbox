@@ -38,7 +38,7 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 
 /**
- * {@link QuotaManager} which will keep track of quota by listing for {@link Event}'s.
+ * {@link QuotaManager} which will keep track of quota by listing for {@link org.apache.james.mailbox.MailboxListener.Event}'s.
  * 
  * The whole quota is keeped in memory after it was lazy-fetched on the first access
  *  *
@@ -129,7 +129,6 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
      * The returned valued must be in <strong>bytes</strong>
      * 
      * @param session
-     * @param mailbox
      * @return maxBytes
      * @throws MailboxException
      */
@@ -140,8 +139,7 @@ public abstract class ListeningQuotaManager implements QuotaManager, MailboxList
      * Return the maximum message count which is allowed for the given {@link MailboxSession} (in fact the user which the session is bound to)
      * 
      * @param session
-     * @param mailbox
-     * @return
+     * @return maximum of allowed message count
      * @throws MailboxException
      */
     protected abstract long getMaxMessage(MailboxSession session) throws MailboxException;

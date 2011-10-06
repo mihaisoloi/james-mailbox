@@ -248,9 +248,7 @@ public class SimpleMailboxMembership implements Message<Long> {
         return new ByteArrayInputStream(body);
     }
 
-
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream getHeaderContent() throws IOException {
@@ -295,8 +293,7 @@ public class SimpleMailboxMembership implements Message<Long> {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Message<Long> other) {

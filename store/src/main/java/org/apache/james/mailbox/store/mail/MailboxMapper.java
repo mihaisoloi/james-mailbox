@@ -53,7 +53,7 @@ public interface MailboxMapper<Id> extends Mapper {
     /**
      * Return the {@link Mailbox} for the given name
      * 
-     * @param name 
+     * @param mailboxName 
      * @return mailbox
      * @throws MailboxException
      * @throws MailboxNotFoundException
@@ -64,7 +64,7 @@ public interface MailboxMapper<Id> extends Mapper {
     /**
      * Return a List of {@link Mailbox} which name is like the given name
      * 
-     * @param name
+     * @param mailboxPath
      * @return mailboxList
      * @throws MailboxException
      */

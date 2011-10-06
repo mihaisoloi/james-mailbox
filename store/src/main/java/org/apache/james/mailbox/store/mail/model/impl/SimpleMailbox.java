@@ -44,57 +44,49 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         this.uidValidity = mailbox.getUidValidity();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getMailboxId()
      */
     public Id getMailboxId() {
         return id;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getNamespace()
      */
     public String getNamespace() {
         return namespace;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setNamespace(java.lang.String)
      */
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getUser()
      */
     public String getUser() {
         return user;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setUser(java.lang.String)
      */
     public void setUser(String user) {
         this.user = user;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getName()
      */
     public String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
      * org.apache.james.mailbox.store.mail.model.Mailbox#setName(java.lang.String
      * )
@@ -103,18 +95,14 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         this.name = name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getUidValidity()
      */
     public long getUidValidity() {
         return uidValidity;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @SuppressWarnings("unchecked")
@@ -134,9 +122,7 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -149,9 +135,7 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#toString()
      */
     @Override

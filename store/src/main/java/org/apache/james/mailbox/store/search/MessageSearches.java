@@ -100,9 +100,11 @@ public class MessageSearches implements Iterable<Long>{
      * 
      * @param query
      *            <code>SearchQuery</code>, not null
-     * @param row
-     *            <code>MessageRow</code>, not null
-     * @return true if the row matches the given criteria, false otherwise
+     * @param message
+     *            <code>Message</code>, not null
+     * @param log
+     *            the logger to use
+     * @return <code>true</code> if the row matches the given criteria, <code>false</code> otherwise
      * @throws MailboxException 
      */
     public static boolean isMatch(final SearchQuery query, final Message<?> message, Logger log)
@@ -125,11 +127,15 @@ public class MessageSearches implements Iterable<Long>{
     /**
      * Does the row match the given criterion?
      * 
-     * @param query
-     *            <code>SearchQuery.Criterion</code>, not null
+     * @param criterion
+     *            the criterion to use
      * @param message
-     *            <code>MessageRow</code>, not null
-     * @return true if the row matches the given criterion, false otherwise
+     *            <code>Message</code>, not null
+     * @param recentMessageUids
+     *            collection of recent message uids
+     * @param log
+     *            the logger to use
+     * @return <code>true</code> if the row matches the given criterion, <code>false</code> otherwise
      * @throws MailboxException 
      */
     public static boolean isMatch(SearchQuery.Criterion criterion, Message<?> message,

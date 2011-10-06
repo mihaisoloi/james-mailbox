@@ -37,7 +37,7 @@ public interface Mailbox<Id> {
     
     /**
      * Sets the current namespace for this mailbox.
-     * @param name not null
+     * @param namespace not null
      */
     void setNamespace(String namespace);
 
@@ -49,7 +49,7 @@ public interface Mailbox<Id> {
     
     /**
      * Sets the current user for this mailbox.
-     * @param name not null
+     * @param user not null
      */
     void setUser(String user);
 

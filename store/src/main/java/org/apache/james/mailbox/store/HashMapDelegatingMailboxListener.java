@@ -28,7 +28,8 @@ import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPath;
 
 /**
- * Receive a {@link Event} and delegate it to an other {@link MailboxListener} depending on the registered name
+ * Receive a {@link org.apache.james.mailbox.MailboxListener.Event} and delegate it to an other
+ * {@link MailboxListener} depending on the registered name
  *
  */
 public class HashMapDelegatingMailboxListener extends AbstractDelegatingMailboxListener{

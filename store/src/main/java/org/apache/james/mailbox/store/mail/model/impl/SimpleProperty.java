@@ -42,24 +42,21 @@ public final class SimpleProperty implements Property {
         this(property.getNamespace(), property.getLocalName(), property.getValue());
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Property#getLocalName()
      */
     public String getLocalName() {
         return localName;
     }
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Property#getNamespace()
      */
     public String getNamespace() {
         return namespace;
     }
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Property#getValue()
      */
     public String getValue() {

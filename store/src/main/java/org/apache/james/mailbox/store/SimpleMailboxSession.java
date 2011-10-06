@@ -85,32 +85,28 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
         this.pathSeparator = pathSeparator;
     }
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#getLog()
      */
     public Logger getLog() {
         return log;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#close()
      */
     public void close() {
         open = false;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#getSessionId()
      */
     public long getSessionId() {
         return sessionId;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#isOpen()
      */
     public boolean isOpen() {
@@ -163,7 +159,7 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
     }
 
     /**
-     * @see org.apache.james.mailbox.MailboxSession#getSharedSpace()
+     * @see org.apache.james.mailbox.MailboxSession#getSharedSpaces()
      */
     public Collection<String> getSharedSpaces() {
         return sharedSpaces;
@@ -176,16 +172,14 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
         return localePreferences;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#getAttributes()
      */
     public Map<Object, Object> getAttributes() {
         return attributes;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession.User#getPassword()
      */
     public String getPassword() {
@@ -199,8 +193,7 @@ public class SimpleMailboxSession implements MailboxSession, MailboxSession.User
         return pathSeparator;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxSession#getType()
      */
     public SessionType getType() {

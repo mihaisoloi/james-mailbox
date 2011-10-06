@@ -42,8 +42,7 @@ public final class InputStreamContent implements Content{
         this.type = type;
     }
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.Content#size()
      */
     public long size() {
@@ -56,8 +55,7 @@ public final class InputStreamContent implements Content{
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {

@@ -46,34 +46,29 @@ public class SimpleMessageMetaData implements MessageMetaData{
         this(message.getUid(), message.getModSeq(), message.createFlags(), message.getFullContentOctets(), message.getInternalDate());
     }
     
-    
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxListener.Added.MessageMetaData#getFlags()
+    /**
+     * @see org.apache.james.mailbox.MessageMetaData#getFlags()
      */
     public Flags getFlags() {
         return flags;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxListener.Added.MessageMetaData#getSize()
+    /**
+     * @see org.apache.james.mailbox.MessageMetaData#getSize()
      */
     public long getSize() {
         return size;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxListener.Added.MessageMetaData#getInternalDate()
+    /**
+     * @see org.apache.james.mailbox.MessageMetaData#getInternalDate()
      */
     public Date getInternalDate() {
         return internalDate;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.MailboxListener.Added.MessageMetaData#getUid()
+    /**
+     * @see org.apache.james.mailbox.MessageMetaData#getUid()
      */
     public long getUid() {
         return uid;
@@ -95,8 +90,7 @@ public class SimpleMessageMetaData implements MessageMetaData{
         return result;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MessageMetaData#getModSeq()
      */
     public long getModSeq() {

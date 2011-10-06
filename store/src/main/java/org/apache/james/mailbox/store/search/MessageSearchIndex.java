@@ -38,11 +38,11 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 public interface MessageSearchIndex<Id> {
     
     /**
-     * Return all uids of the previous indexed {@link MailboxMembership}'s which match the {@link SearchQuery}
+     * Return all uids of the previous indexed {@link Mailbox}'s which match the {@link SearchQuery}
      * 
      * @param mailbox
      * @param searchQuery
-     * @return
+     * @return Iterator on found uids
      * @throws MailboxException
      */
     Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException;

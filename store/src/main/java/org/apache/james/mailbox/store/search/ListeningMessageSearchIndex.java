@@ -64,7 +64,8 @@ public abstract class ListeningMessageSearchIndex<Id> implements MessageSearchIn
     
     
     /**
-     * Process the {@link Event} and update the index if something relevant is received
+     * Process the {@link org.apache.james.mailbox.MailboxListener.Event} and update the index if
+     * something relevant is received
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

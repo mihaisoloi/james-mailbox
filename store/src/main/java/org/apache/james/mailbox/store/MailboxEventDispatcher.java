@@ -33,7 +33,7 @@ import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
- * Helper class to dispatch {@link Event}'s to registerend MailboxListener
+ * Helper class to dispatch {@link org.apache.james.mailbox.MailboxListener.Event}'s to registerend MailboxListener
  */
 public class MailboxEventDispatcher<Id> {
 
@@ -49,9 +49,9 @@ public class MailboxEventDispatcher<Id> {
      * Should get called when a new message was added to a Mailbox. All
      * registered MailboxListener will get triggered then
      * 
-     * @param uids
-     * @param sessionId
-     * @param path
+     * @param session The mailbox session
+     * @param uids Sorted map with uids and message meta data
+     * @param mailbox The mailbox
      */
     public void added(MailboxSession session, SortedMap<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         final AddedImpl added = new AddedImpl(session, mailbox, uids);
@@ -62,9 +62,9 @@ public class MailboxEventDispatcher<Id> {
      * Should get called when a message was expunged from a Mailbox. All
      * registered MailboxListener will get triggered then
      * 
-     * @param session
-     * @param uids
-     * @param path
+     * @param session The mailbox session
+     * @param uids Sorted map with uids and message meta data
+     * @param mailbox The mailbox
      */
     public void expunged(final MailboxSession session,  Map<Long, MessageMetaData> uids, Mailbox<Id> mailbox) {
         final ExpungedImpl expunged = new ExpungedImpl(session, mailbox, uids);
@@ -77,9 +77,8 @@ public class MailboxEventDispatcher<Id> {
      * 
      * @param session
      * @param uids
-     * @param path
-     * @param original
-     * @param updated
+     * @param mailbox
+     * @param uflags
      */
     public void flagsUpdated(MailboxSession session, final List<Long> uids, final Mailbox<Id> mailbox, final List<UpdatedFlags> uflags) {
         final FlagsUpdatedImpl flags = new FlagsUpdatedImpl(session, mailbox, uids, uflags);
@@ -92,9 +91,9 @@ public class MailboxEventDispatcher<Id> {
      * Should get called when a Mailbox was renamed. All registered
      * MailboxListener will get triggered then
      * 
+     * @param session
      * @param from
      * @param to
-     * @param sessionId
      */
     public void mailboxRenamed(MailboxSession session, MailboxPath from, Mailbox<Id> to) {
         listener.event(new MailboxRenamedEventImpl(session, from, to));
@@ -115,16 +114,14 @@ public class MailboxEventDispatcher<Id> {
             this.mailbox = mailbox;
         }
 
-        /*
-         * (non-Javadoc)
+        /**
          * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
         public List<Long> getUids() {
             return new ArrayList<Long>(added.keySet());
         }
 
-        /*
-         * (non-Javadoc)
+        /**
          * @see org.apache.james.mailbox.MailboxListener.Added#getMetaData(long)
          */
         public MessageMetaData getMetaData(long uid) {
@@ -149,16 +146,15 @@ public class MailboxEventDispatcher<Id> {
             this.uids = uids;
             this.mailbox = mailbox;
         }
-        /*
-         * (non-Javadoc)
+
+        /**
          * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
         public List<Long> getUids() {
             return new ArrayList<Long>(uids.keySet());
         }
         
-        /*
-         * (non-Javadoc)
+        /**
          * @see org.apache.james.mailbox.MailboxListener.Expunged#getMetaData(long)
          */
         public MessageMetaData getMetaData(long uid) {
@@ -188,16 +184,14 @@ public class MailboxEventDispatcher<Id> {
             this.mailbox = mailbox;
         }
 
-        /*
-         * (non-Javadoc)
+        /**
          * @see org.apache.james.mailbox.MailboxListener.MessageEvent#getUids()
          */
         public List<Long> getUids() {
             return uids;
         }
 
-        /*
-         * (non-Javadoc)
+        /**
          * @see org.apache.james.mailbox.MailboxListener.FlagsUpdated#getUpdatedFlags()
          */
         public List<UpdatedFlags> getUpdatedFlags() {
@@ -253,7 +247,7 @@ public class MailboxEventDispatcher<Id> {
      * MailboxListener will get triggered then
      * 
      * @param session
-     * @param path
+     * @param mailbox
      */
     public void mailboxDeleted(MailboxSession session, Mailbox<Id> mailbox) {
         final MailboxDeletion event = new MailboxDeletionImpl(session, mailbox);
@@ -265,7 +259,7 @@ public class MailboxEventDispatcher<Id> {
      * MailboxListener will get triggered then
      * 
      * @param session
-     * @param path
+     * @param mailbox
      */
     public void mailboxAdded(MailboxSession session, Mailbox<Id> mailbox) {
         final MailboxAdded event = new MailboxAddedImpl(session, mailbox);
@@ -287,9 +281,7 @@ public class MailboxEventDispatcher<Id> {
             this.newMailbox = newMailbox;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
+        /**
          * @see
          * org.apache.james.mailbox.MailboxListener.MailboxRenamed#getNewPath()
          */

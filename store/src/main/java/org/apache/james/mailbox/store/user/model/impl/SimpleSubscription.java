@@ -29,18 +29,15 @@ public class SimpleSubscription implements Subscription {
         this.user = user;
         this.mailbox = mailbox;
     }
-    
-    
-    /*
-     * (non-Javadoc)
+
+    /**
      * @see org.apache.james.mailbox.store.user.model.Subscription#getMailbox()
      */
     public String getMailbox() {
         return mailbox;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.model.Subscription#getUser()
      */
     public String getUser() {

@@ -65,27 +65,21 @@ public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<Mailbo
         return selectability;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MailboxMetaData#getHierarchyDelimiter()
      */
     public char getHierarchyDelimiter() {
         return delimiter;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see org.apache.james.mailbox.MailboxMetaData#getPath()
      */
     public MailboxPath getPath() {
         return path;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
@@ -121,9 +115,7 @@ public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<Mailbo
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(MailboxMetaData o) {

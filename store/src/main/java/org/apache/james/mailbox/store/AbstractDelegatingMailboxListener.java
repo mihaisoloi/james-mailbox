@@ -34,7 +34,8 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
     }
     
     /**
-     * Receive the event and dispatch it to the right {@link MailboxListener} depending on {@link Event#getMailboxPath()}
+     * Receive the event and dispatch it to the right {@link MailboxListener} depending on
+     * {@link org.apache.james.mailbox.MailboxListener.Event#getMailboxPath()}
      */
     public void event(Event event) {
         MailboxPath path = event.getMailboxPath();
@@ -90,8 +91,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         
     }
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxListenerSupport#addListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void addListener(MailboxPath path, MailboxListener listener, MailboxSession session) throws MailboxException {
@@ -113,9 +113,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         }
     }
 
-
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxListenerSupport#addGlobalListener(org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void addGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
@@ -130,10 +128,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         }
     }
 
-    
-    
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxListenerSupport#removeListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void removeListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException {
@@ -154,8 +149,7 @@ public abstract class AbstractDelegatingMailboxListener implements MailboxListen
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxListenerSupport#removeGlobalListener(org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void removeGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {

@@ -27,9 +27,6 @@ import org.apache.james.mailbox.store.StoreMailboxManager;
  * {@link ListeningQuotaManager} which use the same quota for all users.
  * 
  * By default this means not quota at all
- * 
- *
- * @param <Id>
  */
 public class FixedQuotaManager extends ListeningQuotaManager{
 

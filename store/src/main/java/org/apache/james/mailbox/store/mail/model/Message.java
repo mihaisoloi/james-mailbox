@@ -62,7 +62,7 @@ public interface Message<Id> extends Comparable<Message<Id>>{
      * Set the mod-sequence for the message. This must be called before the message is added to the store 
      * or any flags are changed. This must be unique / sequential.
      * 
-     * @param uid
+     * @param modSeq
      */
     void setModSeq(long modSeq);
     

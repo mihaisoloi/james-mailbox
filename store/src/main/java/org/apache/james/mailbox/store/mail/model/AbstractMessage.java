@@ -33,8 +33,7 @@ import javax.mail.Flags;
 public abstract class AbstractMessage<Id> implements Message<Id> {
     
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Message<Id> other) {
@@ -44,7 +43,7 @@ public abstract class AbstractMessage<Id> implements Message<Id> {
     
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#createFlags()
+     * @see org.apache.james.mailbox.store.mail.model.Message#createFlags()
      */
     public final Flags createFlags() {
         final Flags flags = new Flags();

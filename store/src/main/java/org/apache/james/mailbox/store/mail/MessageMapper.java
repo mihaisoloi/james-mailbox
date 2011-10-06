@@ -40,7 +40,7 @@ import org.apache.james.mailbox.store.transaction.Mapper;
 public interface MessageMapper<Id> extends Mapper {
 
     /**
-     * Return a List of {@link MailboxMembership} using {@link MailboxMembershipCallback<Id>} which represent the given {@link MessageRange}
+     * Return a {@link Iterator} which holds the messages for the given criterias
      * The list must be ordered by the {@link Message} uid
      * 
      * @param mailbox The mailbox to search
@@ -87,7 +87,7 @@ public interface MessageMapper<Id> extends Mapper {
 
 
     /**
-     * Delete the given {@link MailboxMembership}
+     * Delete the given {@link Message}
      * 
      * @param mailbox
      * @param message
@@ -106,7 +106,7 @@ public interface MessageMapper<Id> extends Mapper {
     Long findFirstUnseenMessageUid(Mailbox<Id> mailbox) throws MailboxException;
 
     /**
-     * Return a List of {@link MailboxMembership} which are recent.
+     * Return a List of {@link Message} which are recent.
      * The list must be ordered by the {@link Message} uid. 
      * 
      * @param mailbox
@@ -117,7 +117,7 @@ public interface MessageMapper<Id> extends Mapper {
 
 
     /**
-     * Add the given {@link MailboxMembership} to the underlying storage. Be aware that implementation may choose to replace the uid of the given message while storing.
+     * Add the given {@link Message} to the underlying storage. Be aware that implementation may choose to replace the uid of the given message while storing.
      * So you should only depend on the returned uid.
      * 
      * 
@@ -143,11 +143,10 @@ public interface MessageMapper<Id> extends Mapper {
             final MessageRange set) throws MailboxException;
     
     /**
-     * Copy the given {@link MailboxMembership} to a new mailbox and return the uid of the copy. Be aware that the given uid is just a suggestion for the uid of the copied
+     * Copy the given {@link Message} to a new mailbox and return the uid of the copy. Be aware that the given uid is just a suggestion for the uid of the copied
      * message. Implementation may choose to use a different one, so only depend on the returned uid!
      * 
      * @param mailbox the Mailbox to copy to
-     * @param uid the uid to use for the new MailboxMembership.
      * @param original the original to copy
      * @throws StorageException
      */
@@ -167,7 +166,6 @@ public interface MessageMapper<Id> extends Mapper {
     /**
      * Return the higest mod-sequence which were used for storing a Message in the {@link Mailbox}
      * 
-     * @param session
      * @param mailbox
      * @return lastUid
      * @throws MailboxException
@@ -198,11 +196,11 @@ public interface MessageMapper<Id> extends Mapper {
          */
         Metadata,
         /**
-         * Fetch the {@link #Metadata}, {@link Property}'s and the {@link Header}'s for the {@link Message}. This includes:
+         * Fetch the {@link #Metadata}, {@link Property}'s and the {@link #Headers}'s for the {@link Message}. This includes:
          * 
          * <p>
          * {@link Message#getProperties()}
-         * {@link Message#getHeaders()}
+         * {@link Message#getHeaderContent()}
          * </p>
          */
         Headers,

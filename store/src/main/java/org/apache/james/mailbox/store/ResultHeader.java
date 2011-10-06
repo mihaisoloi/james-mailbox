@@ -44,24 +44,21 @@ public final class ResultHeader implements MessageResult.Header {
         size = name.length() + value.length() + 2;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MessageResult.Header#getName()
      */
     public String getName() throws MailboxException {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MessageResult.Header#getValue()
      */
     public String getValue() throws MailboxException {
         return value;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.Content#size()
      */
     public long size() {
@@ -72,8 +69,7 @@ public final class ResultHeader implements MessageResult.Header {
         return "[HEADER " + name + ": " + value + "]";
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {

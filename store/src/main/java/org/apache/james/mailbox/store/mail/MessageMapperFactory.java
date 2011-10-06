@@ -27,7 +27,6 @@ public interface MessageMapperFactory<Id> {
      * Create a {@link MessageMapper} instance of return the one which exists for the {@link MailboxSession} already
      * 
      * @param session
-     * @param mailboxId
      * @return mapper
      */
     MessageMapper<Id> getMessageMapper(MailboxSession session) throws MailboxException;

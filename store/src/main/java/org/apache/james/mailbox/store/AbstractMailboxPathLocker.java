@@ -26,8 +26,7 @@ import org.apache.james.mailbox.MailboxSession;
 
 public abstract class AbstractMailboxPathLocker implements MailboxPathLocker{
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxPathLocker#executeWithLock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution)
      */
     public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException {

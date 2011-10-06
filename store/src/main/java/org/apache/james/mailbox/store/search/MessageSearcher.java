@@ -72,8 +72,8 @@ public class MessageSearcher {
     /**
      * Sets whether the search should include headers.
      * 
-     * @param true
-     *            if header values are included, false otherwise
+     * @param includesHeaders
+     *            <code>true</code> if header values are included, <code>false</code> otherwise
      */
     public synchronized void setIncludeHeaders(boolean includesHeaders) {
         this.includeHeaders = includesHeaders;

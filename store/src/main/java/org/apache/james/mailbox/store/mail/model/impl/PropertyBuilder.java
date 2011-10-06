@@ -83,7 +83,7 @@ public class PropertyBuilder {
 
     /**
      * Aets the number of CRLF in a textual document.
-     * @param CRLF count when document is textual,
+     * @param textualLineCount count when document is textual,
      * null otherwise
      */
     public void setTextualLineCount(Long textualLineCount) {
@@ -149,7 +149,7 @@ public class PropertyBuilder {
      * Sets a multiple valued property.
      * @param namespace not null
      * @param localName not null
-     * @param value null to remove property
+     * @param values null to remove property
      */
     public void setProperty(final String namespace, final String localName, final List<String> values)
     {
@@ -445,7 +445,7 @@ public class PropertyBuilder {
     /**
      * Sets RFC1766 Content-Language.
      * 
-     * @param list of parsed langauge tags from the RFC1766 Content-Language, 
+     * @param values list of parsed language tags from the RFC1766 Content-Language, 
      * possibly empty
      */
     public void setContentLanguage(List<String> values) {

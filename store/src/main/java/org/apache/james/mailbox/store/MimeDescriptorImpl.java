@@ -51,7 +51,7 @@ public class MimeDescriptorImpl implements MimeDescriptor {
      * Is this a composite media type (as per RFC2045)?
      * 
      * TODO: Move to Mime4j
-     * @param mediaType, possibly null
+     * @param mediaType possibly null
      * @return true when the type is composite,
      * false otherwise
      */
