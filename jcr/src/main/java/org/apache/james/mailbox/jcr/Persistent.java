@@ -43,7 +43,7 @@ public interface Persistent {
     /**
      * Return if the object is persistent
      * 
-     * @return
+     * @return <code>true</code> if object is persistent else <code>false</code>
      */
     public boolean isPersistent();
 

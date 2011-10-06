@@ -104,9 +104,12 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
     /**
      * Construct a new {@link JCRMessageMapper} instance
      * 
-     * @param repos {@link MailboxSessionJCRRepository} to use
-     * @param session {@link MailboxSession} to which the mapper is bound
-     * @param logger Log
+     * @param repository {@link MailboxSessionJCRRepository} to use
+     * @param mSession {@link MailboxSession} to which the mapper is bound
+     * @param uidProvider {@link UidProvider} to use
+     * @param modSeqProvider {@link ModSeqProvider} to use
+     * @param scaleType message scale type either {@link #MESSAGE_SCALE_DAY}, {@link #MESSAGE_SCALE_HOUR}, {@link #MESSAGE_SCALE_MINUTE},
+     *          {@link #MESSAGE_SCALE_MONTH}, {@link #MESSAGE_SCALE_NONE} or {@link #MESSAGE_SCALE_YEAR}
      */
     public JCRMessageMapper(final MailboxSessionJCRRepository repository, MailboxSession mSession, UidProvider<String> uidProvider, ModSeqProvider<String> modSeqProvider, int scaleType) {
         super(mSession, uidProvider, modSeqProvider);
@@ -114,6 +117,14 @@ public class JCRMessageMapper extends AbstractMessageMapper<String> implements J
         this.scaleType = scaleType;
     }
     
+    /**
+     * Construct a new {@link JCRMessageMapper} instance using {@link #MESSAGE_SCALE_DAY} as default
+     * 
+     * @param repos {@link MailboxSessionJCRRepository} to use
+     * @param session {@link MailboxSession} to which the mapper is bound
+     * @param uidProvider {@link UidProvider} to use
+     * @param modSeqProvider {@link ModSeqProvider} to use
+     */
     public JCRMessageMapper(final MailboxSessionJCRRepository repos, MailboxSession session, UidProvider<String> uidProvider, ModSeqProvider<String> modSeqProvider) {
         this(repos, session, uidProvider, modSeqProvider, MESSAGE_SCALE_DAY);
     }

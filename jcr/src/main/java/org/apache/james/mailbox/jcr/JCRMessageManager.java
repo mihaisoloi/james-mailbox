@@ -37,7 +37,7 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.slf4j.Logger;
 
 /**
- * JCR implementation of a {@link MapperStoreMessageManager}
+ * JCR implementation of a {@link org.apache.james.mailbox.MessageManager}
  *
  */
 public class JCRMessageManager extends StoreMessageManager<String> {
