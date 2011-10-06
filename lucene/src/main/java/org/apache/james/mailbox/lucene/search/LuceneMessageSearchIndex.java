@@ -139,22 +139,22 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     
     
     /**
-     * {@link Field} which will contain uid of the {@link MailboxMembership}
+     * {@link Field} which will contain uid of the {@link Message}
      */
     public final static String UID_FIELD = "uid";
     
     /**
-     * {@link Field} which will contain the {@link Flags} of the {@link MailboxMembership}
+     * {@link Field} which will contain the {@link Flags} of the {@link Message}
      */
     public final static String FLAGS_FIELD = "flags";
   
     /**
-     * {@link Field} which will contain the size of the {@link MailboxMembership}
+     * {@link Field} which will contain the size of the {@link Message}
      */
     public final static String SIZE_FIELD = "size";
 
     /**
-     * {@link Field} which will contain the body of the {@link MailboxMembership}
+     * {@link Field} which will contain the body of the {@link Message}
      */
     public final static String BODY_FIELD = "body";
     
@@ -165,7 +165,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     public final static String PREFIX_HEADER_FIELD ="header_";
     
     /**
-     * {@link Field} which will contain the whole message header of the {@link MailboxMembership}
+     * {@link Field} which will contain the whole message header of the {@link Message}
      */
     public final static String HEADERS_FIELD ="headers";
 
@@ -368,7 +368,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     }
     
     /**
-     * Create a {@link Analyzer} which is used to index the {@link MailboxMembership}'s
+     * Create a {@link Analyzer} which is used to index the {@link Message}'s
      * 
      * @param lenient 
      * 
@@ -398,9 +398,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     
     
     
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
+    /**
+     * @see org.apache.james.mailbox.store.search.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
      */
     public Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
         Set<Long> uids = new LinkedHashSet<Long>();
@@ -416,7 +415,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             for (int i = 0; i < crits.size(); i++) {
                 query.add(createQuery(crits.get(i), mailbox, searchQuery.getRecentMessageUids()), BooleanClause.Occur.MUST);
             }
-             
+
             // query for all the documents sorted as specified in the SearchQuery
             TopDocs docs = searcher.search(query, null, maxQueryResults, createSort(searchQuery.getSorts()));
             ScoreDoc[] sDocs = docs.scoreDocs;
@@ -440,7 +439,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
 
    
     /**
-     * Create a new {@link Document} for the given {@link MailboxMembership}. This Document does not contain any flags data. The {@link Flags} are stored in a seperate Document. 
+     * Create a new {@link Document} for the given {@link Message}. This Document does not contain any flags data. The {@link Flags} are stored in a seperate Document. 
      * 
      * See {@link #createFlagsDocument(Message)}
      * 
@@ -1181,9 +1180,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
 
     
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MessageSearchIndex#add(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+    /**
+     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#add(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public void add(MailboxSession session, Mailbox<Id> mailbox, Message<Id> membership) throws MailboxException {
         Document doc = createMessageDocument(session, membership);
@@ -1199,9 +1197,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MessageSearchIndex#update(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, javax.mail.Flags)
+    /**
+     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#update(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, javax.mail.Flags)
      */
     public void update(MailboxSession session, Mailbox<Id> mailbox, MessageRange range, Flags f) throws MailboxException {
         try {
@@ -1283,9 +1280,8 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
             return NumericRangeQuery.newLongRange(UID_FIELD, 0L, Long.MAX_VALUE, true, true);
         }
     }
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.MessageSearchIndex#delete(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
+    /**
+     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#delete(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
      */
     public void delete(MailboxSession session, Mailbox<Id> mailbox, MessageRange range) throws MailboxException {
         BooleanQuery query = new BooleanQuery();

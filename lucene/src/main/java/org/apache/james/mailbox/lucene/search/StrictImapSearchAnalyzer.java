@@ -48,8 +48,8 @@ public final class StrictImapSearchAnalyzer extends Analyzer {
         this.minTokenLength = minTokenLength;
         this.maxTokenLength = maxTokenLength;
     }
-   /*
-    * (non-Javadoc)
+
+   /**
     * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String, java.io.Reader)
     */
    public TokenStream tokenStream(String fieldName, Reader reader) {
