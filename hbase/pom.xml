@@ -29,20 +29,6 @@
     <artifactId>apache-james-mailbox-hbase</artifactId>
     <name>Apache James HBase Mailbox</name>
     <description>Apache James Mailbox implementation over HBase</description>
-    
-    <repositories>
-        <repository>
-            <id>hadoop-non-releases</id>
-            <name>Hadoop non-releases</name>
-            <url>http://people.apache.org/~rawson/repo/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -96,6 +82,10 @@
                 <exclusion>
                     <artifactId>hadoop-core</artifactId>
                     <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>jruby-complete</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -865,8 +865,8 @@
     <version.jmock>2.5.1</version.jmock>
     <version.lucene>3.1.0</version.lucene>
     <version.jackrabbit>2.2.0</version.jackrabbit>
-    <version.hbase>0.90.3</version.hbase>
-    <version.hadoop>0.20-append-r1057313</version.hadoop>
+    <version.hbase>0.90.4</version.hbase>
+    <version.hadoop>0.20.204.0</version.hadoop>
     
     <target.jdk>1.6</target.jdk>
   </properties>
