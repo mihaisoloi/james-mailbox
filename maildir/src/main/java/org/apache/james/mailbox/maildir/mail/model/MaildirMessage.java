@@ -97,11 +97,9 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     public void setUid(long uid) {
         this.uid = uid;
     }
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(
+     * org.apache.james.mailbox.store.mail.model.Message#setFlags(
      * javax.mail.Flags)
      */
     public void setFlags(Flags flags) {
@@ -115,70 +113,56 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         }
     }
     
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isAnswered()
+     * org.apache.james.mailbox.store.mail.model.Message#isAnswered()
      */
     public boolean isAnswered() {
         return answered;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isDeleted()
+     * org.apache.james.mailbox.store.mail.model.Message#isDeleted()
      */
     public boolean isDeleted() {
         return deleted;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isDraft()
+     * org.apache.james.mailbox.store.mail.model.Message#isDraft()
      */
     public boolean isDraft() {
         return draft;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isFlagged()
+     * org.apache.james.mailbox.store.mail.model.Message#isFlagged()
      */
     public boolean isFlagged() {
         return flagged;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#isRecent()
+     * org.apache.james.mailbox.store.mail.model.Message#isRecent()
      */
     public boolean isRecent() {
         return recent;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isSeen()
+    /**
+     * @see org.apache.james.mailbox.store.mail.model.Message#isSeen()
      */
     public boolean isSeen() {
         return seen;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.model.MailboxMembership#unsetRecent()
+     * org.apache.james.mailbox.store.mail.model.Message#unsetRecent()
      */
     public void unsetRecent() {
         recent = false;
@@ -217,16 +201,14 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return theString.toString();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
      */
     public long getModSeq() {
         return modSeq;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
      */
     public void setModSeq(long modSeq) {
@@ -371,8 +353,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return bodyStartOctet;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getMediaType()
      */
     public String getMediaType() {
@@ -380,8 +361,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return propertyBuilder.getMediaType();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getSubType()
      */
     public String getSubType() {
@@ -389,16 +369,14 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return propertyBuilder.getSubType();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getFullContentOctets()
      */
     public long getFullContentOctets() {
         return messageName.getSize();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getTextualLineCount()
      */
     public Long getTextualLineCount() {
@@ -406,8 +384,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return propertyBuilder.getTextualLineCount();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getProperties()
      */
     public List<Property> getProperties() {
@@ -415,9 +392,8 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return propertyBuilder.toProperties();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getInternalDate()
+    /**
+     * @see org.apache.james.mailbox.store.mail.model.Message#getInternalDate()
      */
     public Date getInternalDate() {
         return messageName.getInternalDate();
@@ -431,8 +407,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
         return new FileInputStream(messageName.getFile());
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
@@ -443,8 +418,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
 
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.AbstractMessage#getBodyStartOctet()
      */
     protected int getBodyStartOctet() {

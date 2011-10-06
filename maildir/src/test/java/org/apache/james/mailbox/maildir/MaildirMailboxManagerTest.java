@@ -70,7 +70,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
         }
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testList()
      */
     @Test
@@ -97,7 +97,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
             
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testBasicOperations()
      */
     @Test
@@ -127,7 +127,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
 
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.AbstractMailboxManagerTest#testCreateSubFolderDirectly()
      */
     @Test
@@ -183,7 +183,7 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
         }
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
      */
     @Override

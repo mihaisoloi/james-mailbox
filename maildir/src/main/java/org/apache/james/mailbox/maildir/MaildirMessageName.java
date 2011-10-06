@@ -164,7 +164,7 @@ public class MaildirMessageName {
     
     /**
      * Returns the full name of this message including size and flags if available.
-     * @return
+     * @return the full name of this message
      */
     public String getFullName() {
         if (this.fullName == null) {
@@ -199,7 +199,7 @@ public class MaildirMessageName {
     
     /**
      * Creates a filter which matches the message file even if the flags have changed 
-     * @return
+     * @return filter for this message
      */
     public FilenameFilter getFilenameFilter() {
         split();
@@ -377,8 +377,7 @@ public class MaildirMessageName {
     }
     
     /**
-     * Create a name for a message according to
-     * http://cr.yp.to/proto/maildir.html<br/>
+     * Create a name for a message according to <a href="http://cr.yp.to/proto/maildir.html" /><br/>
      * The following elements are used:
      * <br><br/>
      * "A unique name has three pieces, separated by dots. On the left is the result of time()
@@ -398,7 +397,7 @@ public class MaildirMessageName {
      * <br/>
      * [...]"
      * 
-     * @return
+     * @return unique message name
      */
     public static MaildirMessageName createUniqueName(MaildirFolder parentFolder, long size) {
         String timestamp = String.valueOf(System.currentTimeMillis());

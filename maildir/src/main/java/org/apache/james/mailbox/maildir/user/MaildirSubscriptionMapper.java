@@ -46,8 +46,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         this.store = store;
     }
     
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#delete(org.apache.james.mailbox.store.user.model.Subscription)
      */
     public void delete(Subscription subscription) throws SubscriptionException {
@@ -63,8 +62,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         }
     }
 
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findSubscriptionsForUser(java.lang.String)
      */
     public List<Subscription> findSubscriptionsForUser(String user) throws SubscriptionException {
@@ -76,8 +74,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         return subscriptions;
     }
 
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findMailboxSubscriptionForUser(java.lang.String, java.lang.String)
      */
     public Subscription findMailboxSubscriptionForUser(String user, String mailbox) throws SubscriptionException {
@@ -93,8 +90,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         return null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#save(org.apache.james.mailbox.store.user.model.Subscription)
      */
     public void save(Subscription subscription) throws SubscriptionException {
@@ -110,8 +106,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#endRequest()
      */
     public void endRequest() {

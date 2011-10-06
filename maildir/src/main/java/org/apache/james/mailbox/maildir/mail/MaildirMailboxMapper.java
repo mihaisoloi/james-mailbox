@@ -60,8 +60,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         this.session = session;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void delete(Mailbox<Integer> mailbox) throws MailboxException {
@@ -95,9 +94,8 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
     }
 
    
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.imap.api.MailboxPath)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.mailbox.MailboxPath)
      */
     public Mailbox<Integer> findMailboxByPath(MailboxPath mailboxPath)
             throws MailboxException, MailboxNotFoundException {      
@@ -105,9 +103,8 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         return cacheMailbox(mailbox);
     }
     
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.imap.api.MailboxPath)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.mailbox.MailboxPath)
      */
     public List<Mailbox<Integer>> findMailboxWithPathLike(MailboxPath mailboxPath)
             throws MailboxException {
@@ -130,9 +127,8 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         return mailboxList;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox, char)
      */
     public boolean hasChildren(Mailbox<Integer> mailbox, char delimiter) throws MailboxException, MailboxNotFoundException {
         String searchString = mailbox.getName() + MaildirStore.maildirDelimiter + MaildirStore.WILDCARD;
@@ -141,8 +137,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         return (mailboxes.size() > 0);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void save(Mailbox<Integer> mailbox) throws MailboxException {
@@ -218,7 +213,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
      */
     public List<Mailbox<Integer>> list() throws MailboxException {
@@ -241,8 +236,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
         
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#endRequest()
      */
     public void endRequest() {

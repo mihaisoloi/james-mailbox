@@ -83,7 +83,7 @@ public class MaildirFolder {
     
     /**
      * Returns the {@link File} of this Maildir folder.
-     * @return
+     * @return the root folder
      */
     public File getRootFile() {
         return rootFolder;
@@ -115,7 +115,7 @@ public class MaildirFolder {
     
     /**
      * Returns the ./cur folder of this Maildir folder.
-     * @return
+     * @return the <code>./cur</code> folder
      */
     public File getCurFolder() {
         return curFolder;
@@ -123,7 +123,7 @@ public class MaildirFolder {
     
     /**
      * Returns the ./new folder of this Maildir folder.
-     * @return
+     * @return the <code>./new</code> folder
      */
     public File getNewFolder() {
         return newFolder;
@@ -131,7 +131,7 @@ public class MaildirFolder {
     
     /**
      * Returns the ./tmp folder of this Maildir folder.
-     * @return
+     * @return the <code>./tmp</code> folder
      */
     public File getTmpFolder() {
         return tmpFolder;
@@ -204,7 +204,7 @@ public class MaildirFolder {
     
     /**
      * Returns the uidValidity of this mailbox
-     * @return
+     * @return The uidValidity
      * @throws IOException
      */
     public long getUidValidity() throws IOException {

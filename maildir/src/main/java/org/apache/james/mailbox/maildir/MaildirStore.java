@@ -202,7 +202,7 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
      * @param namespace The namespace of the mailbox
      * @param user The user of the mailbox
      * @param name The name of the mailbox
-     * @return
+     * @return absolute name
      */
     public String getFolderName(String namespace, String user, String name) {
         String root = userRoot(user);
@@ -235,8 +235,7 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
         return getFolderName(mailboxPath.getNamespace(), mailboxPath.getUser(), mailboxPath.getName());
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.UidProvider#nextUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long nextUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {

@@ -62,8 +62,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
     
 
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#countMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long countMessagesInMailbox(Mailbox<Integer> mailbox) throws MailboxException {
@@ -79,8 +78,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         return count;
     }
 
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#countUnseenMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long countUnseenMessagesInMailbox(Mailbox<Integer> mailbox) throws MailboxException {
@@ -96,9 +94,8 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         return count;
     }
 
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public void delete(Mailbox<Integer> mailbox, Message<Integer> message) throws MailboxException {
         MaildirFolder folder = maildirStore.createMaildirFolder(mailbox);
@@ -109,8 +106,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
      */
     public Iterator<Message<Integer>> findInMailbox(Mailbox<Integer> mailbox, MessageRange set, FetchType fType, int max)
@@ -215,9 +211,8 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
        
     }
 
-    /* 
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public List<Long> findRecentMessageUidsInMailbox(Mailbox<Integer> mailbox)
     throws MailboxException {
@@ -228,8 +223,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findFirstUnseenMessageUid(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public Long findFirstUnseenMessageUid(Mailbox<Integer> mailbox)
@@ -243,8 +237,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
 
 
-    /* 
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#endRequest()
      */
     public void endRequest() {
@@ -253,8 +246,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData copy(Mailbox<Integer> mailbox, long uid, long modSeq, Message<Integer> original) throws MailboxException {
@@ -265,12 +257,9 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
         return save(mailbox, theCopy);        
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
-     * org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache
-     * .james.mailbox.store.mail.model.Mailbox,
+     * org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox,
      * org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData save(Mailbox<Integer> mailbox, Message<Integer> message) throws MailboxException {
@@ -351,8 +340,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#begin()
      */
     protected void begin() throws MailboxException {
@@ -360,8 +348,7 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#commit()
      */
     protected void commit() throws MailboxException {
@@ -369,15 +356,14 @@ public class MaildirMessageMapper extends AbstractMessageMapper<Integer> {
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#rollback()
      */
     protected void rollback() throws MailboxException {
         //nothing todo
     }
-    /*
-     * (non-Javadoc)
+
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#updateFlags(org.apache.james.mailbox.store.mail.model.Mailbox, javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange)
      */
     public Iterator<UpdatedFlags> updateFlags(final Mailbox<Integer> mailbox, final Flags flags, final boolean value, final boolean replace, final MessageRange set) throws MailboxException {
