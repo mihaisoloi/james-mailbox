@@ -47,7 +47,7 @@ public abstract class JPAMailboxManager extends StoreMailboxManager<Long> {
     /**
      * Delete all mailboxes 
      * 
-     * @param maibloxSession
+     * @param mailboxSession
      * @throws MailboxException
      */
     public void deleteEverything(MailboxSession mailboxSession) throws MailboxException {

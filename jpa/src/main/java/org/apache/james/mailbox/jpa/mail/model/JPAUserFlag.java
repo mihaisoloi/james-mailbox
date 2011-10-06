@@ -58,8 +58,8 @@ public class JPAUserFlag {
     }
 
     /**
-     * Constructs a User Flag. cloned from the given.
-     * @param property not null
+     * Constructs a User Flag, cloned from the given.
+     * @param flag not null
      */
     public JPAUserFlag(JPAUserFlag flag) {
         this(flag.getName());

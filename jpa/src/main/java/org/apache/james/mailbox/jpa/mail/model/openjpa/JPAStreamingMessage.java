@@ -41,7 +41,7 @@ import org.apache.openjpa.persistence.Persistent;
  * JPA implementation of {@link AbstractJPAMessage} which use openjpas {@link Persistent} type to
  * be able to stream the message content without loading it into the memory at all. 
  * 
- * This is not supported for all DB's yet. See {@link http://openjpa.apache.org/builds/latest/docs/manual/ref_guide_mapping_jpa.html}
+ * This is not supported for all DB's yet. See <a href="http://openjpa.apache.org/builds/latest/docs/manual/ref_guide_mapping_jpa.html">Additional JPA Mappings</a>
  * 
  * If your DB is not supported by this, use {@link JPAMessage} 
  *
@@ -97,16 +97,14 @@ public class JPAStreamingMessage extends AbstractJPAMessage {
     }
 
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
         return content.newStream(getBodyStartOctet(), -1);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream getHeaderContent() throws IOException {

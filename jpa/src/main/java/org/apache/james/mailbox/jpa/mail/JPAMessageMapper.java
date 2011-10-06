@@ -73,9 +73,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         return entityManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.AbstractTransactionalMapper#begin()
+    /**
+     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#begin()
      */
     protected void begin() throws MailboxException {
         try {
@@ -96,9 +95,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.AbstractTransactionalMapper#rollback()
+    /**
+     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#rollback()
      */
     protected void rollback() throws MailboxException {
         EntityTransaction transaction = entityManager.getTransaction();
@@ -119,8 +117,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
      */
     public Iterator<Message<Long>> findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType fType, int max) throws MailboxException {
@@ -254,7 +251,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#countMessagesInMailbox()
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#countMessagesInMailbox(Mailbox)
      */
     public long countMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         try {
@@ -265,7 +262,7 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#countUnseenMessagesInMailbox()
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#countUnseenMessagesInMailbox(Mailbox)
      */
     public long countUnseenMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         try {
@@ -275,9 +272,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(java.lang.Object, org.apache.james.mailbox.store.mail.model.MailboxMembership)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     public void delete(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
         try {
@@ -287,9 +283,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findFirstUnseenMessageUid(org.apache.james.mailbox.store.mail.model.Mailbox)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findFirstUnseenMessageUid(Mailbox)
      */
     @SuppressWarnings("unchecked")
     public Long findFirstUnseenMessageUid(Mailbox<Long> mailbox)  throws MailboxException {
@@ -307,9 +302,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
         }
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox(Mailbox)
      */
     @SuppressWarnings("unchecked")
     public List<Long> findRecentMessageUidsInMailbox(Mailbox<Long> mailbox) throws MailboxException {
@@ -323,9 +317,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
 
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
+    /**
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(Mailbox, long, long, Message)
      */
     protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
         Message<Long> copy;
@@ -340,9 +333,8 @@ public class JPAMessageMapper extends AbstractMessageMapper<Long> implements Mes
     }
 
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
+    /**
+     * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(Mailbox, Message)
      */
     protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
 

@@ -168,32 +168,28 @@ public class JPAMailbox implements Mailbox<Long> {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getNamespace()
      */
     public String getNamespace() {
         return namespace;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#getUser()
      */
     public String getUser() {
         return user;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setNamespace(java.lang.String)
      */
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Mailbox#setUser(java.lang.String)
      */
     public void setUser(String user) {

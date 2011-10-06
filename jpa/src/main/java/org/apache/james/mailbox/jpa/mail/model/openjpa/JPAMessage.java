@@ -90,16 +90,14 @@ public class JPAMessage extends AbstractJPAMessage {
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
     public InputStream getBodyContent() throws IOException {
         return new ByteArrayInputStream(body);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getHeaderContent()
      */
     public InputStream getHeaderContent() throws IOException {

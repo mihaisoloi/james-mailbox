@@ -81,7 +81,7 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(java.lang.String)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(MailboxPath)
      */
     public Mailbox<Long> findMailboxByPath(MailboxPath mailboxPath) throws MailboxException, MailboxNotFoundException {
         try {
@@ -109,9 +109,8 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         } 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.imap.api.MailboxPath)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(MailboxPath)
      */
     @SuppressWarnings("unchecked")
     public List<Mailbox<Long>> findMailboxWithPathLike(MailboxPath path) throws MailboxException {
@@ -143,7 +142,7 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
     }
     
     /**
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(java.lang.String)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(Mailbox, char)
      */
     public boolean hasChildren(Mailbox<Long> mailbox, char delimiter) throws MailboxException,
             MailboxNotFoundException {
@@ -157,8 +156,7 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         return numberOfChildMailboxes != null && numberOfChildMailboxes > 0;
     }
 
-	/*
-     * (non-Javadoc)
+	/**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
      */
     @SuppressWarnings("unchecked")

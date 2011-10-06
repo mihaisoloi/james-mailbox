@@ -51,9 +51,8 @@ public abstract class JPATransactionalMapper extends TransactionalMapper {
         return entityManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.AbstractTransactionalMapper#begin()
+    /**
+     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#begin()
      */
     protected void begin() throws MailboxException {
         try {
@@ -74,9 +73,8 @@ public abstract class JPATransactionalMapper extends TransactionalMapper {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.transaction.AbstractTransactionalMapper#rollback()
+    /**
+     * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#rollback()
      */
     protected void rollback() throws MailboxException {
         EntityTransaction transaction = entityManager.getTransaction();

@@ -39,8 +39,7 @@ public class JPASubscriptionMapper extends JPATransactionalMapper implements Sub
     }
 
     
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findMailboxSubscriptionForUser(java.lang.String, java.lang.String)
      */
     public Subscription findMailboxSubscriptionForUser(final String user, final String mailbox) throws SubscriptionException {

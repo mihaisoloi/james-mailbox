@@ -270,8 +270,9 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     /**
      * Constructs a copy of the given message.
      * All properties are cloned except mailbox and UID.
-     * @param mailboxId new mailbox ID
+     * @param mailbox new mailbox
      * @param uid new UID
+     * @param modSeq new modSeq
      * @param original message to be copied, not null
      * @throws IOException 
      */
@@ -334,16 +335,14 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
      */
     public long getModSeq() {
         return modSeq;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
      */
     public void setModSeq(long modSeq) {
@@ -387,9 +386,8 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
         return textualLineCount;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.model.Document#getFullContentOctets()
+    /**
+     * @see org.apache.james.mailbox.store.mail.model.Message#getFullContentOctets()
      */
     public long getFullContentOctets() {
         return contentOctets;
@@ -402,63 +400,63 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getInternalDate()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getInternalDate()
      */
     public Date getInternalDate() {
         return internalDate;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getMailboxId()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getMailboxId()
      */
     public Long getMailboxId() {
         return getMailbox().getMailboxId();
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getUid()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getUid()
      */
     public long getUid() {
         return uid;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isAnswered()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isAnswered()
      */
     public boolean isAnswered() {
         return answered;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isDeleted()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isDeleted()
      */
     public boolean isDeleted() {
         return deleted;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isDraft()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isDraft()
      */
     public boolean isDraft() {
         return draft;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isFlagged()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isFlagged()
      */
     public boolean isFlagged() {
         return flagged;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isRecent()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isRecent()
      */
     public boolean isRecent() {
         return recent;
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isSeen()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isSeen()
      */
     public boolean isSeen() {
         return seen;
@@ -469,7 +467,7 @@ public abstract class AbstractJPAMessage extends AbstractMessage<Long> {
     }
     
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(javax.mail.Flags)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setFlags(javax.mail.Flags)
      */
     public void setFlags(Flags flags) {
         answered = flags.contains(Flags.Flag.ANSWERED);
