@@ -122,6 +122,15 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     
     
     /**
+     * Return the {@link MailboxPathLocker}
+     * 
+     * @return locker
+     */
+    protected MailboxPathLocker getLocker() {
+        return locker;
+    }
+    
+    /**
      * Return the {@link MailboxEventDispatcher} for this Mailbox
      * 
      * @return dispatcher
@@ -144,24 +153,27 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     
 
     /**
-     * Return {@link Flags} which are permanent stored by the mailbox. By default this are the following flags:
-     * <br>
-     *  {@link Flag#ANSWERED}, {@link Flag#DELETED}, {@link Flag#DRAFT}, {@link Flag#FLAGGED}, {@link Flag#RECENT}, {@link Flag#SEEN}
-     * <br>
+     * Return {@link Flags} which are permanent stored by the mailbox. By
+     * default this are the following flags: <br>
+     * {@link Flag#ANSWERED}, {@link Flag#DELETED}, {@link Flag#DRAFT},
+     * {@link Flag#FLAGGED}, {@link Flag#RECENT}, {@link Flag#SEEN} <br>
      * 
-     * Which in fact does not allow to permanent store user flags / keywords. 
+     * Which in fact does not allow to permanent store user flags / keywords.
      * 
-     * If the sub-class does allow to store "any" user flag / keyword it MUST override this method and add {@link Flag#USER} to the list
-     * of returned {@link Flags}. If only a special set of user flags / keywords should be allowed just add them directly.
+     * If the sub-class does allow to store "any" user flag / keyword it MUST
+     * override this method and add {@link Flag#USER} to the list of returned
+     * {@link Flags}. If only a special set of user flags / keywords should be
+     * allowed just add them directly.
      * 
      * @param session
      * @return flags
      */
     protected Flags getPermanentFlags(MailboxSession session) {
-    	
-    	// Return a new flags instance to make sure the static declared flags instance will not get modified later.
-    	//
-    	// See MAILBOX-109
+
+        // Return a new flags instance to make sure the static declared flags
+        // instance will not get modified later.
+        //
+        // See MAILBOX-109
         return new Flags(MINIMAL_PERMANET_FLAGS);
     }
 
