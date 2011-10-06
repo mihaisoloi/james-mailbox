@@ -130,8 +130,8 @@ public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactor
     }
 
     /**
-     * Returns the configuration object for accesing the cluster.
-     * @return 
+     * Returns the configuration object for accessing the cluster.
+     * @return The configuration for accessing the cluster
      */
     public Configuration getClusterConfiguration() {
         return conf;
@@ -139,7 +139,7 @@ public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactor
 
     /**
      * Returns the ModSeqProvider used.
-     * @return 
+     * @return The used modSeqProvider
      */
     public ModSeqProvider<UUID> getModSeqProvider() {
         return modSeqProvider;
@@ -147,7 +147,7 @@ public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactor
 
     /**
      * Returns the UidProvider that generates UID's for mailboxes.
-     * @return 
+     * @return The provider that generates UID's for mailboxes
      */
     public UidProvider<UUID> getUidProvider() {
         return uidProvider;

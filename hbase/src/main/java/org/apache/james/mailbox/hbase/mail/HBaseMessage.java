@@ -272,7 +272,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getInternalDate()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getInternalDate()
      */
     @Override
     public Date getInternalDate() {
@@ -280,7 +280,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getMailboxId()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getMailboxId()
      */
     @Override
     public UUID getMailboxId() {
@@ -288,7 +288,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#getUid()
+     * @see org.apache.james.mailbox.store.mail.model.Message#getUid()
      */
     @Override
     public long getUid() {
@@ -296,7 +296,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isAnswered()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isAnswered()
      */
     @Override
     public boolean isAnswered() {
@@ -304,7 +304,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isDeleted()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isDeleted()
      */
     @Override
     public boolean isDeleted() {
@@ -312,7 +312,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isDraft()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isDraft()
      */
     @Override
     public boolean isDraft() {
@@ -320,7 +320,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isFlagged()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isFlagged()
      */
     @Override
     public boolean isFlagged() {
@@ -328,7 +328,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isRecent()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isRecent()
      */
     @Override
     public boolean isRecent() {
@@ -336,7 +336,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#isSeen()
+     * @see org.apache.james.mailbox.store.mail.model.Message#isSeen()
      */
     @Override
     public boolean isSeen() {
@@ -349,7 +349,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
     }
 
     /**
-     * @see org.apache.james.mailbox.store.mail.model.MailboxMembership#setFlags(javax.mail.Flags)
+     * @see org.apache.james.mailbox.store.mail.model.Message#setFlags(javax.mail.Flags)
      */
     @Override
     public final void setFlags(Flags flags) {

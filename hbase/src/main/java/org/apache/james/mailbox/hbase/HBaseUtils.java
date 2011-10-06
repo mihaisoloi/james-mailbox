@@ -76,12 +76,10 @@ public class HBaseUtils {
     /**
      * This returns the row key needed for HBase. Having the method here ensure 
      * we have a consistent way to generate the rowkey.
-     * @return rowkey byte array that can be used with HBase API
-     */
-    /**
+     *
      * Convenience method for generating a rowKey when you don't have a mailbox object.
      * @param uuid
-     * @return 
+     * @return rowkey byte array that can be used with HBase API
      */
     public static byte[] mailboxRowKey(UUID uuid) {
         byte[] rowKey = new byte[16];
@@ -93,7 +91,7 @@ public class HBaseUtils {
     /**
      * Returns a UUID from the a byte array.
      * @param rowkey
-     * @return 
+     * @return UUID calculated from the byte array
      */
     public static UUID UUIDFromRowKey(byte[] rowkey) {
         return new UUID(Bytes.toLong(rowkey, 0), Bytes.toLong(rowkey, 8));
@@ -184,8 +182,8 @@ public class HBaseUtils {
      * Create a row key for a message in a mailbox. The current row key is mailboxID followed by messageID.
      * Both values are fixed length so no separator is needed. 
      * Downside: we will be storing the same message multiple times, one time for each recipient.
-     * @param message
-     * @return a row key 
+     * @param message message to get row key from
+     * @return rowkey byte array that can be used with HBase API
      */
     public static byte[] messageRowKey(Message<UUID> message) {
         return messageRowKey(message.getMailboxId(), message.getUid());
@@ -195,9 +193,9 @@ public class HBaseUtils {
      * Utility method to build row keys from mailbox UUID and message uid.
      * The message uid's are stored in reverse order by substracting the uid value 
      * from Long.MAX_VALUE. 
-     * @param message
-     * @param uid
-     * @return a row key byte array
+     * @param mailboxUid mailbox UUID
+     * @param uid message uid
+     * @return rowkey byte array that can be used with HBase API
      */
     public static byte[] messageRowKey(UUID mailboxUid, long uid) {
         /**  message uid's are stored in reverse order so we will always have the most recent messages first*/
@@ -210,10 +208,10 @@ public class HBaseUtils {
 
     /**
      * Utility to build row keys from mailboxUID and a value. The value is added to 
-     * the key without any other opperations. 
-     * @param mailboxUid
+     * the key without any other operations. 
+     * @param mailboxUid mailbox UUID
      * @param value
-     * @return 
+     * @return rowkey byte array that can be used with HBase API
      */
     public static byte[] customMessageRowKey(UUID mailboxUid, long value) {
         return Bytes.add(Bytes.toBytes(mailboxUid.getMostSignificantBits()),

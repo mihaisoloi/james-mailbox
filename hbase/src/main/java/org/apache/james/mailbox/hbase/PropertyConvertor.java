@@ -37,7 +37,7 @@ public class PropertyConvertor {
     /**
      * Returns a byte array that represents a HBase column qualifier for the
      * provided property.
-     * @param prop the property for storage n HBase
+     * @param propNumber the property for storage n HBase
      * @return a byte array that represents a column qualifier for the property
      */
     public static byte[] getQualifier(int propNumber) {
