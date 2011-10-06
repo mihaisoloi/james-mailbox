@@ -41,8 +41,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         mailboxesById = new ConcurrentHashMap<Long, Mailbox<Long>>(INITIAL_SIZE);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void delete(Mailbox<Long> mailbox) throws MailboxException {
@@ -53,9 +52,8 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         mailboxesById.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByName(java.lang.String)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.mailbox.MailboxPath)
      */
     public synchronized Mailbox<Long> findMailboxByPath(MailboxPath path) throws MailboxException, MailboxNotFoundException {
         Mailbox<Long> result = null;
@@ -73,9 +71,8 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithNameLike(java.lang.String)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.mailbox.MailboxPath)
      */
     public List<Mailbox<Long>> findMailboxWithPathLike(MailboxPath path) throws MailboxException {
         final String regex = path.getName().replace("%", ".*");
@@ -88,8 +85,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         return results;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public void save(Mailbox<Long> mailbox) throws MailboxException {
@@ -108,9 +104,8 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         // Do nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#hasChildren(org.apache.james.mailbox.store.mail.model.Mailbox, char)
      */
     public boolean hasChildren(Mailbox<Long> mailbox, char delimiter) throws MailboxException,
             MailboxNotFoundException {
@@ -123,8 +118,7 @@ public class InMemoryMailboxMapper implements MailboxMapper<Long> {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MailboxMapper#list()
      */
     public List<Mailbox<Long>> list() throws MailboxException {

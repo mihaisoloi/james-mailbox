@@ -61,17 +61,15 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         return membershipByUid;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#countMessagesInMailbox()
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#countMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long countMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         return getMembershipByUidForMailbox(mailbox).size();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#countUnseenMessagesInMailbox()
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#countUnseenMessagesInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public long countUnseenMessagesInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         long count = 0;
@@ -83,17 +81,16 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         return count;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.MailboxMembership)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#delete(org.apache.james.mailbox.store.mail.model.Mailbox,
+     * org.apache.james.mailbox.store.mail.model.Message)
      */
     public void delete(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
         getMembershipByUidForMailbox(mailbox).remove(message.getUid());
     }
 
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
      */
     public Iterator<Message<Long>> findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType ftype, int max) throws MailboxException {
@@ -140,9 +137,8 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
     }
     
 
-    /*
-     * (non-Javadoc)
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessagesInMailbox()
+    /**
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findRecentMessageUidsInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public List<Long> findRecentMessageUidsInMailbox(Mailbox<Long> mailbox) throws MailboxException {
         final List<Long> results = new ArrayList<Long>();
@@ -156,8 +152,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         return results;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.MessageMapper#findFirstUnseenMessageUid(org.apache.james.mailbox.store.mail.model.Mailbox)
      */
     public Long findFirstUnseenMessageUid(Mailbox<Long> mailbox) throws MailboxException {
@@ -183,10 +178,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         // Do nothing
     }
 
-
-
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#copy(org.apache.james.mailbox.store.mail.model.Mailbox, long, long, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData copy(Mailbox<Long> mailbox, long uid, long modSeq, Message<Long> original) throws MailboxException {
@@ -201,8 +193,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
         return save(mailbox, message);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.mail.AbstractMessageMapper#save(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.store.mail.model.Message)
      */
     protected MessageMetaData save(Mailbox<Long> mailbox, Message<Long> message) throws MailboxException {
@@ -234,8 +225,6 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
      */
     protected void rollback() throws MailboxException {        
     }
-
-
 
     @Override
     public Map<Long, MessageMetaData> expungeMarkedForDeletionInMailbox(final Mailbox<Long> mailbox, MessageRange set) throws MailboxException {

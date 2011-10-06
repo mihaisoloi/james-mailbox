@@ -37,8 +37,7 @@ public class InMemorySubscriptionMapper extends NonTransactionalMapper implement
         subscriptionsByUser = new ConcurrentHashMap<String, List<Subscription>>(INITIAL_SIZE);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#delete(org.apache.james.mailbox.store.user.model.Subscription)
      */
     public synchronized void delete(Subscription subscription) {
@@ -49,8 +48,7 @@ public class InMemorySubscriptionMapper extends NonTransactionalMapper implement
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findMailboxSubscriptionForUser(java.lang.String, java.lang.String)
      */
     public Subscription findMailboxSubscriptionForUser(String user, String mailbox) {
@@ -67,8 +65,7 @@ public class InMemorySubscriptionMapper extends NonTransactionalMapper implement
         return result;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findSubscriptionsForUser(java.lang.String)
      */
     @SuppressWarnings("unchecked")
@@ -84,8 +81,7 @@ public class InMemorySubscriptionMapper extends NonTransactionalMapper implement
         return results;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#save(org.apache.james.mailbox.store.user.model.Subscription)
      */
     public synchronized void save(Subscription subscription) {
