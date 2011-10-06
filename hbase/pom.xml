@@ -42,11 +42,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
@@ -66,12 +61,6 @@
             <type>test-jar</type>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>apache-james-mailbox-store</artifactId>
-            <scope>test</scope>
-            <type>test-jar</type>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -79,10 +68,6 @@
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
             <exclusions>
-                <exclusion>
-                    <artifactId>hadoop-core</artifactId>
-                    <groupId>org.apache.hadoop</groupId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.jruby</groupId>
                     <artifactId>jruby-complete</artifactId>
@@ -93,21 +78,16 @@
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
             <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
-            <version>${version.hadoop}</version>
-        </dependency>
-        <dependency>
-            <groupId>jaxme</groupId>
-            <artifactId>jaxme2</artifactId>
-            <version>0.5.1</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
