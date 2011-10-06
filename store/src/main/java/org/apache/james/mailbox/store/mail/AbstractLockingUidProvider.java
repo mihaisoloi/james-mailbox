@@ -25,6 +25,14 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.store.StoreMailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
+
+/**
+ * Abstract base implementation of {@link UidProvider} which used the given {@link MailboxPathLocker} to 
+ * lock the {@link Mailbox} while the next uid is generated
+ * 
+ *
+ * @param <Id>
+ */
 public abstract class AbstractLockingUidProvider<Id> implements UidProvider<Id>{
 
     private final MailboxPathLocker locker;
@@ -44,6 +52,14 @@ public abstract class AbstractLockingUidProvider<Id> implements UidProvider<Id>{
         });
     }
     
+    /**
+     * Generate the next uid to use while the {@link Mailbox} is locked
+     * 
+     * @param session
+     * @param mailbox
+     * @return nextUid
+     * @throws MailboxException
+     */
     protected abstract long lockedNextUid(MailboxSession session, Mailbox<Id> mailbox) throws MailboxException;
 
 }
