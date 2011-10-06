@@ -161,16 +161,6 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     }
 
     /**
-     * @see
-     * org.apache.james.mailbox.store.mail.model.Message#unsetRecent()
-     */
-    public void unsetRecent() {
-        recent = false;
-    }
-
-    
-    
-    /**
      * Indicates whether this MaildirMessage reflects a new message or one that already
      * exists in the file system.
      * @return true if it is new, false if it already exists
