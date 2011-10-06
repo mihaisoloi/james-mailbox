@@ -44,7 +44,7 @@ public class JpaMigrator {
      * TODO Extract the SQL in JAVA classes to XML file.
      * TODO Log with slf4j.
      * 
-     * @param the JIRAs numbers
+     * @param jiras the JIRAs numbers
      * @throws JpaMigrateException 
      */
     public static void main(String[] jiras) throws JpaMigrateException {

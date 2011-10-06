@@ -50,8 +50,8 @@ import org.apache.openjpa.lib.rop.ResultList;
  */
 public class IMAP180JpaMigrateCommand implements JpaMigrateCommand {
 
-    /* (non-Javadoc)
-     * @see org.apache.james.imap.jpa.migrator.command.JpaMigrateCommand#migrate(javax.persistence.EntityManager)
+    /**
+     * @see org.apache.james.mailbox.jpa.migrator.command#migrate(javax.persistence.EntityManager)
      */
     public void migrate(EntityManager em) throws JpaMigrateException {
         em.getTransaction().commit();

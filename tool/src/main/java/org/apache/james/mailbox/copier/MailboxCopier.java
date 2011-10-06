@@ -37,8 +37,6 @@ public interface MailboxCopier {
      * 
      * @param src
      * @param dest
-     * @return true if copy is completely successful, false if copy fails at any
-     *         step.
      */
     void copyMailboxes(MailboxManager src, MailboxManager dest) throws MailboxException, IOException;
 

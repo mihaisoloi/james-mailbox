@@ -64,8 +64,7 @@ public class MailboxCopierImpl implements MailboxCopier {
      */
     private Logger log = LoggerFactory.getLogger(MailboxCopierImpl.class.getName());
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.copier.MailboxCopier#copyMailboxes(org.apache.james.mailbox.MailboxManager, org.apache.james.mailbox.MailboxManager)
      */
     public void copyMailboxes(MailboxManager srcMailboxManager, MailboxManager dstMailboxManager) throws MailboxException, IOException {
