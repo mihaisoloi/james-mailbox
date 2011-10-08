@@ -28,8 +28,10 @@
      -->
      
     <!-- 
-        This is the link to the HBase Cluster. You need to place a valid hbase 
-        config file on the classpath that will be picked up by HBaseConfiguration.create().
+        This creates a minicluster so we can reuse the configuration.
+        For a real deployment, you will need to inject with your real configuration
+          (remove hbase-minicluster bean, 
+           and use <bean id="hbase-conf" class="org.apache.hadoop.hbase.HBaseConfiguration" factory-method="create" />
     -->
     <bean id="hbase-minicluster" class="org.apache.hadoop.hbase.HBaseTestingUtility" init-method="startMiniCluster" />
 
