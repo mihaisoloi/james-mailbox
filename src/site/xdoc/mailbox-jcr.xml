@@ -19,18 +19,25 @@
 -->
 <document>
 
-  <properties>
-     <title>Mailbox JCR</title>
-  </properties>
+    <properties>
+        <title>Mailbox JCR</title>
+    </properties>
 
-<body>
+    <body>
 
-  <section name="Maibox JCR Responsibility">
-  </section>
+        <section name="Maibox JCR Responsibility">
+            <p>This implementation stores user mailboxes using JCR (Java Content Repository) technology.</p>
+            <p>The default JCR provider used is 
+                <a hfre="http://jackrabbit.apache.org/">Apache Jackrabbit</a>.
+            </p>
+        </section>
 
-  <section name="Mailbox JCR Classes">
-  </section>
+        <section name="Installation">
+        
+        </section>
+        <section name="Mailbox JCR Classes">
+        </section>
 
-</body>
+    </body>
 
 </document>

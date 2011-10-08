@@ -19,26 +19,45 @@
 -->
 <document>
 
-  <properties>
-     <title>Mailbox JPA</title>
-  </properties>
+    <properties>
+        <title>Mailbox JPA</title>
+    </properties>
 
-<body>
+    <body>
 
-  <section name="Mailbox JPA Responsibility">
-  </section>
-
-  <section name="Mailbox JPA Classes">
+        <section name="Mailbox JPA Responsibility">
+            <p> This mailbox implementation stores messages in a Java Persistace API store 
+            (think data bases, but not limited to that). 
+            </p>
+            <p>
+                Default JPA provider is 
+                <a href="http://openjpa.apache.org/">Apache OpenJPA</a>, 
+                but you can roll your own by extending JPAMailboxManager and JPAMessageManager in the same way
+                as OpenJPAMailboxManager and OpenJPAMessageManager do. 
+            </p>
+        </section>
   
-    <subsection name="Managers">
+        <section name="Overview">
+            <p>The JPA implementation uses Java Persistenca API Annotations to map Java objects to data base tables. 
+            The current implementation also supports features such as storing messages in an encripted database and provide 
+            on the fly encryption/decryption. 
+            </p>
+        </section>
+        
+        <section name="Installation">
+            
+        </section>
+        <section name="Mailbox JPA Classes">
+  
+            <subsection name="Managers">
 <!-- 
 Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-jpa-managers.png"/></p>
 -->
-    </subsection>
+            </subsection>
   
-  </section>
+        </section>
 
-</body>
+    </body>
 
 </document>

@@ -19,26 +19,27 @@
 -->
 <document>
 
-  <properties>
-     <title>Mailbox Memory</title>
-  </properties>
+    <properties>
+        <title>Mailbox Memory</title>
+    </properties>
 
-<body>
+    <body>
 
-  <section name="Mailbox Memory Responsibility">
-  </section>
+        <section name="Mailbox Memory Responsibility">
+            <p>Provides an in-memory mail store.</p>
+        </section>
 
-  <section name="Mailbox Memory Classes">
+        <section name="Mailbox Memory Classes">
   
-    <subsection name="Managers">
+            <subsection name="Managers">
 <!-- 
 Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-memory-managers.png"/></p>
 -->
-    </subsection>
+            </subsection>
     
-  </section>
+        </section>
 
-</body>
+    </body>
 
 </document>
