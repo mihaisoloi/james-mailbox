@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.spring;
 
+import java.io.IOException;
+
 import junit.framework.Assert;
 
 import org.apache.james.mailbox.copier.MailboxCopierImpl;
@@ -29,12 +31,12 @@ public class SpringMailboxTest {
     private static SpringMailbox springMailbox;
     
     @BeforeClass
-    public static void init() {
+    public static void beforeClass() {
         springMailbox = new SpringMailbox();
     }
     
     @Test
-    public void testGetBean() {
+    public void testGetBean() throws IOException {
         Assert.assertEquals(AnonymousAuthenticator.class.getName(), springMailbox.getBean("authenticator").getClass().getName());
         Assert.assertEquals(MailboxCopierImpl.class.getName(), springMailbox.getBean("mailboxcopier").getClass().getName());
     }

@@ -29,9 +29,11 @@
      
     <!-- 
         This is the link to the HBase Cluster. You need to place a valid hbase 
-        config file on the classpath that will be pciked up by HBaseConfiguration.create().
+        config file on the classpath that will be picked up by HBaseConfiguration.create().
     -->
-    <bean id="hbase-conf" class="org.apache.hadoop.hbase.HBaseConfiguration" factory-method="create" />
+    <bean id="hbase-minicluster" class="org.apache.hadoop.hbase.HBaseTestingUtility" init-method="startMiniCluster" />
+
+    <bean id="hbase-conf" factory-bean="hbase-minicluster" factory-method="getConfiguration"/>
 
     <bean id="hbase-mailboxmanager" class="org.apache.james.mailbox.hbase.HBaseMailboxManager" init-method="init">
         <constructor-arg index="0" ref="hbase-sessionMapperFactory"/>
