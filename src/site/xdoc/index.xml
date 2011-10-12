@@ -62,6 +62,11 @@
     <img src="images/uml/org-apache-james-mailbox-package.png"/>
   </section>
   
+  <section name="Apache James Mailbox logging">
+    <p>Apache James Mailbox uses <a href="http://slf4j.org/">SLF4J</a> as logging facade. For specific bindings one needs to add
+    a particular <a href="http://slf4j.org/faq.html#where_is_binding">SLF4J binding</a>.</p>
+  </section>
+  
 </body>
 
 </document>
