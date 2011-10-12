@@ -50,16 +50,6 @@ public class HBaseClusterSingleton {
     public HBaseClusterSingleton(boolean useMiniCluster) throws Exception {
         if (useMiniCluster) {
             HBaseTestingUtility htu = new HBaseTestingUtility();
-            htu.getConfiguration().setBoolean("dfs.support.append", true);
-            
-            // TODO
-            // I got wrong filepermissions on the created files. This fixes it for me.
-            // Maybe this depends on the umask settings on the local linux box?
-            // IMO following line should solve this, but it doesn't ..
-            // (see http://hadoop.apache.org/hdfs/docs/r0.21.0/hdfs-default.html)
-            //
-            // htu.getConfiguration().set("dfs.permissions.enabled", "false");
-            htu.getConfiguration().set("dfs.datanode.data.dir.perm", "775");
             try {
                 hbaseCluster = htu.startMiniCluster();
                 conf = hbaseCluster.getConfiguration();
