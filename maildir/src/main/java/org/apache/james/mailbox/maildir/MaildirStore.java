@@ -119,11 +119,9 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
      */
     private Mailbox<Integer> loadMailbox(MailboxSession session, File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
         long uidValidity;
-        long lastUid;
         MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath(), mailboxPath, locker);
         try {
             uidValidity = folder.getUidValidity();
-            lastUid = folder.getLastUid(session);
             return new SimpleMailbox<Integer>(mailboxPath, uidValidity);
 
         } catch (IOException e) {

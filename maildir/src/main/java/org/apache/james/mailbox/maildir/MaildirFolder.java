@@ -197,7 +197,7 @@ public class MaildirFolder {
                     IOUtils.closeQuietly(fileReader);
                 }                
             }
-        });
+        }, true);
         
         
     }
@@ -325,7 +325,7 @@ public class MaildirFolder {
                     IOUtils.closeQuietly(fileReader);
                 }                
             }
-        });
+        }, true);
     }
     
     /**
@@ -368,7 +368,7 @@ public class MaildirFolder {
                 }
                 return uidMap;
             }
-        });
+        }, true);
     }
     
     public SortedMap<Long, MaildirMessageName> getUidMap(MailboxSession session, FilenameFilter filter, long from, long to)
@@ -499,7 +499,7 @@ public class MaildirFolder {
                 }   
                 return recentMessages;
             }
-        });
+        }, true);
     }
     
     
@@ -764,7 +764,7 @@ public class MaildirFolder {
                    return uid;
                 }
             }
-        });
+        }, true);
 
     }
 
@@ -808,7 +808,7 @@ public class MaildirFolder {
                 }    
                 return null;
             }
-        });
+        }, true);
 
     }
     
@@ -872,7 +872,7 @@ public class MaildirFolder {
                     IOUtils.closeQuietly(fileReader);
                 }   
             }
-        });
+        }, true);
         
 
     }
