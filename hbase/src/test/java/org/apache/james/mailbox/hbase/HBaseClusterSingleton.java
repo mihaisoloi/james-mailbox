@@ -18,6 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase;
 
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
@@ -53,8 +54,24 @@ public class HBaseClusterSingleton {
             try {
                 hbaseCluster = htu.startMiniCluster();
                 conf = hbaseCluster.getConfiguration();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw new Exception("Error starting MiniCluster ", e);
+            } finally {
+                
+                if (hbaseCluster != null) {
+                    // add a shutdown hook for shuting down the minicluster.
+                    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                hbaseCluster.shutdown();
+                            } catch (IOException e) {
+                                throw new RuntimeException("Exception shuting down cluster.");
+                            }
+                        }
+                    }));
+                }
             }
         } else {
             conf = HBaseConfiguration.create();
@@ -78,16 +95,6 @@ public class HBaseClusterSingleton {
         if (hbaseAdmin.tableExists(SUBSCRIPTIONS_TABLE)) {
             hbaseAdmin.disableTable(SUBSCRIPTIONS_TABLE);
             hbaseAdmin.deleteTable(SUBSCRIPTIONS_TABLE);
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (useMiniCluster) {
-            if (hbaseCluster != null) {
-                hbaseCluster.shutdown();
-            }
         }
     }
 }
