@@ -30,7 +30,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.james</groupId>
     <artifactId>apache-james-mailbox-memory</artifactId>
 
     <name>Apache James In Memory Mailbox</name>

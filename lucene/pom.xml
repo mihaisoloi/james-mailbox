@@ -30,7 +30,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.james</groupId>
     <artifactId>apache-james-mailbox-lucene</artifactId>
 
     <name>Apache James Mailbox Lucene Index</name>

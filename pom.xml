@@ -26,11 +26,10 @@
     <parent>
         <artifactId>james-project</artifactId>
         <groupId>org.apache.james</groupId>
-        <version>1.8-SNAPSHOT</version>
+        <version>1.8</version>
         <relativePath></relativePath>
     </parent>
 
-    <groupId>org.apache.james</groupId>
     <artifactId>apache-james-mailbox</artifactId>
     <version>0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -563,7 +562,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-            
         </plugins>
     </build>
 

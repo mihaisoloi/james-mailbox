@@ -30,7 +30,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.james</groupId>
     <artifactId>apache-james-mailbox-jpa</artifactId>
 
     <name>Apache James JPA Mailbox</name>
