@@ -49,6 +49,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#delete(org.apache.james.mailbox.store.user.model.Subscription)
      */
+    @Override
     public void delete(Subscription subscription) throws SubscriptionException {
      // TODO: we need some kind of file locking here
         Set<String> subscriptionNames = readSubscriptionsForUser(subscription.getUser());
@@ -65,6 +66,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findSubscriptionsForUser(java.lang.String)
      */
+    @Override
     public List<Subscription> findSubscriptionsForUser(String user) throws SubscriptionException {
         Set<String> subscriptionNames = readSubscriptionsForUser(user);
         ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
@@ -77,6 +79,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#findMailboxSubscriptionForUser(java.lang.String, java.lang.String)
      */
+    @Override
     public Subscription findMailboxSubscriptionForUser(String user, String mailbox) throws SubscriptionException {
         File userRoot = new File(store.userRoot(user));
         Set<String> subscriptionNames;
@@ -93,6 +96,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     /**
      * @see org.apache.james.mailbox.store.user.SubscriptionMapper#save(org.apache.james.mailbox.store.user.model.Subscription)
      */
+    @Override
     public void save(Subscription subscription) throws SubscriptionException {
         // TODO: we need some kind of file locking here
         Set<String> subscriptionNames = readSubscriptionsForUser(subscription.getUser());
@@ -109,6 +113,7 @@ public class MaildirSubscriptionMapper extends NonTransactionalMapper implements
     /**
      * @see org.apache.james.mailbox.store.transaction.TransactionalMapper#endRequest()
      */
+    @Override
     public void endRequest() {
         // nothing to do
     }

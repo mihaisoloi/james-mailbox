@@ -86,14 +86,17 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     }
 
     
+    @Override
     public Integer getMailboxId() {
         return mailbox.getMailboxId();
     }
 
+    @Override
     public long getUid() {
         return uid;
     }
 
+    @Override
     public void setUid(long uid) {
         this.uid = uid;
     }
@@ -102,6 +105,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * org.apache.james.mailbox.store.mail.model.Message#setFlags(
      * javax.mail.Flags)
      */
+    @Override
     public void setFlags(Flags flags) {
         if (flags != null) {
             answered = flags.contains(Flags.Flag.ANSWERED);
@@ -117,6 +121,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * @see
      * org.apache.james.mailbox.store.mail.model.Message#isAnswered()
      */
+    @Override
     public boolean isAnswered() {
         return answered;
     }
@@ -125,6 +130,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * @see
      * org.apache.james.mailbox.store.mail.model.Message#isDeleted()
      */
+    @Override
     public boolean isDeleted() {
         return deleted;
     }
@@ -133,6 +139,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * @see
      * org.apache.james.mailbox.store.mail.model.Message#isDraft()
      */
+    @Override
     public boolean isDraft() {
         return draft;
     }
@@ -141,6 +148,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * @see
      * org.apache.james.mailbox.store.mail.model.Message#isFlagged()
      */
+    @Override
     public boolean isFlagged() {
         return flagged;
     }
@@ -149,6 +157,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
      * @see
      * org.apache.james.mailbox.store.mail.model.Message#isRecent()
      */
+    @Override
     public boolean isRecent() {
         return recent;
     }
@@ -156,6 +165,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#isSeen()
      */
+    @Override
     public boolean isSeen() {
         return seen;
     }
@@ -172,7 +182,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     
     @Override
     public String toString() {
-        StringBuffer theString = new StringBuffer("MaildirMessage ");
+        StringBuilder theString = new StringBuilder("MaildirMessage ");
         theString.append(getUid());
         theString.append(" {");
         Flags flags = createFlags();
@@ -194,6 +204,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getModSeq()
      */
+    @Override
     public long getModSeq() {
         return modSeq;
     }
@@ -201,6 +212,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#setModSeq(long)
      */
+    @Override
     public void setModSeq(long modSeq) {
         this.modSeq = modSeq;
     }
@@ -316,7 +328,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     private int bodyStartOctet(InputStream msgIn) throws IOException {
         // we need to pushback maximal 3 bytes
         PushbackInputStream in = new PushbackInputStream(msgIn, 3);
-        int bodyStartOctet = in.available();
+        int localBodyStartOctet = in.available();
         int i = -1;
         int count = 0;
         while ((i = in.read()) != -1 && in.available() > 4) {
@@ -329,7 +341,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
                         int c = in.read();
 
                         if (c == 0x0A) {
-                            bodyStartOctet = count + 4;
+                            localBodyStartOctet = count + 4;
                             break;
                         }
                         in.unread(c);
@@ -340,12 +352,13 @@ public class MaildirMessage extends AbstractMessage<Integer> {
             }
             count++;
         }
-        return bodyStartOctet;
+        return localBodyStartOctet;
     }
 
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getMediaType()
      */
+    @Override
     public String getMediaType() {
         parseMessage();
         return propertyBuilder.getMediaType();
@@ -354,6 +367,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getSubType()
      */
+    @Override
     public String getSubType() {
         parseMessage();
         return propertyBuilder.getSubType();
@@ -362,6 +376,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getFullContentOctets()
      */
+    @Override
     public long getFullContentOctets() {
         return messageName.getSize();
     }
@@ -369,6 +384,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getTextualLineCount()
      */
+    @Override
     public Long getTextualLineCount() {
         parseMessage();
         return propertyBuilder.getTextualLineCount();
@@ -377,6 +393,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getProperties()
      */
+    @Override
     public List<Property> getProperties() {
         parseMessage();
         return propertyBuilder.toProperties();
@@ -385,6 +402,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getInternalDate()
      */
+    @Override
     public Date getInternalDate() {
         return messageName.getInternalDate();
     }
@@ -400,6 +418,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.Message#getBodyContent()
      */
+    @Override
     public InputStream getBodyContent() throws IOException {
         parseMessage();
         FileInputStream body = new FileInputStream(messageName.getFile());
@@ -411,6 +430,7 @@ public class MaildirMessage extends AbstractMessage<Integer> {
     /**
      * @see org.apache.james.mailbox.store.mail.model.AbstractMessage#getBodyStartOctet()
      */
+    @Override
     protected int getBodyStartOctet() {
         parseMessage();
         return bodyStartOctet;

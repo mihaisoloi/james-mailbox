@@ -207,7 +207,7 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
         // if INBOX => location == maildirLocation
         if (name.equals(MailboxConstants.INBOX))
             return root;
-        StringBuffer folder = new StringBuffer(root);
+        StringBuilder folder = new StringBuilder(root);
         if (!root.endsWith(File.pathSeparator))
             folder.append(File.separator);
         folder.append(".");
@@ -236,6 +236,7 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
     /**
      * @see org.apache.james.mailbox.store.mail.UidProvider#nextUid(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox)
      */
+    @Override
     public long nextUid(MailboxSession session, Mailbox<Integer> mailbox) throws MailboxException {
         try {
             return createMaildirFolder(mailbox).getLastUid(session) +1;

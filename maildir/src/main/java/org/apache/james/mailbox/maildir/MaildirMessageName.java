@@ -168,7 +168,7 @@ public class MaildirMessageName {
      */
     public String getFullName() {
         if (this.fullName == null) {
-            StringBuffer fullBuffer = new StringBuffer();
+            StringBuilder fullBuffer = new StringBuilder();
             fullBuffer.append(timestamp);
             fullBuffer.append(".");
             fullBuffer.append(uniqueString);
@@ -203,7 +203,7 @@ public class MaildirMessageName {
      */
     public FilenameFilter getFilenameFilter() {
         split();
-        StringBuffer pattern = new StringBuffer();
+        StringBuilder pattern = new StringBuilder();
         pattern.append(timestamp);
         pattern.append("\\.");
         pattern.append(uniqueString);
@@ -316,7 +316,7 @@ public class MaildirMessageName {
      */
     public String getBaseName() {
         split();
-        StringBuffer baseName = new StringBuffer();
+        StringBuilder baseName = new StringBuilder();
         baseName.append(timestamp);
         baseName.append(".");
         baseName.append(uniqueString);
@@ -331,18 +331,18 @@ public class MaildirMessageName {
      * @return A String valid for Maildir
      */
     public String encodeFlags(Flags flags) {
-        StringBuffer flagsString = new StringBuffer(":2,");
+        StringBuilder localFlagsString = new StringBuilder(":2,");
         if (flags.contains(Flags.Flag.DRAFT))
-            flagsString.append(FLAG_DRAFT);
+            localFlagsString.append(FLAG_DRAFT);
         if (flags.contains(Flags.Flag.FLAGGED))
-            flagsString.append(FLAG_FLAGGED);
+            localFlagsString.append(FLAG_FLAGGED);
         if (flags.contains(Flags.Flag.ANSWERED))
-            flagsString.append(FLAG_ANSWERD);
+            localFlagsString.append(FLAG_ANSWERD);
         if (flags.contains(Flags.Flag.SEEN))
-            flagsString.append(FLAG_SEEN);
+            localFlagsString.append(FLAG_SEEN);
         if (flags.contains(Flags.Flag.DELETED))
-            flagsString.append(FLAG_DELETED);
-        return flagsString.toString();
+            localFlagsString.append(FLAG_DELETED);
+        return localFlagsString.toString();
     }
     
     /**
@@ -352,18 +352,18 @@ public class MaildirMessageName {
      * @return A Flags object containing the flags read form the String
      */
     public Flags decodeFlags(String flagsString) {
-        Flags flags = new Flags();
+        Flags localFlags = new Flags();
         if (flagsString.contains(FLAG_DRAFT))
-            flags.add(Flags.Flag.DRAFT);
+            localFlags.add(Flags.Flag.DRAFT);
         if (flagsString.contains(FLAG_FLAGGED))
-            flags.add(Flags.Flag.FLAGGED);
+            localFlags.add(Flags.Flag.FLAGGED);
         if (flagsString.contains(FLAG_ANSWERD))
-            flags.add(Flags.Flag.ANSWERED);
+            localFlags.add(Flags.Flag.ANSWERED);
         if (flagsString.contains(FLAG_SEEN))
-            flags.add(Flags.Flag.SEEN);
+            localFlags.add(Flags.Flag.SEEN);
         if (flagsString.contains(FLAG_DELETED))
-            flags.add(Flags.Flag.DELETED);
-        return flags;
+            localFlags.add(Flags.Flag.DELETED);
+        return localFlags;
     }
     
     /**
@@ -402,7 +402,7 @@ public class MaildirMessageName {
     public static MaildirMessageName createUniqueName(MaildirFolder parentFolder, long size) {
         String timestamp = String.valueOf(System.currentTimeMillis());
         timestamp = timestamp.substring(0, timestamp.length()-3); // time in seconds
-        StringBuffer uniquePart = new StringBuffer();
+        StringBuilder uniquePart = new StringBuilder();
         uniquePart.append(Integer.toHexString(random.nextInt())); // random number as hex
         uniquePart.append(timestamp.substring(timestamp.length()-3)); // milliseconds
         uniquePart.append(processName); // process name
@@ -421,6 +421,7 @@ public class MaildirMessageName {
     
     public static FilenameFilter createRegexFilter(final Pattern pattern) {
         return new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 Matcher matcher = pattern.matcher(name);
                 return matcher.matches();
