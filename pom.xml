@@ -86,7 +86,7 @@
         <version.lucene>3.1.0</version.lucene>
         <version.jackrabbit>2.2.0</version.jackrabbit>
         <version.hbase>0.90.4</version.hbase>
-        <version.hadoop>0.20.204.0</version.hadoop>
+        <version.hadoop>0.20.205.0</version.hadoop>
     </properties>
 
     <dependencyManagement>
