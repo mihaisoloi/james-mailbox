@@ -76,17 +76,16 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
                     FileUtils.deleteDirectory(new File(folder, MaildirFolder.NEW));
                     FileUtils.deleteDirectory(new File(folder, MaildirFolder.TMP));
                     File uidListFile = new File(folder, MaildirFolder.UIDLIST_FILE);
+                    uidListFile.delete();
                     File validityFile = new File(folder, MaildirFolder.VALIDITY_FILE);
-                    if (!uidListFile.delete())
-                        throw new IOException("Could not delete file " + uidListFile);
-                    if (!validityFile.delete())
-                        throw new IOException("Could not delete file " + validityFile);
+                    validityFile.delete();
                 }
                 else {
                     // We simply delete all the folder for non INBOX mailboxes.
                     FileUtils.deleteDirectory(folder);
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new MailboxException("Unable to delete Mailbox " + mailbox, e);
             }
         }
