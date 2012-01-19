@@ -28,11 +28,11 @@ import org.apache.james.mailbox.Content;
 import org.apache.james.mailbox.Headers;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.MessageRange.Type;
 import org.apache.james.mailbox.MessageResult;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResultIterator;
+import org.apache.james.mailbox.MimeDescriptor;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -45,6 +45,7 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
     private Mailbox<Id> mailbox;
     private FetchGroup group;
     private long from;
+    private long cursor;
     private long to;
     private int batchSize;
     private Type type;
@@ -57,6 +58,7 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
         this.group = group;
         this.mapper = mapper;
         this.from = range.getUidFrom();
+        this.cursor = this.from;
         this.to = range.getUidTo();
         this.batchSize = batchSize;
         this.type = range.getType();
@@ -112,34 +114,36 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
     public boolean hasNext() {
         if (!done && (next == null || !next.hasNext())) {
             try {
-                MessageRange range;
-                switch (type) {
-                default:
-                case ALL:
-                    range = MessageRange.all();
-                    break;
-                case FROM:
-                    range = MessageRange.from(from);
-                    break;
-                case ONE:
-                    range = MessageRange.one(from);
-                    break;
-                case RANGE:
-                    range = MessageRange.range(from, to);
-                    break;
-                }
-
-                next = mapper.findInMailbox(mailbox, range, ftype, batchSize);
-                if (!next.hasNext()) {
-                	done = true;
-                }
+                readBatch();
             } catch (MailboxException e) {
                 this.exception = e;
                 done = true;
             }
-            return !done;
-        } else {
-            return !done;
+        }
+       return !done;
+    }
+
+    private void readBatch() throws MailboxException {
+        MessageRange range;
+        switch (type) {
+        default:
+        case ALL:
+            // In case of all, we start on cursor and don't specify a to
+            range = MessageRange.from(cursor);
+            break;
+        case FROM:
+            range = MessageRange.from(cursor);
+            break;
+        case ONE:
+            range = MessageRange.one(cursor);
+            break;
+        case RANGE:
+            range = MessageRange.range(cursor, to);
+            break;
+        }
+        next = mapper.findInMailbox(mailbox, range, ftype, batchSize);
+        if (!next.hasNext()) {
+            done = true;
         }
     }
 
@@ -149,16 +153,16 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
             final Message<Id> message = next.next();
             MessageResult result;
             try {
-
                 result = ResultUtils.loadMessageResult(message, group);
+                cursor = result.getUid();
             } catch (MailboxException e) {
                 result = new UnloadedMessageResult<Id>(message, e);
             }
 
+            cursor++;
             // move the start UID behind the last fetched message UID if needed
-            if (!next.hasNext()) {
-                from = result.getUid() + 1;
-                if (result.getUid() >= to || from > to) {
+            if (hasNext()) {
+                if (cursor > to) {
                 	done = true;
                 }
             }
