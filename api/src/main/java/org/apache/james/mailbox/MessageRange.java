@@ -43,8 +43,9 @@ public class MessageRange implements Iterable<Long>{
         RANGE
     }
 
-    public static final int NOT_A_UID = -1;
+    public static final long NOT_A_UID = -1;
 
+    public static final long MAX_UID = Long.MAX_VALUE;
 
     /**
      * Constructs a range consisting of a single message only.
@@ -64,7 +65,7 @@ public class MessageRange implements Iterable<Long>{
      * @return not null
      */
     public static MessageRange all() {
-        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID, NOT_A_UID);
+        final MessageRange result = new MessageRange(Type.ALL, NOT_A_UID, MAX_UID);
         return result;
     }
 
