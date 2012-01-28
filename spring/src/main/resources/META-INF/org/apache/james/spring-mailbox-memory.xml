@@ -33,6 +33,8 @@
         <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
         <constructor-arg index="2" ref="memory-locker"/>
+        <constructor-arg index="3" ref="aclResolver"/>
+        <constructor-arg index="4" ref="groupMembershipResolver"/>
 <!--         <property name="messageSearchIndex" ref="lazyIndex"/> -->
     </bean>
     <bean id ="memory-subscriptionManager" class="org.apache.james.mailbox.store.StoreSubscriptionManager">

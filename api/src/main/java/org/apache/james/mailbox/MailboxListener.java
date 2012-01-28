@@ -120,6 +120,24 @@ public interface MailboxListener {
         public abstract MailboxPath getNewPath();
     }
 
+
+    /**
+     * A mailbox event related to updated ACL
+     */
+    public abstract class MailboxACLUpdated extends MessageEvent {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
+        public MailboxACLUpdated(MailboxSession session, MailboxPath path) {
+            super(session, path);
+        }
+
+        public abstract MailboxACL getUpdatedACL();
+    }
+    
     /**
      * A mailbox event related to a message.
      */
@@ -200,5 +218,5 @@ public interface MailboxListener {
         public abstract MessageMetaData getMetaData(long uid);
         
     }
-
+    
 }

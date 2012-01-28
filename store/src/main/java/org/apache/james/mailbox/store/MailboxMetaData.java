@@ -24,8 +24,8 @@ import java.util.List;
 
 import javax.mail.Flags;
 
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MessageManager;
-
 
 /**
  * Describes the current state of a mailbox.
@@ -43,9 +43,9 @@ public class MailboxMetaData implements MessageManager.MetaData {
     private final boolean writeable;
     private final long highestModSeq;
     private final boolean modSeqPermanent;
-    
-    public MailboxMetaData(final List<Long> recent, final Flags premanentFlags, final long uidValidity, final long nextUid, final long highestModSeq, 
-            final long messageCount, final long unseenCount, final Long firstUnseen, final boolean writeable, final boolean modSeqPermanent) {
+    private final MailboxACL acl;
+
+    public MailboxMetaData(final List<Long> recent, final Flags premanentFlags, final long uidValidity, final long nextUid, final long highestModSeq, final long messageCount, final long unseenCount, final Long firstUnseen, final boolean writeable, final boolean modSeqPermanent, MailboxACL acl) {
         super();
         if (recent == null) {
             this.recent = new ArrayList<Long>();
@@ -64,6 +64,7 @@ public class MailboxMetaData implements MessageManager.MetaData {
         this.firstUnseen = firstUnseen;
         this.writeable = writeable;
         this.modSeqPermanent = modSeqPermanent;
+        this.acl = acl;
     }
 
     /**
@@ -141,5 +142,15 @@ public class MailboxMetaData implements MessageManager.MetaData {
      */
     public boolean isModSeqPermanent() {
         return modSeqPermanent;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.james.mailbox.MessageManager.MetaData#getACL()
+     */
+    @Override
+    public MailboxACL getACL() {
+        return acl;
     }
 }

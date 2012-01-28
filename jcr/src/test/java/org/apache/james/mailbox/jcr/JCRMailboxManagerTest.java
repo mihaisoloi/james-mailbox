@@ -28,9 +28,13 @@ import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.ConfigurationException;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.jcr.mail.JCRModSeqProvider;
 import org.apache.james.mailbox.jcr.mail.JCRUidProvider;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
@@ -101,7 +105,11 @@ public class JCRMailboxManagerTest extends AbstractMailboxManagerTest {
         JCRUidProvider uidProvider = new JCRUidProvider(locker, sessionRepos);
         JCRModSeqProvider modSeqProvider= new JCRModSeqProvider(locker, sessionRepos);
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider, modSeqProvider);
-        JCRMailboxManager manager = new JCRMailboxManager(mf, null, locker);
+        
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        JCRMailboxManager manager = new JCRMailboxManager(mf, null, locker, aclResolver, groupMembershipResolver);
         manager.init();
         setMailboxManager(manager);
     }

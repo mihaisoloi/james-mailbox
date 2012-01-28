@@ -41,10 +41,21 @@
 -->
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-maildir.xml" />
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-memory.xml" />
+    <!--  
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-hbase.xml" />
+    -->
     <!-- 
       Mailbox Copier
      -->
     <bean id="mailboxcopier" class="org.apache.james.mailbox.copier.MailboxCopierImpl"/>
+
+    <!-- 
+      Mailbox ACL Resolver
+     -->
+    <bean id="aclResolver" class="org.apache.james.mailbox.UnionMailboxACLResolver"/>
+    <!-- 
+      Group Membership Resolver
+     -->
+    <bean id="groupMembershipResolver" class="org.apache.james.mailbox.SimpleGroupMembershipResolver"/>
           
 </beans>

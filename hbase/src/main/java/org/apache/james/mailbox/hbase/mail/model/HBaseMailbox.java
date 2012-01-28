@@ -19,7 +19,10 @@
 package org.apache.james.mailbox.hbase.mail.model;
 
 import java.util.UUID;
+
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**
@@ -193,4 +196,22 @@ public class HBaseMailbox implements Mailbox<UUID> {
     public void setMessageCount(long messageCount) {
         this.messageCount = messageCount;
     }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getACL()
+     */
+    @Override
+    public MailboxACL getACL() {
+        // TODO ACL support
+        return SimpleMailboxACL.OWNER_FULL_ACL;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#setACL(org.apache.james.mailbox.MailboxACL)
+     */
+    @Override
+    public void setACL(MailboxACL acl) {
+        // TODO ACL support
+    }
+    
 }

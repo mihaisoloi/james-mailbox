@@ -22,6 +22,8 @@ import java.util.UUID;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.hbase.mail.HBaseMailboxMapper;
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
@@ -38,12 +40,12 @@ import org.apache.james.mailbox.store.transaction.TransactionalMapper;
  */
 public class HBaseMailboxManager extends StoreMailboxManager<UUID> {
 
-    public HBaseMailboxManager(HBaseMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, MailboxPathLocker locker) {
-        super(mapperFactory, authenticator, locker);
+    public HBaseMailboxManager(HBaseMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, MailboxPathLocker locker, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) {
+        super(mapperFactory, authenticator, locker, aclResolver, groupMembershipResolver);
     }
 
-    public HBaseMailboxManager(HBaseMailboxSessionMapperFactory mapperFactory, Authenticator authenticator) {
-        super(mapperFactory, authenticator, new JVMMailboxPathLocker());
+    public HBaseMailboxManager(HBaseMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) {
+        super(mapperFactory, authenticator, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
     }
 
     @Override
@@ -79,7 +81,7 @@ public class HBaseMailboxManager extends StoreMailboxManager<UUID> {
 
     @Override
     protected StoreMessageManager<UUID> createMessageManager(Mailbox<UUID> mailboxRow, MailboxSession session) throws MailboxException {
-        StoreMessageManager<UUID> result = new HBaseMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailboxRow);
+        StoreMessageManager<UUID> result = new HBaseMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailboxRow, getAclResolver(), getGroupMembershipResolver());
         return result;
     }
 }

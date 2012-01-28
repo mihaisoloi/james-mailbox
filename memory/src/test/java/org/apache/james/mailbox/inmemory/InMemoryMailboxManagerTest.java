@@ -19,9 +19,13 @@
 package org.apache.james.mailbox.inmemory;
 
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.store.MockAuthenticator;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
@@ -62,7 +66,10 @@ public class InMemoryMailboxManagerTest extends AbstractMailboxManagerTest {
     protected void createMailboxManager() throws MailboxException {
         
         InMemoryMailboxSessionMapperFactory factory = new InMemoryMailboxSessionMapperFactory();
-        StoreMailboxManager<Long> mailboxManager = new StoreMailboxManager<Long>(factory, new MockAuthenticator());
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        StoreMailboxManager<Long> mailboxManager = new StoreMailboxManager<Long>(factory, new MockAuthenticator(), aclResolver, groupMembershipResolver);
         mailboxManager.init();
         
         setMailboxManager(mailboxManager);

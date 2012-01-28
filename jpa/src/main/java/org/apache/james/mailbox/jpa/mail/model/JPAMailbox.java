@@ -27,7 +27,9 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 @Entity(name="Mailbox")
@@ -211,6 +213,23 @@ public class JPAMailbox implements Mailbox<Long> {
     
     public long consumeModSeq() {
         return ++highestModSeq;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getACL()
+     */
+    @Override
+    public MailboxACL getACL() {
+        // TODO ACL support
+        return SimpleMailboxACL.OWNER_FULL_ACL;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#setACL(org.apache.james.mailbox.MailboxACL)
+     */
+    @Override
+    public void setACL(MailboxACL acl) {
+        // TODO ACL support
     }
     
 }

@@ -24,6 +24,8 @@ import java.util.Date;
 import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.jpa.JPAMessageManager;
@@ -51,13 +53,13 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     }
     
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index,
-            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox) throws MailboxException {
-        this(mapperFactory, index, dispatcher, locker,  mailbox, AdvancedFeature.None);
+            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+        this(mapperFactory, index, dispatcher, locker,  mailbox, AdvancedFeature.None, aclResolver, groupMembershipResolver);
     }
 
     public OpenJPAMessageManager(MailboxSessionMapperFactory<Long> mapperFactory, MessageSearchIndex<Long> index, 
-            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox, final AdvancedFeature f) throws MailboxException {
-        super(mapperFactory,  index, dispatcher, locker, mailbox);
+            MailboxEventDispatcher<Long> dispatcher, MailboxPathLocker locker, Mailbox<Long> mailbox, final AdvancedFeature f, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+        super(mapperFactory,  index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
         this.feature = f;
     }
 

@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.jcr;
 
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
@@ -39,18 +41,18 @@ public class JCRMailboxManager extends StoreMailboxManager<String> implements JC
 
     private final Logger logger = LoggerFactory.getLogger(JCRMailboxManager.class);
     
-    public JCRMailboxManager(JCRMailboxSessionMapperFactory mapperFactory, final Authenticator authenticator) {
-	    this(mapperFactory, authenticator, new JVMMailboxPathLocker());
+    public JCRMailboxManager(JCRMailboxSessionMapperFactory mapperFactory, final Authenticator authenticator, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) {
+	    this(mapperFactory, authenticator, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
     }
 
-    public JCRMailboxManager(JCRMailboxSessionMapperFactory mapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
-        super(mapperFactory, authenticator, locker);
+    public JCRMailboxManager(JCRMailboxSessionMapperFactory mapperFactory, final Authenticator authenticator, final MailboxPathLocker locker, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) {
+        super(mapperFactory, authenticator, locker, aclResolver, groupMembershipResolver);
     }
 
     
     @Override
     protected StoreMessageManager<String> createMessageManager(Mailbox<String> mailboxEntity, MailboxSession session) throws MailboxException{
-        return new JCRMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), (JCRMailbox) mailboxEntity, logger, getDelimiter());
+        return new JCRMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), (JCRMailbox) mailboxEntity, getAclResolver(), getGroupMembershipResolver(), logger, getDelimiter());
     }
 
     @Override

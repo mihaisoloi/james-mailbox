@@ -38,18 +38,24 @@ import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
+import org.apache.james.mailbox.MailboxACL;
+import org.apache.james.mailbox.MailboxACL.MailboxACLRight;
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MailboxSession.User;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.MessageMetaData;
 import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.MessageResultIterator;
 import org.apache.james.mailbox.ReadOnlyException;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.UnsupportedRightException;
 import org.apache.james.mailbox.UpdatedFlags;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
@@ -103,17 +109,23 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     private final MessageMapperFactory<Id> mapperFactory;
 
     private final MessageSearchIndex<Id> index;
+    
+    private final MailboxACLResolver aclResolver;
+    
+    private final GroupMembershipResolver groupMembershipResolver;
 
 	private MailboxPathLocker locker;
 
     private int fetchBatchSize;
     
-    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final MailboxPathLocker locker, final Mailbox<Id> mailbox) throws MailboxException {
+    public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final MailboxPathLocker locker, final Mailbox<Id> mailbox, final MailboxACLResolver aclResolver, final GroupMembershipResolver groupMembershipResolver) throws MailboxException {
         this.mailbox = mailbox;
         this.dispatcher = dispatcher;
         this.mapperFactory = mapperFactory;
         this.index = index;
         this.locker = locker;
+        this.aclResolver = aclResolver;
+        this.groupMembershipResolver = groupMembershipResolver;
     }
     
     public void setFetchBatchSize(int fetchBatchSize) {
@@ -395,6 +407,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      */
     public MetaData getMetaData(boolean resetRecent, MailboxSession mailboxSession, 
             org.apache.james.mailbox.MessageManager.MetaData.FetchGroup fetchGroup) throws MailboxException {
+        
         final List<Long> recent;
         final Flags permanentFlags = getPermanentFlags(mailboxSession);
         final long uidValidity = getMailboxEntity().getUidValidity();
@@ -436,7 +449,10 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
                 recent = new ArrayList<Long>();
                 break;
         }
-        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession), isModSeqPermanent(mailboxSession));
+        // FIXME
+        boolean resourceOwnerIsGroup = false;
+        MailboxACL resolvedAcl = aclResolver.applyGlobalACL(mailbox.getACL(), resourceOwnerIsGroup );
+        return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession), isModSeqPermanent(mailboxSession), resolvedAcl );
     }
 
  
@@ -676,4 +692,15 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
         return messageMapper.findFirstUnseenMessageUid(getMailboxEntity());
     }
+    
+    public boolean hasRight(MailboxACLRight right, MailboxSession session) throws UnsupportedRightException {
+        User user = session.getUser();
+        String userName = user != null ? user.getUserName() : null;
+        
+        // FIXME probably mailbox should provide the information whether the resource owner is group; otherwise user names and group names may clash
+        boolean resourceOwnerIsGroup = false;
+        
+        return aclResolver.hasRight(userName, groupMembershipResolver, right, mailbox.getACL(), mailbox.getUser(), resourceOwnerIsGroup);
+    }
+    
 }

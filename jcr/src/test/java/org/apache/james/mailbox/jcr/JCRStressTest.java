@@ -25,9 +25,13 @@ import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.apache.james.mailbox.AbstractStressTest;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.jcr.mail.JCRModSeqProvider;
 import org.apache.james.mailbox.jcr.mail.JCRUidProvider;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
@@ -60,7 +64,10 @@ public class JCRStressTest extends AbstractStressTest {
         JCRUidProvider uidProvider = new JCRUidProvider(locker, sessionRepos);
         JCRModSeqProvider modSeqProvider= new JCRModSeqProvider(locker, sessionRepos);
         JCRMailboxSessionMapperFactory mf = new JCRMailboxSessionMapperFactory(sessionRepos, uidProvider, modSeqProvider);
-        mailboxManager = new JCRMailboxManager(mf, null, locker);
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        mailboxManager = new JCRMailboxManager(mf, null, locker, aclResolver, groupMembershipResolver);
         mailboxManager.init();
 
     }

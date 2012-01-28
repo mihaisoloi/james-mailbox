@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail.model;
 
+import org.apache.james.mailbox.MailboxACL;
+
 /**
  * Models long term mailbox data.
  */
@@ -70,4 +72,20 @@ public interface Mailbox<Id> {
      * @return uid validity
      */
     long getUidValidity();
+    
+    
+    /**
+     * Gets the current ACL for this mailbox.
+     *
+     * @return ACL
+     */
+    MailboxACL getACL();
+    
+    /**
+     * Sets the current ACL for this mailbox.
+     *
+     * @param acl
+     */
+    void setACL(MailboxACL acl);
+    
 }

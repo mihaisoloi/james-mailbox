@@ -28,6 +28,7 @@ import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
 import org.apache.james.mailbox.store.mail.UidProvider;
@@ -118,12 +119,9 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
      * @throws MailboxException If the mailbox folder doesn't exist or can't be read
      */
     private Mailbox<Integer> loadMailbox(MailboxSession session, File mailboxFile, MailboxPath mailboxPath) throws MailboxException {
-        long uidValidity;
         MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath(), mailboxPath, locker);
         try {
-            uidValidity = folder.getUidValidity();
-            return new SimpleMailbox<Integer>(mailboxPath, uidValidity);
-
+            return new MaildirMailbox<Integer>(session, mailboxPath, folder);
         } catch (IOException e) {
             throw new MailboxException("Unable to load Mailbox " + mailboxPath, e);
         }

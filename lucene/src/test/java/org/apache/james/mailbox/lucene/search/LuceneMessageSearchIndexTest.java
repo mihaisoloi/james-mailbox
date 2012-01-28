@@ -34,7 +34,9 @@ import java.util.Map;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.SearchQuery.AddressType;
 import org.apache.james.mailbox.SearchQuery.DateResolution;
 import org.apache.james.mailbox.SearchQuery.Sort.SortClause;
@@ -741,6 +743,23 @@ public class LuceneMessageSearchIndexTest {
         public long getUidValidity() {
             return 0;
         }
+
+        /* (non-Javadoc)
+         * @see org.apache.james.mailbox.store.mail.model.Mailbox#getACL()
+         */
+        @Override
+        public MailboxACL getACL() {
+            return SimpleMailboxACL.OWNER_FULL_ACL;
+        }
+
+        /* (non-Javadoc)
+         * @see org.apache.james.mailbox.store.mail.model.Mailbox#setACL(org.apache.james.mailbox.MailboxACL)
+         */
+        @Override
+        public void setACL(MailboxACL acl) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
 
     }
 }

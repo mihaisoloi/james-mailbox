@@ -26,9 +26,11 @@ import java.util.Iterator;
 
 import javax.mail.Flags;
 
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.mock.MockMailboxSession;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
@@ -102,6 +104,16 @@ public class MailboxEventDispatcherFlagsTest {
         public long getUidValidity() {
             return 0;
         }
+        
+        @Override
+        public MailboxACL getACL() {
+            return SimpleMailboxACL.EMPTY;
+        }
+
+        @Override
+        public void setACL(MailboxACL acl) {
+        }
+
     };
     
     @Before

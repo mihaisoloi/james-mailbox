@@ -23,6 +23,8 @@ import java.util.Date;
 import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
@@ -45,8 +47,8 @@ public class JCRMessageManager extends StoreMessageManager<String> {
     private final Logger log;
 
     public JCRMessageManager(MailboxSessionMapperFactory<String> mapperFactory, MessageSearchIndex<String> index, 
-            final MailboxEventDispatcher<String> dispatcher, final MailboxPathLocker locker, final JCRMailbox mailbox, final Logger log, final char delimiter) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox);
+            final MailboxEventDispatcher<String> dispatcher, final MailboxPathLocker locker, final JCRMailbox mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver, final Logger log, final char delimiter) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
         this.log = log;
     }
 

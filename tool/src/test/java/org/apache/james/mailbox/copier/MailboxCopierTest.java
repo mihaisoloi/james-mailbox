@@ -24,11 +24,15 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.inmemory.InMemoryMailboxSessionMapperFactory;
 import org.apache.james.mailbox.mock.MockMailboxManager;
 import org.apache.james.mailbox.store.Authenticator;
@@ -147,14 +151,19 @@ public class MailboxCopierTest {
      * @return a new InMemoryMailboxManager
      */
     private MailboxManager newInMemoryMailboxManager() {
-    
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
         return new StoreMailboxManager<Long>(
             new InMemoryMailboxSessionMapperFactory(), 
             new Authenticator() {
                 public boolean isAuthentic(String userid, CharSequence passwd) {
                     return true;
                 }
-            });
+            },
+            aclResolver,
+            groupMembershipResolver
+            );
     
     }
 

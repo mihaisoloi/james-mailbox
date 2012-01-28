@@ -23,7 +23,9 @@ import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.Text;
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.jcr.JCRImapConstants;
 import org.apache.james.mailbox.jcr.Persistent;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -303,4 +305,22 @@ public class JCRMailbox implements Mailbox<String>, JCRImapConstants, Persistent
         }
         return highestKnownModSeq;
     }
+    
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getACL()
+     */
+    @Override
+    public MailboxACL getACL() {
+        // TODO ACL support
+        return SimpleMailboxACL.OWNER_FULL_ACL;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#setACL(org.apache.james.mailbox.MailboxACL)
+     */
+    @Override
+    public void setACL(MailboxACL acl) {
+        // TODO ACL support
+    }
+    
 }

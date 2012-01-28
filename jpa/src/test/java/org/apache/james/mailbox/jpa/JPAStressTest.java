@@ -24,9 +24,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.apache.james.mailbox.AbstractStressTest;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.jpa.mail.JPAModSeqProvider;
 import org.apache.james.mailbox.jpa.mail.JPAUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
@@ -75,7 +79,10 @@ public class JPAStressTest extends AbstractStressTest {
         JVMMailboxPathLocker locker = new JVMMailboxPathLocker();
         JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory, new JPAUidProvider(locker, entityManagerFactory), new JPAModSeqProvider(locker, entityManagerFactory));
 
-        mailboxManager = new OpenJPAMailboxManager(mf, null);
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        mailboxManager = new OpenJPAMailboxManager(mf, null, aclResolver, groupMembershipResolver);
         mailboxManager.init();
 
         // Set the lock timeout via SQL because of a bug in openJPA

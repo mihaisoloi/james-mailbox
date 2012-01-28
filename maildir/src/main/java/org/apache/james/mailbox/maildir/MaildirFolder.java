@@ -21,11 +21,14 @@ package org.apache.james.mailbox.maildir;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,14 +36,19 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.james.mailbox.MailboxACL;
+import org.apache.james.mailbox.MailboxACL.MailboxACLEntryKey;
+import org.apache.james.mailbox.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxSession;
 
@@ -48,6 +56,7 @@ public class MaildirFolder {
 
     public static final String VALIDITY_FILE = "james-uidvalidity";
     public static final String UIDLIST_FILE = "james-uidlist";
+    public static final String ACL_FILE = "james-acl";
     public static final String CUR = "cur";
     public static final String NEW = "new";
     public static final String TMP = "tmp";
@@ -57,10 +66,12 @@ public class MaildirFolder {
     private File newFolder;
     private File tmpFolder;
     private File uidFile;
+    private File aclFile;
     
     private long lastUid = -1;
     private int messageCount = 0;
     private long uidValidity = -1;
+    private MailboxACL acl;
 
     private final MailboxPathLocker locker;
 
@@ -77,6 +88,7 @@ public class MaildirFolder {
         this.newFolder = new File(rootFolder, NEW);
         this.tmpFolder = new File(rootFolder, TMP);
         this.uidFile = new File(rootFolder, UIDLIST_FILE);
+        this.aclFile = new File(rootFolder, ACL_FILE);
         this.locker = locker;
         this.path = path;
     }
@@ -201,7 +213,7 @@ public class MaildirFolder {
         
         
     }
-    
+
     /**
      * Returns the uidValidity of this mailbox
      * @return The uidValidity
@@ -884,5 +896,94 @@ public class MaildirFolder {
     public String toString() {
         return getRootFile().getAbsolutePath();
     }
+    
+    public MailboxACL getACL(final MailboxSession session) throws MailboxException {
+        if (acl == null) {
+            acl = readACL(session);
+        }
+        return acl;
+    }
+
+    /**
+     * Read the ACL of the given mailbox from the file system.
+     * 
+     * @param session
+     * @throws MailboxException if there are problems with the aclFile file
+     */
+    private MailboxACL readACL(MailboxSession session) throws MailboxException {
+        // FIXME Do we need this locking?
+        return locker.executeWithLock(session, path, new LockAwareExecution<MailboxACL>() {
+            
+            @Override
+            public MailboxACL execute() throws MailboxException {
+                File f = aclFile;
+                InputStream in = null;
+                Properties props = new Properties();
+                if (f.exists()) {
+                    try {
+                        in = new FileInputStream(f);
+                        props.load(in);
+                    } catch (FileNotFoundException e) {
+                        throw new MailboxException("Unable to read last ACL from "+ f.getAbsolutePath(), e);
+                    } catch (IOException e) {
+                        throw new MailboxException("Unable to read last ACL from "+ f.getAbsolutePath(), e);
+                    }
+                    finally {
+                        IOUtils.closeQuietly(in);
+                    }
+                }
+                
+                return new SimpleMailboxACL(props);
+
+            }
+        }, true);
+        
+    }
+    
+    public void setACL(final MailboxSession session, final MailboxACL acl) throws MailboxException {
+        MailboxACL old = this.acl;
+        if (old != acl && (old == null || !old.equals(acl))) {
+            /* change only if different */
+            saveACL(acl, session);
+            this.acl = acl;
+        }
+        
+    }
+
+    private void saveACL(final MailboxACL acl, final MailboxSession session) throws MailboxException {
+        // FIXME Do we need this locking?
+        locker.executeWithLock(session, path, new LockAwareExecution<Void>() {
+            
+            @Override
+            public Void execute() throws MailboxException {
+                File f = aclFile;
+                OutputStream out = null;
+                Properties props = new Properties();
+                Map<MailboxACLEntryKey, MailboxACLRights> entries = acl.getEntries();
+                if (entries != null) {
+                    for (Entry<MailboxACLEntryKey, MailboxACLRights> en : entries.entrySet()) {
+                        props.put(en.getKey().serialize(), en.getValue().serialize());
+                    }
+                }
+                if (f.exists()) {
+                    try {
+                        out = new FileOutputStream(f);
+                        props.store(out, "written by "+ getClass().getName());
+                    } catch (FileNotFoundException e) {
+                        throw new MailboxException("Unable to read last ACL from "+ f.getAbsolutePath(), e);
+                    } catch (IOException e) {
+                        throw new MailboxException("Unable to read last ACL from "+ f.getAbsolutePath(), e);
+                    }
+                    finally {
+                        IOUtils.closeQuietly(out);
+                    }
+                }
+                
+                return null;
+
+            }
+        }, true);
+    }
+
     
 }

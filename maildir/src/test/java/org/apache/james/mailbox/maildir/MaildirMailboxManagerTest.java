@@ -27,8 +27,12 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.junit.After;
@@ -110,7 +114,11 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
 
             MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user", new JVMMailboxPathLocker());
             MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
+            
+            MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+            GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
             manager.init();
             setMailboxManager(manager);
             try {
@@ -140,7 +148,10 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
 
             MaildirStore store = new MaildirStore(MAILDIR_HOME + "/%domain/%user", new JVMMailboxPathLocker());
             MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
+            MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+            GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+            StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
             manager.init();
             setMailboxManager(manager);
             try {
@@ -169,7 +180,10 @@ public class MaildirMailboxManagerTest extends AbstractMailboxManagerTest {
     private void doTestListWithMaildirStoreConfiguration(String maildirStoreConfiguration) throws MailboxException, UnsupportedEncodingException {
         MaildirStore store = new MaildirStore(MAILDIR_HOME + maildirStoreConfiguration, new JVMMailboxPathLocker());
         MaildirMailboxSessionMapperFactory mf = new MaildirMailboxSessionMapperFactory(store);
-        StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker());
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        StoreMailboxManager<Integer> manager = new StoreMailboxManager<Integer>(mf, null, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
         manager.init();
         setMailboxManager(manager);
         try {

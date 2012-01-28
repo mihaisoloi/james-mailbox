@@ -18,6 +18,8 @@
  ****************************************************************/
 package org.apache.james.mailbox.jpa;
 
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
@@ -35,8 +37,8 @@ import org.apache.james.mailbox.store.transaction.TransactionalMapper;
 public abstract class JPAMailboxManager extends StoreMailboxManager<Long> {
     
     public JPAMailboxManager(JPAMailboxSessionMapperFactory mailboxSessionMapperFactory,
-            final Authenticator authenticator, final MailboxPathLocker locker) {
-        super(mailboxSessionMapperFactory, authenticator, locker);
+            final Authenticator authenticator, final MailboxPathLocker locker, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) {
+        super(mailboxSessionMapperFactory, authenticator, locker, aclResolver, groupMembershipResolver);
     }
     
     @Override

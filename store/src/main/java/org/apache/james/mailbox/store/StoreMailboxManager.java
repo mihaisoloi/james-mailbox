@@ -27,24 +27,26 @@ import java.util.Locale;
 import java.util.Random;
 
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxConstants;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxMetaData;
+import org.apache.james.mailbox.MailboxMetaData.Selectability;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
+import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
 import org.apache.james.mailbox.MailboxQuery;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.MailboxSessionIdGenerator;
 import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.RequestAware;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
-import org.apache.james.mailbox.MailboxMetaData.Selectability;
-import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
-import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
@@ -74,11 +76,14 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     private final MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory;    
     
     private final Authenticator authenticator;
+    
+    private final MailboxACLResolver aclResolver;
+    
+    private final GroupMembershipResolver groupMembershipResolver;
+    
     private final static Random RANDOM = new Random();
     
     private int copyBatchSize = 0;
-    
-    
 
     private MailboxPathLocker locker;
 
@@ -89,14 +94,16 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     private int fetchBatchSize = DEFAULT_FETCH_BATCH_SIZE;
 
     
-    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker) {
+    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxPathLocker locker, final MailboxACLResolver aclResolver, final GroupMembershipResolver groupMembershipResolver) {
         this.authenticator = authenticator;
         this.locker = locker;
-        this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;       
+        this.mailboxSessionMapperFactory = mailboxSessionMapperFactory;
+        this.aclResolver = aclResolver;
+        this.groupMembershipResolver = groupMembershipResolver;
     }
     
-    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator) {
-        this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker());
+    public StoreMailboxManager(MailboxSessionMapperFactory<Id> mailboxSessionMapperFactory, final Authenticator authenticator, final MailboxACLResolver aclResolver, final GroupMembershipResolver groupMembershipResolver) {
+        this(mailboxSessionMapperFactory, authenticator, new JVMMailboxPathLocker(), aclResolver, groupMembershipResolver);
     }
    
     public void setMailboxSessionIdGenerator(MailboxSessionIdGenerator idGenerator) {
@@ -179,6 +186,13 @@ public class StoreMailboxManager<Id> implements MailboxManager {
         return locker;
     }
     
+    public MailboxACLResolver getAclResolver() {
+        return aclResolver;
+    }
+
+    public GroupMembershipResolver getGroupMembershipResolver() {
+        return groupMembershipResolver;
+    }
     
     /**
      * Set the {@link AbstractDelegatingMailboxListener} to use with this {@link MailboxManager} instance. If none is set here a {@link HashMapDelegatingMailboxListener} instance will
@@ -284,7 +298,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
      * @return storeMailbox
      */
     protected StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailbox, MailboxSession session) throws MailboxException {
-        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailbox);
+        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailbox, getAclResolver(), getGroupMembershipResolver());
     }
 
     /**

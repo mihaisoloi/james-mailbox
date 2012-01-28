@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.mail.Flags;
 
+import org.apache.james.mailbox.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.MessageResult.FetchGroup;
 
 /**
@@ -42,7 +43,8 @@ public interface MessageManager {
      * @param mailboxSession
      * @return count
      * @throws MailboxException
-     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
+     * @deprecated use
+     *             {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
     @Deprecated
     long getMessageCount(MailboxSession mailboxSession) throws MailboxException;
@@ -52,18 +54,20 @@ public interface MessageManager {
      * 
      * @param session
      * @return writable
-     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
+     * @deprecated use
+     *             {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
     @Deprecated
     boolean isWriteable(MailboxSession session);
-    
-    
+
     /**
-     * Return true if {@link MessageResult#getModSeq()} is stored in a permanent way.
+     * Return true if {@link MessageResult#getModSeq()} is stored in a permanent
+     * way.
      * 
      * @param session
      * @return modSeqPermanent
-     * @deprecated use {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
+     * @deprecated use
+     *             {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
     boolean isModSeqPermanent(MailboxSession session);
 
@@ -115,7 +119,8 @@ public interface MessageManager {
     Map<Long, Flags> setFlags(Flags flags, boolean value, boolean replace, MessageRange set, MailboxSession mailboxSession) throws MailboxException;
 
     /**
-     * Appends a message to this mailbox. This method must return a higher UID as the last call in every case which also needs to be unique for the 
+     * Appends a message to this mailbox. This method must return a higher UID
+     * as the last call in every case which also needs to be unique for the
      * lifetime of the mailbox.
      * 
      * 
@@ -135,9 +140,11 @@ public interface MessageManager {
     long appendMessage(InputStream msgIn, Date internalDate, MailboxSession mailboxSession, boolean isRecent, Flags flags) throws MailboxException;
 
     /**
-     * Gets messages in the given range. The messages may get fetched under the-hood in batches so the caller should check if {@link MessageResultIterator#getException()} 
-     * returns <code>null</code> after {@link MessageResultIterator#hasNext()} returns <code>false</code>.
-     *  
+     * Gets messages in the given range. The messages may get fetched under
+     * the-hood in batches so the caller should check if
+     * {@link MessageResultIterator#getException()} returns <code>null</code>
+     * after {@link MessageResultIterator#hasNext()} returns <code>false</code>.
+     * 
      * 
      * @param set
      * @param fetchGroup
@@ -149,6 +156,18 @@ public interface MessageManager {
      */
     MessageResultIterator getMessages(MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException;
 
+    /**
+     * Tells whether the given {@link MailboxSession}'s user has the given
+     * {@link MailboxACLRight} for this {@link MessageManager}'s mailbox.
+     * 
+     * @param right
+     * @param session
+     * @return true if the given {@link MailboxSession}'s user has the given
+     *         {@link MailboxACLRight} for this {@link MessageManager}'s
+     *         mailbox; false otherwise.
+     * @throws MailboxException
+     */
+    public boolean hasRight(MailboxACLRight right, MailboxSession session) throws MailboxException;
 
     /**
      * Gets current meta data for the mailbox.<br>
@@ -173,33 +192,29 @@ public interface MessageManager {
     public interface MetaData {
 
         /**
-         * Describes the optional data types which will get set in the {@link MetaData}.
+         * Describes the optional data types which will get set in the
+         * {@link MetaData}.
          * 
-         * These are always set:
-         *     - HIGHESTMODSEQ
-         *     - PERMANENTFLAGS
-         *     - UIDNEXT
-         *     - UIDVALIDITY
-         *     - MODSEQPERMANET
-         *     - WRITABLE
+         * These are always set: - HIGHESTMODSEQ - PERMANENTFLAGS - UIDNEXT -
+         * UIDVALIDITY - MODSEQPERMANET - WRITABLE
          */
         public enum FetchGroup {
-            
+
             /**
              * Only include the message and recent count
              */
-            NO_UNSEEN, 
-            
+            NO_UNSEEN,
+
             /**
              * Only include the unseen message and recent count
              */
-            UNSEEN_COUNT, 
-            
+            UNSEEN_COUNT,
+
             /**
              * Only include the first unseen and the recent count
              */
-            FIRST_UNSEEN, 
-            
+            FIRST_UNSEEN,
+
             /**
              * Only return the "always set" metadata as documented above
              */
@@ -207,7 +222,8 @@ public interface MessageManager {
         };
 
         /**
-         * Gets the UIDs of recent messages if requested or an empty {@link List} otherwise.
+         * Gets the UIDs of recent messages if requested or an empty
+         * {@link List} otherwise.
          * 
          * @return the uids flagged RECENT in this mailbox,
          */
@@ -242,10 +258,11 @@ public interface MessageManager {
          * @return the uid that will be assigned to the next appended message
          */
         long getUidNext();
-        
+
         /**
-         * Return the highest mod-sequence for the mailbox. If this value has changed
-         * till the last check you can be sure that some changes where happen on the mailbox
+         * Return the highest mod-sequence for the mailbox. If this value has
+         * changed till the last check you can be sure that some changes where
+         * happen on the mailbox
          * 
          * @return higestModSeq
          */
@@ -255,9 +272,9 @@ public interface MessageManager {
          * Gets the number of messages that this mailbox contains. This is an
          * optional property.<br>
          * 
-         * @return number of messages contained or -1 when this 
-         *         optional data has not be requested
-         *         
+         * @return number of messages contained or -1 when this optional data
+         *         has not be requested
+         * 
          */
         long getMessageCount();
 
@@ -287,13 +304,21 @@ public interface MessageManager {
          * @return true if read-write, false if read only
          */
         boolean isWriteable();
-        
+
         /**
-         * Return true if the mailbox does store the mod-sequences in a permanent way
+         * Return true if the mailbox does store the mod-sequences in a
+         * permanent way
          * 
          * @return permanent
          */
         boolean isModSeqPermanent();
+
+        /**
+         * Returns the ACL concerning this mailbox.
+         * 
+         * @return acl
+         */
+        MailboxACL getACL();
 
     }
 }

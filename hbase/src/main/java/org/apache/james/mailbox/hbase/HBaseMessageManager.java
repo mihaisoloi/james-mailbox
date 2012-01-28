@@ -20,6 +20,9 @@ package org.apache.james.mailbox.hbase;
 
 import java.util.UUID;
 import javax.mail.Flags;
+
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
@@ -36,8 +39,8 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
 public class HBaseMessageManager extends StoreMessageManager<UUID> {
 
     public HBaseMessageManager(MailboxSessionMapperFactory<UUID> mapperFactory, MessageSearchIndex<UUID> index,
-            MailboxEventDispatcher<UUID> dispatcher, MailboxPathLocker locker, Mailbox<UUID> mailbox) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox);
+            MailboxEventDispatcher<UUID> dispatcher, MailboxPathLocker locker, Mailbox<UUID> mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
 
     }
 

@@ -22,8 +22,12 @@ package org.apache.james.mailbox.hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
 import org.apache.james.mailbox.hbase.mail.HBaseModSeqProvider;
 import org.apache.james.mailbox.hbase.mail.HBaseUidProvider;
 import org.junit.After;
@@ -72,7 +76,10 @@ public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
         HBaseModSeqProvider modSeqProvider = new HBaseModSeqProvider(conf);
         HBaseMailboxSessionMapperFactory mf = new HBaseMailboxSessionMapperFactory(conf, uidProvider, modSeqProvider);
         
-        HBaseMailboxManager mailboxManagerLocal = new HBaseMailboxManager(mf, null);
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+        
+        HBaseMailboxManager mailboxManagerLocal = new HBaseMailboxManager(mf, null, aclResolver, groupMembershipResolver);
         mailboxManagerLocal.init();
 
         setMailboxManager(mailboxManagerLocal);

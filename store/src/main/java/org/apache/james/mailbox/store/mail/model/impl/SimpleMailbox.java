@@ -18,7 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail.model.impl;
 
+import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 public class SimpleMailbox<Id> implements Mailbox<Id> {
@@ -28,6 +30,7 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
     private String user;
     private String name;
     private long uidValidity;
+    private MailboxACL acl = SimpleMailboxACL.EMPTY;
 
     public SimpleMailbox(MailboxPath path, long uidValidity) {
         this.namespace = path.getNamespace();
@@ -146,6 +149,22 @@ public class SimpleMailbox<Id> implements Mailbox<Id> {
 
     public void setMailboxId(Id id) {
         this.id = id;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#getACL()
+     */
+    @Override
+    public MailboxACL getACL() {
+        return acl;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.james.mailbox.store.mail.model.Mailbox#setACL(org.apache.james.mailbox.MailboxACL)
+     */
+    @Override
+    public void setACL(MailboxACL acl) {
+        this.acl = acl;
     }
 
 }

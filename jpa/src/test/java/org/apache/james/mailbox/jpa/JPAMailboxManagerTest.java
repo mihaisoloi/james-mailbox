@@ -23,9 +23,13 @@ import java.util.HashMap;
 import javax.persistence.EntityManagerFactory;
 
 import org.apache.james.mailbox.BadCredentialsException;
+import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
 import org.apache.james.mailbox.jpa.mail.JPAModSeqProvider;
 import org.apache.james.mailbox.jpa.mail.JPAUidProvider;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
@@ -99,7 +103,10 @@ public class JPAMailboxManagerTest extends AbstractMailboxManagerTest {
         JVMMailboxPathLocker locker = new JVMMailboxPathLocker();
         JPAMailboxSessionMapperFactory mf = new JPAMailboxSessionMapperFactory(entityManagerFactory, new JPAUidProvider(locker, entityManagerFactory), new JPAModSeqProvider(locker, entityManagerFactory));
 
-        JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null);
+        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+
+        JPAMailboxManager mailboxManager = new OpenJPAMailboxManager(mf, null, aclResolver, groupMembershipResolver);
         mailboxManager.init();
 
         setMailboxManager(mailboxManager);
