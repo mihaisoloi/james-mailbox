@@ -1,80 +1,81 @@
-/****************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one   *
- * or more contributor license agreements.  See the NOTICE file *
- * distributed with this work for additional information        *
- * regarding copyright ownership.  The ASF licenses this file   *
- * to you under the Apache License, Version 2.0 (the            *
- * "License"); you may not use this file except in compliance   *
- * with the License.  You may obtain a copy of the License at   *
- *                                                              *
- *   http://www.apache.org/licenses/LICENSE-2.0                 *
- *                                                              *
- * Unless required by applicable law or agreed to in writing,   *
- * software distributed under the License is distributed on an  *
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY       *
- * KIND, either express or implied.  See the License for the    *
- * specific language governing permissions and limitations      *
- * under the License.                                           *
- ****************************************************************/
+/**
+ * **************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one * or more
+ * contributor license agreements. See the NOTICE file * distributed with this
+ * work for additional information * regarding copyright ownership. The ASF
+ * licenses this file * to you under the Apache License, Version 2.0 (the *
+ * "License"); you may not use this file except in compliance * with the
+ * License. You may obtain a copy of the License at * *
+ * http://www.apache.org/licenses/LICENSE-2.0 * * Unless required by applicable
+ * law or agreed to in writing, * software distributed under the License is
+ * distributed on an * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY *
+ * KIND, either express or implied. See the License for the * specific language
+ * governing permissions and limitations * under the License. *
+ * **************************************************************
+ */
 package org.apache.james.mailbox.hbase;
 
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.IOUtils;
 import static org.apache.james.mailbox.hbase.HBaseNames.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Class that will creates a single connection to a HBaseCluster.
+ * Class that will creates a single instance of HBase MiniCluster.
  */
-public class HBaseClusterSingleton {
+public final class HBaseClusterSingleton {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseClusterSingleton.class);
+    private static final HBaseTestingUtility htu = new HBaseTestingUtility();
     private static HBaseClusterSingleton cluster = null;
     private MiniHBaseCluster hbaseCluster;
     private Configuration conf;
-    /** Set this to false if you wish to test it against a real cluster.
-     * In that case you should provide the configuration file for the real
-     * cluster on the classpath. 
-     */
-    public static boolean useMiniCluster = true;
 
-    public static synchronized Configuration build() throws Exception {
+    public static synchronized HBaseClusterSingleton build()
+            throws RuntimeException {
+        LOG.info("Retrieving cluster instance.");
         if (cluster == null) {
-            cluster = new HBaseClusterSingleton(useMiniCluster);
+            cluster = new HBaseClusterSingleton();
         }
-        return cluster.getConf();
+        return cluster;
     }
 
-    public HBaseClusterSingleton(boolean useMiniCluster) throws Exception {
-        if (useMiniCluster) {
-            HBaseTestingUtility htu = new HBaseTestingUtility();
-            try {
-                hbaseCluster = htu.startMiniCluster();
-                conf = hbaseCluster.getConfiguration();
-            } catch (IOException e) {
-                throw new Exception("Error starting MiniCluster ", e);
-            } finally {
-                
-                if (hbaseCluster != null) {
-                    // add a shutdown hook for shuting down the minicluster.
-                    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+    private HBaseClusterSingleton() throws RuntimeException {
+        HTableDescriptor desc = null;
+        HColumnDescriptor hColumnDescriptor = null;
+        try {
+            hbaseCluster = htu.startMiniCluster();
+            htu.createTable(MAILBOXES_TABLE, MAILBOX_CF);
+            htu.createTable(MESSAGES_TABLE, new byte[][]{MESSAGES_META_CF,
+                        MESSAGE_DATA_HEADERS, MESSAGE_DATA_BODY});
+            htu.createTable(SUBSCRIPTIONS_TABLE, SUBSCRIPTION_CF);
+            
+            conf = hbaseCluster.getConfiguration();
+        } catch (Exception e) {
+            throw new RuntimeException("Error starting MiniCluster ", e);
+        } finally {
+            if (hbaseCluster != null) {
+                // add a shutdown hook for shuting down the minicluster.
+                Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            try {
-                                hbaseCluster.shutdown();
-                            } catch (IOException e) {
-                                throw new RuntimeException("Exception shuting down cluster.");
-                            }
+                    @Override
+                    public void run() {
+                        try {
+                            hbaseCluster.shutdown();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Exception shuting down cluster.");
                         }
-                    }));
-                }
+                    }
+                }));
             }
-        } else {
-            conf = HBaseConfiguration.create();
         }
     }
 
@@ -82,19 +83,44 @@ public class HBaseClusterSingleton {
         return conf;
     }
 
-    public static void resetTables(Configuration conf) throws Exception {
-        HBaseAdmin hbaseAdmin = new HBaseAdmin(conf);
-        if (hbaseAdmin.tableExists(MAILBOXES_TABLE)) {
-            hbaseAdmin.disableTable(MAILBOXES_TABLE);
-            hbaseAdmin.deleteTable(MAILBOXES_TABLE);
+    public void truncateTable(String tableName) {
+        LOG.info("Truncating table!");
+        try {
+            htu.truncateTable(Bytes.toBytes(tableName));
+        } catch (IOException ex) {
+            LOG.info("Exception truncating table {}", tableName, ex);
         }
-        if (hbaseAdmin.tableExists(MESSAGES_TABLE)) {
-            hbaseAdmin.disableTable(MESSAGES_TABLE);
-            hbaseAdmin.deleteTable(MESSAGES_TABLE);
-        }
-        if (hbaseAdmin.tableExists(SUBSCRIPTIONS_TABLE)) {
-            hbaseAdmin.disableTable(SUBSCRIPTIONS_TABLE);
-            hbaseAdmin.deleteTable(SUBSCRIPTIONS_TABLE);
+    }
+
+    public void clearTables() {
+        clearTable(MAILBOXES);
+        clearTable(MESSAGES);
+        clearTable(SUBSCRIPTIONS);
+    }
+
+    /**
+     * Delete all rows from specified table.
+     *
+     * @param tableName
+     */
+    public void clearTable(String tableName) {
+        HTable table = null;
+        ResultScanner scanner = null;
+        try {
+            table = new HTable(conf, tableName);
+            Scan scan = new Scan();
+            scan.setCaching(1000);
+            scanner = table.getScanner(scan);
+            Result result;
+            while ((result = scanner.next()) != null) {
+                Delete delete = new Delete(result.getRow());
+                table.delete(delete);
+            }
+        } catch (IOException ex) {
+            LOG.info("Exception clearing table {}", tableName);
+        } finally {
+            IOUtils.closeStream(scanner);
+            IOUtils.closeStream(table);
         }
     }
 }

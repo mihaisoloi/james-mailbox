@@ -19,15 +19,8 @@
 
 package org.apache.james.mailbox.hbase;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.james.mailbox.AbstractMailboxManagerTest;
-import org.apache.james.mailbox.BadCredentialsException;
-import org.apache.james.mailbox.MailboxACLResolver;
 import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.SimpleGroupMembershipResolver;
-import org.apache.james.mailbox.UnionMailboxACLResolver;
+import org.apache.james.mailbox.*;
 import org.apache.james.mailbox.hbase.mail.HBaseModSeqProvider;
 import org.apache.james.mailbox.hbase.mail.HBaseUidProvider;
 import org.junit.After;
@@ -40,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
 
-    private Configuration conf;
+    private static final HBaseClusterSingleton clsuter = HBaseClusterSingleton.build();
     /**
      * Setup the mailboxManager.
      
@@ -48,8 +41,7 @@ public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
      */
     @Before
     public void setup() throws Exception {
-        conf = HBaseClusterSingleton.build();
-        HBaseClusterSingleton.resetTables(conf);
+        clsuter.clearTables();
         createMailboxManager();
     }
 
@@ -64,7 +56,6 @@ public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
         deleteAllMailboxes();
         MailboxSession session = getMailboxManager().createSystemSession("test", LoggerFactory.getLogger("Test"));
         session.close();
-        HBaseClusterSingleton.resetTables(conf);
     }
 
     /* (non-Javadoc)i deve
@@ -72,17 +63,18 @@ public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
      */
     @Override
     protected void createMailboxManager() throws MailboxException{
-        HBaseUidProvider uidProvider = new HBaseUidProvider(conf);
-        HBaseModSeqProvider modSeqProvider = new HBaseModSeqProvider(conf);
-        HBaseMailboxSessionMapperFactory mf = new HBaseMailboxSessionMapperFactory(conf, uidProvider, modSeqProvider);
+        final HBaseUidProvider uidProvider = new HBaseUidProvider(clsuter.getConf());
+        final HBaseModSeqProvider modSeqProvider = new HBaseModSeqProvider(clsuter.getConf());
+        final HBaseMailboxSessionMapperFactory mapperFactory = new HBaseMailboxSessionMapperFactory(clsuter.getConf(),
+                uidProvider, modSeqProvider);
         
-        MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
-        GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
+        final MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
+        final GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
         
-        HBaseMailboxManager mailboxManagerLocal = new HBaseMailboxManager(mf, null, aclResolver, groupMembershipResolver);
-        mailboxManagerLocal.init();
+        final HBaseMailboxManager manager = new HBaseMailboxManager(mapperFactory, null, aclResolver, groupMembershipResolver);
+        manager.init();
 
-        setMailboxManager(mailboxManagerLocal);
+        setMailboxManager(manager);
 
         deleteAllMailboxes();
     }

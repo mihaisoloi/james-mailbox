@@ -18,33 +18,31 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase.mail;
 
-import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
-import org.apache.james.mailbox.hbase.HBaseMailboxSessionMapperFactory;
 import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Unit tests for UidProvider. 
+ * Unit tests for UidProvider and ModSeqProvider.
+ *
  * @author ieugen
  */
 public class HBaseUidAndModSeqProviderTest {
 
-    private static final Logger logger = Logger.getLogger("HBaseUidProviderTest");
-    /** testing mini-cluster */
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseUidAndModSeqProviderTest.class);
+    private static final HBaseClusterSingleton CLUSTER = HBaseClusterSingleton.build();
     private static Configuration conf;
     private static HBaseUidProvider uidProvider;
     private static HBaseModSeqProvider modSeqProvider;
     private static HBaseMailboxMapper mapper;
-    private static HBaseMailboxSessionMapperFactory mapperFactory;
     private static List<HBaseMailbox> mailboxList;
     private static List<MailboxPath> pathsList;
     private static final int NAMESPACES = 5;
@@ -52,23 +50,17 @@ public class HBaseUidAndModSeqProviderTest {
     private static final int MAILBOXES = 5;
     private static final char SEPARATOR = '%';
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        // start the test cluster 
-        conf = HBaseClusterSingleton.build();
-        HBaseClusterSingleton.resetTables(conf);
+    @Before
+    public void setUpClass() throws Exception {
+        CLUSTER.clearTables();
+        conf = CLUSTER.getConf();
         uidProvider = new HBaseUidProvider(conf);
         modSeqProvider = new HBaseModSeqProvider(conf);
-        mapperFactory = new HBaseMailboxSessionMapperFactory(conf, uidProvider, modSeqProvider);
         mapper = new HBaseMailboxMapper(conf);
         fillMailboxList();
         for (HBaseMailbox mailbox : mailboxList) {
             mapper.save(mailbox);
         }
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
     }
 
     private static void fillMailboxList() {
@@ -91,7 +83,8 @@ public class HBaseUidAndModSeqProviderTest {
             }
         }
 
-        logger.log(Level.INFO, "Created test case with {0} mailboxes and {1} paths", new Object[]{mailboxList.size(), pathsList.size()});
+        LOG.info("Created test case with {} mailboxes and {} paths", mailboxList.size(),
+                pathsList.size());
     }
 
     /**
@@ -99,18 +92,17 @@ public class HBaseUidAndModSeqProviderTest {
      */
     @Test
     public void testLastUid() throws Exception {
-        System.out.println("lastUid");
-        HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
-        MailboxPath path = new MailboxPath("gsoc", "ieugen", "Trash");
-        HBaseMailbox newBox = new HBaseMailbox(path, 1234);
+        LOG.info("lastUid");
+        final MailboxPath path = new MailboxPath("gsoc", "ieugen", "Trash");
+        final HBaseMailbox newBox = new HBaseMailbox(path, 1234);
         mapper.save(newBox);
         mailboxList.add(newBox);
         pathsList.add(path);
 
-        long result = uidProvider.lastUid(null, newBox);
+        final long result = uidProvider.lastUid(null, newBox);
         assertEquals(0, result);
         for (int i = 1; i < 10; i++) {
-            long uid = uidProvider.nextUid(null, newBox);
+            final long uid = uidProvider.nextUid(null, newBox);
             assertEquals(uid, uidProvider.lastUid(null, newBox));
         }
     }
@@ -120,11 +112,12 @@ public class HBaseUidAndModSeqProviderTest {
      */
     @Test
     public void testNextUid() throws Exception {
-        System.out.println("nextUid");
-        HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
-        long lastUid = uidProvider.lastUid(null, mailbox);
+        LOG.info("nextUid");
+        final HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
+        final long lastUid = uidProvider.lastUid(null, mailbox);
+        long result;
         for (int i = (int) lastUid + 1; i < (lastUid + 10); i++) {
-            long result = uidProvider.nextUid(null, mailbox);
+            result = uidProvider.nextUid(null, mailbox);
             assertEquals(i, result);
         }
     }
@@ -134,9 +127,8 @@ public class HBaseUidAndModSeqProviderTest {
      */
     @Test
     public void testHighestModSeq() throws Exception {
-        System.out.println("highestModSeq");
-        System.out.println("lastUid");
-        HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
+        LOG.info("highestModSeq");
+        LOG.info("lastUid");
         MailboxPath path = new MailboxPath("gsoc", "ieugen", "Trash");
         HBaseMailbox newBox = new HBaseMailbox(path, 1234);
         mapper.save(newBox);
@@ -156,11 +148,12 @@ public class HBaseUidAndModSeqProviderTest {
      */
     @Test
     public void testNextModSeq() throws Exception {
-        System.out.println("nextModSeq");
-        HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
-        long lastUid = modSeqProvider.highestModSeq(null, mailbox);
+        LOG.info("nextModSeq");
+        final HBaseMailbox mailbox = mailboxList.get(mailboxList.size() / 2);
+        final long lastUid = modSeqProvider.highestModSeq(null, mailbox);
+        long result;
         for (int i = (int) lastUid + 1; i < (lastUid + 10); i++) {
-            long result = modSeqProvider.nextModSeq(null, mailbox);
+            result = modSeqProvider.nextModSeq(null, mailbox);
             assertEquals(i, result);
         }
     }

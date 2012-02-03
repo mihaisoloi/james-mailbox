@@ -18,7 +18,6 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase;
 
-import java.io.IOException;
 import java.util.UUID;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -29,6 +28,7 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.SubscriptionException;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.mail.HBaseMailboxMapper;
 import org.apache.james.mailbox.hbase.mail.HBaseMessageMapper;
 import org.apache.james.mailbox.hbase.user.HBaseSubscriptionMapper;
@@ -38,8 +38,6 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
-
-import static org.apache.james.mailbox.hbase.HBaseNames.*;
 
 /**
  * HBase implementation of {@link MailboxSessionMapperFactory}

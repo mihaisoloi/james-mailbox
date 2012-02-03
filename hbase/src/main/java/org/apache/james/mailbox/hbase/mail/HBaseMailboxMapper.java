@@ -23,60 +23,59 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.BinaryPrefixComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.filter.SubstringComparator;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxNotFoundException;
 import org.apache.james.mailbox.MailboxPath;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.HBaseNonTransactionalMapper;
+import static org.apache.james.mailbox.hbase.HBaseUtils.*;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import static org.apache.james.mailbox.hbase.HBaseUtils.*;
-import static org.apache.james.mailbox.hbase.HBaseNames.*;
 
 /**
  * Data access management for mailbox.
- * 
+ *
  */
 public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements MailboxMapper<UUID> {
 
-    /** Link to the HBase Configuration object and specific mailbox names */
+    /**
+     * Link to the HBase Configuration object and specific mailbox names
+     */
     private final Configuration conf;
-
+    
     public HBaseMailboxMapper(Configuration conf) {
         this.conf = conf;
     }
-
+    
     @Override
     public Mailbox<UUID> findMailboxByPath(MailboxPath mailboxPath) throws MailboxException, MailboxNotFoundException {
         HTable mailboxes = null;
         ResultScanner scanner = null;
         try {
             mailboxes = new HTable(conf, MAILBOXES_TABLE);
-
+            
             Scan scan = new Scan();
             scan.addFamily(MAILBOX_CF);
             scan.setCaching(mailboxes.getScannerCaching() * 2);
             scan.setMaxVersions(1);
 
-            /* 
-             * Filters is ORDERED. Passing the parameters in the right order might improve performance:
-             * passing the user first means that the other filters will not be tested if the mailbox
-             * does not belong to the passed user.
+            /*
+             * Filters is ORDERED. Passing the parameters in the right order
+             * might improve performance: passing the user first means that the
+             * other filters will not be tested if the mailbox does not belong
+             * to the passed user.
              */
             FilterList filters = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-
+            
             if (mailboxPath.getUser() != null) {
                 SingleColumnValueFilter userFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_USER, CompareOp.EQUAL, Bytes.toBytes(mailboxPath.getUser()));
                 filters.addFilter(userFilter);
@@ -85,11 +84,11 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             filters.addFilter(nameFilter);
             SingleColumnValueFilter namespaceFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_NAMESPACE, CompareOp.EQUAL, Bytes.toBytes(mailboxPath.getNamespace()));
             filters.addFilter(namespaceFilter);
-
+            
             scan.setFilter(filters);
             scanner = mailboxes.getScanner(scan);
             Result result = scanner.next();
-
+            
             if (result == null) {
                 throw new MailboxNotFoundException(mailboxPath);
             }
@@ -107,28 +106,30 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     @Override
     public List<Mailbox<UUID>> findMailboxWithPathLike(MailboxPath mailboxPath) throws MailboxException {
         HTable mailboxes = null;
         ResultScanner scanner = null;
         try {
             mailboxes = new HTable(conf, MAILBOXES_TABLE);
-
+            
             Scan scan = new Scan();
             scan.addFamily(MAILBOX_CF);
             scan.setCaching(mailboxes.getScannerCaching() * 2);
             scan.setMaxVersions(1);
-
+            
             FilterList filters = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-
+            
             if (mailboxPath.getUser() != null) {
                 SingleColumnValueFilter userFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_USER, CompareOp.EQUAL, Bytes.toBytes(mailboxPath.getUser()));
                 filters.addFilter(userFilter);
             }
             SubstringComparator pathComparator;
             String mboxName = mailboxPath.getName();
-            /* TODO: use a RegExFiler */
+            /*
+             * TODO: use a RegExFiler
+             */
             if (mboxName.length() >= 1) {
                 if (mboxName.charAt(mboxName.length() - 1) == '%') {
                     mboxName = mboxName.substring(0, mboxName.length() - 1);
@@ -144,12 +145,12 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             filters.addFilter(nameFilter);
             SingleColumnValueFilter namespaceFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_NAMESPACE, CompareOp.EQUAL, Bytes.toBytes(mailboxPath.getNamespace()));
             filters.addFilter(namespaceFilter);
-
+            
             scan.setFilter(filters);
             scanner = mailboxes.getScanner(scan);
-
+            
             List<Mailbox<UUID>> mailboxList = new ArrayList<Mailbox<UUID>>();
-
+            
             for (Result result : scanner) {
                 mailboxList.add(mailboxFromResult(result));
             }
@@ -167,7 +168,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     @Override
     public List<Mailbox<UUID>> list() throws MailboxException {
         HTable mailboxes = null;
@@ -181,7 +182,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             scan.setMaxVersions(1);
             scanner = mailboxes.getScanner(scan);
             List<Mailbox<UUID>> mailboxList = new ArrayList<Mailbox<UUID>>();
-
+            
             Result result;
             while ((result = scanner.next()) != null) {
                 Mailbox<UUID> mlbx = mailboxFromResult(result);
@@ -201,18 +202,20 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     @Override
     public void endRequest() {
     }
-
+    
     @Override
     public void save(Mailbox<UUID> mlbx) throws MailboxException {
         //TODO: maybe switch to checkAndPut for transactions
         HTable mailboxes = null;
         try {
             mailboxes = new HTable(conf, MAILBOXES_TABLE);
-            /* cast to HBaseMailbox to access lastuid and ModSeq*/
+            /*
+             * cast to HBaseMailbox to access lastuid and ModSeq
+             */
             Put put = toPut((HBaseMailbox) mlbx);
             mailboxes.put(put);
         } catch (IOException ex) {
@@ -227,7 +230,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     @Override
     public void delete(Mailbox<UUID> mlbx) throws MailboxException {
         //TODO: maybe switch to checkAndDelete
@@ -249,21 +252,21 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     @Override
     public boolean hasChildren(final Mailbox<UUID> mailbox, final char c) throws MailboxException, MailboxNotFoundException {
         HTable mailboxes = null;
         ResultScanner scanner = null;
         try {
             mailboxes = new HTable(conf, MAILBOXES_TABLE);
-
+            
             Scan scan = new Scan();
             scan.addFamily(MAILBOX_CF);
             scan.setCaching(mailboxes.getScannerCaching() * 2);
             scan.setMaxVersions(1);
-
+            
             FilterList filters = new FilterList(FilterList.Operator.MUST_PASS_ALL);
-
+            
             if (mailbox.getUser() != null) {
                 SingleColumnValueFilter userFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_USER, CompareOp.EQUAL, Bytes.toBytes(mailbox.getUser()));
                 filters.addFilter(userFilter);
@@ -275,7 +278,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             filters.addFilter(nameFilter);
             SingleColumnValueFilter namespaceFilter = new SingleColumnValueFilter(MAILBOX_CF, MAILBOX_NAMESPACE, CompareOp.EQUAL, Bytes.toBytes(mailbox.getNamespace()));
             filters.addFilter(namespaceFilter);
-
+            
             scan.setFilter(filters);
             scanner = mailboxes.getScanner(scan);
             try {
@@ -299,7 +302,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     public void deleteAllMemberships() {
         HTable messages = null;
         HTable mailboxes = null;
@@ -337,7 +340,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
         } catch (IOException e) {
             throw new RuntimeException("Error deleting MESSAGES table ", e);
         } finally {
-            scanner.close();
+            IOUtils.closeStream(scanner);
             if (messages != null) {
                 try {
                     messages.close();
@@ -347,7 +350,7 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
         }
     }
-
+    
     public void deleteAllMailboxes() {
         HTable mailboxes = null;
         ResultScanner scanner = null;
@@ -364,11 +367,11 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             }
             long totalDeletes = deletes.size();
             mailboxes.delete(deletes);
-            if (deletes.size() > 0) {
-                //throw new RuntimeException("Just " + deletes.size() + " out of " + totalDeletes + " mailboxes have been deleted");
-            }
         } catch (IOException ex) {
             throw new RuntimeException("IOException deleting mailboxes", ex);
+        } finally {
+            IOUtils.closeStream(scanner);
+            IOUtils.closeStream(mailboxes);
         }
     }
 }

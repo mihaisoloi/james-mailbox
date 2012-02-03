@@ -29,81 +29,79 @@ import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The MailboxSessionMapperFactory test.
  *
- * 
  */
 public class HBaseMailboxSessionMapperFactoryTest {
 
-    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(HBaseMailboxSessionMapperFactoryTest.class);
+    private final static Logger LOG = LoggerFactory.getLogger(HBaseMailboxSessionMapperFactoryTest.class);
+    private static final HBaseClusterSingleton CLUSTER = HBaseClusterSingleton.build();
     private static Configuration conf;
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        conf = HBaseClusterSingleton.build();
-        HBaseClusterSingleton.resetTables(conf);
+    @Before
+    public void beforeMethod() {
+        CLUSTER.clearTables();
+        conf = CLUSTER.getConf();
     }
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        
-    }
-
-     /**
-     * Test of createMessageMapper method, of class HBaseMailboxSessionMapperFactory.
+    /**
+     * Test of createMessageMapper method, of class
+     * HBaseMailboxSessionMapperFactory.
      */
     @Test
     public void testCreateMessageMapper() throws Exception {
-        System.out.println("createMessageMapper");
+        LOG.info("createMessageMapper");
         MailboxSession session = null;
-        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null , null);
-        MessageMapper<UUID> messageMapper = instance.createMessageMapper(session); 
+        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null, null);
+        MessageMapper<UUID> messageMapper = instance.createMessageMapper(session);
         assertNotNull(messageMapper);
         assertTrue(messageMapper instanceof MessageMapper);
     }
 
     /**
-     * Test of createMailboxMapper method, of class HBaseMailboxSessionMapperFactory.
+     * Test of createMailboxMapper method, of class
+     * HBaseMailboxSessionMapperFactory.
      */
     @Test
     public void testCreateMailboxMapper() throws Exception {
-        System.out.println("createMailboxMapper");
+        LOG.info("createMailboxMapper");
         MailboxSession session = null;
-        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null , null);
-        MailboxMapper<UUID> mailboxMapper = instance.createMailboxMapper(session); 
+        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null, null);
+        MailboxMapper<UUID> mailboxMapper = instance.createMailboxMapper(session);
         assertNotNull(mailboxMapper);
         assertTrue(mailboxMapper instanceof MailboxMapper);
     }
 
     /**
-     * Test of createSubscriptionMapper method, of class HBaseMailboxSessionMapperFactory.
+     * Test of createSubscriptionMapper method, of class
+     * HBaseMailboxSessionMapperFactory.
      */
     @Test
     public void testCreateSubscriptionMapper() throws Exception {
-        System.out.println("createSubscriptionMapper");
+        LOG.info("createSubscriptionMapper");
         MailboxSession session = null;
-        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null , null);
-        SubscriptionMapper subscriptionMapper = instance.createSubscriptionMapper(session); 
+        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null, null);
+        SubscriptionMapper subscriptionMapper = instance.createSubscriptionMapper(session);
         assertNotNull(subscriptionMapper);
         assertTrue(subscriptionMapper instanceof SubscriptionMapper);
     }
 
     /**
-     * Test of getModSeqProvider method, of class HBaseMailboxSessionMapperFactory.
+     * Test of getModSeqProvider method, of class
+     * HBaseMailboxSessionMapperFactory.
      */
     @Test
     public void testGetModSeqProvider() {
-        System.out.println("getModSeqProvider");
+        LOG.info("getModSeqProvider");
         ModSeqProvider<UUID> expResult = new HBaseModSeqProvider(conf);
-        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null , expResult);
+        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, null, expResult);
         ModSeqProvider<UUID> result = instance.getModSeqProvider();
         assertEquals(expResult, result);
     }
@@ -113,11 +111,10 @@ public class HBaseMailboxSessionMapperFactoryTest {
      */
     @Test
     public void testGetUidProvider() {
-        System.out.println("getUidProvider");
+        LOG.info("getUidProvider");
         UidProvider<UUID> expResult = new HBaseUidProvider(conf);
-        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, expResult , null);        
+        HBaseMailboxSessionMapperFactory instance = new HBaseMailboxSessionMapperFactory(conf, expResult, null);
         UidProvider<UUID> result = instance.getUidProvider();
         assertEquals(expResult, result);
     }
-    
 }
