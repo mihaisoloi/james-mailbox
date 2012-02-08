@@ -449,9 +449,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
                 recent = new ArrayList<Long>();
                 break;
         }
-        // FIXME
-        boolean resourceOwnerIsGroup = false;
-        MailboxACL resolvedAcl = aclResolver.applyGlobalACL(mailbox.getACL(), resourceOwnerIsGroup );
+        MailboxACL resolvedAcl = aclResolver.applyGlobalACL(mailbox.getACL(), isGroupFolder(mailboxSession) );
         return new MailboxMetaData(recent, permanentFlags, uidValidity, uidNext,highestModSeq, messageCount, unseenCount, firstUnseen, isWriteable(mailboxSession), isModSeqPermanent(mailboxSession), resolvedAcl );
     }
 
@@ -697,10 +695,21 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         User user = session.getUser();
         String userName = user != null ? user.getUserName() : null;
         
-        // FIXME probably mailbox should provide the information whether the resource owner is group; otherwise user names and group names may clash
-        boolean resourceOwnerIsGroup = false;
-        
-        return aclResolver.hasRight(userName, groupMembershipResolver, right, mailbox.getACL(), mailbox.getUser(), resourceOwnerIsGroup);
+        return aclResolver.hasRight(userName, groupMembershipResolver, right, mailbox.getACL(), mailbox.getUser(), isGroupFolder(session));
+    }
+    
+    /**
+     * Returns true if the current mailbox does not reside neither in private nor other users' namespace.
+     *
+     * @param session
+     * @return
+     */
+    protected boolean isGroupFolder(MailboxSession session) {
+        final String ns = mailbox.getNamespace();
+        return ns == null || ( 
+                !ns.equals(session.getPersonalSpace())
+                && !ns.equals(session.getOtherUsersSpace())
+         );
     }
     
 }
