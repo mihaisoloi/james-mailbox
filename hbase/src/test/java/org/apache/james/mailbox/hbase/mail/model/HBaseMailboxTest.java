@@ -19,7 +19,8 @@
 package org.apache.james.mailbox.hbase.mail.model;
 
 import java.util.UUID;
-import org.apache.james.mailbox.MailboxPath;
+
+import org.apache.james.mailbox.model.MailboxPath;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

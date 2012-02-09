@@ -22,6 +22,11 @@ package org.apache.james.mailbox;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.MessageMetaData;
+import org.apache.james.mailbox.model.UpdatedFlags;
+
 
 /**
  * Listens to <code>Mailbox</code> events.<br>

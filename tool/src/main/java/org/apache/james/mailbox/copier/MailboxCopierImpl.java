@@ -26,15 +26,15 @@ import java.util.Set;
 
 import javax.mail.Flags.Flag;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxManager;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
-import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.MailboxExistsException;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.streaming.InputStreamContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

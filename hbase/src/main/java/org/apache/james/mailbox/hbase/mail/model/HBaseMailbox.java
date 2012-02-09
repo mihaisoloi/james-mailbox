@@ -20,9 +20,9 @@ package org.apache.james.mailbox.hbase.mail.model;
 
 import java.util.UUID;
 
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.SimpleMailboxACL;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**

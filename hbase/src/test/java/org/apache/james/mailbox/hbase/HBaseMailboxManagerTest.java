@@ -19,8 +19,14 @@
 
 package org.apache.james.mailbox.hbase;
 
-import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
-import org.apache.james.mailbox.*;
+import org.apache.james.mailbox.AbstractMailboxManagerTest;
+import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.acl.GroupMembershipResolver;
+import org.apache.james.mailbox.acl.MailboxACLResolver;
+import org.apache.james.mailbox.acl.SimpleGroupMembershipResolver;
+import org.apache.james.mailbox.acl.UnionMailboxACLResolver;
+import org.apache.james.mailbox.exception.BadCredentialsException;
+import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.hbase.mail.HBaseModSeqProvider;
 import org.apache.james.mailbox.hbase.mail.HBaseUidProvider;
 import org.junit.After;

@@ -18,10 +18,10 @@
  ****************************************************************/
 package org.apache.james.mailbox.store;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.RequestAware;
-import org.apache.james.mailbox.SubscriptionException;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.SubscriptionException;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.MailboxMapperFactory;
 import org.apache.james.mailbox.store.mail.MessageMapper;

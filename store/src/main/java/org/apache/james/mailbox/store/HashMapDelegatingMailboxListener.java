@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.james.mailbox.MailboxListener;
-import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.model.MailboxPath;
 
 /**
  * Receive a {@link org.apache.james.mailbox.MailboxListener.Event} and delegate it to an other

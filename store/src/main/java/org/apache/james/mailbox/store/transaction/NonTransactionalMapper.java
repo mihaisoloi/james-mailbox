@@ -18,7 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.transaction;
 
-import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.exception.MailboxException;
 
 /**
  * A Mapper which does no transaction handling. It just executes the execute() method

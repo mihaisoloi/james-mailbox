@@ -34,12 +34,12 @@ import java.util.Map;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SimpleMailboxACL;
-import org.apache.james.mailbox.SearchQuery.AddressType;
-import org.apache.james.mailbox.SearchQuery.DateResolution;
-import org.apache.james.mailbox.SearchQuery.Sort.SortClause;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
+import org.apache.james.mailbox.model.SearchQuery.AddressType;
+import org.apache.james.mailbox.model.SearchQuery.DateResolution;
+import org.apache.james.mailbox.model.SearchQuery.Sort.SortClause;
 import org.apache.james.mailbox.store.MessageBuilder;
 import org.apache.james.mailbox.store.SimpleMailboxMembership;
 import org.apache.james.mailbox.store.mail.model.Mailbox;

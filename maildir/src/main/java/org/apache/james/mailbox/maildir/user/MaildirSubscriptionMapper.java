@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.james.mailbox.SubscriptionException;
+import org.apache.james.mailbox.exception.SubscriptionException;
 import org.apache.james.mailbox.maildir.MaildirStore;
 import org.apache.james.mailbox.store.transaction.NonTransactionalMapper;
 import org.apache.james.mailbox.store.user.SubscriptionMapper;

@@ -26,13 +26,13 @@ import java.util.Iterator;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.MailboxACL;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.SimpleMailboxACL;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.mock.MockMailboxSession;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
+import org.apache.james.mailbox.model.UpdatedFlags;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.util.EventCollector;

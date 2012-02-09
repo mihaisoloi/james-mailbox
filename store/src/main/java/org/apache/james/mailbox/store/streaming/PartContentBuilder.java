@@ -26,10 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.james.mailbox.Content;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.Header;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.Content;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultHeader;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.stream.EntityState;

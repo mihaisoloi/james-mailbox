@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.model.SearchQuery;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.MessageSearches;
 import org.junit.Before;

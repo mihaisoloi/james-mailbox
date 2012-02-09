@@ -30,10 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageMetaData;
-import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageMetaData;
+import org.apache.james.mailbox.model.MessageRange;
 import org.apache.james.mailbox.store.SimpleMessageMetaData;
 import org.apache.james.mailbox.store.mail.AbstractMessageMapper;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
@@ -91,7 +91,7 @@ public class InMemoryMessageMapper extends AbstractMessageMapper<Long> {
 
 
     /**
-     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
+     * @see org.apache.james.mailbox.store.mail.MessageMapper#findInMailbox(org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.model.MessageRange, org.apache.james.mailbox.store.mail.MessageMapper.FetchType, int)
      */
     public Iterator<Message<Long>> findInMailbox(Mailbox<Long> mailbox, MessageRange set, FetchType ftype, int max) throws MailboxException {
         List<Message<Long>> results;

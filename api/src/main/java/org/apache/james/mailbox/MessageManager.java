@@ -27,8 +27,15 @@ import java.util.Map;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.MailboxACL.MailboxACLRight;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.UnsupportedCriteriaException;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MessageResultIterator;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
+import org.apache.james.mailbox.model.MessageResult.FetchGroup;
 
 /**
  * Interface which represent a Mailbox

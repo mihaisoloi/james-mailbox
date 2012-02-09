@@ -20,11 +20,11 @@ package org.apache.james.mailbox.hbase;
 
 import java.util.Date;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.james.mailbox.MailboxPath;
 import java.util.UUID;
 import javax.mail.Flags;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Property;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;

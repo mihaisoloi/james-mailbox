@@ -18,16 +18,16 @@
  ****************************************************************/
 package org.apache.james.mailbox.store;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MailboxPath;
 
 
 public abstract class AbstractMailboxPathLocker implements MailboxPathLocker{
 
     /**
-     * @see org.apache.james.mailbox.MailboxPathLocker#executeWithLock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution)
+     * @see org.apache.james.mailbox.MailboxPathLocker#executeWithLock(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.model.MailboxPath, org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution)
      */
     public <T> T executeWithLock(MailboxSession session, MailboxPath path, LockAwareExecution<T> execution) throws MailboxException {
         return executeWithLock(session, path, execution, true);

@@ -39,23 +39,23 @@ import java.util.TimeZone;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SearchQuery.AllCriterion;
-import org.apache.james.mailbox.SearchQuery.ContainsOperator;
-import org.apache.james.mailbox.SearchQuery.Criterion;
-import org.apache.james.mailbox.SearchQuery.CustomFlagCriterion;
-import org.apache.james.mailbox.SearchQuery.DateOperator;
-import org.apache.james.mailbox.SearchQuery.DateResolution;
-import org.apache.james.mailbox.SearchQuery.FlagCriterion;
-import org.apache.james.mailbox.SearchQuery.HeaderCriterion;
-import org.apache.james.mailbox.SearchQuery.HeaderOperator;
-import org.apache.james.mailbox.SearchQuery.NumericOperator;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
-import org.apache.james.mailbox.SearchQuery.UidCriterion;
-import org.apache.james.mailbox.UnsupportedSearchException;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.UnsupportedSearchException;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.SearchQuery.AllCriterion;
+import org.apache.james.mailbox.model.SearchQuery.ContainsOperator;
+import org.apache.james.mailbox.model.SearchQuery.Criterion;
+import org.apache.james.mailbox.model.SearchQuery.CustomFlagCriterion;
+import org.apache.james.mailbox.model.SearchQuery.DateOperator;
+import org.apache.james.mailbox.model.SearchQuery.DateResolution;
+import org.apache.james.mailbox.model.SearchQuery.FlagCriterion;
+import org.apache.james.mailbox.model.SearchQuery.HeaderCriterion;
+import org.apache.james.mailbox.model.SearchQuery.HeaderOperator;
+import org.apache.james.mailbox.model.SearchQuery.NumericOperator;
+import org.apache.james.mailbox.model.SearchQuery.NumericRange;
+import org.apache.james.mailbox.model.SearchQuery.UidCriterion;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
@@ -399,7 +399,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     
     
     /**
-     * @see org.apache.james.mailbox.store.search.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.SearchQuery)
+     * @see org.apache.james.mailbox.store.search.MessageSearchIndex#search(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.model.SearchQuery)
      */
     public Iterator<Long> search(MailboxSession session, Mailbox<Id> mailbox, SearchQuery searchQuery) throws MailboxException {
         Set<Long> uids = new LinkedHashSet<Long>();
@@ -1198,7 +1198,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
     }
 
     /**
-     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#update(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange, javax.mail.Flags)
+     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#update(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.model.MessageRange, javax.mail.Flags)
      */
     public void update(MailboxSession session, Mailbox<Id> mailbox, MessageRange range, Flags f) throws MailboxException {
         try {
@@ -1281,7 +1281,7 @@ public class LuceneMessageSearchIndex<Id> extends ListeningMessageSearchIndex<Id
         }
     }
     /**
-     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#delete(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.MessageRange)
+     * @see org.apache.james.mailbox.store.search.ListeningMessageSearchIndex#delete(org.apache.james.mailbox.MailboxSession, org.apache.james.mailbox.store.mail.model.Mailbox, org.apache.james.mailbox.model.MessageRange)
      */
     public void delete(MailboxSession session, Mailbox<Id> mailbox, MessageRange range) throws MailboxException {
         BooleanQuery query = new BooleanQuery();

@@ -21,6 +21,9 @@ package org.apache.james.mailbox;
 
 import java.util.concurrent.locks.ReadWriteLock;
 
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MailboxPath;
+
 /**
  * The {@link MailboxPathLocker} is responsible to help to synchronize the
  * access to a {@link MailboxPath} and execute an given {@link LockAwareExecution}

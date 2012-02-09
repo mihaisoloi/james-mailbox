@@ -20,9 +20,9 @@ package org.apache.james.mailbox.store.mail;
 
 import java.util.List;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxNotFoundException;
-import org.apache.james.mailbox.MailboxPath;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.transaction.Mapper;
 

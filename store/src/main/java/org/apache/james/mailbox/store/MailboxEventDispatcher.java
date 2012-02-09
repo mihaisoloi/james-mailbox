@@ -26,10 +26,10 @@ import java.util.SortedMap;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxListener.MailboxAdded;
 import org.apache.james.mailbox.MailboxListener.MailboxDeletion;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageMetaData;
-import org.apache.james.mailbox.UpdatedFlags;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.MessageMetaData;
+import org.apache.james.mailbox.model.UpdatedFlags;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 /**

@@ -30,12 +30,12 @@ import javax.mail.util.SharedByteArrayInputStream;
 
 import junit.framework.Assert;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageMetaData;
-import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
-import org.apache.james.mailbox.UpdatedFlags;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageMetaData;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.UpdatedFlags;
+import org.apache.james.mailbox.model.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;

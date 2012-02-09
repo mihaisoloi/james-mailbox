@@ -19,7 +19,7 @@
 
 package org.apache.james.mailbox.store.transaction;
 
-import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.exception.MailboxException;
 
 /**
  * Mapper which execute units of work in a {@link Transaction}

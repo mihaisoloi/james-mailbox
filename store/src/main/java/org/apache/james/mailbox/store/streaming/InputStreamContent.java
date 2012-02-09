@@ -21,7 +21,7 @@ package org.apache.james.mailbox.store.streaming;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.model.Content;
 import org.apache.james.mailbox.store.mail.model.Message;
 
 /**
@@ -43,7 +43,7 @@ public final class InputStreamContent implements Content{
     }
     
     /**
-     * @see org.apache.james.mailbox.Content#size()
+     * @see org.apache.james.mailbox.model.Content#size()
      */
     public long size() {
         switch (type) {
@@ -56,7 +56,7 @@ public final class InputStreamContent implements Content{
     }
 
     /**
-     * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
+     * @see org.apache.james.mailbox.model.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {
         // wrap the streams in a BoundedInputStream to make sure it really match with the stored size.

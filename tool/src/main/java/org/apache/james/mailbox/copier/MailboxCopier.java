@@ -20,8 +20,8 @@ package org.apache.james.mailbox.copier;
 
 import java.io.IOException;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxManager;
+import org.apache.james.mailbox.exception.MailboxException;
 
 /**
  * Interface that exposes a method aimed to copy all mailboxes from a source

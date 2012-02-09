@@ -19,6 +19,9 @@
 
 package org.apache.james.mailbox;
 
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MailboxPath;
+
 /**
  * Implementations of this interface supports {@link MailboxListener}. Its needed that the events get handled
  * in the submitted order

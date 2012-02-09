@@ -26,7 +26,11 @@ import javax.mail.Flags;
 
 import junit.framework.Assert;
 
+import org.apache.james.mailbox.exception.BadCredentialsException;
+import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.mock.MockMailboxManager;
+import org.apache.james.mailbox.model.MailboxConstants;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 

@@ -30,9 +30,9 @@ import java.util.TimeZone;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SearchQuery.AddressType;
-import org.apache.james.mailbox.SearchQuery.DateResolution;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.SearchQuery.AddressType;
+import org.apache.james.mailbox.model.SearchQuery.DateResolution;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.MessageSearches;
 import org.junit.Before;

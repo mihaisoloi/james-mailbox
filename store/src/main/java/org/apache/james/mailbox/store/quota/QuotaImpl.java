@@ -18,7 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.quota;
 
-import org.apache.james.mailbox.quota.Quota;
+import org.apache.james.mailbox.model.Quota;
 
 public final class QuotaImpl implements Quota{
     

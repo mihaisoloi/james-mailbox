@@ -24,15 +24,15 @@ import java.util.NoSuchElementException;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.Content;
-import org.apache.james.mailbox.Headers;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageRange.Type;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
-import org.apache.james.mailbox.MessageResultIterator;
-import org.apache.james.mailbox.MimeDescriptor;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.Content;
+import org.apache.james.mailbox.model.Headers;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MessageResultIterator;
+import org.apache.james.mailbox.model.MimeDescriptor;
+import org.apache.james.mailbox.model.MessageRange.Type;
+import org.apache.james.mailbox.model.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -53,7 +53,7 @@ public class StoreMessageResultIterator<Id> implements MessageResultIterator {
     private MessageMapper<Id> mapper;
     private FetchType ftype;
 
-    public StoreMessageResultIterator(MessageMapper<Id> mapper, Mailbox<Id> mailbox, MessageRange range, int batchSize, org.apache.james.mailbox.MessageResult.FetchGroup group) {
+    public StoreMessageResultIterator(MessageMapper<Id> mapper, Mailbox<Id> mailbox, MessageRange range, int batchSize, org.apache.james.mailbox.model.MessageResult.FetchGroup group) {
         this.mailbox = mailbox;
         this.group = group;
         this.mapper = mapper;

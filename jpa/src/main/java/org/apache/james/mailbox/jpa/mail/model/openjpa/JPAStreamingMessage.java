@@ -31,7 +31,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Table;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;

@@ -38,24 +38,24 @@ import javax.mail.util.SharedFileInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.MailboxACL.MailboxACLRight;
-import org.apache.james.mailbox.MailboxACLResolver;
-import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MailboxSession.User;
 import org.apache.james.mailbox.MessageManager;
-import org.apache.james.mailbox.MessageMetaData;
-import org.apache.james.mailbox.MessageRange;
-import org.apache.james.mailbox.MessageResult.FetchGroup;
-import org.apache.james.mailbox.MessageResultIterator;
-import org.apache.james.mailbox.ReadOnlyException;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.UnsupportedRightException;
-import org.apache.james.mailbox.UpdatedFlags;
+import org.apache.james.mailbox.acl.GroupMembershipResolver;
+import org.apache.james.mailbox.acl.MailboxACLResolver;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.ReadOnlyException;
+import org.apache.james.mailbox.exception.UnsupportedRightException;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MessageMetaData;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MessageResultIterator;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.UpdatedFlags;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
+import org.apache.james.mailbox.model.MessageResult.FetchGroup;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
@@ -202,7 +202,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
     /**
-     * @see org.apache.james.mailbox.MessageManager#expunge(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#expunge(org.apache.james.mailbox.model.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> expunge(final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
         if (!isWriteable(mailboxSession)) {
@@ -489,7 +489,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
     
     /**
-     * @see org.apache.james.mailbox.MessageManager#setFlags(javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#setFlags(javax.mail.Flags, boolean, boolean, org.apache.james.mailbox.model.MessageRange, org.apache.james.mailbox.MailboxSession)
      */
     public Map<Long, Flags> setFlags(final Flags flags, final boolean value, final boolean replace,
             final MessageRange set, MailboxSession mailboxSession) throws MailboxException {
@@ -568,7 +568,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
     /**
-     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#getMessages(org.apache.james.mailbox.model.MessageRange, org.apache.james.mailbox.model.MessageResult.FetchGroup, org.apache.james.mailbox.MailboxSession)
      */
     public MessageResultIterator getMessages(final MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException {
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(mailboxSession);
@@ -626,7 +626,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
     /**
-     * @see org.apache.james.mailbox.MessageManager#search(org.apache.james.mailbox.SearchQuery, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MessageManager#search(org.apache.james.mailbox.model.SearchQuery, org.apache.james.mailbox.MailboxSession)
      */
     public Iterator<Long> search(SearchQuery query, MailboxSession mailboxSession) throws MailboxException {
         return index.search(mailboxSession, getMailboxEntity(), query);
@@ -651,7 +651,7 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
     /**
-     * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.store.AbstractStoreMessageManager#copy(org.apache.james.mailbox.model.MessageRange, org.apache.james.mailbox.store.AbstractStoreMessageManager, org.apache.james.mailbox.MailboxSession)
      */
     private SortedMap<Long, MessageMetaData> copy(MessageRange set, final StoreMessageManager<Id> to, final MailboxSession session) throws MailboxException {
         MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);

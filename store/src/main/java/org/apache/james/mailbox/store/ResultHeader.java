@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageResult;
 
 public final class ResultHeader implements MessageResult.Header {
     private final String name;
@@ -45,21 +45,21 @@ public final class ResultHeader implements MessageResult.Header {
     }
 
     /**
-     * @see org.apache.james.mailbox.MessageResult.Header#getName()
+     * @see org.apache.james.mailbox.model.MessageResult.Header#getName()
      */
     public String getName() throws MailboxException {
         return name;
     }
 
     /**
-     * @see org.apache.james.mailbox.MessageResult.Header#getValue()
+     * @see org.apache.james.mailbox.model.MessageResult.Header#getValue()
      */
     public String getValue() throws MailboxException {
         return value;
     }
 
     /**
-     * @see org.apache.james.mailbox.Content#size()
+     * @see org.apache.james.mailbox.model.Content#size()
      */
     public long size() {
         return size;
@@ -70,7 +70,7 @@ public final class ResultHeader implements MessageResult.Header {
     }
 
     /**
-     * @see org.apache.james.mailbox.InputStreamContent#getInputStream()
+     * @see org.apache.james.mailbox.model.InputStreamContent#getInputStream()
      */
     public InputStream getInputStream() throws IOException {
         return new ByteArrayInputStream((name + ": " + value).getBytes(US_ASCII));

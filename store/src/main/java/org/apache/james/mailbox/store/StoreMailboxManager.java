@@ -26,27 +26,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import org.apache.james.mailbox.BadCredentialsException;
-import org.apache.james.mailbox.MailboxACLResolver;
-import org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver;
-import org.apache.james.mailbox.MailboxConstants;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxExistsException;
 import org.apache.james.mailbox.MailboxListener;
 import org.apache.james.mailbox.MailboxManager;
-import org.apache.james.mailbox.MailboxMetaData;
-import org.apache.james.mailbox.MailboxMetaData.Selectability;
-import org.apache.james.mailbox.MailboxNotFoundException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
-import org.apache.james.mailbox.MailboxQuery;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MailboxSession.SessionType;
 import org.apache.james.mailbox.MailboxSessionIdGenerator;
-import org.apache.james.mailbox.MessageRange;
 import org.apache.james.mailbox.RequestAware;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
+import org.apache.james.mailbox.acl.GroupMembershipResolver;
+import org.apache.james.mailbox.acl.MailboxACLResolver;
+import org.apache.james.mailbox.exception.BadCredentialsException;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.MailboxExistsException;
+import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxConstants;
+import org.apache.james.mailbox.model.MailboxMetaData;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.MailboxQuery;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.MailboxMetaData.Selectability;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
@@ -486,7 +486,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     }
 
     /**
-     * @see org.apache.james.mailbox.MailboxManager#search(org.apache.james.mailbox.MailboxQuery, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MailboxManager#search(org.apache.james.mailbox.model.MailboxQuery, org.apache.james.mailbox.MailboxSession)
      */
     public List<MailboxMetaData> search(final MailboxQuery mailboxExpression, MailboxSession session)
     throws MailboxException {
@@ -587,7 +587,7 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     }
 
     /**
-     * @see org.apache.james.mailbox.MailboxListenerSupport#removeListener(org.apache.james.mailbox.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
+     * @see org.apache.james.mailbox.MailboxListenerSupport#removeListener(org.apache.james.mailbox.model.MailboxPath, org.apache.james.mailbox.MailboxListener, org.apache.james.mailbox.MailboxSession)
      */
     public void removeListener(MailboxPath mailboxPath, MailboxListener listener, MailboxSession session) throws MailboxException {
         delegatingListener.removeListener(mailboxPath, listener, session);

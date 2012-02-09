@@ -2,11 +2,11 @@ package org.apache.james.mailbox.maildir.mail.model;
 
 import java.io.IOException;
 
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.maildir.MaildirFolder;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 
 public class MaildirMailbox<Id> extends SimpleMailbox<Id> {

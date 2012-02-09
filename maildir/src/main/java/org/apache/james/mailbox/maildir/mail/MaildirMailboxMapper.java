@@ -27,15 +27,15 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.james.mailbox.MailboxConstants;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxExistsException;
-import org.apache.james.mailbox.MailboxNotFoundException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxSession;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.MailboxExistsException;
+import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.maildir.MaildirFolder;
 import org.apache.james.mailbox.maildir.MaildirMessageName;
 import org.apache.james.mailbox.maildir.MaildirStore;
+import org.apache.james.mailbox.model.MailboxConstants;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
@@ -95,7 +95,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
 
    
     /**
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.mailbox.MailboxPath)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxByPath(org.apache.james.mailbox.model.MailboxPath)
      */
     @Override
     public Mailbox<Integer> findMailboxByPath(MailboxPath mailboxPath)
@@ -105,7 +105,7 @@ public class MaildirMailboxMapper extends NonTransactionalMapper implements Mail
     }
     
     /**
-     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.mailbox.MailboxPath)
+     * @see org.apache.james.mailbox.store.mail.MailboxMapper#findMailboxWithPathLike(org.apache.james.mailbox.model.MailboxPath)
      */
     @Override
     public List<Mailbox<Integer>> findMailboxWithPathLike(MailboxPath mailboxPath)

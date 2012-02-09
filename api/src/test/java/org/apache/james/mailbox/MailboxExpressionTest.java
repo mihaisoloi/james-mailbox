@@ -21,8 +21,8 @@ package org.apache.james.mailbox;
 
 import static org.junit.Assert.*;
 
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.MailboxQuery;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.MailboxQuery;
 import org.junit.Test;
 
 public class MailboxExpressionTest {

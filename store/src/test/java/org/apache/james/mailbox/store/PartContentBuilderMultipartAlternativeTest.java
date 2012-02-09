@@ -29,7 +29,7 @@ import java.util.List;
 import javax.management.openmbean.InvalidOpenTypeException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.james.mailbox.MessageResult.Header;
+import org.apache.james.mailbox.model.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultHeader;
 import org.apache.james.mailbox.store.streaming.PartContentBuilder;
 import org.junit.Before;

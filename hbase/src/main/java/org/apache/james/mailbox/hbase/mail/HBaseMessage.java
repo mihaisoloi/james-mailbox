@@ -29,7 +29,7 @@ import java.util.UUID;
 import javax.mail.Flags;
 import org.apache.hadoop.conf.Configuration;
 
-import org.apache.james.mailbox.MailboxException;
+import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.hbase.io.ChunkInputStream;
 import org.apache.james.mailbox.store.mail.model.AbstractMessage;
 import org.apache.james.mailbox.store.mail.model.Message;

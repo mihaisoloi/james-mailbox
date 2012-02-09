@@ -26,7 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.james.mailbox.Content;
+import org.apache.james.mailbox.model.Content;
 
 public final class ByteContent implements Content {
 
@@ -40,7 +40,7 @@ public final class ByteContent implements Content {
     }
 
     /**
-     * @see org.apache.james.mailbox.Content#size()
+     * @see org.apache.james.mailbox.model.Content#size()
      */
     public long size() {
         return size;

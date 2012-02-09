@@ -36,13 +36,13 @@ import java.util.TreeSet;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult.Header;
-import org.apache.james.mailbox.SearchQuery;
-import org.apache.james.mailbox.SearchQuery.AddressType;
-import org.apache.james.mailbox.SearchQuery.DateResolution;
-import org.apache.james.mailbox.UnsupportedSearchException;
-import org.apache.james.mailbox.SearchQuery.NumericRange;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.UnsupportedSearchException;
+import org.apache.james.mailbox.model.SearchQuery;
+import org.apache.james.mailbox.model.MessageResult.Header;
+import org.apache.james.mailbox.model.SearchQuery.AddressType;
+import org.apache.james.mailbox.model.SearchQuery.DateResolution;
+import org.apache.james.mailbox.model.SearchQuery.NumericRange;
 import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.search.comparator.CombinedComparator;

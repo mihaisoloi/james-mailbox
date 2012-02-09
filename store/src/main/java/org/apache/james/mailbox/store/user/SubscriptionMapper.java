@@ -20,7 +20,7 @@ package org.apache.james.mailbox.store.user;
 
 import java.util.List;
 
-import org.apache.james.mailbox.SubscriptionException;
+import org.apache.james.mailbox.exception.SubscriptionException;
 import org.apache.james.mailbox.store.transaction.Mapper;
 import org.apache.james.mailbox.store.user.model.Subscription;
 

@@ -42,14 +42,14 @@ import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.MailboxACL.MailboxACLEntryKey;
-import org.apache.james.mailbox.MailboxACL.MailboxACLRights;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.MailboxPathLocker;
-import org.apache.james.mailbox.SimpleMailboxACL;
 import org.apache.james.mailbox.MailboxPathLocker.LockAwareExecution;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.MailboxSession;
 
 public class MaildirFolder {

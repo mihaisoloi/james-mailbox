@@ -23,8 +23,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult.Header;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageResult.Header;
 import org.apache.james.mailbox.store.ResultUtils;
 import org.apache.james.mailbox.store.mail.model.Message;
 

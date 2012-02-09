@@ -21,6 +21,8 @@ package org.apache.james.mailbox;
 
 import java.util.Collection;
 
+import org.apache.james.mailbox.exception.SubscriptionException;
+
 /**
  * Subscribes mailboxes to users. This is only needed to implement if the Mailbox should be usable via
  * IMAP. For POP3 only you don't need this at all.

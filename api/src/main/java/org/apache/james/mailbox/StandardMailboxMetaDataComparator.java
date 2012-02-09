@@ -21,6 +21,9 @@ package org.apache.james.mailbox;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.apache.james.mailbox.model.MailboxConstants;
+import org.apache.james.mailbox.model.MailboxMetaData;
+
 /**
  * Orders by name with INBOX first.
  */

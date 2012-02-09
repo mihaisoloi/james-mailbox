@@ -19,7 +19,7 @@
 package org.apache.james.mailbox.store.user;
 
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.SubscriptionException;
+import org.apache.james.mailbox.exception.SubscriptionException;
 
 public interface SubscriptionMapperFactory {
 

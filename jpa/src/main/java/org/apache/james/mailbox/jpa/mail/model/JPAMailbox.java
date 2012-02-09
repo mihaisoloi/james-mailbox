@@ -27,9 +27,9 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-import org.apache.james.mailbox.MailboxACL;
-import org.apache.james.mailbox.MailboxPath;
-import org.apache.james.mailbox.SimpleMailboxACL;
+import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 @Entity(name="Mailbox")

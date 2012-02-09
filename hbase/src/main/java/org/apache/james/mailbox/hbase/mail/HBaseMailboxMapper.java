@@ -18,12 +18,31 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase.mail;
 
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOXES_TABLE;
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_CF;
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_MESSAGE_COUNT;
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_NAME;
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_NAMESPACE;
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_USER;
+import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_META_CF;
+import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_TABLE;
+import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGE_INTERNALDATE;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxFromResult;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxRowKey;
+import static org.apache.james.mailbox.hbase.HBaseUtils.toPut;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.BinaryPrefixComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -31,13 +50,11 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.filter.SubstringComparator;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MailboxNotFoundException;
-import org.apache.james.mailbox.MailboxPath;
-import static org.apache.james.mailbox.hbase.HBaseNames.*;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.hbase.HBaseNonTransactionalMapper;
-import static org.apache.james.mailbox.hbase.HBaseUtils.*;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
@@ -371,7 +388,8 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             throw new RuntimeException("IOException deleting mailboxes", ex);
         } finally {
             IOUtils.closeStream(scanner);
-            IOUtils.closeStream(mailboxes);
+            // TODO Temporary commented, was not compiling.
+//            IOUtils.closeStream(mailboxes);
         }
     }
 }

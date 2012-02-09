@@ -21,9 +21,9 @@ package org.apache.james.mailbox.store.search;
 
 import java.util.Iterator;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.SearchQuery;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.SearchQuery;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 
 

@@ -19,9 +19,9 @@
 
 package org.apache.james.mailbox.store;
 
-import org.apache.james.mailbox.MailboxMetaData;
-import org.apache.james.mailbox.MailboxPath;
 import org.apache.james.mailbox.StandardMailboxMetaDataComparator;
+import org.apache.james.mailbox.model.MailboxMetaData;
+import org.apache.james.mailbox.model.MailboxPath;
 
 public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<MailboxMetaData> {
 
@@ -66,14 +66,14 @@ public class SimpleMailboxMetaData implements MailboxMetaData, Comparable<Mailbo
     }
 
     /**
-     * @see org.apache.james.mailbox.MailboxMetaData#getHierarchyDelimiter()
+     * @see org.apache.james.mailbox.model.MailboxMetaData#getHierarchyDelimiter()
      */
     public char getHierarchyDelimiter() {
         return delimiter;
     }
 
     /**
-     * @see org.apache.james.mailbox.MailboxMetaData#getPath()
+     * @see org.apache.james.mailbox.model.MailboxMetaData#getPath()
      */
     public MailboxPath getPath() {
         return path;

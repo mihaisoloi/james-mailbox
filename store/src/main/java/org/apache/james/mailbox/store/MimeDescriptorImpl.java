@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MimeDescriptor;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MimeDescriptor;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.message.DefaultBodyDescriptorBuilder;

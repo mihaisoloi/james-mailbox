@@ -26,10 +26,10 @@ import java.io.SequenceInputStream;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.james.mailbox.Content;
-import org.apache.james.mailbox.MailboxException;
-import org.apache.james.mailbox.MessageResult;
-import org.apache.james.mailbox.MessageResult.Header;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.Content;
+import org.apache.james.mailbox.model.MessageResult;
+import org.apache.james.mailbox.model.MessageResult.Header;
 
 /**
  * Abstract base class for {@link Content} implementations which hold the headers and 

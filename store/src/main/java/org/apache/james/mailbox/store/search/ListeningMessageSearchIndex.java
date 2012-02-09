@@ -23,11 +23,11 @@ import java.util.List;
 
 import javax.mail.Flags;
 
-import org.apache.james.mailbox.MailboxException;
 import org.apache.james.mailbox.MailboxListener;
-import org.apache.james.mailbox.UpdatedFlags;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageRange;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.UpdatedFlags;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.AddedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.ExpungedImpl;
 import org.apache.james.mailbox.store.MailboxEventDispatcher.FlagsUpdatedImpl;

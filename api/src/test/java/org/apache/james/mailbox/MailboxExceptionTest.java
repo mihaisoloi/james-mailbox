@@ -20,6 +20,7 @@ package org.apache.james.mailbox;
 
 import junit.framework.Assert;
 
+import org.apache.james.mailbox.exception.MailboxException;
 import org.junit.Test;
 
 /**
