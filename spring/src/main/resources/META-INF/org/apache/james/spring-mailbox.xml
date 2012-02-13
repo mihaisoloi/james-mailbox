@@ -52,10 +52,10 @@
     <!-- 
       Mailbox ACL Resolver
      -->
-    <bean id="aclResolver" class="org.apache.james.mailbox.UnionMailboxACLResolver"/>
+    <bean id="aclResolver" class="org.apache.james.mailbox.acl.UnionMailboxACLResolver"/>
     <!-- 
       Group Membership Resolver
      -->
-    <bean id="groupMembershipResolver" class="org.apache.james.mailbox.SimpleGroupMembershipResolver"/>
+    <bean id="groupMembershipResolver" class="org.apache.james.mailbox.acl.SimpleGroupMembershipResolver"/>
           
 </beans>
