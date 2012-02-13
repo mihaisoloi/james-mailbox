@@ -133,7 +133,7 @@ public interface MailboxACL {
         boolean isSupported(MailboxACLRight right);
 
         /**
-         * Tells whether this conatins the given right.
+         * Tells whether this contains the given right.
          * 
          * @param right
          * @return
@@ -141,7 +141,7 @@ public interface MailboxACL {
          *             iff the given right is not supported.
          */
         boolean contains(MailboxACLRight right) throws UnsupportedRightException;
-
+        
         /**
          * Performs the set theoretic operation of relative complement of
          * toRemove MailboxACLRights in this MailboxACLRights.

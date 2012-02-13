@@ -61,11 +61,12 @@ public interface MessageManager {
      * 
      * @param session
      * @return writable
+     * @throws MailboxException 
      * @deprecated use
      *             {@link #getMetaData(boolean, MailboxSession, org.apache.james.mailbox.MessageManager.MetaData.FetchGroup)}
      */
     @Deprecated
-    boolean isWriteable(MailboxSession session);
+    boolean isWriteable(MailboxSession session) throws MailboxException;
 
     /**
      * Return true if {@link MessageResult#getModSeq()} is stored in a permanent

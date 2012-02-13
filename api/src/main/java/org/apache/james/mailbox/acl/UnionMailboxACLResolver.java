@@ -24,6 +24,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.mail.Flags;
+import javax.mail.Flags.Flag;
+
 import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.SimpleMailboxACL;
@@ -31,6 +34,7 @@ import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.model.MailboxACL.NameType;
+import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
 
 import com.sun.mail.mbox.Mailbox;
 
@@ -44,7 +48,7 @@ import com.sun.mail.mbox.Mailbox;
  * the result is computed afterwards with
  * <code>nonNegativeUnion.except(negativeUnion)</code>.
  * 
- * Allows for setting dictinct global ACL for users' mailboxes on one hand and
+ * Allows for setting distinct global ACL for users' mailboxes on one hand and
  * group (a.k.a shared) mailboxes on the other hand. E.g. the zero parameter
  * constructor uses full rights for user mailboxes and
  * full-except-administration rights for group mailboxes.
@@ -140,9 +144,7 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see
      * org.apache.james.mailbox.MailboxACLResolver#applyGlobalACL(org.apache
      * .james.mailbox.MailboxACL, boolean)
@@ -152,9 +154,7 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
         return resourceOwnerIsGroup ? resourceACL.union(groupGlobalACL) : resourceACL.union(userGlobalACL);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /** 
      * @see
      * org.apache.james.mailbox.store.mail.MailboxACLResolver#hasRight(java.
      * lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.
@@ -200,9 +200,41 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * @see org.apache.james.mailbox.acl.MailboxACLResolver#isReadWrite(org.apache.james.mailbox.model.MailboxACL.MailboxACLRights, javax.mail.Flags)
+     */
+    @Override
+    public boolean isReadWrite(MailboxACLRights mailboxACLRights, Flags sharedFlags) throws UnsupportedRightException {
+        /* the two fast cases first */
+        if (mailboxACLRights.contains(Rfc4314Rights.i_Insert_RIGHT) || mailboxACLRights.contains(Rfc4314Rights.e_PerformExpunge_RIGHT)) {
+            return true;
+        }
+        /*
+         * then go through shared flags. RFC 4314 section 4:
+         * 
+         * Changing flags: STORE 
+         * 
+         * - the server MUST check if the user has "t" right 
+         * 
+         * - when the user modifies \Deleted flag "s" right 
+         * 
+         * - when the user modifies \Seen flag "w" right - for all other message flags.
+         * 
+         */
+        else if (sharedFlags != null) {
+            if (sharedFlags.contains(Flag.DELETED) && mailboxACLRights.contains(Rfc4314Rights.t_DeleteMessages_RIGHT)) {
+                return true;
+            } else if (sharedFlags.contains(Flag.SEEN) && mailboxACLRights.contains(Rfc4314Rights.s_WriteSeenFlag_RIGHT)) {
+                return true;
+            } else {
+                boolean hasWriteRight = mailboxACLRights.contains(Rfc4314Rights.w_Write_RIGHT);
+                return hasWriteRight && (sharedFlags.contains(Flag.ANSWERED) || sharedFlags.contains(Flag.DRAFT) || sharedFlags.contains(Flag.FLAGGED) || sharedFlags.contains(Flag.RECENT) || sharedFlags.contains(Flag.USER));
+            }
+        }
+        return false;
+    }
+
+    /** 
      * @see
      * org.apache.james.mailbox.store.mail.MailboxACLResolver#rightsOf(java.
      * lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.

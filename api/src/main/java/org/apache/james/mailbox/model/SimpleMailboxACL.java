@@ -354,9 +354,7 @@ public class SimpleMailboxACL implements MailboxACL {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
+        /** 
          * @see
          * org.apache.james.mailbox.MailboxACL.MailboxACLRights#contains(org
          * .apache.james.mailbox.MailboxACL.MailboxACLRight)
@@ -381,9 +379,7 @@ public class SimpleMailboxACL implements MailboxACL {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
+        /** 
          * @see
          * org.apache.james.mailbox.MailboxACL.MailboxACLRights#except(org.apache
          * .james.mailbox.MailboxACL.MailboxACLRights)
