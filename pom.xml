@@ -79,7 +79,7 @@
         <version.javax.persistence>1.0.2</version.javax.persistence>
         <version.javax.inject>1</version.javax.inject>
         <version.commons-lang>2.4</version.commons-lang>
-        <version.apache-mime4j>0.7</version.apache-mime4j>
+        <version.apache-mime4j>0.7.2</version.apache-mime4j>
         <version.javax.mail>1.4.1</version.javax.mail>
         <version.activation>1.1.1</version.activation>
         <version.jmock>2.5.1</version.jmock>
