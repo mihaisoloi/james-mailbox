@@ -30,7 +30,7 @@
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
-        <property name ="location" value="classpath:maildir.properties"/>
+        <property name ="location" value="classpath:mailbox-maildir.properties"/>
     </bean>
 
     <bean id="maildir-mailboxmanager" class="org.apache.james.mailbox.store.StoreMailboxManager" init-method="init">
