@@ -28,9 +28,6 @@
         <class>org.apache.james.mailbox.jpa.mail.model.JPAUserFlag</class>
         <class>org.apache.james.mailbox.jpa.mail.model.openjpa.AbstractJPAMessage</class>
         <class>org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage</class>
-<!-- 
-        <class>org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage</class>
--->
         <class>org.apache.james.mailbox.jpa.mail.model.JPAProperty</class>
         <class>org.apache.james.mailbox.jpa.user.model.JPASubscription</class>
         <properties>
