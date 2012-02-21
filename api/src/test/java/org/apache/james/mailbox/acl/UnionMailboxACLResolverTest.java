@@ -20,13 +20,10 @@
 
 package org.apache.james.mailbox.acl;
 
-import org.apache.james.mailbox.acl.SimpleGroupMembershipResolver;
-import org.apache.james.mailbox.acl.UnionMailboxACLResolver;
 import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.MailboxACL;
-import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.MailboxACL.NameType;
-import org.apache.james.mailbox.model.MailboxACL.SpecialName;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
 import org.apache.james.mailbox.model.SimpleMailboxACL.SimpleMailboxACLEntryKey;
 import org.junit.Assert;
@@ -60,9 +57,18 @@ public class UnionMailboxACLResolverTest {
     private MailboxACL ownerReadNegative;
     private MailboxACL user1Read;
     private MailboxACL user1ReadNegative;
+    private SimpleMailboxACLEntryKey user1Key;
+    private SimpleMailboxACLEntryKey user2Key;
+    private SimpleMailboxACLEntryKey group1Key;
+    private SimpleMailboxACLEntryKey group2Key;
 
     @Before
     public void setUp() throws Exception {
+        user1Key = SimpleMailboxACLEntryKey.createUser(USER_1);
+        user2Key = SimpleMailboxACLEntryKey.createUser(USER_2);
+        group1Key = SimpleMailboxACLEntryKey.createGroup(GROUP_1);
+        group2Key = SimpleMailboxACLEntryKey.createGroup(GROUP_2);
+        
         MailboxACL acl = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.AUTHENTICATED_KEY, SimpleMailboxACL.FULL_RIGHTS) });
         authenticatedReadListWriteGlobal = new UnionMailboxACLResolver(acl, acl);
         acl = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.ANYBODY_KEY, new Rfc4314Rights("rl")) });
@@ -77,72 +83,81 @@ public class UnionMailboxACLResolverTest {
         groupMembershipResolver.addMembership(GROUP_1, USER_1);
         groupMembershipResolver.addMembership(GROUP_2, USER_2);
 
-        user1Read = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createUser(USER_1), new Rfc4314Rights("r")) });
+        user1Read = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(user1Key, new Rfc4314Rights("r")) });
         user1ReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createUser(USER_1, true), new Rfc4314Rights("r")) });
 
-        group1Read = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createGroup(GROUP_1), new Rfc4314Rights("r")) });
+        group1Read = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(group1Key, new Rfc4314Rights("r")) });
         group1ReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createGroup(GROUP_1, true), new Rfc4314Rights("r")) });
 
-        anybodyRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), new Rfc4314Rights("r")) });
-        anybodyReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody, true), new Rfc4314Rights("r")) });
+        anybodyRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.ANYBODY_KEY, new Rfc4314Rights("r")) });
+        anybodyReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.ANYBODY_NEGATIVE_KEY, new Rfc4314Rights("r")) });
 
-        authenticatedRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), new Rfc4314Rights("r")) });
-        authenticatedReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated, true), new Rfc4314Rights("r")) });
+        authenticatedRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.AUTHENTICATED_KEY, new Rfc4314Rights("r")) });
+        authenticatedReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.AUTHENTICATED_NEGATIVE_KEY, new Rfc4314Rights("r")) });
 
-        ownerRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), new Rfc4314Rights("r")) });
-        ownerReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner, true), new Rfc4314Rights("r")) });
+        ownerRead = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.OWNER_KEY, new Rfc4314Rights("r")) });
+        ownerReadNegative = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.OWNER_NEGATIVE_KEY, new Rfc4314Rights("r")) });
 
     }
 
     @Test
     public void testAppliesNullUser() throws UnsupportedRightException {
 
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_1), null, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_2), null, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_1), null, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_2), null, groupMembershipResolver, USER_1, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), null, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), null, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user1Key, null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group1Key, null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, null, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, null, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, null, groupMembershipResolver, USER_1, false));
     }
 
     @Test
     public void testAppliesUser() throws UnsupportedRightException {
-        /* requester unequal to owner */
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_1), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_2), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_1), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_2), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), USER_1, groupMembershipResolver, USER_1, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), USER_1, groupMembershipResolver, USER_1, false));
+        /* requester is the resource owner */
+        Assert.assertTrue(UnionMailboxACLResolver.applies(user1Key, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(group1Key, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, user1Key, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, user1Key, groupMembershipResolver, USER_1, false));
 
-        /* requester unequal to owner user */
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_1), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_2), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_1), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_2), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), USER_1, groupMembershipResolver, USER_2, false));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), USER_1, groupMembershipResolver, USER_2, false));
+        /* requester is not the resource user */
+        Assert.assertTrue(UnionMailboxACLResolver.applies(user1Key, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(group1Key, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, user1Key, groupMembershipResolver, USER_2, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, user1Key, groupMembershipResolver, USER_2, false));
 
         /* requester member of owner group */
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_1), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_2), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_1), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_2), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), USER_1, groupMembershipResolver, GROUP_1, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), USER_1, groupMembershipResolver, GROUP_1, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(user1Key, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(group1Key, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, user1Key, groupMembershipResolver, GROUP_1, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, user1Key, groupMembershipResolver, GROUP_1, true));
 
         /* requester not member of owner group */
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_1), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createUser(USER_2), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_1), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createGroup(GROUP_2), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.anybody), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertTrue(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.authenticated), USER_1, groupMembershipResolver, GROUP_2, true));
-        Assert.assertFalse(anyoneReadListGlobal.applies(SimpleMailboxACLEntryKey.createSpecial(SpecialName.owner), USER_1, groupMembershipResolver, GROUP_2, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(user1Key, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(group1Key, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, user1Key, groupMembershipResolver, GROUP_2, true));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, user1Key, groupMembershipResolver, GROUP_2, true));
+
+        /* owner query */
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user1Key, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(user2Key, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group1Key, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertFalse(UnionMailboxACLResolver.applies(group2Key, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.ANYBODY_KEY, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.AUTHENTICATED_KEY, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
+        Assert.assertTrue(UnionMailboxACLResolver.applies(SimpleMailboxACL.OWNER_KEY, SimpleMailboxACL.OWNER_KEY, groupMembershipResolver, USER_1, false));
 
     }
 

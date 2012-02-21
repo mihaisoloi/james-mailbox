@@ -28,18 +28,25 @@ import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
  */
 public class UnsupportedRightException extends MailboxSecurityException {
 
+    private static final char INVALID_RIGHT = 0;
     private static final long serialVersionUID = 2959248897018370078L;
+    private char unsupportedRight = INVALID_RIGHT;
 
     public UnsupportedRightException() {
         super();
+    }
+
+    public UnsupportedRightException(char right) {
+        super("Unsupported right flag '"+ right +"'.");
+        this.unsupportedRight  = right;
     }
     
     public UnsupportedRightException(MailboxACLRight unsupportedRight) {
         this(unsupportedRight.getValue());
     }
     
-    public UnsupportedRightException(char rigthFlag) {
-        super("Unsupported right flag '"+ rigthFlag +"'.");
+    public char getUnsupportedRight() {
+        return unsupportedRight;
     }
 
 }

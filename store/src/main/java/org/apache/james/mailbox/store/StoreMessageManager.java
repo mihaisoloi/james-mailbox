@@ -50,6 +50,8 @@ import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.ReadOnlyException;
 import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxACL.EditMode;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.model.MessageMetaData;
@@ -732,34 +734,49 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
     }
 
     /**
-     * Returns the rights applicable to the user who has sent the current
-     * request.
-     * 
-     * @param session
-     * @return the rights applicable to the user who has sent the request,
-     *         returns {@link SimpleMailboxACL#NO_RIGHTS} if
-     *         {@code session.getUser()} is null.
-     * @throws UnsupportedRightException
+     * @see org.apache.james.mailbox.MessageManager#myRights(org.apache.james.mailbox.MailboxSession)
      */
+    @Override
     public MailboxACLRights myRights(MailboxSession session) throws MailboxException {
         User user = session.getUser();
         if (user != null) {
-            return listRigths(user.getUserName(), session);
+            return aclResolver.resolveRights(user.getUserName(), groupMembershipResolver, mailbox.getACL(), mailbox.getUser(), isGroupFolder(session));
         } else {
             return SimpleMailboxACL.NO_RIGHTS;
         }
     }
 
     /**
-     * Returns the rights applicable to the given user.
-     * 
-     * @param user
-     * @param session
-     * @return
-     * @throws UnsupportedRightException
+     * @see org.apache.james.mailbox.MessageManager#listRigths(java.lang.String, org.apache.james.mailbox.MailboxSession)
      */
-    public MailboxACLRights listRigths(String user, MailboxSession session) throws UnsupportedRightException {
-        return aclResolver.listRights(user, groupMembershipResolver, mailbox.getACL(), mailbox.getUser(), isGroupFolder(session));
+    public MailboxACLRights[] listRigths(final MailboxACLEntryKey key, MailboxSession session) throws UnsupportedRightException {
+        return aclResolver.listRights(key, groupMembershipResolver, mailbox.getUser(), isGroupFolder(session));
+    }
+
+    /**
+     * @throws UnsupportedRightException 
+     * @see org.apache.james.mailbox.MessageManager#setRights(java.lang.String, org.apache.james.mailbox.model.MailboxACL.EditMode, org.apache.james.mailbox.model.MailboxACL.MailboxACLRights)
+     */
+    @Override
+    public void setRights(MailboxACLEntryKey mailboxACLEntryKey, EditMode editMode, MailboxACLRights mailboxAclRights) throws UnsupportedRightException {
+        MailboxACL acl = mailbox.getACL();
+        if (acl == null) {
+            acl = SimpleMailboxACL.EMPTY;
+        }
+        switch (editMode) {
+        case ADD:
+            acl = acl.union(mailboxACLEntryKey, mailboxAclRights);
+            break;
+        case REMOVE:
+            acl = acl.except(mailboxACLEntryKey, mailboxAclRights);
+            break;
+        case REPLACE:
+            acl = acl.replace(mailboxACLEntryKey, mailboxAclRights);
+            break;
+        default:
+            throw new IllegalStateException("Unexpected "+ EditMode.class.getName() +"."+ editMode);
+        }
+        mailbox.setACL(acl);
     }
 
     /**

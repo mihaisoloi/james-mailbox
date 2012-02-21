@@ -24,6 +24,7 @@ import javax.mail.Flags;
 
 import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.MailboxACL;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 
@@ -35,8 +36,8 @@ import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
  * to be granted to the identifier matching the user, one or more
  * implementation-defined identifiers matching groups that include the user,
  * and/or the identifier "anyone". How these rights are combined to determine
- * the users access is implementation defined. An implementation may choose,
- * for example, to use the union of the rights granted to the applicable
+ * the users access is implementation defined. An implementation may choose, for
+ * example, to use the union of the rights granted to the applicable
  * identifiers. An implementation may instead choose, for example, to use only
  * those rights granted to the most specific identifier present in the ACL. A
  * client can determine the set of rights granted to the logged-in user for a
@@ -55,7 +56,7 @@ public interface MailboxACLResolver {
      * @return
      * @throws UnsupportedRightException
      */
-    public abstract MailboxACL applyGlobalACL(MailboxACL resourceACL, boolean resourceOwnerIsGroup) throws UnsupportedRightException;
+    public MailboxACL applyGlobalACL(MailboxACL resourceACL, boolean resourceOwnerIsGroup) throws UnsupportedRightException;
 
     /**
      * Tells whether the given user has the given right granted on the basis of
@@ -86,31 +87,6 @@ public interface MailboxACLResolver {
      * @throws UnsupportedRightException
      */
     boolean hasRight(String requestUser, GroupMembershipResolver groupMembershipResolver, MailboxACLRight right, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException;
-
-    /**
-     * Computes the rights which apply to the given user and resource. Global ACL (if there is any) should be applied
-     * within this method.
-     * 
-     * @param requestUser
-     *            the user for whom the rights are computed, possibly
-     *            <code>null</code> when there is no authenticated user in the
-     *            given context.
-     * @param groupMembershipResolver
-     *            this resolver is used when checking whether any group rights
-     *            contained in resourceACL are applicable for the requestUser.
-     * @param resourceACL
-     *            the ACL defining the access right for the resource in
-     *            question.
-     * @param resourceOwner
-     *            this user name is used as a replacement for the "owner" place
-     *            holder in the resourceACL.
-     * @param resourceOwnerIsGroup
-     *            true if the resourceOwner is a group of users, false
-     *            otherwise.
-     * @return the rights applicable for the given user and resource.
-     * @throws UnsupportedRightException
-     */
-    public abstract MailboxACLRights listRights(String requestUser, GroupMembershipResolver groupMembershipResolver, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException;
 
     /**
      * Maps the given {@code mailboxACLRights} to READ-WRITE and READ-ONLY
@@ -150,5 +126,53 @@ public interface MailboxACLResolver {
      * @throws UnsupportedRightException
      */
     public abstract boolean isReadWrite(MailboxACLRights mailboxACLRights, Flags sharedFlags) throws UnsupportedRightException;
+
+    /**
+     * Computes a result suitable for the LISTRIGHTS IMAP command. The result is
+     * computed regardless of mailbox. Therefore it should be viewed as a
+     * general default which may be further customised depending on the given
+     * mailbox.
+     * 
+     * @param key
+     *            the identifier from the LISTRIGHTS command
+     * @param groupMembershipResolver
+     * @param resourceOwner
+     *            the owner of the mailbox named in the LISTRIGHTS command. User
+     *            name or group name.
+     * @param resourceOwnerIsGroup
+     *            true if the {@code resourceOwner} is a group of users, false
+     *            otherwise.
+     * @return an array of {@link MailboxACLRights}. The first element is the
+     *         set of implicit (global) rights which does not need to be set
+     *         explicitly for the given identifier. Further elements are groups
+     *         of rights which can be set for the given identifier and resource.
+     * @throws UnsupportedRightException
+     */
+    public MailboxACLRights[] listRights(final MailboxACLEntryKey key, final GroupMembershipResolver groupMembershipResolver, final String resourceOwner, final boolean resourceOwnerIsGroup) throws UnsupportedRightException;
+
+    /**
+     * Computes the rights which apply to the given user and resource. Global
+     * ACL (if there is any) should be applied within this method.
+     * 
+     * @param requestUser
+     *            the user for whom the rights are computed, possibly
+     *            <code>null</code> when there is no authenticated user in the
+     *            given context.
+     * @param groupMembershipResolver
+     *            this resolver is used when checking whether any group rights
+     *            contained in resourceACL are applicable for the requestUser.
+     * @param resourceACL
+     *            the ACL defining the access right for the resource in
+     *            question.
+     * @param resourceOwner
+     *            this user name is used as a replacement for the "owner" place
+     *            holder in the resourceACL.
+     * @param resourceOwnerIsGroup
+     *            true if the resourceOwner is a group of users, false
+     *            otherwise.
+     * @return the rights applicable for the given user and resource.
+     * @throws UnsupportedRightException
+     */
+    public abstract MailboxACLRights resolveRights(String requestUser, GroupMembershipResolver groupMembershipResolver, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException;
 
 }

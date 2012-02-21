@@ -20,7 +20,9 @@
 
 package org.apache.james.mailbox.acl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,12 +31,13 @@ import javax.mail.Flags.Flag;
 
 import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.MailboxACL;
-import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.model.MailboxACL.NameType;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
+import org.apache.james.mailbox.model.SimpleMailboxACL.SimpleMailboxACLEntryKey;
 
 import com.sun.mail.mbox.Mailbox;
 
@@ -43,7 +46,7 @@ import com.sun.mail.mbox.Mailbox;
  * applicable identifiers. Inspired by RFC 4314 Section 2.
  * 
  * In
- * {@link UnionMailboxACLResolver#listRights(String, org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver, MailboxACL, String, boolean)}
+ * {@link UnionMailboxACLResolver#resolveRights(String, org.apache.james.mailbox.MailboxACLResolver.GroupMembershipResolver, MailboxACL, String, boolean)}
  * all applicable negative and non-negative rights are union-ed separately and
  * the result is computed afterwards with
  * <code>nonNegativeUnion.except(negativeUnion)</code>.
@@ -61,6 +64,9 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
      * Nothing else than full rights for the owner.
      */
     public static final MailboxACL DEFAULT_GLOBAL_USER_ACL = SimpleMailboxACL.OWNER_FULL_ACL;
+
+    private static final int POSITIVE_INDEX = 0;
+    private static final int NEGATIVE_INDEX = 1;
 
     private final MailboxACL groupGlobalACL;
     /**
@@ -108,69 +114,147 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
     }
 
     /**
-     * Tells whether the given {@link MailboxACLEntryKey} is applicable for the
-     * given user. If the given key is a group key, the given
-     * {@link GroupMembershipResolver} is used to find out if the given user is
-     * a member of the key's group. If the given key is an "owner" key, it is
-     * effectively handled as if it was a {@code resourceOwner} key. To avoid
-     * clash between user and group names, {@code resourceOwnerIsGroup} must
-     * state explicitly if the given {@code resourceOwner} is a group.
+     * Tells whether the given {@code aclKey} {@link MailboxACLEntryKey} is
+     * applicable for the given {@code queryKey}.
      * 
-     * @param key
-     * @param user
+     * There are two use cases for which this method was designed and tested:
+     * 
+     * (1) Calls from
+     * {@link #hasRight(String, GroupMembershipResolver, MailboxACLRight, MailboxACL, String, boolean)}
+     * and
+     * {@link #resolveRights(String, GroupMembershipResolver, MailboxACL, String, boolean)}
+     * in which the {@code queryKey} is a {@link NameType#user}.
+     * 
+     * (2) Calls from
+     * {@link #listRights(MailboxACLEntryKey, GroupMembershipResolver, String, boolean)}
+     * where {@code queryKey} can be anything including {@link NameType#user},
+     * {@link NameType#group} and all {@link NameType#special} identifiers.
+     * 
+     * Clearly the set of cases which this method has to handle in (1) is a
+     * proper subset of the cases handled in (2). See the javadoc on
+     * {@link #listRights(MailboxACLEntryKey, GroupMembershipResolver, String, boolean)}
+     * for more details.
+     * 
+     * @param aclKey
+     * @param queryKey
      * @param groupMembershipResolver
      * @param resourceOwner
      * @param resourceOwnerIsGroup
      * @return
      */
-    protected boolean applies(MailboxACLEntryKey key, String user, GroupMembershipResolver groupMembershipResolver, String resourceOwner, boolean resourceOwnerIsGroup) {
-        final String keyName = key.getName();
-        final NameType keyNameType = key.getNameType();
-        if (MailboxACL.SpecialName.anybody.name().equals(keyName)) {
+    protected static boolean applies(MailboxACLEntryKey aclKey, MailboxACLEntryKey queryKey, GroupMembershipResolver groupMembershipResolver, String resourceOwner, boolean resourceOwnerIsGroup) {
+        final String aclKeyName = aclKey.getName();
+        final NameType aclKeyNameType = aclKey.getNameType();
+        if (MailboxACL.SpecialName.anybody.name().equals(aclKeyName)) {
             /* this works also for unauthenticated users */
             return true;
-        } else if (user != null) {
-            /* Authenticated users */
-            if (MailboxACL.SpecialName.authenticated.name().equals(keyName)) {
-                return true;
-            } else if (MailboxACL.SpecialName.owner.name().equals(keyName)) {
-                return (!resourceOwnerIsGroup && user.equals(resourceOwner)) || (resourceOwnerIsGroup && groupMembershipResolver.isMember(user, resourceOwner));
-            } else if (MailboxACL.NameType.user.equals(keyNameType)) {
-                return keyName.equals(user);
-            } else if (MailboxACL.NameType.group.equals(keyNameType)) {
-                return groupMembershipResolver.isMember(user, keyName);
+        } else if (queryKey != null) {
+            String queryUserOrGroupName = queryKey.getName();
+            switch (queryKey.getNameType()) {
+            case user:
+                /* Authenticated users */
+                switch (aclKeyNameType) {
+                case special:
+                    if (MailboxACL.SpecialName.authenticated.name().equals(aclKeyName)) {
+                        /* non null query user is viewed as authenticated */
+                        return true;
+                    } else if (MailboxACL.SpecialName.owner.name().equals(aclKeyName)) {
+                        return (!resourceOwnerIsGroup && queryUserOrGroupName.equals(resourceOwner)) || (resourceOwnerIsGroup && groupMembershipResolver.isMember(queryUserOrGroupName, resourceOwner));
+                    } else {
+                        /* should not happen unless the parent if is changed */
+                        throw new IllegalStateException("Unexpected " + MailboxACL.SpecialName.class.getName() + "." + aclKeyName);
+                    }
+                case user:
+                    return aclKeyName.equals(queryUserOrGroupName);
+                case group:
+                    return groupMembershipResolver.isMember(queryUserOrGroupName, aclKeyName);
+                default:
+                    throw new IllegalStateException("Unexpected " + NameType.class.getName() + "." + aclKeyNameType);
+                }
+            case group:
+                /* query is a group */
+                switch (aclKeyNameType) {
+                case special:
+                    if (MailboxACL.SpecialName.authenticated.name().equals(aclKeyName)) {
+                        /*
+                         * see the javadoc comment on listRights()
+                         */
+                        return true;
+                    } else if (MailboxACL.SpecialName.owner.name().equals(aclKeyName)) {
+                        return resourceOwnerIsGroup && queryUserOrGroupName.equals(resourceOwner);
+                    } else {
+                        /* should not happen unless the parent if is changed */
+                        throw new IllegalStateException("Unexpected " + MailboxACL.SpecialName.class.getName() + "." + aclKeyName);
+                    }
+                case user:
+                    /* query groups cannot match ACL users */
+                    return false;
+                case group:
+                    return aclKeyName.equals(queryUserOrGroupName);
+                default:
+                    throw new IllegalStateException("Unexpected " + NameType.class.getName() + "." + aclKeyNameType);
+                }
+            case special:
+                /* query is a special name */
+                switch (aclKeyNameType) {
+                case special:
+                    if (aclKeyName.equals(queryUserOrGroupName)) {
+                        /*
+                         * authenticated matches authenticated and owner matches
+                         * owner
+                         */
+                        return true;
+                    } else if (MailboxACL.SpecialName.owner.name().equals(queryUserOrGroupName) && MailboxACL.SpecialName.authenticated.name().equals(aclKeyName)) {
+                        /*
+                         * query owner matches authenticated because owner will
+                         * be resolved only if the user is authenticated
+                         */
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case user:
+                case group:
+                    /* query specials cannot match ACL users or groups */
+                    return false;
+                default:
+                    throw new IllegalStateException("Unexpected " + NameType.class.getName() + "." + aclKeyNameType);
+                }
+            default:
+                throw new IllegalStateException("Unexpected " + NameType.class.getName() + "." + queryKey.getNameType());
             }
+        } else {
+            /* non-anybody ACL keys do not match non-authenticated queries */
+            return false;
         }
-        return false;
     }
 
     /**
-     * @see
-     * org.apache.james.mailbox.MailboxACLResolver#applyGlobalACL(org.apache
-     * .james.mailbox.MailboxACL, boolean)
+     * @see org.apache.james.mailbox.MailboxACLResolver#applyGlobalACL(org.apache
+     *      .james.mailbox.MailboxACL, boolean)
      */
     @Override
     public MailboxACL applyGlobalACL(MailboxACL resourceACL, boolean resourceOwnerIsGroup) throws UnsupportedRightException {
         return resourceOwnerIsGroup ? resourceACL.union(groupGlobalACL) : resourceACL.union(userGlobalACL);
     }
 
-    /** 
-     * @see
-     * org.apache.james.mailbox.store.mail.MailboxACLResolver#hasRight(java.
-     * lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.
-     * GroupMembershipResolver,
-     * org.apache.james.mailbox.MailboxACL.MailboxACLRight,
-     * org.apache.james.mailbox.MailboxACL, java.lang.String)
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxACLResolver#hasRight(java.
+     *      lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.
+     *      GroupMembershipResolver,
+     *      org.apache.james.mailbox.MailboxACL.MailboxACLRight,
+     *      org.apache.james.mailbox.MailboxACL, java.lang.String)
      */
     @Override
     public boolean hasRight(String requestUser, GroupMembershipResolver groupMembershipResolver, MailboxACLRight right, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException {
+        final MailboxACLEntryKey queryKey = requestUser == null ? null : new SimpleMailboxACLEntryKey(requestUser, NameType.user, false);
         boolean result = false;
         Map<MailboxACLEntryKey, MailboxACLRights> entries = resourceOwnerIsGroup ? groupGlobalACL.getEntries() : userGlobalACL.getEntries();
         if (entries != null) {
             for (Iterator<Map.Entry<MailboxACLEntryKey, MailboxACLRights>> it = entries.entrySet().iterator(); it.hasNext();) {
                 final Entry<MailboxACLEntryKey, MailboxACLRights> entry = it.next();
                 final MailboxACLEntryKey key = entry.getKey();
-                if (applies(key, requestUser, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup) && entry.getValue().contains(right)) {
+                if (applies(key, queryKey, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup) && entry.getValue().contains(right)) {
                     if (key.isNegative()) {
                         return false;
                     } else {
@@ -186,7 +270,7 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
                 for (Iterator<Map.Entry<MailboxACLEntryKey, MailboxACLRights>> it = entries.entrySet().iterator(); it.hasNext();) {
                     final Entry<MailboxACLEntryKey, MailboxACLRights> entry = it.next();
                     final MailboxACLEntryKey key = entry.getKey();
-                    if (applies(key, requestUser, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup) && entry.getValue().contains(right)) {
+                    if (applies(key, queryKey, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup) && entry.getValue().contains(right)) {
                         if (key.isNegative()) {
                             return false;
                         } else {
@@ -201,7 +285,8 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
     }
 
     /**
-     * @see org.apache.james.mailbox.acl.MailboxACLResolver#isReadWrite(org.apache.james.mailbox.model.MailboxACL.MailboxACLRights, javax.mail.Flags)
+     * @see org.apache.james.mailbox.acl.MailboxACLResolver#isReadWrite(org.apache.james.mailbox.model.MailboxACL.MailboxACLRights,
+     *      javax.mail.Flags)
      */
     @Override
     public boolean isReadWrite(MailboxACLRights mailboxACLRights, Flags sharedFlags) throws UnsupportedRightException {
@@ -212,14 +297,14 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
         /*
          * then go through shared flags. RFC 4314 section 4:
          * 
-         * Changing flags: STORE 
+         * Changing flags: STORE
          * 
-         * - the server MUST check if the user has "t" right 
+         * - the server MUST check if the user has "t" right
          * 
-         * - when the user modifies \Deleted flag "s" right 
+         * - when the user modifies \Deleted flag "s" right
          * 
-         * - when the user modifies \Seen flag "w" right - for all other message flags.
-         * 
+         * - when the user modifies \Seen flag "w" right - for all other message
+         * flags.
          */
         else if (sharedFlags != null) {
             if (sharedFlags.contains(Flag.DELETED) && mailboxACLRights.contains(Rfc4314Rights.t_DeleteMessages_RIGHT)) {
@@ -234,24 +319,96 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
         return false;
     }
 
-    /** 
-     * @see
-     * org.apache.james.mailbox.store.mail.MailboxACLResolver#rightsOf(java.
-     * lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.
-     * GroupMembershipResolver, org.apache.james.mailbox.MailboxACL,
-     * java.lang.String)
+    /**
+     * The key point of this implementation is that it resolves everything what
+     * can be resolved. Let us explain what it means in particular for the
+     * implicit (global) rights included in the result:
+     * 
+     * (1) if {@code queryKey} is a user key, the rights included come from the
+     * following ACL entries:
+     * <ul>
+     * <li>the entry literally matching the given user name</li>
+     * <li>the entries of the groups of which the given user is a member</li>
+     * <li>if the given user is the owner of the given mailbox also the "owner"
+     * entry is included</li>
+     * <li>the "authenticated" entry</li>
+     * <li>the "anybody" entry</li>
+     * </ul>
+     * 
+     * (2) if {@code queryKey} is a group key, the rights included come from the
+     * following ACL entries:
+     * <ul>
+     * <li>the entry literally matching the given group name</li>
+     * <li>if the given group is the owner of the given mailbox also the "owner"
+     * entry is included</li>
+     * <li>the "authenticated" entry (*)</li>
+     * <li>the "anybody" entry</li>
+     * </ul>
+     * 
+     * (3) if {@code queryKey} is a special key, the rights included come from
+     * the following ACL entries:
+     * <ul>
+     * <li>the entry literally matching the given special name</li>
+     * <li>the "authenticated" entry if the {@code queryKey} is the "owner"
+     * query key (*)</li>
+     * <li>the "anybody" entry</li>
+     * </ul>
+     * 
+     * (*) This is the most questionable case: should "authenticated" ACL
+     * entries hold for group name queries? We say yes. Firstly, listing
+     * implicit rights for, say "group1", should inform which rights do not need
+     * to be set explicitly for the members of "group1". And secondly the group
+     * rights are actually queried and applied only for authenticated users. To
+     * put it in other words, the hasRight(user, right, ...) call can be
+     * performed only either with user == null (only "anybody" rights will
+     * apply) or with a user name which is there only after the user was
+     * authenticated.
+     * 
+     * @see org.apache.james.mailbox.acl.MailboxACLResolver#listRightsDefault(boolean)
      */
     @Override
-    public MailboxACL.MailboxACLRights listRights(String user, GroupMembershipResolver groupMembershipResolver, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException {
+    public MailboxACLRights[] listRights(final MailboxACLEntryKey queryKey, final GroupMembershipResolver groupMembershipResolver, final String resourceOwner, final boolean resourceOwnerIsGroup) throws UnsupportedRightException {
         MailboxACL.MailboxACLRights[] positiveNegativePair = { SimpleMailboxACL.NO_RIGHTS, SimpleMailboxACL.NO_RIGHTS };
 
-        listRights(user, groupMembershipResolver, userGlobalACL.getEntries(), resourceOwner, resourceOwnerIsGroup, positiveNegativePair);
+        MailboxACL userACL = resourceOwnerIsGroup ? groupGlobalACL : userGlobalACL;
+        resolveRights(queryKey, groupMembershipResolver, userACL.getEntries(), resourceOwner, resourceOwnerIsGroup, positiveNegativePair);
+
+        if (queryKey.isNegative()) {
+            return toListRightsArray(positiveNegativePair[NEGATIVE_INDEX]);
+        } else {
+            return toListRightsArray(positiveNegativePair[POSITIVE_INDEX].except(positiveNegativePair[NEGATIVE_INDEX]));
+        }
+    }
+
+    private static MailboxACLRights[] toListRightsArray(MailboxACLRights implicitRights) throws UnsupportedRightException {
+        List<MailboxACLRights> result = new ArrayList<MailboxACL.MailboxACLRights>(Rfc4314Rights.FIELD_COUNT);
+        result.add(implicitRights);
+        for (MailboxACLRight right : SimpleMailboxACL.FULL_RIGHTS) {
+            if (!implicitRights.contains(right)) {
+                result.add(new Rfc4314Rights(right));
+            }
+        }
+        return result.toArray(new MailboxACLRights[result.size()]);
+    }
+
+    /**
+     * @see org.apache.james.mailbox.store.mail.MailboxACLResolver#rightsOf(java.
+     *      lang.String, org.apache.james.mailbox.store.mail.MailboxACLResolver.
+     *      GroupMembershipResolver, org.apache.james.mailbox.MailboxACL,
+     *      java.lang.String)
+     */
+    @Override
+    public MailboxACL.MailboxACLRights resolveRights(String requestUser, GroupMembershipResolver groupMembershipResolver, MailboxACL resourceACL, String resourceOwner, boolean resourceOwnerIsGroup) throws UnsupportedRightException {
+        MailboxACL.MailboxACLRights[] positiveNegativePair = { SimpleMailboxACL.NO_RIGHTS, SimpleMailboxACL.NO_RIGHTS };
+        final MailboxACLEntryKey queryKey = requestUser == null ? null : new SimpleMailboxACLEntryKey(requestUser, NameType.user, false);
+        MailboxACL userACL = resourceOwnerIsGroup ? groupGlobalACL : userGlobalACL;
+        resolveRights(queryKey, groupMembershipResolver, userACL.getEntries(), resourceOwner, resourceOwnerIsGroup, positiveNegativePair);
 
         if (resourceACL != null) {
-            listRights(user, groupMembershipResolver, resourceACL.getEntries(), resourceOwner, resourceOwnerIsGroup, positiveNegativePair);
+            resolveRights(queryKey, groupMembershipResolver, resourceACL.getEntries(), resourceOwner, resourceOwnerIsGroup, positiveNegativePair);
         }
 
-        return positiveNegativePair[0].except(positiveNegativePair[1]);
+        return positiveNegativePair[POSITIVE_INDEX].except(positiveNegativePair[NEGATIVE_INDEX]);
     }
 
     /**
@@ -265,16 +422,17 @@ public class UnionMailboxACLResolver implements MailboxACLResolver {
      * @param positiveNegativePair
      * @throws UnsupportedRightException
      */
-    private void listRights(String requestUser, GroupMembershipResolver groupMembershipResolver, final Map<MailboxACLEntryKey, MailboxACLRights> entries, String resourceOwner, boolean resourceOwnerIsGroup, MailboxACL.MailboxACLRights[] positiveNegativePair) throws UnsupportedRightException {
+    private void resolveRights(MailboxACLEntryKey queryKey, GroupMembershipResolver groupMembershipResolver, final Map<MailboxACLEntryKey, MailboxACLRights> entries, String resourceOwner, boolean resourceOwnerIsGroup, MailboxACL.MailboxACLRights[] positiveNegativePair)
+            throws UnsupportedRightException {
         if (entries != null) {
             for (Iterator<Map.Entry<MailboxACLEntryKey, MailboxACLRights>> it = entries.entrySet().iterator(); it.hasNext();) {
                 final Entry<MailboxACLEntryKey, MailboxACLRights> entry = it.next();
                 final MailboxACLEntryKey key = entry.getKey();
-                if (applies(key, requestUser, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup)) {
+                if (applies(key, queryKey, groupMembershipResolver, resourceOwner, resourceOwnerIsGroup)) {
                     if (key.isNegative()) {
-                        positiveNegativePair[1] = positiveNegativePair[1].union(entry.getValue());
+                        positiveNegativePair[NEGATIVE_INDEX] = positiveNegativePair[NEGATIVE_INDEX].union(entry.getValue());
                     } else {
-                        positiveNegativePair[0] = positiveNegativePair[0].union(entry.getValue());
+                        positiveNegativePair[POSITIVE_INDEX] = positiveNegativePair[POSITIVE_INDEX].union(entry.getValue());
                     }
                 }
             }

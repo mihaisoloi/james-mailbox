@@ -23,6 +23,7 @@ package org.apache.james.mailbox.model;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.james.mailbox.exception.UnsupportedRightException;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
@@ -36,10 +37,10 @@ import org.junit.Test;
 public class Rfc4314RightsTest {
     
     private Rfc4314Rights aeik;
-    private Rfc4314Rights lprs;
-    private Rfc4314Rights twx;
     private MailboxACLRights full;
+    private Rfc4314Rights lprs;
     private MailboxACLRights none;
+    private Rfc4314Rights twx;
     
     @Before
     public void setUp() throws Exception {
@@ -50,44 +51,13 @@ public class Rfc4314RightsTest {
         none = SimpleMailboxACL.NO_RIGHTS;
     }
     @Test
-    public void test() throws UnsupportedRightException {
-        assertEquals(aeik.getValue(), Rfc4314Rights.a_Administer_MASK | Rfc4314Rights.e_PerformExpunge_MASK | Rfc4314Rights.i_Insert_MASK | Rfc4314Rights.k_CreateMailbox_MASK);
-        assertEquals(lprs.getValue(), Rfc4314Rights.l_Lookup_MASK | Rfc4314Rights.p_Post_MASK | Rfc4314Rights.s_WriteSeenFlag_MASK | Rfc4314Rights.r_Read_MASK);
-        assertEquals(twx.getValue(), Rfc4314Rights.t_DeleteMessages_MASK | Rfc4314Rights.w_Write_MASK | Rfc4314Rights.x_DeleteMailbox_MASK);
-    }
-    
-    @Test
-    public void testSerialize() throws UnsupportedRightException {
-        assertEquals("aeik", aeik.serialize());
-        assertEquals("lprs", lprs.serialize());
-        assertEquals("twx", twx.serialize());
-        assertEquals("aeiklprstwx", full.serialize());
-        assertEquals("", none.serialize());
-    }
-
-    @Test
-    public void testUnionFull() throws UnsupportedRightException {
-        assertEquals(full, aeik.union(lprs).union(twx));
-    }
-    
-    @Test
-    public void testUnionZero() throws UnsupportedRightException {
-        assertEquals(lprs, lprs.union(none));
-    }
-    
-    @Test
-    public void testExceptZero() throws UnsupportedRightException {
-        assertEquals(aeik, aeik.except(none));
+    public void testExceptFull() throws UnsupportedRightException {
+        assertEquals(none, full.except(aeik).except(lprs).except(twx));
     }
     
     @Test
     public void testExceptNonExistent() throws UnsupportedRightException {
         assertEquals(aeik, aeik.except(lprs));
-    }
-
-    @Test
-    public void testExceptFull() throws UnsupportedRightException {
-        assertEquals(none, full.except(aeik).except(lprs).except(twx));
     }
 
     @Test
@@ -100,5 +70,55 @@ public class Rfc4314RightsTest {
             /* OK */
         }
     }
+    
+    @Test
+    public void testExceptZero() throws UnsupportedRightException {
+        assertEquals(aeik, aeik.except(none));
+    }
+    
+    @Test
+    public void testIterable() {
+        testIterable(full);
+        testIterable(none);
+        testIterable(aeik);
+        testIterable(lprs);
+        testIterable(twx);
+    }
+    
+    private static void testIterable(MailboxACLRights rights) {
+        String stringRights = rights.serialize();
+        int i = 0;
+        for (MailboxACLRight r : rights) {
+            assertEquals(stringRights.charAt(i++), r.getValue());
+        }
+        assertEquals(stringRights.length(), i);
+
+    }
+
+    @Test
+    public void testParse() throws UnsupportedRightException {
+        assertEquals(aeik.getValue(), Rfc4314Rights.a_Administer_MASK | Rfc4314Rights.e_PerformExpunge_MASK | Rfc4314Rights.i_Insert_MASK | Rfc4314Rights.k_CreateMailbox_MASK);
+        assertEquals(lprs.getValue(), Rfc4314Rights.l_Lookup_MASK | Rfc4314Rights.p_Post_MASK | Rfc4314Rights.s_WriteSeenFlag_MASK | Rfc4314Rights.r_Read_MASK);
+        assertEquals(twx.getValue(), Rfc4314Rights.t_DeleteMessages_MASK | Rfc4314Rights.w_Write_MASK | Rfc4314Rights.x_DeleteMailbox_MASK);
+    }
+
+    @Test
+    public void testSerialize() throws UnsupportedRightException {
+        assertEquals("aeik", aeik.serialize());
+        assertEquals("lprs", lprs.serialize());
+        assertEquals("twx", twx.serialize());
+        assertEquals("aeiklprstwx", full.serialize());
+        assertEquals("", none.serialize());
+    }
+    
+    @Test
+    public void testUnionFull() throws UnsupportedRightException {
+        assertEquals(full, aeik.union(lprs).union(twx));
+    }
+    @Test
+    public void testUnionZero() throws UnsupportedRightException {
+        assertEquals(lprs, lprs.union(none));
+    }
+
 
 }

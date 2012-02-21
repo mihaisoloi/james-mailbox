@@ -34,6 +34,13 @@ import org.apache.james.mailbox.exception.UnsupportedRightException;
 public interface MailboxACL {
 
     /**
+     * SETACL command mode.
+     */
+    enum EditMode {
+        ADD, REMOVE, REPLACE
+    }
+
+    /**
      * The key used in {@link MailboxACL#getEntries()}. Implementations should
      * override {@link #hashCode()} and {@link #equals(Object)} in such a way
      * that all of {@link #getName()}, {@link #getNameType()} and
@@ -125,14 +132,6 @@ public interface MailboxACL {
     public interface MailboxACLRights extends Iterable<MailboxACLRight> {
 
         /**
-         * Tells whether the implementation supports the given right.
-         * 
-         * @param right
-         * @return true if this supports the given right.
-         */
-        boolean isSupported(MailboxACLRight right);
-
-        /**
          * Tells whether this contains the given right.
          * 
          * @param right
@@ -141,7 +140,7 @@ public interface MailboxACL {
          *             iff the given right is not supported.
          */
         boolean contains(MailboxACLRight right) throws UnsupportedRightException;
-        
+
         /**
          * Performs the set theoretic operation of relative complement of
          * toRemove MailboxACLRights in this MailboxACLRights.
@@ -157,7 +156,22 @@ public interface MailboxACL {
          * @return
          * @throws UnsupportedRightException
          */
-        public abstract MailboxACLRights except(MailboxACLRights toRemove) throws UnsupportedRightException;
+        public MailboxACLRights except(MailboxACLRights toRemove) throws UnsupportedRightException;
+
+        /**
+         * Tells if this set of rights is empty.
+         * 
+         * @return true if there are no rights in this set; false otherwise.
+         */
+        public boolean isEmpty();
+
+        /**
+         * Tells whether the implementation supports the given right.
+         * 
+         * @param right
+         * @return true if this supports the given right.
+         */
+        boolean isSupported(MailboxACLRight right);
 
         /**
          * Returns a serialized form of this {@link MailboxACLRights} as
@@ -185,7 +199,7 @@ public interface MailboxACL {
          */
         public abstract MailboxACLRights union(MailboxACLRights toAdd) throws UnsupportedRightException;
 
-    }
+    };
 
     /**
      * Allows distinguishing between users, groups and special names (see
@@ -203,6 +217,11 @@ public interface MailboxACL {
     };
 
     /**
+     * SETACL third argument prefix
+     */
+    public static final char ADD_RIGHTS_MARKER = '+';
+
+    /**
      * Marks groups when (de)serializing {@link MailboxACLEntryKey}s.
      * 
      * @see MailboxACLEntryKey#serialize()
@@ -217,6 +236,11 @@ public interface MailboxACL {
     public static final char DEFAULT_NEGATIVE_MARKER = '-';
 
     /**
+     * SETACL third argument prefix
+     */
+    public static final char REMOVE_RIGHTS_MARKER = '-';
+
+    /**
      * Performs the set theoretic operation of relative complement of toRemove
      * {@link MailboxACL} in this {@link MailboxACL}.
      * 
@@ -228,6 +252,10 @@ public interface MailboxACL {
      * toRemove parameter value in case the result would be equal to the
      * respective one of those.
      * 
+     * Implementations must ensure that the result does not contain entries with
+     * empty rigths. E.g. "user1:lr;user2:lrwt".except("user1:lr") should return
+     * "user2:lrwt" rather than "user1:;user2:lrwt"
+     * 
      * @param toRemove
      * @return
      * @throws UnsupportedRightException
@@ -235,11 +263,42 @@ public interface MailboxACL {
     MailboxACL except(MailboxACL toRemove) throws UnsupportedRightException;
 
     /**
+     * TODO except.
+     * 
+     * @param key
+     * @param toRemove
+     * @return
+     * @throws UnsupportedRightException
+     */
+    MailboxACL except(MailboxACLEntryKey key, MailboxACLRights toRemove) throws UnsupportedRightException;
+
+    /**
      * {@link Map} of entries.
      * 
      * @return the entries.
      */
     Map<MailboxACLEntryKey, MailboxACLRights> getEntries();
+
+    /**
+     * Replaces the entry corresponding to the given {@code key} with
+     * {@code toAdd}link MailboxACLRights}.
+     * 
+     * Implementations must return a new unmodifiable instance of
+     * {@link MailboxACL}. However, implementations may decide to return this in
+     * case the result would be equal to it.
+     * 
+     * Implementations must ensure that the result does not contain entries with
+     * empty rigths. E.g. "user1:lr;user2:lrwt".replace("user1",
+     * MailboxACLRights.EMPTY) should return "user2:lrwt" rather than
+     * "user1:;user2:lrwt". The same result should be returned by
+     * "user1:lr;user2:lrwt".replace("user1", null).
+     * 
+     * @param key
+     * @param toAdd
+     * @return
+     * @throws UnsupportedRightException
+     */
+    MailboxACL replace(MailboxACLEntryKey key, MailboxACLRights toAdd) throws UnsupportedRightException;
 
     /**
      * Performs the set theoretic operation of union of this {@link MailboxACL}
@@ -260,5 +319,15 @@ public interface MailboxACL {
      * @throws UnsupportedRightException
      */
     MailboxACL union(MailboxACL toAdd) throws UnsupportedRightException;
+
+    /**
+     * TODO union.
+     * 
+     * @param key
+     * @param toAdd
+     * @return
+     * @throws UnsupportedRightException
+     */
+    MailboxACL union(MailboxACLEntryKey key, MailboxACLRights toAdd) throws UnsupportedRightException;
 
 }

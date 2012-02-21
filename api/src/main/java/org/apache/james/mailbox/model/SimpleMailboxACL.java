@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.james.mailbox.exception.UnsupportedRightException;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 
 /**
  * Default implementation of {@link MailboxACL}.
@@ -57,7 +58,7 @@ public class SimpleMailboxACL implements MailboxACL {
 
             @Override
             public boolean hasNext() {
-                return (value | (1 << position)) != 0;
+                return position < FIELD_COUNT;
             }
 
             @Override
@@ -65,13 +66,16 @@ public class SimpleMailboxACL implements MailboxACL {
                 if (!hasNext()) {
                     throw new IndexOutOfBoundsException("No next element at position " + position + " from " + FIELD_COUNT + " in " + Rfc4314RightsIterator.class.getName());
                 }
-                return indexRightLookup[position];
+                MailboxACLRight result = indexRightLookup[position];
+                position++;
+                nextPostion();
+                return result;
             }
 
             /**
              */
             private void nextPostion() {
-                while (position < FIELD_COUNT && (value | (1 << position)) != 0) {
+                while (position < FIELD_COUNT && (value & (1 << position)) == 0) {
                     position++;
                 }
             }
@@ -271,11 +275,15 @@ public class SimpleMailboxACL implements MailboxACL {
 
         }
 
-        private Rfc4314Rights(int value) throws UnsupportedRightException {
+        public Rfc4314Rights(int value) throws UnsupportedRightException {
             if ((value >> FIELD_COUNT) != 0) {
                 throw new UnsupportedRightException();
             }
             this.value = value;
+        }
+        
+        public Rfc4314Rights(MailboxACLRight right) throws UnsupportedRightException {
+            this.value = flagMaskLookup(right.getValue());
         }
 
         public Rfc4314Rights(String serializedRfc4314Rights) throws UnsupportedRightException {
@@ -386,7 +394,7 @@ public class SimpleMailboxACL implements MailboxACL {
          */
         @Override
         public MailboxACLRights except(MailboxACLRights toRemove) throws UnsupportedRightException {
-            if (this.value == EMPTY_MASK) {
+            if (this.value == EMPTY_MASK || toRemove == null || toRemove.isEmpty()) {
                 /* nothing to remove */
                 return this;
             } else if (toRemove instanceof Rfc4314Rights) {
@@ -416,9 +424,15 @@ public class SimpleMailboxACL implements MailboxACL {
             return value;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
+        /**
+         * @see org.apache.james.mailbox.model.MailboxACL.MailboxACLRights#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return value == EMPTY_MASK;
+        }
+
+        /** 
          * @see
          * org.apache.james.mailbox.MailboxACL.MailboxACLRights#isSupported(
          * org.apache.james.mailbox.MailboxACL.MailboxACLRight)
@@ -510,6 +524,9 @@ public class SimpleMailboxACL implements MailboxACL {
             this.key = key;
             this.value = value;
         }
+        public SimpleMailboxACLEntry(String key, String value) throws UnsupportedRightException {
+            this(new SimpleMailboxACLEntryKey(key), new Rfc4314Rights(value));
+        }
 
         /*
          * (non-Javadoc)
@@ -555,14 +572,6 @@ public class SimpleMailboxACL implements MailboxACL {
             return new SimpleMailboxACLEntryKey(name, NameType.group, negative);
         }
 
-        public static SimpleMailboxACLEntryKey createSpecial(SpecialName name) {
-            return new SimpleMailboxACLEntryKey(name.name(), NameType.special, false);
-        }
-
-        public static SimpleMailboxACLEntryKey createSpecial(SpecialName name, boolean negative) {
-            return new SimpleMailboxACLEntryKey(name.name(), NameType.special, negative);
-        }
-
         public static SimpleMailboxACLEntryKey createUser(String name) {
             return new SimpleMailboxACLEntryKey(name, NameType.user, false);
         }
@@ -593,13 +602,13 @@ public class SimpleMailboxACL implements MailboxACL {
                 throw new IllegalStateException("Cannot parse an empty string to a " + getClass().getName());
             }
             int start = 0;
-            if (serialized.charAt(0) == DEFAULT_NEGATIVE_MARKER) {
+            if (serialized.charAt(start) == DEFAULT_NEGATIVE_MARKER) {
                 negative = true;
                 start++;
             } else {
-                negative = true;
+                negative = false;
             }
-            if (serialized.charAt(0) == DEFAULT_GROUP_MARKER) {
+            if (serialized.charAt(start) == DEFAULT_GROUP_MARKER) {
                 nameType = NameType.group;
                 start++;
                 name = serialized.substring(start);
@@ -790,7 +799,9 @@ public class SimpleMailboxACL implements MailboxACL {
     }
 
     public static final MailboxACLEntryKey ANYBODY_KEY;
+    public static final MailboxACLEntryKey ANYBODY_NEGATIVE_KEY;
     public static final MailboxACLEntryKey AUTHENTICATED_KEY;
+    public static final MailboxACLEntryKey AUTHENTICATED_NEGATIVE_KEY;
     public static final MailboxACL EMPTY;
 
     public static final MailboxACLRights FULL_RIGHTS;
@@ -800,21 +811,26 @@ public class SimpleMailboxACL implements MailboxACL {
     public static final MailboxACL OWNER_FULL_EXCEPT_ADMINISTRATION_ACL;
 
     public static final MailboxACLEntryKey OWNER_KEY;
+    public static final MailboxACLEntryKey OWNER_NEGATIVE_KEY;
 
     static {
         try {
             ANYBODY_KEY = new SimpleMailboxACLEntryKey(SpecialName.anybody.name(), NameType.special, false);
+            ANYBODY_NEGATIVE_KEY = new SimpleMailboxACLEntryKey(SpecialName.anybody.name(), NameType.special, true);
             AUTHENTICATED_KEY = new SimpleMailboxACLEntryKey(SpecialName.authenticated.name(), NameType.special, false);
+            AUTHENTICATED_NEGATIVE_KEY = new SimpleMailboxACLEntryKey(SpecialName.authenticated.name(), NameType.special, true);
             EMPTY = new SimpleMailboxACL();
             FULL_RIGHTS =  new Rfc4314Rights(true, true, true, true, true, true, true, true, true, true, true);
             NO_RIGHTS = new Rfc4314Rights();
             OWNER_KEY = new SimpleMailboxACLEntryKey(SpecialName.owner.name(), NameType.special, false);
+            OWNER_NEGATIVE_KEY = new SimpleMailboxACLEntryKey(SpecialName.owner.name(), NameType.special, true);
             OWNER_FULL_ACL = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.OWNER_KEY, SimpleMailboxACL.FULL_RIGHTS) });
             OWNER_FULL_EXCEPT_ADMINISTRATION_ACL = new SimpleMailboxACL(new SimpleMailboxACL.SimpleMailboxACLEntry[] { new SimpleMailboxACL.SimpleMailboxACLEntry(SimpleMailboxACL.OWNER_KEY, SimpleMailboxACL.FULL_RIGHTS.except(new Rfc4314Rights(Rfc4314Rights.a_Administer_MASK))) });
         } catch (UnsupportedRightException e) {
             throw new RuntimeException(e);
         }
     }
+    
     private final Map<MailboxACLEntryKey, MailboxACLRights> entries;
 
     /**
@@ -897,7 +913,7 @@ public class SimpleMailboxACL implements MailboxACL {
         entries = Collections.unmodifiableMap(m);
     }
 
-    /* (non-Javadoc)
+    /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -910,26 +926,58 @@ public class SimpleMailboxACL implements MailboxACL {
         return false;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxACL#except(org.apache.james.mailbox.MailboxACL)
      */
     @Override
-    public MailboxACL except(MailboxACL other) {
+    public MailboxACL except(MailboxACL other) throws UnsupportedRightException {
         if (entries.size() == 0) {
             return this;
         } else {
             Map<MailboxACLEntryKey, MailboxACLRights> otherEntries = other.getEntries();
-            int cnt = entries.size();
-            Map<MailboxACLEntryKey, MailboxACLRights> resultEntries = new HashMap<MailboxACLEntryKey, MailboxACLRights>(cnt + cnt / 2 + 1);
+            Map<MailboxACLEntryKey, MailboxACLRights> resultEntries = new HashMap<MailboxACLEntryKey, MailboxACLRights>(this.entries);
             for (Entry<MailboxACLEntryKey, MailboxACLRights> otherEntry : otherEntries.entrySet()) {
                 MailboxACLEntryKey key = otherEntry.getKey();
-                entries.remove(key);
+                MailboxACLRights thisRights = resultEntries.get(key);
+                if (thisRights == null) {
+                    /* nothing to diff */
+                } else {
+                    /* diff */
+                    MailboxACLRights resultRights = thisRights.except(otherEntry.getValue());
+                    if (!resultRights.isEmpty()) {
+                        resultEntries.put(key, resultRights);
+                    }
+                    else {
+                        resultEntries.remove(key);
+                    }
+                }
             }
             return new SimpleMailboxACL(Collections.unmodifiableMap(resultEntries), true);
         }
     }
+    
+    /**
+     * @see org.apache.james.mailbox.model.MailboxACL#except(org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey, org.apache.james.mailbox.model.MailboxACL.MailboxACLRights)
+     */
+    public MailboxACL except(MailboxACLEntryKey key, MailboxACLRights mailboxACLRights) throws UnsupportedRightException {
+        Map<MailboxACLEntryKey, MailboxACLRights> resultEntries = new HashMap<MailboxACLEntryKey, MailboxACLRights>(this.entries);
+        MailboxACLRights thisRights = resultEntries.get(key);
+        if (thisRights == null) {
+            /* nothing to diff */
+        } else {
+            /* diff */
+            MailboxACLRights resultRights = thisRights.except(mailboxACLRights);
+            if (!resultRights.isEmpty()) {
+                resultEntries.put(key, resultRights);
+            }
+            else {
+                resultEntries.remove(key);
+            }
+        }
+        return new SimpleMailboxACL(Collections.unmodifiableMap(resultEntries), true);
+    }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxACL#getEntries()
      */
     @Override
@@ -937,7 +985,7 @@ public class SimpleMailboxACL implements MailboxACL {
         return entries;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -945,7 +993,21 @@ public class SimpleMailboxACL implements MailboxACL {
         return entries == null ? 0 : entries.hashCode();
     }
 
-    /* (non-Javadoc)
+    /**
+     * @see org.apache.james.mailbox.model.MailboxACL#replace(org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey, org.apache.james.mailbox.model.MailboxACL.MailboxACLRights)
+     */
+    @Override
+    public MailboxACL replace(MailboxACLEntryKey key, MailboxACLRights replacement) throws UnsupportedRightException {
+        Map<MailboxACLEntryKey, MailboxACLRights> resultEntries = new HashMap<MailboxACLEntryKey, MailboxACLRights>(this.entries);
+        if (replacement == null || replacement.isEmpty()) {
+            resultEntries.remove(key);
+        } else {
+            resultEntries.put(key, replacement);
+        }
+        return new SimpleMailboxACL(Collections.unmodifiableMap(resultEntries), true);
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -953,7 +1015,7 @@ public class SimpleMailboxACL implements MailboxACL {
         return entries == null ? "" : entries.toString();
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.mailbox.MailboxACL#union(org.apache.james.mailbox.MailboxACL)
      */
     @Override
@@ -986,6 +1048,22 @@ public class SimpleMailboxACL implements MailboxACL {
             }
             return new SimpleMailboxACL(Collections.unmodifiableMap(resultEntries), true);
         }
+    }
+    
+    /**
+     * @see org.apache.james.mailbox.model.MailboxACL#union(org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey, org.apache.james.mailbox.model.MailboxACL.MailboxACLRights)
+     */
+    public MailboxACL union(MailboxACLEntryKey key, MailboxACLRights mailboxACLRights) throws UnsupportedRightException {
+        Map<MailboxACLEntryKey, MailboxACLRights> resultEntries = new HashMap<MailboxACLEntryKey, MailboxACLRights>(this.entries);
+        MailboxACLRights thisRights = resultEntries.get(key);
+        if (thisRights == null) {
+            /* nothing to union */
+            resultEntries.put(key, mailboxACLRights);
+        } else {
+            /* union */
+            resultEntries.put(key, thisRights.union(mailboxACLRights));
+        }
+        return new SimpleMailboxACL(Collections.unmodifiableMap(resultEntries), true);
     }
 
 }
