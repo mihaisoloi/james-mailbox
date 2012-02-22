@@ -28,7 +28,7 @@
     </parent>
 
     <artifactId>apache-james-mailbox</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache James Mailbox</name>
@@ -50,9 +50,9 @@
     </modules>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/james/mailbox/tags/apache-james-mailbox-0.4</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/mailbox/tags/apache-james-mailbox-0.4</developerConnection>
-        <url>http://svn.apache.org/viewcvs.cgi/james/mailbox/trunk/tags/apache-james-mailbox-0.4?root=Apache-SVN</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/james/mailbox/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/mailbox/trunk</developerConnection>
+        <url>http://svn.apache.org/viewcvs.cgi/james/mailbox/trunk?root=Apache-SVN</url>
     </scm>
     <issueManagement>
         <system>JIRA</system>
