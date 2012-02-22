@@ -15,6 +15,17 @@
  */
 package org.apache.james.mailbox.hbase.mail;
 
+import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOXES_TABLE;
+import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_TABLE;
+import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGE_DATA_BODY;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxFromResult;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxRowKey;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -30,17 +42,12 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
-import static org.apache.james.mailbox.hbase.HBaseNames.*;
-import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxFromResult;
-import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxRowKey;
 import org.apache.james.mailbox.hbase.io.ChunkInputStream;
 import org.apache.james.mailbox.hbase.io.ChunkOutputStream;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,42 +82,28 @@ public class HBaseMailboxMapperTest {
         }
     }
 
-    private static void fillMailboxList() {
-        mailboxList = new ArrayList<HBaseMailbox>();
-        pathsList = new ArrayList<MailboxPath>();
-        MailboxPath path;
-        String name;
-        for (int i = 0; i < NAMESPACES; i++) {
-            for (int j = 0; j < USERS; j++) {
-                for (int k = 0; k < MAILBOXES; k++) {
-                    if (j == 3) {
-                        name = "test" + SEPARATOR + "subbox" + k;
-                    } else {
-                        name = "mailbox" + k;
-                    }
-                    path = new MailboxPath("namespace" + i, "user" + j, name);
-                    pathsList.add(path);
-                    mailboxList.add(new HBaseMailbox(path, 13));
-                }
-            }
-        }
-        LOG.info("Created test case with {} mailboxes and {} paths",
-                mailboxList.size(), pathsList.size());
-    }
-
-    private void addMailbox(HBaseMailbox mailbox) throws MailboxException {
-        mailboxList.add(mailbox);
-        pathsList.add(new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), mailbox.getName()));
-        mapper = new HBaseMailboxMapper(conf);
-        mapper.save(mailbox);
-        LOG.info("Added new mailbox: {} paths: {}", mailboxList.size(), pathsList.size());
+    /**
+     * Test an ordered scenario with list, delete... methods.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testMailboxMapperScenario() throws Exception {
+        testFindMailboxByPath();
+        testFindMailboxWithPathLike();
+        testList();
+        testSave();
+        testDelete();
+        testHasChildren();
+//        testDeleteAllMemberships(); // Ignore this test
+        testDeleteAllMailboxes();
+        testChunkStream();
     }
 
     /**
      * Test of findMailboxByPath method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testFindMailboxByPath() throws Exception {
+    private void testFindMailboxByPath() throws Exception {
         LOG.info("findMailboxByPath");
         HBaseMailbox mailbox;
         for (MailboxPath path : pathsList) {
@@ -123,8 +116,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of findMailboxWithPathLike method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testFindMailboxWithPathLike() throws Exception {
+    private void testFindMailboxWithPathLike() throws Exception {
         LOG.info("findMailboxWithPathLike");
         MailboxPath path = pathsList.get(pathsList.size() / 2);
 
@@ -151,8 +143,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of list method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testList() throws Exception {
+    private void testList() throws Exception {
         LOG.info("list");
         List<Mailbox<UUID>> result = mapper.list();
         assertEquals(mailboxList.size(), result.size());
@@ -162,8 +153,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of save method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testSave() throws Exception {
+    private void testSave() throws Exception {
         LOG.info("save and mailboxFromResult");
         final HTable mailboxes = new HTable(conf, MAILBOXES_TABLE);
 
@@ -189,8 +179,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of delete method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testDelete() throws Exception {
+    private void testDelete() throws Exception {
         LOG.info("delete");
         // delete last 5 mailboxes from mailboxList
         int offset = 5;
@@ -219,8 +208,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of hasChildren method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testHasChildren() throws Exception {
+    private void testHasChildren() throws Exception {
         LOG.info("hasChildren");
         String oldName;
         for (MailboxPath path : pathsList) {
@@ -243,9 +231,7 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of deleteAllMemberships method, of class HBaseMailboxMapper.
      */
-    @Test
-    @Ignore
-    public void testDeleteAllMemberships() {
+    private void testDeleteAllMemberships() {
         LOG.info("deleteAllMemberships");
         fail("Not yet implemented");
     }
@@ -253,16 +239,14 @@ public class HBaseMailboxMapperTest {
     /**
      * Test of deleteAllMailboxes method, of class HBaseMailboxMapper.
      */
-    @Test
-    public void testDeleteAllMailboxes() throws MailboxException {
+    private void testDeleteAllMailboxes() throws MailboxException {
         LOG.info("deleteAllMailboxes");
         mapper.deleteAllMailboxes();
         assertEquals(0, mapper.list().size());
         fillMailboxList();
     }
 
-    @Test
-    public void chunkStream() throws IOException {
+    private void testChunkStream() throws IOException {
         LOG.info("Checking ChunkOutpuStream and ChunkInputStream");
         final String original = "This is a proper test for the HBase ChunkInputStream and"
                 + "ChunkOutputStream. This text must be larger than the chunk size so we write"
@@ -294,4 +278,36 @@ public class HBaseMailboxMapperTest {
         String s = bout.toString();
         assertTrue(original.equals(s));
     }
+    
+    private static void fillMailboxList() {
+        mailboxList = new ArrayList<HBaseMailbox>();
+        pathsList = new ArrayList<MailboxPath>();
+        MailboxPath path;
+        String name;
+        for (int i = 0; i < NAMESPACES; i++) {
+            for (int j = 0; j < USERS; j++) {
+                for (int k = 0; k < MAILBOXES; k++) {
+                    if (j == 3) {
+                        name = "test" + SEPARATOR + "subbox" + k;
+                    } else {
+                        name = "mailbox" + k;
+                    }
+                    path = new MailboxPath("namespace" + i, "user" + j, name);
+                    pathsList.add(path);
+                    mailboxList.add(new HBaseMailbox(path, 13));
+                }
+            }
+        }
+        LOG.info("Created test case with {} mailboxes and {} paths",
+                mailboxList.size(), pathsList.size());
+    }
+
+    private void addMailbox(HBaseMailbox mailbox) throws MailboxException {
+        mailboxList.add(mailbox);
+        pathsList.add(new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), mailbox.getName()));
+        mapper = new HBaseMailboxMapper(conf);
+        mapper.save(mailbox);
+        LOG.info("Added new mailbox: {} paths: {}", mailboxList.size(), pathsList.size());
+    }
+
 }
