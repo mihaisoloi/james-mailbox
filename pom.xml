@@ -47,6 +47,7 @@
         <module>hbase</module>
         <module>spring</module>
         <module>tool</module>
+        <module>zoo-seq-provider</module>
     </modules>
 
     <scm>
