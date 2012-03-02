@@ -18,6 +18,9 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
+import com.netflix.curator.framework.CuratorFramework;
+import java.io.Closeable;
+import java.io.IOException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -25,17 +28,38 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 /**
  * ZooKeepr based implementation of a distribuited sequential UID generator.
  */
-public class ZooUidProvider<E> implements UidProvider<E> {
+public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
+
+    /** Inject the curator client using srping */
+    private final CuratorFramework client;
+
+    public ZooUidProvider(CuratorFramework client) {
+        this.client = client;
+        client.start();
+    }
 
     @Override
     public long nextUid(MailboxSession session,
                         Mailbox<E> mailbox) throws MailboxException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (client.isStarted()) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } else {
+            throw new IllegalStateException("Curator client is closed.");
+        }
     }
 
     @Override
     public long lastUid(MailboxSession session,
                         Mailbox<E> mailbox) throws MailboxException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (client.isStarted()) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } else {
+            throw new IllegalStateException("Curator client is closed.");
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        client.close();
     }
 }

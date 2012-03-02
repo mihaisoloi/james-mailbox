@@ -32,6 +32,10 @@
     <name>Apache James Zookeeper Sequence Provider</name>
     <description>High performance distribuited sequence provider based on ZooKeepr </description>
 
+    <properties>
+        <curator.version>1.1.2</curator.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -54,6 +58,16 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>apache-james-mailbox-store</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>${curator.version}</version>
         </dependency>
     </dependencies>
 </project>
