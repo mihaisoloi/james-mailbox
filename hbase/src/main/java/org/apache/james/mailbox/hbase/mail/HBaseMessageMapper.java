@@ -61,9 +61,9 @@ import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import static org.apache.james.mailbox.hbase.FlagConvertor.*;
 
 /**
- * HBase implementation of a {@link MessageMapper}. 
+ * HBase implementation of a {@link MessageMapper}.
  * I don't know if this class is thread-safe! Asume it is not!
- * 
+ *
  */
 public class HBaseMessageMapper extends NonTransactionalMapper implements MessageMapper<UUID> {
 
@@ -172,7 +172,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
     private List<Message<UUID>> findMessagesInMailboxAfterUID(Mailbox<UUID> mailbox, final long from, final int batchSize, final boolean flaggedForDelete) throws IOException {
         List<Message<UUID>> messageList = new ArrayList<Message<UUID>>();
         HTable messages = new HTable(conf, MESSAGES_TABLE);
-        // uids are stored in reverse so we need to search 
+        // uids are stored in reverse so we need to search
         Scan scan = new Scan(messageRowKey(mailbox.getMailboxId(), Long.MAX_VALUE),
                 messageRowKey(mailbox.getMailboxId(), from - 1));
         if (flaggedForDelete) {
@@ -206,7 +206,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
         }
         HTable messages = new HTable(conf, MESSAGES_TABLE);
         /*TODO: check if Between should be inclusive or exclusive regarding limits.
-         * HBase scan operaion are exclusive to the upper bound when providing stop row key. 
+         * HBase scan operaion are exclusive to the upper bound when providing stop row key.
          */
         Scan scan = new Scan(messageRowKey(mailbox.getMailboxId(), to), messageRowKey(mailbox.getMailboxId(), from - 1));
         if (flaggedForDelete) {
@@ -511,7 +511,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
                 Flags newFlags = member.createFlags();
                 put = flagsToPut(member, newFlags);
                 if (UpdatedFlags.flagsChanged(originalFlags, newFlags)) {
-                    // increase the mod-seq as we changed the flags                    
+                    // increase the mod-seq as we changed the flags
                     put.add(MESSAGES_META_CF, MESSAGE_MODSEQ, Bytes.toBytes(modSeq));
                     // update put not to include the allready existing flags
                     messages.put(put);
@@ -531,8 +531,8 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
                     throw new MailboxException("Error setting flags for messages in " + mailbox, e);
                 }
             }
-        }   
-        
+        }
+
         return updatedFlags.iterator();
     }
 
@@ -572,8 +572,8 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
     }
 
     /**
-     * Save the {@link Message} for the given {@link Mailbox} and return the {@link MessageMetaData} 
-     * 
+     * Save the {@link Message} for the given {@link Mailbox} and return the {@link MessageMetaData}
+     *
      * @param mailbox
      * @param message
      * @return metaData
@@ -596,7 +596,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
 
             int b;
             out = new ChunkOutputStream(conf,
-                    MESSAGES_TABLE, MESSAGE_DATA_BODY, messageRowKey(message), MAX_COLUMN_SIZE);
+                    MESSAGES_TABLE, MESSAGE_DATA_BODY_CF, messageRowKey(message), MAX_COLUMN_SIZE);
             in = new BufferedInputStream(message.getBodyContent());
             while ((b = in.read()) != -1) {
                 out.write(b);
@@ -604,7 +604,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
             in.close();
             out.close();
             out = new ChunkOutputStream(conf,
-                    MESSAGES_TABLE, MESSAGE_DATA_HEADERS, messageRowKey(message), MAX_COLUMN_SIZE);
+                    MESSAGES_TABLE, MESSAGE_DATA_HEADERS_CF, messageRowKey(message), MAX_COLUMN_SIZE);
             in = new BufferedInputStream(message.getHeaderContent());
             while ((b = in.read()) != -1) {
                 out.write(b);
@@ -665,7 +665,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
         HTable mailboxes = new HTable(conf, MAILBOXES_TABLE);
         List<Delete> deletes = new ArrayList<Delete>();
         /*TODO: check if Between should be inclusive or exclusive regarding limits.
-         * HBase scan operaion are exclusive to the upper bound when providing stop row key. 
+         * HBase scan operaion are exclusive to the upper bound when providing stop row key.
          */
         Scan scan = new Scan(messageRowKey(mailbox.getMailboxId(), fromUid), messageRowKey(mailbox.getMailboxId(), toUid));
         scan.addColumn(MESSAGES_META_CF, FLAGS_DELETED);
@@ -691,7 +691,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
         HTable mailboxes = new HTable(conf, MAILBOXES_TABLE);
         List<Delete> deletes = new ArrayList<Delete>();
         /*TODO: check if Between should be inclusive or exclusive regarding limits.
-         * HBase scan operaion are exclusive to the upper bound when providing stop row key. 
+         * HBase scan operaion are exclusive to the upper bound when providing stop row key.
          */
         Scan scan = new Scan(messageRowKey(mailbox.getMailboxId(), fromUid));
         scan.addColumn(MESSAGES_META_CF, FLAGS_DELETED);
@@ -717,7 +717,7 @@ public class HBaseMessageMapper extends NonTransactionalMapper implements Messag
         HTable mailboxes = new HTable(conf, MAILBOXES_TABLE);
         List<Delete> deletes = new ArrayList<Delete>();
         /*TODO: check if Between should be inclusive or exclusive regarding limits.
-         * HBase scan operaion are exclusive to the upper bound when providing stop row key. 
+         * HBase scan operaion are exclusive to the upper bound when providing stop row key.
          */
         Scan scan = new Scan(customMessageRowKey(mailbox.getMailboxId(), 0L),
                 new PrefixFilter(Bytes.add(Bytes.toBytes(mailbox.getMailboxId().getMostSignificantBits()),

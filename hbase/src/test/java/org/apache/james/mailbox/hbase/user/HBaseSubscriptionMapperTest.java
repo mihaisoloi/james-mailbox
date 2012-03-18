@@ -18,6 +18,7 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase.user;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +31,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.james.mailbox.exception.SubscriptionException;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
 import org.apache.james.mailbox.hbase.HBaseMailboxSessionMapperFactory;
-import static org.apache.james.mailbox.hbase.HBaseNames.SUBSCRIPTIONS_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.SUBSCRIPTION_CF;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.store.user.model.Subscription;
 import org.apache.james.mailbox.store.user.model.impl.SimpleSubscription;
 import static org.junit.Assert.*;
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Runs tests for SubscriptionMapper.
  *
- * @author ieugen
  */
 public class HBaseSubscriptionMapperTest {
 
@@ -54,15 +53,29 @@ public class HBaseSubscriptionMapperTest {
     private static HBaseSubscriptionMapper mapper;
     private static Map<String, List<SimpleSubscription>> subscriptionList;
     private static final int USERS = 5;
-    private static final int MAILBOXES = 5;
+    private static final int MAILBOX_NO = 5;
 
     @Before
-    public void setUpClass() throws Exception {
-        CLUSTER.clearTables();
+    public void setUp() throws Exception {
+        ensureTables();
+        clearTables();
         conf = CLUSTER.getConf();
         mapperFactory = new HBaseMailboxSessionMapperFactory(conf, null, null);
         mapper = new HBaseSubscriptionMapper(conf);
         fillSubscriptionList();
+    }
+
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
     }
 
     private static void fillSubscriptionList() throws SubscriptionException {
@@ -75,7 +88,7 @@ public class HBaseSubscriptionMapperTest {
             final List<SimpleSubscription> mailboxes = new ArrayList<SimpleSubscription>();
             subscriptionList.put(user, mailboxes);
 
-            for (int j = 0; j < MAILBOXES; j++) {
+            for (int j = 0; j < MAILBOX_NO; j++) {
                 if (j == 0) {
                     mailbox = "INBOX";
                 } else {

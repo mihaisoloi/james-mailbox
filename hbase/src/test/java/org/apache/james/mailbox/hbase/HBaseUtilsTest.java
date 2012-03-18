@@ -19,10 +19,15 @@
 package org.apache.james.mailbox.hbase;
 
 import java.util.Date;
-import org.apache.hadoop.hbase.util.Bytes;
 import java.util.UUID;
 import javax.mail.Flags;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import static org.apache.james.mailbox.hbase.FlagConvertor.*;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
+import static org.apache.james.mailbox.hbase.HBaseUtils.*;
+import static org.apache.james.mailbox.hbase.PropertyConvertor.getProperty;
+import static org.apache.james.mailbox.hbase.PropertyConvertor.getValue;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Property;
@@ -31,17 +36,11 @@ import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleProperty;
 import org.apache.james.mailbox.store.user.model.Subscription;
 import org.apache.james.mailbox.store.user.model.impl.SimpleSubscription;
-import org.junit.Test;
-
 import static org.junit.Assert.*;
-import static org.apache.james.mailbox.hbase.HBaseUtils.*;
-import static org.apache.james.mailbox.hbase.HBaseNames.*;
-import static org.apache.james.mailbox.hbase.FlagConvertor.*;
-import static org.apache.james.mailbox.hbase.PropertyConvertor.*;
+import org.junit.Test;
 
 /**
  * Tests for HBase Mailbox store utility methods .
- * @author ieugen
  */
 public class HBaseUtilsTest {
 

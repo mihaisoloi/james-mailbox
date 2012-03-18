@@ -19,14 +19,12 @@
 package org.apache.james.mailbox.hbase.mail.model;
 
 import java.util.UUID;
-
 import org.apache.james.mailbox.model.MailboxPath;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for HBaseMailbox class.
- * @author ieugen
  */
 public class HBaseMailboxTest {
 

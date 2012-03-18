@@ -18,22 +18,16 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase.mail;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-
+import java.io.IOException;
+import java.util.*;
 import javax.mail.Flags;
 import javax.mail.internet.SharedInputStream;
 import javax.mail.util.SharedByteArrayInputStream;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.mock.MockMailboxSession;
 import org.apache.james.mailbox.model.MailboxPath;
@@ -41,6 +35,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -49,7 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Unit tests for HBaseMessageMapper.
  *
- * @author ieugen
  */
 public class HBaseMessageMapperTest {
 
@@ -60,7 +54,7 @@ public class HBaseMessageMapperTest {
     private static HBaseMessageMapper messageMapper;
     private static final List<MailboxPath> MBOX_PATHS = new ArrayList<MailboxPath>();
     private static final List<Mailbox<UUID>> MBOXES = new ArrayList<Mailbox<UUID>>();
-    private static final List<Message<UUID>> MESSAGES = new ArrayList<Message<UUID>>();
+    private static final List<Message<UUID>> MESSAGE_NO = new ArrayList<Message<UUID>>();
     private static final int COUNT = 5;
     private static Configuration conf;
     /*
@@ -81,16 +75,30 @@ public class HBaseMessageMapperTest {
 
     @Before
     public void setUp() throws Exception {
-        CLUSTER.clearTables();
+        ensureTables();
+        clearTables();
         conf = CLUSTER.getConf();
         uidProvider = new HBaseUidProvider(conf);
         modSeqProvider = new HBaseModSeqProvider(conf);
         generateTestData();
         final MailboxSession session = new MockMailboxSession("ieugen");
         messageMapper = new HBaseMessageMapper(session, uidProvider, modSeqProvider, conf);
-        for (int i = 0; i < MESSAGES.size(); i++) {
-            messageMapper.add(MBOXES.get(1), MESSAGES.get(i));
+        for (int i = 0; i < MESSAGE_NO.size(); i++) {
+            messageMapper.add(MBOXES.get(1), MESSAGE_NO.get(i));
         }
+    }
+
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
     }
 
     public static void generateTestData() {
@@ -125,13 +133,13 @@ public class HBaseMessageMapperTest {
                 flags.remove(Flags.Flag.RECENT);
                 myMsg.setFlags(flags);
             }
-            MESSAGES.add(myMsg);
+            MESSAGE_NO.add(myMsg);
         }
     }
-    
+
     /**
      * Test an ordered scenario with count, find, add... methods.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -151,7 +159,7 @@ public class HBaseMessageMapperTest {
     private void testCountMessagesInMailbox() throws Exception {
         LOG.info("countMessagesInMailbox");
         long messageCount = messageMapper.countMessagesInMailbox(MBOXES.get(1));
-        assertEquals(MESSAGES.size(), messageCount);
+        assertEquals(MESSAGE_NO.size(), messageCount);
     }
 
     /**
@@ -160,7 +168,7 @@ public class HBaseMessageMapperTest {
     private void testCountUnseenMessagesInMailbox() throws Exception {
         LOG.info("countUnseenMessagesInMailbox");
         long unseen = messageMapper.countUnseenMessagesInMailbox(MBOXES.get(1));
-        assertEquals(MESSAGES.size() - 1, unseen);
+        assertEquals(MESSAGE_NO.size() - 1, unseen);
     }
 
     /**
@@ -179,7 +187,7 @@ public class HBaseMessageMapperTest {
     private void testFindRecentMessageUidsInMailbox() throws Exception {
         LOG.info("findRecentMessageUidsInMailbox");
         List<Long> recentMessages = messageMapper.findRecentMessageUidsInMailbox(MBOXES.get(1));
-        assertEquals(MESSAGES.size() - 1, recentMessages.size());
+        assertEquals(MESSAGE_NO.size() - 1, recentMessages.size());
     }
 
     /**
@@ -189,8 +197,8 @@ public class HBaseMessageMapperTest {
         LOG.info("add");
         // The tables should be deleted every time the tests run.
         long msgCount = messageMapper.countMessagesInMailbox(MBOXES.get(1));
-        LOG.info(msgCount + " " + MESSAGES.size());
-        assertEquals(MESSAGES.size(), msgCount);
+        LOG.info(msgCount + " " + MESSAGE_NO.size());
+        assertEquals(MESSAGE_NO.size(), msgCount);
     }
 
     /**
@@ -199,7 +207,7 @@ public class HBaseMessageMapperTest {
     private void testGetLastUid() throws Exception {
         LOG.info("getLastUid");
         long lastUid = messageMapper.getLastUid(MBOXES.get(1));
-        assertEquals(MESSAGES.size(), lastUid);
+        assertEquals(MESSAGE_NO.size(), lastUid);
     }
 
     /**
@@ -208,6 +216,6 @@ public class HBaseMessageMapperTest {
     private void testGetHighestModSeq() throws Exception {
         LOG.info("getHighestModSeq");
         long highestModSeq = messageMapper.getHighestModSeq(MBOXES.get(1));
-        assertEquals(MESSAGES.size(), highestModSeq);
+        assertEquals(MESSAGE_NO.size(), highestModSeq);
     }
 }

@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-
 package org.apache.james.mailbox.hbase;
 
+import java.io.IOException;
 import org.apache.james.mailbox.AbstractMailboxManagerTest;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.acl.GroupMembershipResolver;
@@ -27,6 +27,7 @@ import org.apache.james.mailbox.acl.SimpleGroupMembershipResolver;
 import org.apache.james.mailbox.acl.UnionMailboxACLResolver;
 import org.apache.james.mailbox.exception.BadCredentialsException;
 import org.apache.james.mailbox.exception.MailboxException;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.mail.HBaseModSeqProvider;
 import org.apache.james.mailbox.hbase.mail.HBaseUidProvider;
 import org.junit.After;
@@ -35,27 +36,42 @@ import org.slf4j.LoggerFactory;
 
 /**
  * HBaseMailboxManagerTest that extends the StoreMailboxManagerTest.
- *  
+ *
  */
 public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
 
-    private static final HBaseClusterSingleton clsuter = HBaseClusterSingleton.build();
+    private static final HBaseClusterSingleton CLUSTER = HBaseClusterSingleton.build();
+
     /**
      * Setup the mailboxManager.
-     
+
      * @throws Exception
      */
     @Before
     public void setup() throws Exception {
-        clsuter.clearTables();
+        ensureTables();
+        clearTables();
         createMailboxManager();
+    }
+
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
     }
 
     /**
      * Close the system session and entityManagerFactory
-     * 
-     * @throws MailboxException 
-     * @throws BadCredentialsException 
+     *
+     * @throws MailboxException
+     * @throws BadCredentialsException
      */
     @After
     public void tearDown() throws Exception {
@@ -68,16 +84,17 @@ public class HBaseMailboxManagerTest extends AbstractMailboxManagerTest {
      * @see org.apache.james.mailbox.MailboxManagerTest#createMailboxManager()
      */
     @Override
-    protected void createMailboxManager() throws MailboxException{
-        final HBaseUidProvider uidProvider = new HBaseUidProvider(clsuter.getConf());
-        final HBaseModSeqProvider modSeqProvider = new HBaseModSeqProvider(clsuter.getConf());
-        final HBaseMailboxSessionMapperFactory mapperFactory = new HBaseMailboxSessionMapperFactory(clsuter.getConf(),
+    protected void createMailboxManager() throws MailboxException {
+        final HBaseUidProvider uidProvider = new HBaseUidProvider(CLUSTER.getConf());
+        final HBaseModSeqProvider modSeqProvider = new HBaseModSeqProvider(CLUSTER.getConf());
+        final HBaseMailboxSessionMapperFactory mapperFactory = new HBaseMailboxSessionMapperFactory(CLUSTER.getConf(),
                 uidProvider, modSeqProvider);
-        
+
         final MailboxACLResolver aclResolver = new UnionMailboxACLResolver();
         final GroupMembershipResolver groupMembershipResolver = new SimpleGroupMembershipResolver();
-        
-        final HBaseMailboxManager manager = new HBaseMailboxManager(mapperFactory, null, aclResolver, groupMembershipResolver);
+
+        final HBaseMailboxManager manager = new HBaseMailboxManager(mapperFactory, null, aclResolver,
+                groupMembershipResolver);
         manager.init();
 
         setMailboxManager(manager);

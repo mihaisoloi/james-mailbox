@@ -1,44 +1,28 @@
-/**
- * **************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one * or more
- * contributor license agreements. See the NOTICE file * distributed with this
- * work for additional information * regarding copyright ownership. The ASF
- * licenses this file * to you under the Apache License, Version 2.0 (the *
- * "License"); you may not use this file except in compliance * with the
- * License. You may obtain a copy of the License at * *
- * http://www.apache.org/licenses/LICENSE-2.0 * * Unless required by applicable
- * law or agreed to in writing, * software distributed under the License is
- * distributed on an * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY *
- * KIND, either express or implied. See the License for the * specific language
- * governing permissions and limitations * under the License. *
- * **************************************************************
- */
+/****************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one   *
+ * or more contributor license agreements.  See the NOTICE file *
+ * distributed with this work for additional information        *
+ * regarding copyright ownership.  The ASF licenses this file   *
+ * to you under the Apache License, Version 2.0 (the            *
+ * "License"); you may not use this file except in compliance   *
+ * with the License.  You may obtain a copy of the License at   *
+ *                                                              *
+ *   http://www.apache.org/licenses/LICENSE-2.0                 *
+ *                                                              *
+ * Unless required by applicable law or agreed to in writing,   *
+ * software distributed under the License is distributed on an  *
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY       *
+ * KIND, either express or implied.  See the License for the    *
+ * specific language governing permissions and limitations      *
+ * under the License.                                           *
+ ****************************************************************/
 package org.apache.james.mailbox.hbase;
 
-import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOXES;
-import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOXES_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOX_CF;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_META_CF;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGE_DATA_BODY;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGE_DATA_HEADERS;
-import static org.apache.james.mailbox.hbase.HBaseNames.SUBSCRIPTIONS;
-import static org.apache.james.mailbox.hbase.HBaseNames.SUBSCRIPTIONS_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.SUBSCRIPTION_CF;
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IOUtils;
 import org.slf4j.Logger;
@@ -55,6 +39,11 @@ public final class HBaseClusterSingleton {
     private MiniHBaseCluster hbaseCluster;
     private Configuration conf;
 
+    /**
+     * Builds a MiniCluster instance.
+     * @return the {@link HBaseClusterSingleton} instance
+     * @throws RuntimeException
+     */
     public static synchronized HBaseClusterSingleton build()
             throws RuntimeException {
         LOG.info("Retrieving cluster instance.");
@@ -65,18 +54,18 @@ public final class HBaseClusterSingleton {
     }
 
     private HBaseClusterSingleton() throws RuntimeException {
-        HTableDescriptor desc = null;
-        HColumnDescriptor hColumnDescriptor = null;
+        htu.getConfiguration().setBoolean("dfs.support.append", true);
+        htu.getConfiguration().setInt("zookeeper.session.timeout", 20000);
+//        htu.getConfiguration().setInt("hbase.client.retries.number", 2);
         try {
             hbaseCluster = htu.startMiniCluster();
-            htu.createTable(MAILBOXES_TABLE, MAILBOX_CF);
-            htu.createTable(MESSAGES_TABLE, new byte[][]{MESSAGES_META_CF,
-                        MESSAGE_DATA_HEADERS, MESSAGE_DATA_BODY});
-            htu.createTable(SUBSCRIPTIONS_TABLE, SUBSCRIPTION_CF);
-            
+            LOG.info("After cluster start-up.");
+            hbaseCluster.waitForActiveAndReadyMaster();
+            LOG.info("After active and ready.");
+//            ensureTables();
             conf = hbaseCluster.getConfiguration();
-        } catch (Exception e) {
-            throw new RuntimeException("Error starting MiniCluster ", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Minicluster not starting.");
         } finally {
             if (hbaseCluster != null) {
                 // add a shutdown hook for shuting down the minicluster.
@@ -95,23 +84,39 @@ public final class HBaseClusterSingleton {
         }
     }
 
+    /**
+     * Return a configuration for the runnning MiniCluster.
+     * @return
+     */
     public Configuration getConf() {
         return conf;
     }
 
-    public void truncateTable(String tableName) {
-        LOG.info("Truncating table!");
-        try {
-            htu.truncateTable(Bytes.toBytes(tableName));
-        } catch (IOException ex) {
-            LOG.info("Exception truncating table {}", tableName, ex);
+    /**
+     * Creates a table with the specified column families.
+     * @param tableName the table name
+     * @param columnFamilies the colum families
+     * @throws IOException
+     */
+    public void ensureTable(String tableName, String... columnFamilies) throws IOException {
+        byte[][] cfs = new byte[columnFamilies.length][];
+        for (int i = 0; i < columnFamilies.length; i++) {
+            cfs[i] = Bytes.toBytes(columnFamilies[i]);
         }
+        ensureTable(Bytes.toBytes(tableName), cfs);
     }
 
-    public void clearTables() {
-        clearTable(MAILBOXES);
-        clearTable(MESSAGES);
-        clearTable(SUBSCRIPTIONS);
+    /**
+     * Creates a table with the specified column families.
+     * @param tableName the table name
+     * @param cfs the column families
+     * @throws IOException
+     */
+    public void ensureTable(byte[] tableName, byte[][] cfs) throws IOException {
+        HBaseAdmin admin = htu.getHBaseAdmin();
+        if (!admin.tableExists(tableName)) {
+            htu.createTable(tableName, cfs);
+        }
     }
 
     /**
@@ -136,8 +141,7 @@ public final class HBaseClusterSingleton {
             LOG.info("Exception clearing table {}", tableName);
         } finally {
             IOUtils.closeStream(scanner);
-            // TODO Temporary commented, was not compiling.
-//            IOUtils.closeStream(table);
+            IOUtils.closeStream(table);
         }
     }
 }

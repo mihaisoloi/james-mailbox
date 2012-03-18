@@ -15,17 +15,6 @@
  */
 package org.apache.james.mailbox.hbase.mail;
 
-import static org.apache.james.mailbox.hbase.HBaseNames.MAILBOXES_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGES_TABLE;
-import static org.apache.james.mailbox.hbase.HBaseNames.MESSAGE_DATA_BODY;
-import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxFromResult;
-import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxRowKey;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -42,11 +30,15 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxFromResult;
+import static org.apache.james.mailbox.hbase.HBaseUtils.mailboxRowKey;
 import org.apache.james.mailbox.hbase.io.ChunkInputStream;
 import org.apache.james.mailbox.hbase.io.ChunkOutputStream;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -55,7 +47,6 @@ import org.slf4j.LoggerFactory;
 /**
  * HBaseMailboxMapper unit tests.
  *
- * @author ieugen
  */
 public class HBaseMailboxMapperTest {
 
@@ -67,13 +58,14 @@ public class HBaseMailboxMapperTest {
     private static List<MailboxPath> pathsList;
     private static final int NAMESPACES = 5;
     private static final int USERS = 5;
-    private static final int MAILBOXES = 5;
+    private static final int MAILBOX_NO = 5;
     private static final char SEPARATOR = '%';
 
     @Before
     public void setUp() throws Exception {
-        // start the test cluster 
-        CLUSTER.clearTables();
+        ensureTables();
+        // start the test cluster
+        clearTables();
         conf = CLUSTER.getConf();
         fillMailboxList();
         mapper = new HBaseMailboxMapper(conf);
@@ -82,9 +74,22 @@ public class HBaseMailboxMapperTest {
         }
     }
 
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
+    }
+
     /**
      * Test an ordered scenario with list, delete... methods.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -130,7 +135,7 @@ public class HBaseMailboxMapperTest {
         for (int i = start; i < end; i++) {
             newPath = new MailboxPath(path);
             newPath.setName(i + newPath.getName() + " " + i);
-            // test for paths with null user 
+            // test for paths with null user
             if (i % 2 == 0) {
                 newPath.setUser(null);
             }
@@ -161,7 +166,7 @@ public class HBaseMailboxMapperTest {
 
         final Get get = new Get(mailboxRowKey(mlbx.getMailboxId()));
         // get all columns for the DATA column family
-        get.addFamily(Bytes.toBytes("DATA"));
+        get.addFamily(MAILBOX_CF);
 
         final Result result = mailboxes.get(get);
         final HBaseMailbox newValue = (HBaseMailbox) mailboxFromResult(result);
@@ -261,9 +266,9 @@ public class HBaseMailboxMapperTest {
         byte[] data = Bytes.toBytes(original);
         // we make the column size = 10 bytes
         ChunkOutputStream out = new ChunkOutputStream(conf,
-                MESSAGES_TABLE, MESSAGE_DATA_BODY, Bytes.toBytes("10"), 10);
+                MESSAGES_TABLE, MESSAGE_DATA_BODY_CF, Bytes.toBytes("10"), 10);
         ChunkInputStream in = new ChunkInputStream(conf,
-                MESSAGES_TABLE, MESSAGE_DATA_BODY, Bytes.toBytes("10"));
+                MESSAGES_TABLE, MESSAGE_DATA_BODY_CF, Bytes.toBytes("10"));
         //create the stream
         ByteArrayInputStream bin = new ByteArrayInputStream(data);
         ByteArrayOutputStream bout = new ByteArrayOutputStream(data.length);
@@ -278,7 +283,7 @@ public class HBaseMailboxMapperTest {
         String s = bout.toString();
         assertTrue(original.equals(s));
     }
-    
+
     private static void fillMailboxList() {
         mailboxList = new ArrayList<HBaseMailbox>();
         pathsList = new ArrayList<MailboxPath>();
@@ -286,7 +291,7 @@ public class HBaseMailboxMapperTest {
         String name;
         for (int i = 0; i < NAMESPACES; i++) {
             for (int j = 0; j < USERS; j++) {
-                for (int k = 0; k < MAILBOXES; k++) {
+                for (int k = 0; k < MAILBOX_NO; k++) {
                     if (j == 3) {
                         name = "test" + SEPARATOR + "subbox" + k;
                     } else {
@@ -309,5 +314,4 @@ public class HBaseMailboxMapperTest {
         mapper.save(mailbox);
         LOG.info("Added new mailbox: {} paths: {}", mailboxList.size(), pathsList.size());
     }
-
 }

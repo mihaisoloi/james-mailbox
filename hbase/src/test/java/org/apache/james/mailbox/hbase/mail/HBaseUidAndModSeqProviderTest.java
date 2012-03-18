@@ -18,13 +18,14 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase.mail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.james.mailbox.hbase.HBaseClusterSingleton;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
 import org.apache.james.mailbox.model.MailboxPath;
-
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Unit tests for UidProvider and ModSeqProvider.
  *
- * @author ieugen
  */
 public class HBaseUidAndModSeqProviderTest {
 
@@ -48,12 +48,13 @@ public class HBaseUidAndModSeqProviderTest {
     private static List<MailboxPath> pathsList;
     private static final int NAMESPACES = 5;
     private static final int USERS = 5;
-    private static final int MAILBOXES = 5;
+    private static final int MAILBOX_NO = 5;
     private static final char SEPARATOR = '%';
 
     @Before
     public void setUpClass() throws Exception {
-        CLUSTER.clearTables();
+        ensureTables();
+        clearTables();
         conf = CLUSTER.getConf();
         uidProvider = new HBaseUidProvider(conf);
         modSeqProvider = new HBaseModSeqProvider(conf);
@@ -64,6 +65,19 @@ public class HBaseUidAndModSeqProviderTest {
         }
     }
 
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
+    }
+
     private static void fillMailboxList() {
         mailboxList = new ArrayList<HBaseMailbox>();
         pathsList = new ArrayList<MailboxPath>();
@@ -71,7 +85,7 @@ public class HBaseUidAndModSeqProviderTest {
         String name;
         for (int i = 0; i < NAMESPACES; i++) {
             for (int j = 0; j < USERS; j++) {
-                for (int k = 0; k < MAILBOXES; k++) {
+                for (int k = 0; k < MAILBOX_NO; k++) {
                     if (j == 3) {
                         name = "test" + SEPARATOR + "subbox" + k;
                     } else {

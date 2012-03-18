@@ -42,7 +42,7 @@ import org.apache.james.mailbox.store.user.SubscriptionMapper;
 
 /**
  * HBase implementation of {@link MailboxSessionMapperFactory}
- * 
+ *
  */
 public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactory<UUID> {
 
@@ -52,12 +52,12 @@ public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactor
 
     /**
      * Creates  the necessary tables in HBase if they do not exist.
-     * 
+     *
      * @param conf Configuration for the cluster
      * @param uidProvider UID provider for mailbox uid.
-     * @param modSeqProvider 
+     * @param modSeqProvider
      * @throws MasterNotRunningException
-     * @throws ZooKeeperConnectionException 
+     * @throws ZooKeeperConnectionException
      * @throws IOException
      */
     public HBaseMailboxSessionMapperFactory(Configuration conf, UidProvider<UUID> uidProvider, ModSeqProvider<UUID> modSeqProvider) {
@@ -82,18 +82,18 @@ public class HBaseMailboxSessionMapperFactory extends MailboxSessionMapperFactor
             }
 
             if (!hbaseAdmin.tableExists(MESSAGES_TABLE)) {
-                /**TODO: try to reduce the number of column families as suggested by: 
-                 * http://hbase.apache.org/book.html#number.of.cfs 
+                /**TODO: try to reduce the number of column families as suggested by:
+                 * http://hbase.apache.org/book.html#number.of.cfs
                  * Down to three column families, striking for just two.
                  */
                 desc = new HTableDescriptor(MESSAGES_TABLE);
                 hColumnDescriptor = new HColumnDescriptor(MESSAGES_META_CF);
                 hColumnDescriptor.setMaxVersions(1);
                 desc.addFamily(hColumnDescriptor);
-                hColumnDescriptor = new HColumnDescriptor(MESSAGE_DATA_HEADERS);
+                hColumnDescriptor = new HColumnDescriptor(MESSAGE_DATA_HEADERS_CF);
                 hColumnDescriptor.setMaxVersions(1);
                 desc.addFamily(hColumnDescriptor);
-                hColumnDescriptor = new HColumnDescriptor(MESSAGE_DATA_BODY);
+                hColumnDescriptor = new HColumnDescriptor(MESSAGE_DATA_BODY_CF);
                 hColumnDescriptor.setMaxVersions(1);
                 desc.addFamily(hColumnDescriptor);
                 hbaseAdmin.createTable(desc);

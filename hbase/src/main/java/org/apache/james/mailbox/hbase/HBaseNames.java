@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 /**
  * Contains table names, column family names, qualifier names and other constants
  * for use in HBase.
- *     
+ *
  * Each qualifier in the META column will begin with a short prefix that will
  * determine it's purpose. </br>
  * Qualifier prefix meaning:<br/>
@@ -42,7 +42,7 @@ public interface HBaseNames {
     public static final String MAILBOXES = "JAMES_MAILBOXES";
     public static final byte[] MAILBOXES_TABLE = Bytes.toBytes(MAILBOXES);
     /** Default mailbox column family */
-    public static final byte[] MAILBOX_CF = Bytes.toBytes("DATA");
+    public static final byte[] MAILBOX_CF = Bytes.toBytes("D");
     /** HBase column qualifiers: field names stored as byte arrays*/
     public static final byte[] MAILBOX_NAME = Bytes.toBytes("name");
     public static final byte[] MAILBOX_USER = Bytes.toBytes("user");
@@ -56,19 +56,17 @@ public interface HBaseNames {
     /** The HBase table name for storing subscriptions */
     public static final byte[] SUBSCRIPTIONS_TABLE = Bytes.toBytes(SUBSCRIPTIONS);
     /** Default subscription column family */
-    public static final byte[] SUBSCRIPTION_CF = Bytes.toBytes("DATA");
+    public static final byte[] SUBSCRIPTION_CF = Bytes.toBytes("D");
     /** The HBase table name for storing messages */
     public static final String MESSAGES = "JAMES_MESSAGES";
     /** The HBase table name for storing messages */
     public static final byte[] MESSAGES_TABLE = Bytes.toBytes(MESSAGES);
-    /** Column family for storing message data*/
-    //public static final byte[] MESSAGES_DATA_CF = Bytes.toBytes("DATA");
     /** Column family for storing message meta information*/
-    public static final byte[] MESSAGES_META_CF = Bytes.toBytes("META");
+    public static final byte[] MESSAGES_META_CF = Bytes.toBytes("M");
     /** Column family for storing message headers*/
-    public static final byte[] MESSAGE_DATA_HEADERS = Bytes.toBytes("HEAD");
+    public static final byte[] MESSAGE_DATA_HEADERS_CF = Bytes.toBytes("H");
     /** Column family for storing message body*/
-    public static final byte[] MESSAGE_DATA_BODY = Bytes.toBytes("BODY");
+    public static final byte[] MESSAGE_DATA_BODY_CF = Bytes.toBytes("B");
     public static final String PREFIX_META = "m:";
     public static final byte[] PREFIX_META_B = Bytes.toBytes(PREFIX_META);
     /** kept sorted */

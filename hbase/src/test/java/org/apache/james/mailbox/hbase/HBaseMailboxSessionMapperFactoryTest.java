@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-
 package org.apache.james.mailbox.hbase;
 
+import java.io.IOException;
 import java.util.UUID;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.james.mailbox.MailboxSession;
+import static org.apache.james.mailbox.hbase.HBaseNames.*;
 import org.apache.james.mailbox.hbase.mail.HBaseModSeqProvider;
 import org.apache.james.mailbox.hbase.mail.HBaseUidProvider;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
@@ -46,9 +47,23 @@ public class HBaseMailboxSessionMapperFactoryTest {
     private static Configuration conf;
 
     @Before
-    public void beforeMethod() {
-        CLUSTER.clearTables();
+    public void beforeMethod() throws IOException {
+        ensureTables();
+        clearTables();
         conf = CLUSTER.getConf();
+    }
+
+    private void ensureTables() throws IOException {
+        CLUSTER.ensureTable(MAILBOXES_TABLE, new byte[][]{MAILBOX_CF});
+        CLUSTER.ensureTable(MESSAGES_TABLE,
+                new byte[][]{MESSAGES_META_CF, MESSAGE_DATA_HEADERS_CF, MESSAGE_DATA_BODY_CF});
+        CLUSTER.ensureTable(SUBSCRIPTIONS_TABLE, new byte[][]{SUBSCRIPTION_CF});
+    }
+
+    private void clearTables() {
+        CLUSTER.clearTable(MAILBOXES);
+        CLUSTER.clearTable(MESSAGES);
+        CLUSTER.clearTable(SUBSCRIPTIONS);
     }
 
     /**

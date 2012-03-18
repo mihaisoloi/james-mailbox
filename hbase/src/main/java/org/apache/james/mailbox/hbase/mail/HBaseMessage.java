@@ -41,7 +41,7 @@ import static org.apache.james.mailbox.hbase.HBaseNames.*;
 
 /**
  * Concrete HBaseMessage implementation. This implementation does not store any
- * message content. The message content is retrieved using a ChunkedInputStream 
+ * message content. The message content is retrieved using a ChunkedInputStream
  * directly from HBase.
  */
 public class HBaseMessage extends AbstractMessage<UUID> {
@@ -90,7 +90,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
      * @param uid
      * @param modSeq
      * @param original
-     * @throws MailboxException 
+     * @throws MailboxException
      */
     public HBaseMessage(Configuration conf, UUID mailboxId, long uid, long modSeq, Message<?> original) throws MailboxException {
         super();
@@ -101,7 +101,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
         this.userFlags = new ArrayList<String>();
         setFlags(original.createFlags());
 
-        // A copy of a message is recent 
+        // A copy of a message is recent
         // See MAILBOX-85
         this.recent = true;
 
@@ -122,7 +122,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
      * @param flags
      * @param contentOctets
      * @param bodyStartOctet
-     * @param propertyBuilder 
+     * @param propertyBuilder
      */
     public HBaseMessage(Configuration conf, UUID mailboxId, Date internalDate, Flags flags, long contentOctets, int bodyStartOctet, PropertyBuilder propertyBuilder) {
         super();
@@ -146,7 +146,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
      */
     @Override
     public InputStream getBodyContent() throws IOException {
-        return new ChunkInputStream(conf, MESSAGES_TABLE, MESSAGE_DATA_BODY, messageRowKey(this));
+        return new ChunkInputStream(conf, MESSAGES_TABLE, MESSAGE_DATA_BODY_CF, messageRowKey(this));
     }
 
     /*
@@ -155,7 +155,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
      */
     @Override
     public InputStream getHeaderContent() throws IOException {
-        return new ChunkInputStream(conf, MESSAGES_TABLE, MESSAGE_DATA_HEADERS, messageRowKey(this));
+        return new ChunkInputStream(conf, MESSAGES_TABLE, MESSAGE_DATA_HEADERS_CF, messageRowKey(this));
     }
 
     @Override
@@ -214,7 +214,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
 
     /**
      * Gets the top level MIME content media type.
-     * 
+     *
      * @return top level MIME content media type, or null if default
      */
     @Override
@@ -224,7 +224,7 @@ public class HBaseMessage extends AbstractMessage<UUID> {
 
     /**
      * Gets the MIME content subtype.
-     * 
+     *
      * @return the MIME content subtype, or null if default
      */
     @Override
@@ -366,8 +366,8 @@ public class HBaseMessage extends AbstractMessage<UUID> {
 
     /**
      * This implementation supports user flags
-     * 
-     * 
+     *
+     *
      */
     @Override
     public String[] createUserFlags() {
