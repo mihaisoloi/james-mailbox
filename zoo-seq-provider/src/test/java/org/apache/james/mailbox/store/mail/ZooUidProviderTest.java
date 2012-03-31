@@ -18,11 +18,18 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
+import com.netflix.curator.RetryPolicy;
+import com.netflix.curator.framework.CuratorFramework;
+import com.netflix.curator.framework.CuratorFrameworkFactory;
+import com.netflix.curator.retry.RetryOneTime;
+import com.netflix.curator.test.TestingServer;
 import java.util.UUID;
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.store.mail.model.Mailbox;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -30,20 +37,46 @@ import org.junit.Test;
  */
 public class ZooUidProviderTest {
 
+    private static TestingServer testServer;
+    private static final int ZOO_TEST_PORT = 3123;
+    private final RetryPolicy retryPolicy = new RetryOneTime(1);
+    private CuratorFramework client;
+    private ZooUidProvider<UUID> uuidProvider;
+    private ZooUidProvider<Long> longProvider;
+    private SimpleMailbox<UUID> mailboxUUID;
+    private SimpleMailbox<Long> mailboxLong;
+    private UUID randomUUID = UUID.randomUUID();
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        testServer = new TestingServer(ZOO_TEST_PORT);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        client = CuratorFrameworkFactory.builder().connectString("localhost:" + ZOO_TEST_PORT).retryPolicy(retryPolicy).
+                namespace("JAMES").build();
+        client.start();
+        uuidProvider = new ZooUidProvider<UUID>(client, retryPolicy);
+        longProvider = new ZooUidProvider<Long>(client, retryPolicy);
+        MailboxPath path1 = new MailboxPath("namespacetest", "namespaceuser", "UUID");
+        MailboxPath path2 = new MailboxPath("namespacetest", "namespaceuser", "Long");
+        mailboxUUID = new SimpleMailbox<UUID>(path1, 1L);
+        mailboxUUID.setMailboxId(randomUUID);
+        mailboxLong = new SimpleMailbox<Long>(path2, 2L);
+        mailboxLong.setMailboxId(123L);
+    }
+
     /**
      * Test of nextUid method, of class ZooUidProvider.
      */
     @Test
     public void testNextUid() throws Exception {
-        System.out.println("nextUid");
-        MailboxSession session = null;
-        Mailbox<UUID> mailbox = null;
-        ZooUidProvider instance = null;
-        long expResult = 0L;
-        long result = instance.nextUid(session, mailbox);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        System.out.println("Testing nextUid");
+        long result = uuidProvider.nextUid(null, mailboxUUID);
+        assertEquals("Next UID is 1", 1, result);
+        result = longProvider.nextUid(null, mailboxLong);
+        assertEquals("Next UID is 1", 1, result);
     }
 
     /**
@@ -51,15 +84,15 @@ public class ZooUidProviderTest {
      */
     @Test
     public void testLastUid() throws Exception {
-        System.out.println("lastUid");
-        MailboxSession session = null;
-        Mailbox<UUID> mailbox = null;
-        ZooUidProvider instance = null;
-        long expResult = 0L;
-        long result = instance.lastUid(session, mailbox);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        System.out.println("Testing lastUid");
+        long result = uuidProvider.lastUid(null, mailboxUUID);
+        assertEquals("Next UID is 0", 0, result);
+        result = uuidProvider.nextUid(null, mailboxUUID);
+        assertEquals("Next UID is 1", 1, result);
+        result = longProvider.lastUid(null, mailboxLong);
+        assertEquals("Next UID is 0", 0, result);
+        result = longProvider.nextUid(null, mailboxLong);
+        assertEquals("Next UID is 1", 1, result);
     }
 
     /**
@@ -67,10 +100,28 @@ public class ZooUidProviderTest {
      */
     @Test
     public void testClose() throws Exception {
-        System.out.println("close");
-        ZooUidProvider instance = null;
-        instance.close();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        System.out.println("Testing close");
+        uuidProvider.close();
+        try {
+            uuidProvider.lastUid(null, mailboxUUID);
+        } catch (MailboxException me) {
+            assertEquals("Curator client is closed.", me.getMessage());
+        }
+        try {
+            uuidProvider.nextUid(null, mailboxUUID);
+        } catch (MailboxException me) {
+            assertEquals("Curator client is closed.", me.getMessage());
+        }
+        longProvider.close();
+        try {
+            longProvider.lastUid(null, mailboxLong);
+        } catch (MailboxException me) {
+            assertEquals("Curator client is closed.", me.getMessage());
+        }
+        try {
+            longProvider.nextUid(null, mailboxLong);
+        } catch (MailboxException me) {
+            assertEquals("Curator client is closed.", me.getMessage());
+        }
     }
 }

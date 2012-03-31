@@ -48,8 +48,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -68,6 +68,17 @@
             <groupId>com.netflix.curator</groupId>
             <artifactId>curator-framework</artifactId>
             <version>${curator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.curator</groupId>
+            <artifactId>curator-client</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <version>${curator.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

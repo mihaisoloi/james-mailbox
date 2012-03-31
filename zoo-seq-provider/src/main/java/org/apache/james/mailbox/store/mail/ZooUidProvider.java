@@ -18,7 +18,12 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.mail;
 
+import com.google.common.base.Preconditions;
+import com.netflix.curator.RetryPolicy;
 import com.netflix.curator.framework.CuratorFramework;
+import com.netflix.curator.framework.recipes.atomic.AtomicValue;
+import com.netflix.curator.framework.recipes.atomic.DistributedAtomicLong;
+import com.netflix.curator.retry.RetryOneTime;
 import java.io.Closeable;
 import java.io.IOException;
 import org.apache.james.mailbox.MailboxSession;
@@ -30,36 +35,70 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
  */
 public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
 
-    /** Inject the curator client using srping */
+    public final String UID_PATH_SUFIX = "-uid";
     private final CuratorFramework client;
+    private final RetryPolicy retryPolicy;
 
     public ZooUidProvider(CuratorFramework client) {
+        this(client, new RetryOneTime(1));
+    }
+
+    public ZooUidProvider(CuratorFramework client, RetryPolicy retryPolicy) {
+        Preconditions.checkNotNull(client);
+        Preconditions.checkNotNull(retryPolicy);
         this.client = client;
-        client.start();
+        this.retryPolicy = retryPolicy;
     }
 
     @Override
-    public long nextUid(MailboxSession session,
-                        Mailbox<E> mailbox) throws MailboxException {
+    public long nextUid(MailboxSession session, Mailbox mailbox) throws MailboxException {
         if (client.isStarted()) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        } else {
-            throw new IllegalStateException("Curator client is closed.");
+            String path = mailbox.getMailboxId().toString() + UID_PATH_SUFIX;
+            System.out.println(path);
+            DistributedAtomicLong uid = new DistributedAtomicLong(client, path, retryPolicy);
+            AtomicValue<Long> value = null;
+            try {
+                uid.increment();
+                value = uid.get();
+            } catch (Exception e) {
+                throw new MailboxException("Exception incrementing UID for session " + session, e);
+            } finally {
+                if (value != null && value.succeeded()) {
+                    return value.postValue();
+                } else {
+                    throw new MailboxException("Failed getting next UID for " + session);
+                }
+            }
         }
+        throw new MailboxException("Curator client is closed.");
     }
 
     @Override
-    public long lastUid(MailboxSession session,
-                        Mailbox<E> mailbox) throws MailboxException {
+    public long lastUid(MailboxSession session, Mailbox<E> mailbox) throws MailboxException {
         if (client.isStarted()) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        } else {
-            throw new IllegalStateException("Curator client is closed.");
+            String path = mailbox.getMailboxId().toString() + UID_PATH_SUFIX;
+            System.out.println(path);
+            DistributedAtomicLong uid = new DistributedAtomicLong(client, path, retryPolicy);
+            AtomicValue<Long> value = null;
+            try {
+                value = uid.get();
+            } catch (Exception e) {
+                throw new MailboxException("Exception getting last UID for session " + session, e);
+            } finally {
+                if (value != null && value.succeeded()) {
+                    return value.postValue();
+                } else {
+                    throw new MailboxException("Failed getting last UID for " + session);
+                }
+            }
         }
+        throw new MailboxException("Curator client is closed.");
     }
 
     @Override
     public void close() throws IOException {
-        client.close();
+        if (client.isStarted()) {
+            client.close();
+        }
     }
 }
