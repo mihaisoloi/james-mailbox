@@ -24,8 +24,6 @@ import com.netflix.curator.framework.CuratorFramework;
 import com.netflix.curator.framework.recipes.atomic.AtomicValue;
 import com.netflix.curator.framework.recipes.atomic.DistributedAtomicLong;
 import com.netflix.curator.retry.RetryOneTime;
-import java.io.Closeable;
-import java.io.IOException;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -33,9 +31,10 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 /**
  * ZooKeepr based implementation of a distribuited sequential UID generator.
  */
-public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
+public class ZooUidProvider<E> implements UidProvider<E> {
+    // TODO: use ZK paths to store uid and modSeq, etc.
 
-    public final String UID_PATH_SUFIX = "-uid";
+    public static final String UID_PATH_SUFFIX = "-uid";
     private final CuratorFramework client;
     private final RetryPolicy retryPolicy;
 
@@ -53,9 +52,7 @@ public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
     @Override
     public long nextUid(MailboxSession session, Mailbox mailbox) throws MailboxException {
         if (client.isStarted()) {
-            String path = mailbox.getMailboxId().toString() + UID_PATH_SUFIX;
-            System.out.println(path);
-            DistributedAtomicLong uid = new DistributedAtomicLong(client, path, retryPolicy);
+            DistributedAtomicLong uid = new DistributedAtomicLong(client, pathForMailbox(mailbox), retryPolicy);
             AtomicValue<Long> value = null;
             try {
                 uid.increment();
@@ -76,9 +73,7 @@ public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
     @Override
     public long lastUid(MailboxSession session, Mailbox<E> mailbox) throws MailboxException {
         if (client.isStarted()) {
-            String path = mailbox.getMailboxId().toString() + UID_PATH_SUFIX;
-            System.out.println(path);
-            DistributedAtomicLong uid = new DistributedAtomicLong(client, path, retryPolicy);
+            DistributedAtomicLong uid = new DistributedAtomicLong(client, pathForMailbox(mailbox), retryPolicy);
             AtomicValue<Long> value = null;
             try {
                 value = uid.get();
@@ -95,10 +90,7 @@ public class ZooUidProvider<E> implements UidProvider<E>, Closeable {
         throw new MailboxException("Curator client is closed.");
     }
 
-    @Override
-    public void close() throws IOException {
-        if (client.isStarted()) {
-            client.close();
-        }
+    public static String pathForMailbox(Mailbox mailbox) {
+        return mailbox.getMailboxId().toString() + UID_PATH_SUFFIX;
     }
 }

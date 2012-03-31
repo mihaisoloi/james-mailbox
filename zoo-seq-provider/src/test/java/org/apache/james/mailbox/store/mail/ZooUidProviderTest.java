@@ -24,12 +24,11 @@ import com.netflix.curator.framework.CuratorFrameworkFactory;
 import com.netflix.curator.retry.RetryOneTime;
 import com.netflix.curator.test.TestingServer;
 import java.util.UUID;
-import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
+import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -47,13 +46,9 @@ public class ZooUidProviderTest {
     private SimpleMailbox<Long> mailboxLong;
     private UUID randomUUID = UUID.randomUUID();
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        testServer = new TestingServer(ZOO_TEST_PORT);
-    }
-
     @Before
     public void setUp() throws Exception {
+        testServer = new TestingServer(ZOO_TEST_PORT);
         client = CuratorFrameworkFactory.builder().connectString("localhost:" + ZOO_TEST_PORT).retryPolicy(retryPolicy).
                 namespace("JAMES").build();
         client.start();
@@ -65,6 +60,12 @@ public class ZooUidProviderTest {
         mailboxUUID.setMailboxId(randomUUID);
         mailboxLong = new SimpleMailbox<Long>(path2, 2L);
         mailboxLong.setMailboxId(123L);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        client.close();
+        testServer.close();
     }
 
     /**
@@ -89,39 +90,17 @@ public class ZooUidProviderTest {
         assertEquals("Next UID is 0", 0, result);
         result = uuidProvider.nextUid(null, mailboxUUID);
         assertEquals("Next UID is 1", 1, result);
-        result = longProvider.lastUid(null, mailboxLong);
-        assertEquals("Next UID is 0", 0, result);
-        result = longProvider.nextUid(null, mailboxLong);
-        assertEquals("Next UID is 1", 1, result);
     }
 
     /**
-     * Test of close method, of class ZooUidProvider.
+     * Test of lastUid method, of class ZooUidProvider.
      */
     @Test
-    public void testClose() throws Exception {
-        System.out.println("Testing close");
-        uuidProvider.close();
-        try {
-            uuidProvider.lastUid(null, mailboxUUID);
-        } catch (MailboxException me) {
-            assertEquals("Curator client is closed.", me.getMessage());
-        }
-        try {
-            uuidProvider.nextUid(null, mailboxUUID);
-        } catch (MailboxException me) {
-            assertEquals("Curator client is closed.", me.getMessage());
-        }
-        longProvider.close();
-        try {
-            longProvider.lastUid(null, mailboxLong);
-        } catch (MailboxException me) {
-            assertEquals("Curator client is closed.", me.getMessage());
-        }
-        try {
-            longProvider.nextUid(null, mailboxLong);
-        } catch (MailboxException me) {
-            assertEquals("Curator client is closed.", me.getMessage());
-        }
+    public void testLongLastUid() throws Exception {
+        System.out.println("Testing long lastUid");
+        long result = longProvider.lastUid(null, mailboxLong);
+        assertEquals("Next UID is 0", 0, result);
+        result = longProvider.nextUid(null, mailboxLong);
+        assertEquals("Next UID is 1", 1, result);
     }
 }
