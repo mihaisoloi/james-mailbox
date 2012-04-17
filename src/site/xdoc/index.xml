@@ -21,7 +21,7 @@
 <document>
 
  <properties>
-  <title>Introduction</title>
+  <title>Apache James Mailbox Introduction</title>
   <author email="server-dev@james.apache.org">Apache James Mailbox</author>
  </properties>
 
@@ -43,7 +43,7 @@
        mechanisms: MailDir, SQL Database via Apache OpenJPA, JCR (Java Content Repository based on Apache Jackrabbit) 
        and Apache HBase.
     </p>
-    <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 0.3 release. 
+    <p>You can <a href="http://james.apache.org/download.cgi">download</a> current 0.4 release. 
        The <a href="apidocs/">API</a> as the schemas for the different implementations are susceptible to evolve.
     </p>
   </section>

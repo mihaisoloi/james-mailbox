@@ -26,7 +26,7 @@
     <body>
 
         <section name="Mailbox JPA Responsibility">
-            <p> This mailbox implementation stores messages in a Java Persistace API store 
+            <p> This mailbox implementation stores messages in a Java Persistence API store 
             (think data bases, but not limited to that). 
             </p>
             <p>
@@ -39,25 +39,21 @@
   
         <section name="Overview">
             <p>The JPA implementation uses Java Persistenca API Annotations to map Java objects to data base tables. 
-            The current implementation also supports features such as storing messages in an encripted database and provide 
-            on the fly encryption/decryption. 
+            The current implementation also supports features such as storing messages in an encrypted database and provide 
+            on the fly encryption/decryption.
             </p>
         </section>
-        
-        <section name="Installation">
-            
-        </section>
-        <section name="Mailbox JPA Classes">
-  
-            <subsection name="Managers">
 <!-- 
-Image is no more in line with trunk
-      <p><img src="images/uml/org-apache-james-mailbox-jpa-managers.png"/></p>
--->
-            </subsection>
-  
+        <section name="Installation">
         </section>
 
+        <section name="Mailbox JPA Classes">
+            <subsection name="Managers">
+Image is no more in line with trunk
+      <p><img src="images/uml/org-apache-james-mailbox-jpa-managers.png"/></p>
+            </subsection>
+        </section>
+-->
     </body>
 
 </document>

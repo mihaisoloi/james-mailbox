@@ -73,14 +73,12 @@ Image is no more in line with trunk
     </subsection>
 
   </section>
-  
-  <section name="Other Interfaces and Classes">
 <!-- 
+  <section name="Other Interfaces and Classes">
 Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-api-msc.png"/></p>
--->
   </section>
-
+-->
 </body>
 
 </document>

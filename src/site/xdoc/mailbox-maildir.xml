@@ -28,18 +28,13 @@
   <section name="Mailbox Maildir Responsibility">
       <p>This implementation stores messages using the popular <a href="http://en.wikipedia.org/wiki/Maildir">Maildir</a> format.</p> 
   </section>
-
-  <section name="Mailbox Maildir Classes">
-
-    <subsection name="Managers">
 <!-- 
-Image is no more in line with trunk
+  <section name="Mailbox Maildir Classes">
+    <subsection name="Managers">
       <p><img src="images/uml/org-apache-james-mailbox-maildir-managers.png"/></p>
--->
     </subsection>
-    
   </section>
-
+-->
 </body>
 
 </document>

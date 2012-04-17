@@ -30,8 +30,12 @@
         </section>
         
         <section name="Overview">
-            <p>This should provide an overview of the design and implementation of Mailbox HBase. The current design is illustrated in </p>
-            <img src="apache-james-mailbox-hbase/images/james-hbase-mailbox-schema.svg"/>. It is generated from a MindMap file that you can find in the sources.
+            <p>
+              This should provide an overview of the design and implementation of Mailbox HBase.
+              <!-- 
+                The current design is illustrated in <img src="apache-james-mailbox-hbase/images/james-hbase-mailbox-schema.svg"/>. It is generated from a MindMap file that you can find in the sources.
+              -->
+            </p>
             <subsection name="Tables">
                 <p>The current implementations stores Messages, Mailboxes and Subscriptions in their own tables.</p> There are:
                 <ul>
@@ -73,8 +77,8 @@
         </section>
         
         <section name="Installation">
-            <p>In order for the mailbox implementation to work you have to provide it with a link to your HBase cluster. Puting 
-                <em>hbase-sites.xml</em> on the class path should be enough. Mailbox HBase will pick it up an read all the configuration parameters from it.
+            <p>In order for the mailbox implementation to work you have to provide it with a link to your HBase cluster. Putting 
+                <em>hbase-site.xml</em> on the class path should be enough. Mailbox HBase will pick it up an read all the configuration parameters from it.
             </p>
         </section>
         
@@ -118,7 +122,7 @@
             </subsection>
             <subsection name="HBaseMessage">
                 <p>Extends AbstractMessage and represents a message in the message store. 
-                What is important to rememeber is that the current implementation retrieves just the message meta-data from HBase 
+                What is important to remember is that the current implementation retrieves just the message meta-data from HBase 
                 and uses ChunkInputStream to load the message body only when needed.
                 </p>
             </subsection>            

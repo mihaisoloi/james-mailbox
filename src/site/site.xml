@@ -19,6 +19,12 @@
 -->
 <project name="Apache James Mailbox">
 
+  <skin>
+    <groupId>org.apache.james</groupId>
+    <artifactId>james-skin</artifactId>
+    <version>${james-skin.version}</version>
+  </skin>
+
   <bannerLeft>
     <name>James Server</name>
     <src>images/logos/james-server-logo.gif</src>

@@ -28,18 +28,14 @@
         <section name="Mailbox Memory Responsibility">
             <p>Provides an in-memory mail store.</p>
         </section>
-
-        <section name="Mailbox Memory Classes">
-  
-            <subsection name="Managers">
 <!-- 
+        <section name="Mailbox Memory Classes">
+            <subsection name="Managers">
 Image is no more in line with trunk
       <p><img src="images/uml/org-apache-james-mailbox-memory-managers.png"/></p>
--->
             </subsection>
-    
         </section>
-
+-->
     </body>
 
 </document>
