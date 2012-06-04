@@ -30,7 +30,7 @@
     <!--          Information will be lost after jvm restart. -->
 
     <bean id="memory-mailboxmanager" class="org.apache.james.mailbox.store.StoreMailboxManager" init-method="init">
-        <constructor-arg index="0" ref="maildir-sessionMapperFactory"/>
+        <constructor-arg index="0" ref="memory-sessionMapperFactory"/>
         <constructor-arg index="1" ref="authenticator"/>
         <constructor-arg index="2" ref="memory-locker"/>
         <constructor-arg index="3" ref="aclResolver"/>
