@@ -55,11 +55,12 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
     private int bodyStartOctet;
     private long modSeq;
     private SharedInputStream content;
- 
-    public SimpleMessage(Date internalDate, int size, int bodyStartOctet, SharedInputStream content,
-            Flags flags, PropertyBuilder propertyBuilder, final Id mailboxId) {
+
+    public SimpleMessage(Date internalDate, int size, int bodyStartOctet,
+            SharedInputStream content, Flags flags,
+            PropertyBuilder propertyBuilder, final Id mailboxId) {
         this.content = content;
-        
+
         this.size = size;
         this.bodyStartOctet = bodyStartOctet;
         setFlags(flags);
@@ -71,31 +72,32 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         this.subType = propertyBuilder.getSubType();
     }
 
-
-    public SimpleMessage(Mailbox<Id> mailbox, Message<Id> original) throws MailboxException {
+    public SimpleMessage(Mailbox<Id> mailbox, Message<Id> original)
+            throws MailboxException {
         this.internalDate = original.getInternalDate();
         this.size = original.getFullContentOctets();
         this.mailboxId = mailbox.getMailboxId();
         setFlags(original.createFlags());
         try {
-            this.content = new SharedByteArrayInputStream(IOUtils.toByteArray(original.getFullContent()));
+            this.content = new SharedByteArrayInputStream(
+                    IOUtils.toByteArray(original.getFullContent()));
         } catch (IOException e) {
-            throw new MailboxException("Unable to parse message",e);
+            throw new MailboxException("Unable to parse message", e);
         }
-       
-        this.bodyStartOctet = (int) (original.getFullContentOctets() - original.getBodyOctets());
-        
+
+        this.bodyStartOctet = (int) (original.getFullContentOctets() - original
+                .getBodyOctets());
+
         PropertyBuilder pBuilder = new PropertyBuilder(original.getProperties());
         this.lineCount = original.getTextualLineCount();
         this.mediaType = original.getMediaType();
         this.subType = original.getSubType();
         final List<Property> properties = pBuilder.toProperties();
         this.properties = new ArrayList<Property>(properties.size());
-        for (final Property property:properties) {
+        for (final Property property : properties) {
             this.properties.add(new SimpleProperty(property));
         }
     }
-
 
     public Date getInternalDate() {
         return internalDate;
@@ -143,14 +145,12 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
     }
 
     public InputStream getBodyContent() throws IOException {
-        return content.newStream(getBodyStartOctet(), -1);    
+        return content.newStream(getBodyStartOctet(), -1);
     }
-
 
     public long getFullContentOctets() {
         return size;
     }
-
 
     public String getMediaType() {
         return mediaType;
@@ -193,26 +193,18 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
 
     /**
      * Representation suitable for logging and debugging.
-     *
-     * @return a <code>String</code> representation 
-     * of this object.
+     * 
+     * @return a <code>String</code> representation of this object.
      */
-    public String toString()
-    {
-        return super.toString() + "["
-            + "uid = " + this.uid + " "
-            + "mailboxId = " + this.mailboxId + " "
-            + "size = " + this.size + " "
-            + "answered = " + this.answered + " "
-            + "deleted = " + this.deleted + " "
-            + "draft = " + this.draft + " "
-            + "flagged = " + this.flagged + " "
-            + "recent = " + this.recent + " "
-            + "seen = " + this.seen + " "
-            + "internalDate = " + this.internalDate + " "
-            + "subType = " + this.subType + " "
-            + "mediaType = " + this.mediaType + " "
-            + " ]";
+    public String toString() {
+        return super.toString() + "[" + "uid = " + this.uid + " "
+                + "mailboxId = " + this.mailboxId + " " + "size = " + this.size
+                + " " + "answered = " + this.answered + " " + "deleted = "
+                + this.deleted + " " + "draft = " + this.draft + " "
+                + "flagged = " + this.flagged + " " + "recent = " + this.recent
+                + " " + "seen = " + this.seen + " " + "internalDate = "
+                + this.internalDate + " " + "subType = " + this.subType + " "
+                + "mediaType = " + this.mediaType + " " + " ]";
     }
 
     @Override
@@ -249,4 +241,10 @@ public class SimpleMessage<Id> extends AbstractMessage<Id> {
         }
         return content.newStream(0, headerEnd);
     }
+
+    @Override
+    public InputStream getFullContent() throws IOException {
+        return content.newStream(0, -1);
+    }
+
 }
