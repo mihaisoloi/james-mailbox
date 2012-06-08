@@ -18,10 +18,10 @@
   under the License.    
 -->
 
-<beans xmlns="http://www.springframework.org/schema/beans" 
+<beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:camel="http://camel.apache.org/schema/spring"
-       xmlns:amq="http://activemq.apache.org/schema/core" 
+       xmlns:amq="http://activemq.apache.org/schema/core"
        xsi:schemaLocation="
           http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-3.0.xsd
           http://camel.apache.org/schema/spring classpath:camel-spring.xsd
@@ -30,20 +30,20 @@
     <!-- 
       Mailbox Managers
      -->
-     
+
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-locker.xml" />
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-authenticator.xml" />
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-lucene.xml" />
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-jpa.xml" />
-<!-- 
+<!--
     JCR temporary desactivated because jackrabbit still uses lucene 2
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-jcr.xml" />
 -->
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-maildir.xml" />
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-memory.xml" />
-    <!--  
+
     <import resource="classpath:META-INF/org/apache/james/spring-mailbox-hbase.xml" />
-    -->
+
     <!-- 
       Mailbox Copier
      -->
@@ -57,5 +57,5 @@
       Group Membership Resolver
      -->
     <bean id="groupMembershipResolver" class="org.apache.james.mailbox.acl.SimpleGroupMembershipResolver"/>
-          
+
 </beans>
