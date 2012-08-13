@@ -18,11 +18,19 @@
  ****************************************************************/
 package org.apache.james.mailbox.hbase;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IOUtils;
 import org.slf4j.Logger;
@@ -54,6 +62,32 @@ public final class HBaseClusterSingleton {
     }
 
     private HBaseClusterSingleton() throws RuntimeException {
+        
+        // Workaround for HBASE-5711, we need to set config value dfs.datanode.data.dir.perm
+        // equal to the permissions of the temp dirs on the filesystem. These temp dirs were
+        // probably created using this process' umask. So we guess the temp dir permissions as
+        // 0777 & ~umask, and use that to set the config value.
+        try {
+            Process process = Runtime.getRuntime().exec("/bin/sh -c umask");
+            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            int rc = process.waitFor();
+            if(rc == 0) {
+                String umask = br.readLine();
+
+                int umaskBits = Integer.parseInt(umask, 8);
+                int permBits = 0777 & ~umaskBits;
+                String perms = Integer.toString(permBits, 8);
+                
+                LOG.info("Setting dfs.datanode.data.dir.perm to " + perms);
+                htu.getConfiguration().set("dfs.datanode.data.dir.perm", perms);
+            } else {
+                LOG.warn("Failed running umask command in a shell, nonzero return value");
+            }
+        } catch (Exception e) {
+            // ignore errors, we might not be running on POSIX, or "sh" might not be on the path
+            LOG.warn("Couldn't get umask", e);
+        }
+        
         htu.getConfiguration().setBoolean("dfs.support.append", true);
         htu.getConfiguration().setInt("zookeeper.session.timeout", 20000);
 //        htu.getConfiguration().setInt("hbase.client.retries.number", 2);
