@@ -45,6 +45,7 @@
         <module>jcr</module>
         <module>maildir</module>
         <module>hbase</module>
+        <module>hbase-simple-search</module>
         <module>spring</module>
         <module>tool</module>
         <module>zoo-seq-provider</module>
